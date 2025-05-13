@@ -1,0 +1,119 @@
+//==============================================================================
+//  @file       sql_store.proto
+//  @ingroup    proto database interface
+//  @brief		Operations on store
+//
+//  Messages for storage
+//
+//  @author     Bart Houkes
+//
+//------------------------------------------------------------------------------
+//  Copyright (c) Bart Houkes, 25-12-2023
+//
+//  Copyright notice:
+//  This software is property of Bart Houkes.
+//  Unauthorized duplication and disclosure to third parties is forbidden.
+//============================================================================*/
+
+syntax = "proto3";
+
+option csharp_namespace = "store";
+
+package sti;
+
+import "common_types.proto";
+
+// Add these Kotlin-specific options
+option java_multiple_files = true;
+option java_package = "com.hha.store.transaction.item";
+
+service storeTransactionItemService
+{
+    rpc InsertOrder(StoreOrder)  returns (common.Empty) {}
+    rpc SelectSmurf(StoreSmurfId)  returns (StoreOrderList) {}
+    rpc AddStoreItem(common.StorePart) returns (common.Empty) {}
+    rpc SetState(SetStateRequest)  returns (common.Empty) {}
+    rpc GetSmurfTotals(StoreSmurfId)  returns (TotalStore) {}
+    rpc GetStatistics(MenuItemId)  returns (StoreStat) {}
+    rpc DeliveryDone(DeliveryStateRequest)  returns(DeliveryResponse) {}
+    rpc DeliveryLate(DeliveryStateRequest)  returns(DeliveryResponse) {}
+    rpc DeliveryCancel(DeliveryStateRequest)  returns(DeliveryResponse) {}
+    rpc DeliveryNext(DeliveryStateRequest)  returns(DeliveryResponse) {}
+}
+
+message DeliveryStateRequest
+{
+    StoreOrderState  status = 1;
+    int32            database_id = 2;
+}
+
+message DeliveryResponse
+{
+    bool             result = 1;
+}
+
+message SetStateRequest
+{
+    int32            transaction_id = 1;
+    StoreOrderState  status = 2;
+}
+
+message StoreOrder
+{
+    int32            sql_id = 1;
+    int32            smurf_id = 2;
+    int32            menu_item_id = 3;
+    int32            quantity = 4;
+    StoreOrderState  status = 5;
+    int32            supplier_id = 6;
+    string           order_date = 7;
+    string           deliver_date = 8;
+    string           local_name = 9;
+    string           chinese_name = 10;
+}
+
+message StoreOrderList
+{
+    repeated StoreOrder order = 1;
+}
+
+message StoreStat
+{
+    int32    total_prepared = 1;
+    int32    total_ordered = 2;
+    int32    total_sold = 3;
+    int32    total_received = 4;
+    int32    total_cancelled = 5;
+}
+
+message StoreSmurfId
+{
+    int32 smurf_id = 1;
+}
+
+message MenuItemId
+{
+    int32 menu_item_id = 1;
+}
+
+message TotalStore
+{
+    int32  prepared = 1;
+    int32  input = 2;
+    int32  ordered = 3;
+    int32  delivered = 4;
+    int32  late = 5;
+    int32  cancelled = 6;
+}
+
+enum StoreOrderState
+{
+    STORE_STATUS_INVALID = 0;
+    STORE_STATUS_PREPARED = 10;
+    STORE_STATUS_ORDERED = 20;
+    STORE_STATUS_DELIVERED = 30;
+    STORE_STATUS_DELIVERED_EARLY = 40;
+    STORE_STATUS_DELIVERED_TOO_LATE = 50;
+    STORE_STATUS_CANCELLED = 60;
+}
+

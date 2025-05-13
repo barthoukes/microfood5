@@ -1,0 +1,93 @@
+syntax = "proto3";
+
+option csharp_namespace = "GrpcService";
+
+package pc;
+
+import "common_types.proto";
+
+// Add these Kotlin-specific options
+option java_multiple_files = true;
+option java_package = "com.hha.postcode";
+
+service ZipCodeService
+{
+  rpc Verify(common.Empty) returns (VerifyResponse);
+  rpc FindAllZipCodes(common.Empty) returns (GetZipCodesResponse);
+  rpc FindAllStreets(common.Empty) returns (GetZipCodesResponse);
+  rpc FindLowHighZipCode(FindLowHighZipCodeRequest) returns (GetZipCodesResponse);
+  rpc FindLowHighStreet(FindLowHighStreetRequest) returns (GetZipCodesResponse);
+  rpc FindZipCode(FindZipCodeRequest) returns (GetZipCodesResponse);
+  rpc SetZipCodes(SetZipCodesRequest) returns (common.Empty);
+}
+
+message VerifyResponse
+{
+  bool result = 1;
+}
+
+message FindAllZipCodesResponse
+{
+  int32 count = 1;
+}
+
+message FindAllStreetsResponse
+{
+  int32 count = 1;
+}
+
+message FindLowHighZipCodeRequest
+{
+  string zip_code_part = 1;
+}
+
+message FindLowHighZipCodeResponse
+{
+  int32 low = 1;
+  int32 high = 2;
+  string low_pc = 3;
+  string high_pc = 4;
+}
+
+message FindLowHighStreetRequest
+{ 
+  string street_name_part = 1;
+}
+
+message FindLowHighStreetResponse
+{
+  int32 low = 1;
+  int32 high = 2;
+  string low_pc = 3;
+  string high_pc = 4;
+}
+
+message FindZipCodeRequest
+{
+  string street_name = 1;
+  string city = 2;
+}
+
+message SetZipCodesRequest
+{
+  repeated ZipCode zip_code = 1;
+  bool clear = 2;
+}
+
+message GetZipCodesResponse
+{
+  repeated ZipCode zip_code = 1;
+}
+
+message ZipCode
+{
+  string zip_code = 1;
+  string city = 2;
+  string street_name = 3;
+  string low = 4;
+  string high = 5;
+  bool even = 6;
+  double longitude = 7;
+  double latitude = 8;
+}
+

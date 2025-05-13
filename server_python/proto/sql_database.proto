@@ -1,0 +1,123 @@
+//==============================================================================
+//  @file       sql_database.proto
+//  @ingroup    proto database interface
+//  @brief      Operations on entire database
+//
+//  Messages database
+//
+//  @author     Bart Houkes
+//
+//------------------------------------------------------------------------------
+//  Copyright (c) Bart Houkes, 25-12-2024
+//
+//  Copyright notice:
+//  This software is property of Bart Houkes.
+//  Unauthorized duplication and disclosure to third parties is forbidden.
+//============================================================================*/
+
+syntax = "proto3";
+
+package db;
+
+import "common_types.proto";
+
+// Add these Kotlin-specific options
+option java_multiple_files = true;
+option java_package = "com.hha.database";
+
+service DatabaseService 
+{
+  rpc SetDatabase(SetDatabaseRequest) returns (common.Empty) {}
+  rpc RunQuery(QueryRequest) returns (QueryResponse) {}
+  rpc ValidateDatabase(ValidataDatabaseRequest)  returns (ValidateDatabaseResponse) {}
+  rpc SetSqlDefaults(SqlDefaults)  returns (common.Empty) {}
+  rpc SetConfiguration(ConfigurationRequest)  returns (common.Empty) {}
+  rpc ResetProgram(common.Empty)  returns (common.Empty) {}
+}
+
+message SetDatabaseRequest
+{
+    string  hostname = 1;
+    string  user = 2;
+    string  password = 3;
+    string  database = 4;
+}
+
+message QueryRequest
+{
+    string  query = 1;
+}
+
+message QueryResponse
+{
+    string result = 1;
+}
+
+message ValidataDatabaseRequest
+{
+    int32  index = 1;
+}
+
+message ValidateDatabaseResponse
+{
+    bool result = 1;
+}
+
+message SqlDefaults
+{
+    int32        sq_size = 1;
+    int32        speed = 2;
+    string       log_file_name = 3;
+    int32        pc_number = 4;
+    int32        version_major = 5;
+    int32        version_minor = 6;
+    int32        version_build = 7;
+    string       version_date = 8;
+    string       version_time = 9;
+    int32        button1 = 10;
+    int32        squares_width = 11;
+    int32        menu_card_sitin = 12;
+    int32        menu_card_takeaway = 13;
+    int32        menu_card_delivery = 14;
+    int32        display_groups = 15;
+    int32        item_pixels_horizontal = 16;
+    int32        item_pixels_vertical = 17;
+    int32        items_height = 18;
+    string	 name_half = 19;
+    int32        transactions_width = 20;
+    int32        entry_display_capitals = 21;
+    int32        printer_capitals = 22;
+    string       colour_item_text = 23;
+    int32        prepare_display_enable = 24;
+    int32        prepare_display_ask_table = 25;
+    int32        store_enable = 26;
+    string       font_path = 27;
+    string       background_dir = 28;
+    string       data_path = 29;
+    string       backup_database = 30;
+    string       backup_user = 31;
+    string       backup_password = 32;
+    string       backup_hostname = 33;
+    string       database = 34;
+    string       user = 35;
+    string       password = 36;
+    string       hostname = 37;
+    bool         person_count = 38;
+    int32        log_level = 39;
+    int32        account_years = 40;
+}
+
+message ConfigurationRequest
+{
+    int32        display_groups = 1;
+    bool         prepare_display_enable = 2;
+    bool         enable_reservation = 3;
+    bool         wallet_enable = 4;
+    bool         sitin_only = 5;
+    bool         takeaway_only = 6;
+    bool         telephone_order = 7;
+    int32        accounting_verify = 8;
+    int32        account_clusters = 9;
+    int32        store_enable = 10;
+}
+

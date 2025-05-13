@@ -1,0 +1,508 @@
+//==============================================================================
+//  @file       common_types.proto
+//  @ingroup    proto database interface
+//  @brief		Commo operations for all proto interfaces
+//
+//  Types for proto files
+//
+//  @author     Bart Houkes
+//
+//------------------------------------------------------------------------------
+//  Copyright (c) Bart Houkes, 20-4-2024
+//
+//  Copyright notice:
+//  This software is property of Bart Houkes.
+//  Unauthorized duplication and disclosure to third parties is forbidden.
+//============================================================================*/
+
+syntax = "proto3";
+
+package common;
+
+option java_multiple_files = true;
+option java_package = "com.hha.common";
+
+message Empty
+{
+    int32 empty = 1;
+}
+
+message Item
+{
+    int64 menu_item_id = 1;
+    string alias_name = 2;
+    int32 sequence_nr = 3;
+    int32 sub_sequence = 4;  // Assuming short can be represented as int32.
+    int32 sub_sub_sequence = 5;  // Assuming short can be represented as int32.
+    string local_name = 6;
+    string chinese_name = 7;
+    int32 parts = 8;
+    int32 order_quantity = 9;
+    Money unit_price = 12;
+    Money full_price = 15;  // Assuming Cmoney can be represented as a message.
+    Money half_price = 18;  // Assuming Cmoney can be represented as a message.
+    int32 unit_statiegeld = 20;
+    int32 print_locations = 25;
+    int32 item_group = 30;
+    int32 item_page = 35;
+    int32 time_frame = 40;  // Assuming EtimeFrameIndex can be represented as int32.
+    double tax_percentage = 45;
+    OrderLevel order_level = 50;  // Assuming order_level can be represented as int32.
+    int32 sql_id = 55;
+    int32 device_id = 60;  // Device for the order.
+    int32 cluster_id = 70;  // Assuming short can be represented as int32.
+    bool cut_paper_kitchen = 75;
+    Payed is_paid = 80;  // Assuming Epayed can be represented as int32.
+    string short_time = 85; // hours::minutes::seconds
+    DeletedStatus deleted_status = 86;
+    string local_printer_name = 96;
+    string chinese_printer_name = 97;
+}
+
+message ItemList
+{
+    repeated Item entry = 1;
+}
+ 
+message MenuCardId
+{
+    int32 menu_card_id = 1;
+}
+
+message MenuItem
+{
+    int32 menu_item_id = 1;
+    string alias = 2;
+    string local_name = 3;
+    string chinese_name = 4;
+    int32 restaurant_price = 5;
+    int32 takeaway_price = 6;
+    int32 restaurant_half_price = 7;
+    int32 takeaway_half_price = 8;
+    TaxType restaurant_tax = 9;
+    TaxType takeaway_tax = 10;
+    int32 level = 11;
+    int32 tax_cluster_id = 12;
+    int32 page = 13;
+    int32 locations = 14;
+    bool paper_cut_per_item = 15;
+    ItemVisible is_visible = 16;
+    ItemSort sort = 17;
+    bool is_twin = 18;
+    int32 position_x = 19;
+    int32 position_y = 20;
+    int32 position_width = 21;
+    int32 position_height = 22;
+    int32 clusters = 23;
+    int32 special_prices = 24;
+    int32 colour_text = 25;
+    int32 colour_back = 26;
+    int32 colour_selected_text = 27;
+    int32 colour_selected_back = 28;
+    string image = 29;
+    int32 colour_back2 = 30;
+    int32 colour_selected_back2 = 31;
+    int32 menu_card_id = 32;
+    int32 statiegeld = 33;
+    int32 sequence = 34;
+    int32 dirty_status = 35;
+    StoreItem store_item = 36;
+}
+
+message Money
+{
+    int32 cents = 1;
+}
+
+message MoneyReply
+{
+    int32 cents = 1;
+}
+
+message StoreItem
+{
+    int32 menu_item_id = 1;
+    int32 year_consumption = 2;
+    int32 stock = 3;
+    int32 total_sold = 4;
+    StorePartList store_part_list = 5;
+}
+
+message StorePart
+{
+    int32       store_part_id =1;
+    int32       menu_item_id =2;
+    int32       menu_translation_id =3;
+    int32       total_delivered =4;
+    int32       total_sold =5;
+    float       percentage =6;
+    float       year_consumption =7;
+    string      end_time =8;
+    StoreSmurf  smurf =9;
+}
+
+message StorePartList
+{
+    repeated StorePart store_part = 1;
+}
+
+message StoreSmurf
+{
+    int32       smurf_id =1;
+    int32       danger_level =2; 
+    float       year_consumption =3;
+    float       total_sold =4;
+    int32       total_ordered =5;
+    int32       total_received =6;
+    int32       total_cancelled =7;
+    float       total_stock =8;
+    string      local_name =9;
+    string      chinese_name =10;
+    string      end_time =11;
+}
+
+message TextDump
+{
+    string dump = 1;
+}
+
+message TimeFrame
+{
+        int32 id = 1;
+        int32 transaction_id = 2;
+        int32 time_frame_index = 3;
+        string name = 4;
+        string start_time = 5;
+        string end_time = 6;
+        int32 type = 7;
+        int32 status = 8;
+        int32 minutes = 9;
+        int32 days = 10;
+        int32 total = 11;
+        TransType trans_type = 12;
+        int32 rfid_key_id = 13;
+        int32 device_id = 14;
+        int32 kitchen_prints = 15;
+        string deliver = 16;
+}
+
+message TimeFrameList
+{
+    repeated TimeFrame time_frame = 1;
+}
+
+message Timestamp
+{
+    int32 year = 1;
+    int32 quarter = 2;
+    int32 month = 3;
+    int32 day = 4;
+    int32 week = 5;
+    int32 week_day = 6;
+    int32 hour = 7;
+    int32 minute = 8;
+    int32 second = 9;
+}
+
+message TransactionData
+{
+    int32 transaction_id = 1;
+    string name = 2;
+    TransType trans_type = 3;
+    int32 rfid_key_id = 4;
+    ClientOrdersType status = 5;
+    int32 deposit = 6;
+    string time_start = 7;
+    string time_end = 8;
+    string time_customer = 9;
+    Money subtotal_low = 10;
+    Money subtotal_high = 11;
+    Money discount_low = 12;
+    Money discount_high = 13;
+    float remains_low = 14;
+    float remains_high = 15;
+    Money tips_low = 16;
+    Money tips_high = 17;
+    Money total_low = 18;
+    Money total_high = 19;
+    Money tax_total_low = 20;
+    Money tax_total_high = 21;
+    int32 customer_id = 22;
+    bool archived = 23;
+    string message = 24;
+    Money subtotal_tax_free = 25;
+    Money total_tax_free = 26;
+    Money discount_tax_free = 27;
+    Money tips_tax_free = 28;
+}
+
+message TransactionDatalist
+{
+    repeated TransactionData transaction = 1;
+}
+
+enum ClientOrdersType
+{
+    CLIENT_ORDER_INIT = 0; ///< No order yet.
+    CLIENT_ORDER_OPEN = 1;      ///< Busy to order.
+    CLIENT_ORDER_CLOSED = 2;    ///< Closed order.
+    CLIENT_ORDER_OPEN_PAID = 3; ///< Order paid but not closed yet.
+    CLIENT_ORDER_EMPTY = 4;     ///< Empty order, all removed.
+    CLIENT_ORDER_ALL = 5;               ///< All things.
+    CLIENT_ORDER_PERSONNEL = 6; ///< Eaten by myself or my personnel.
+    CLIENT_ORDER_CREDIT = 7;    ///< This is a negative amount for another transaction.
+    CLIENT_ORDER_CLOSED_CREDIT = 8; ///< Transaction closed and credited.
+    CLIENT_ORDER_PAYING = 16;   ///< Busy paying.
+}
+
+enum CookingState
+{
+    COOKING_STATE_UNDEFINED = 0;
+    COOKING_ORDER_ENTRY = 1;
+    COOKING_IN_KITCHEN = 100;
+    COOKING_IN_KITCHEN_DISPLAY = 101;
+    COOKING_READY_KITCHEN =105;
+    COOKING_DONE = 108;
+}
+
+enum ClusterType
+{
+    GROUP_SELECT_UNKNOWN = 0;
+    GROUP_CHOOSE_SINGLE_SELECTION = 1;
+    GROUP_CHOOSE_MULTIPLE_SELECTION = 2;
+    GROUP_SELECT_ALL = 3;
+}
+
+enum DeletedStatus
+{
+    DELETE_NOT =0; ///< Normal order.
+    DELETE_MOVE_OTHER_TABLE =-9; ///< Move to other table.
+    DELETE_PRICE_IMMEDIATE =-8; ///< Immediately change price.
+    DELETE_PORTION_IMMEDIATE =-7; ///; Quick change portion after item select.
+    DELETE_PORTION_AFTER_PRINTING =-6; ///< change portion after printing.
+    DELETE_CANCEL_TIMEFRAME =-5; ///< time frame removed.
+    DELETE_REMOVE_AFTER_PRINTING =-4; ///< Remove after printing.
+    DELETE_QUANTITY_AFTER_PRINTING =-3; ///< First print, then delete.
+    DELETE_PRICE_AFTER_PRINTING =-2; ///< Price change after printing.
+    DELETE_REMOVE_IMMEDIATE =-1; ///< Delete immediately in same time frame.
+    DELETE_CAUSE_CHANGE_QUANTITY =1; ///< Old way of quantity remove.
+    DELETE_CAUSE_CHANGE_ITEM =2; ///< Replace item with new item.
+    DELETE_CAUSE_DELETED =3; ///< Old way of delete items.
+    DELETE_CAUSE_MOVE_TABLE =4; ///< Move to other table.
+    DELETE_CAUSE_CHANGE_PRICE =5; ///< Change price old way.
+    DELETE_CAUSE_CHANGE_PORTION_OLD=6; // Old way of change portion. Neglect items.
+    DELETE_CAUSE_ESCAPE_ORDER =7; ///< Cancel everything we ordered now.
+}
+
+enum ItemLocation
+{
+    ITEM_KITCHEN = 0;   ///< Item belongs to kitchen.
+    ITEM_DRINKS = 1;  ///< Drinks printer location.
+    ITEM_BAR = 2;     ///< Bar printer location.
+    ITEM_OTHERS = 3;  ///< Other place in kitchen.
+    ITEM_KITCHEN2 = 4;     ///< 2nd Kitchen.
+    ITEM_SUSHI = 5;      ///< Sushi.
+    ITEM_NONFOOD = 6;    ///< Not food.
+    ITEM_KITCHEN3 = 7;   ///< 3rd Kitchen
+    ITEM_KITCHEN4 = 8;   ///< 4th Kitchen
+    ITEM_KITCHEN5 = 9;     ///< 5th Kitchen == Kitchen collect
+    ITEM_MAX_LOCATION = 10; ///< Maximum item location.
+    ITEM_ALL_LOCATIONS = 11; ///< Total all locations.
+    ITEM_ALL_KITCHEN = 12;       ///< All Kitchen items.
+    ITEM_NO_LOCATION = 13;
+    ITEM_ARRAY_SIZE = 14;
+}
+
+enum ItemSort
+{
+    SORT_NONE = 0;
+    SORT_BILL = 1;
+    SORT_SPLIT = 2; 
+    SORT_ORDER = 3;
+    SORT_PRINTER_SORTED = 4;
+    SORT_PRINTER_UNSORTED = 5;
+    SORT_PRINTER_SORTED_ALL = 6;
+    SORT_PRINTER_UNSORTED_ALL = 7;
+    SORT_COOKING = 8;
+    SORT_DEFAULT = 9; 
+}
+
+enum ItemVisible
+{
+    ITEM_UNDEFINED = 0;
+    ITEM_VISIBLE = 86;    ///< Item is visible.
+    ITEM_INVISIBLE = 73;  ///< Item is invisible.
+}
+
+enum OrderLevel
+{
+    LEVEL_ITEMGROUP = 0;
+    LEVEL_COMBINE_ALL =1;
+    LEVEL_ITEM = 2;             ///< Item normal
+    LEVEL_EXTRA = 3;    ///< Extra food like bami, nasi
+    LEVEL_CHARITY =4;
+    LEVEL_ASK_CLUSTER =5;
+    LEVEL_SPICES = 6;   ///< Extra spices like peper, salt
+    LEVEL_TWIN_ITEM = 7; ///< Combine with previous item.
+    LEVEL_FREE = 8;
+    LEVEL_INFO = 9;
+    LEVEL_MINUTES_PRICE =10; ///< Price per minute for a customer
+    LEVEL_SYSTEM = 11;
+    LEVEL_SEPARATOR=12;
+    LEVEL_OUTOFSTOCK =13;
+    LEVEL_SUB_EXTRA =14;        ///< Extra food for "Extra food", like extra saus on the sate.
+    LEVEL_SUB_SPICES =15;       ///< Extra spices for "Extra food" and "Extra spices", like extra hot for the sauce.
+    LEVEL_SUB_ITEM =16; ///< Extra item for "Extra food" or "Spices". Don't know how to do this yet...
+    LEVEL_PERSON = 80;
+    LEVEL_NOTHING =100;
+    LEVEL_ZERO = 25;
+}
+ 
+enum Payed
+{
+    PAID_UNDEFINED = 0;
+    PAID_NO = 1;                // During billing we add payments until confirmation.
+    PAID_ORDER = 7;             // After billing, payments become final PAYED_ORDER. These bills can be printed.
+    PAID_BEFORE = 8;    //Paid before in another transaction. When add food after bill, payed before is used to set the amount already-payed. Don't add this to the accounting.
+    PAID_ALL = 9;               // Not for database!!
+    PAID_CANCEL = 5; //< Payment cancelled
+}
+
+// EpaymentMethod convert to proto
+enum PaymentMethod
+{
+    PAYMENT_NONE = 0;
+    PAYMENT_ALL =1;     ///< Also no meaning.
+    PAYMENT_CASH = 10;
+    PAYMENT_PIN = 11;
+    PAYMENT_CREDIT_CARD = 12;   ///< Pay with credit card.
+    PAYMENT_VISA_CARD = 13;     ///< Pay with Visa card.
+    PAYMENT_PAY_PAL = 14;       ///< Pay with Paypal.
+    PAYMENT_MASTERCARD = 15;    ///< Pay with Mastercard.
+    PAYMENT_DEBIT = 24;   ///< Pay with debit.
+    PAYMENT_ZETTLE = 25;   ///< Pay with pin2.
+    PAYMENT_AMERICAN_EXPRESS = 16;      ///< Pay AE
+    PAYMENT_SEND_BILL = 17;     ///< Don't pay, send a bill.
+    PAYMENT_RENMINBI = 18;      ///< Joke, pay in chinese money.
+    PAYMENT_RETURN = 19;        ///< Money returned after paying cash.
+    PAYMENT_SEND_BILL_WAIT = 20;   ///< Send but not paid yet
+    PAYMENT_SEND_BILL_DONE = 21;        ///< Paiment done
+    PAYMENT_TOTAL_CARDS = 22;   ///< Paiment all cards
+    PAYMENT_DISCOUNT = 30;   ///< Discount already given
+    PAYMENT_TIPS = 31;   ///< Tips already given
+    PAYMENT_INVALID =-2;        ///< No payment.
+}
+
+enum PaymentStatus
+{
+    PAY_STATUS_UNPAID = 0; ///< Not paid yet.
+    PAY_STATUS_PAID_ORDER = 1; ///< The paid, but not paid before.
+    PAY_STATUS_PAID_BEFORE = 2; ///< Only the paid before.
+    PAY_STATUS_PAID_ORDER_BEFORE = 3; ///< Paid already and paid in previous bills
+    PAY_STATUS_ANY = 4; ///< Payed before and paid active.
+    PAY_STATUS_CANCEL = 5; ///< Payment cancelled or replaced.
+}
+
+enum PrinterStatus
+{
+  PRINTER_STATUS_DONE = 0;
+  PRINTER_STATUS_RETRY1 = 1;
+  PRINTER_STATUS_RETRY2 = 2;
+  PRINTER_STATUS_ERROR = 3;
+}
+
+enum SkipInvisible
+{
+    SKIP_INVISIBLE_TRUE   = 0;  ///< Do show only the background.
+    SKIP_INVISIBLE_FALSE  = 70; ///< Do show like normal items.
+    SKIP_INVISIBLE_SHOW   = 83;  ///< Do show the items with an indication if skipped.
+}
+
+enum SortOrders
+{
+    SORT_UNDEFINED = 0;
+    SORT_BY_DATE = 1;
+    SORT_BY_RFID_KEY = 2;
+    SORT_BY_TABLE = 3;
+    SORT_BY_DRINKS = 4;
+    SORT_BY_FOOD = 5;
+    SORT_BY_AMOUNT = 6;
+}
+
+enum SubItems
+{
+    ORDER_ITEMS = 0;
+    ORDER_DELETED = 1;
+    ORDER_ITEMS_AND_DELETED = 2;
+    ORDER_ITEMS_EXTRA = 3;
+    ORDER_ITEMS_AND_EXTRA = 4;
+    ORDER_MAX_CURSOR = 5;
+    ORDER_ITEMS_AND_DELETED_AND_EXTRA = 6;
+    ORDERS_INVALID = 7;
+}
+
+enum TableStatus
+{
+    TABLE_EMPTY =0;
+    TABLE_EXIST =1;
+    TABLE_NEW =2;
+    TABLE_ERROR =3; // No tables left
+    TABLE_BUSY =4; // For network
+    TABLE_OK =5; // Already orders
+    TABLE_OPEN_PAID =6; // Paid and busy eating
+    TABLE_OPEN_NOT_PAID =7; // Not paid and busy eating
+    TABLE_CLOSED =8; // Paid closed
+    TABLE_CLEAN =9;
+    TABLE_FOUND =10;
+    TABLE_RESERVED=11;
+}
+
+enum TableType
+{
+    TABLE_TYPE_UNDEFINED = 0;
+    TABLE_TYPE_RESTAURANT = 1;
+    TABLE_TYPE_WOK = 2;
+    TABLE_TYPE_TAKEAWAY = 3;
+    TABLE_TYPE_EATINSIDE = 4;
+    TABLE_TYPE_NOFOOD = 5;
+}
+
+enum TaxType
+{
+    BTW_INVALID = 0;
+    BTW_HIGH = 2;
+    BTW_LOW = 1;
+    BTW_NONE = 3;
+    BTW_MAX = 4;
+}
+
+// Copy from EtransType
+enum TransType
+{
+    TRANS_TYPE_UNDEFINED = 0;
+    TRANS_TYPE_NOCHANGE = 1;
+    TRANS_TYPE_SITIN = 4;
+    TRANS_TYPE_DELIVERY = 68;
+    TRANS_TYPE_SHOP = 83;
+    TRANS_TYPE_TAKEAWAY = 84;
+    TRANS_TYPE_TAKEAWAY_PHONE = 80;
+    TRANS_TYPE_EAT_INSIDE = 69;
+    TRANS_TYPE_RECHAUD = 82;
+    TRANS_TYPE_WOK = 87;
+    TRANS_TYPE_ALL = 65;
+}
+
+enum TreeRow
+{
+    TREE_ONLY_ITEM = 0;
+    TREE_ITEM = 1;
+    TREE_NEXT_ONLY_SUBITEM = 2;
+    TREE_LAST_ONLY_SUBITEM = 3;
+    TREE_NEXT_SUBITEM = 4;
+    TREE_LAST_SUBITEM = 5;
+    TREE_NEXT_SUBITEM_NEXT_SUBSUBITEM = 6;
+    TREE_NEXT_SUBITEM_LAST_SUBSUBITEM = 7;
+    TREE_LAST_SUBITEM_NEXT_SUBSUBITEM = 8;
+    TREE_LAST_SUBITEM_LAST_SUBSUBITEM = 9;
+}
+

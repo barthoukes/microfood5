@@ -1,0 +1,42 @@
+
+syntax = "proto3";
+
+package taxcl;
+
+import "common_types.proto";
+
+// Add these Kotlin-specific options
+option java_multiple_files = true;
+option java_package = "com.hha.tax.cluster";
+
+service TaxClusterService
+{
+    rpc GetTaxClusters(common.Empty)  returns (TaxClusterList) {}
+    rpc EraseTaxCluster(TaxClusterId)  returns (common.Empty) {}
+    rpc UpdateTaxCluster(TaxCluster)  returns (common.Empty) {}
+    rpc DuplicateTaxCluster(TaxClusterId)  returns (TaxClusterId) {}
+    rpc LowestTaxCluster(common.Empty)  returns (TaxClusterId) {}
+    rpc HighestTaxCluster(common.Empty)  returns (TaxClusterId) {}
+    rpc GetTaxCluster(TaxClusterId)  returns (TaxCluster) {}
+    rpc InsertTaxCluster(common.Empty)  returns (TaxClusterId) {}
+}
+
+message TaxClusterId
+{
+    int32  tax_cluster_id = 1;
+}
+
+message TaxCluster
+{
+    int32 tax_cluster_id = 1;
+    int32 index = 2;
+    int32 menu_card_id = 3;
+    string local_name = 4;
+    string chinese_name = 5;
+}
+
+message TaxClusterList
+{
+    repeated TaxCluster tax_cluster = 1;
+}
+

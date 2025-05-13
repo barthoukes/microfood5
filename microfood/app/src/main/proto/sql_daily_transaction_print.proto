@@ -1,0 +1,76 @@
+//==============================================================================
+//  @file       sql_daily_transaction_print.proto
+//  @ingroup    proto database interface
+//  @brief      Operations on archive database
+//
+//  Messages for printing daily stuff
+//
+//  @author     Bart Houkes
+//
+//------------------------------------------------------------------------------
+//  Copyright (c) Bart Houkes, 11-11-2024
+//
+//  Copyright notice:
+//  This software is property of Bart Houkes.
+//  Unauthorized duplication and disclosure to third parties is forbidden.
+//============================================================================*/
+
+syntax = "proto3";
+
+option csharp_namespace = "GrpcService";
+
+package dtp;
+
+import "common_types.proto";
+
+// Add these Kotlin-specific options
+option java_multiple_files = true;
+option java_package = "com.hha.daily.print";
+
+service DailyTransactionPrintService
+{
+  rpc FindPrintTimeFrame(common.Empty)  returns (TimeFrame);
+  rpc PrintTimeFrame(PrintTimeFrameRequest)  returns (common.Empty);
+  rpc Verify(common.Empty)  returns (VerifyResponse);
+  rpc SetPrinted(SetPrintedRequest)  returns (common.Empty);
+}
+
+message SetPrintedRequest
+{
+  int32 job_id = 1;
+  common.PrinterStatus status = 2;
+}
+
+message TimeFrame
+{
+  int32 database_id = 1;
+  string time = 2;
+  int32 transaction_id = 3;
+  int32 time_frame_id = 4;
+  int32 device_id = 5;
+  int32 rfid_key_id = 6;
+  int32 print_type = 7;
+  int32 printer = 8; 
+  int32 quantity = 9;
+  int32 tickets = 10;
+  int32 priority = 11;
+  common.PrinterStatus status = 12;
+}
+
+message PrintTimeFrameRequest
+{
+  int32 transaction_id = 1;
+  int32 time_frame_index = 2;
+  int32 device_id = 3;
+  int32 rfid_key_id = 4;
+  int32 prints = 5;
+  int32 tickets = 6;
+  bool collect_printer = 7;
+  bool bill_printer = 8;
+}
+
+message VerifyResponse
+{
+  bool verified = 1;
+}
+

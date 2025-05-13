@@ -1,0 +1,78 @@
+//==============================================================================
+//  @file       sql_prepare_transaction.proto
+//  @ingroup    proto database interface
+//  @brief	Operations on transactions
+//
+//  Messages for daily transactions
+//
+//  @author     Bart Houkes
+//
+//------------------------------------------------------------------------------
+//  Copyright (c) Bart Houkes, 05-11-2024
+//
+//  Copyright notice:
+//  This software is property of Bart Houkes.
+//  Unauthorized duplication and disclosure to third parties is forbidden.
+//============================================================================*/
+
+syntax = "proto3";
+
+option csharp_namespace = "GrpcService";
+
+package pt;
+
+import "common_types.proto";
+
+// Add these Kotlin-specific options
+option java_multiple_files = true;
+option java_package = "com.hha.prepare.transaction";
+
+service PrepareTransactionService
+{
+    rpc UpdatePrepareTransaction(PrepareTransaction)  returns (common.Empty) {}
+    rpc RemoveFinishedTransactions(common.Empty)  returns (common.Empty) {}
+    rpc GetTransactionMap(common.Empty)  returns (PrepareTransactionMap) {}
+    rpc GetAllVisibleTransactions (common.Empty)  returns (PrepareTransactionList) {}
+    rpc GetAllNewTransactions(common.Empty)  returns (PrepareTransactionList) {}
+    rpc SetState(SetStateRequest)  returns (common.Empty) {}
+    rpc Clear(ClearRequest)  returns (common.Empty);
+    rpc AddPrepare(AddPrepareRequest)  returns (common.Empty);
+}
+
+message AddPrepareRequest
+{
+    int32 transaction_id = 1;
+}
+
+message ClearRequest
+{
+    int32 transaction_id = 1;
+}
+
+message PrepareTransaction
+{
+    int32 id = 1;
+    int32 transaction_id = 2;
+    common.CookingState cooking_state = 3;
+    int32 display_position = 4;
+    string start_time = 5;
+    int32 lowest_time_frame = 6;
+    int32 highest_time_frame = 7;
+}
+
+message PrepareTransactionMap
+{
+    map<int32, PrepareTransaction> transaction = 1;
+}
+
+message PrepareTransactionList
+{
+    repeated PrepareTransaction transaction = 1;
+}
+
+message SetStateRequest 
+{
+    int64 transaction_id = 1;
+    common.CookingState cooking_state = 2;
+    int32 position = 3;
+}

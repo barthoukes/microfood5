@@ -1,0 +1,108 @@
+//==============================================================================
+//  @file       sql_store.proto
+//  @ingroup    proto database interface
+//  @brief		Operations on store
+//
+//  Messages for storage
+//
+//  @author     Bart Houkes
+//
+//------------------------------------------------------------------------------
+//  Copyright (c) Bart Houkes, 25-12-2023
+//
+//  Copyright notice:
+//  This software is property of Bart Houkes.
+//  Unauthorized duplication and disclosure to third parties is forbidden.
+//============================================================================*/
+
+syntax = "proto3";
+
+option csharp_namespace = "store";
+
+package sp;
+
+import "common_types.proto";
+
+// Add these Kotlin-specific options
+option java_multiple_files = true;
+option java_package = "com.hha.store.part";
+
+service storePartService
+{
+    rpc reduceStorage(transactionId) returns (common.Empty) {}
+    rpc selectMenuItem(menuCardItemId) returns (common.StoreItem) {}	
+    rpc getMenuItems(menuCardId) returns (storeItemList) {}
+    rpc insertSmurf(newSmurfRequest) returns (storeSmurfId) {}
+    rpc removeStorePart(storePartId) returns (common.Empty) {}
+    rpc calculateUsagePerYear(itemId) returns (common.Empty) {}
+    rpc calculateSoldOutDates(itemId) returns (common.Empty) {}
+    rpc calculateMenuTranslations(itemId) returns (common.Empty) {}
+    rpc calculateFirstDay(itemId) returns (common.Empty) {}
+    rpc calculateTotalSold(itemId) returns (common.Empty) {}
+    rpc updateSold(itemId) returns (common.Empty) {}
+    rpc getStorePartFromId(storePartId) returns (common.StorePart) {}
+}
+
+message transactionId
+{
+    int32 transaction_id = 1;
+}
+
+message menuCardId
+{
+    int32 menu_card_id = 1;
+}
+
+message menuCardItemId
+{
+	int32 menu_card_id = 1;
+    int32 menu_item_id = 2;
+}
+
+message storePartId
+{
+    int32 store_part_id = 1;
+}
+
+message storeSmurfId
+{
+    int32 store_smurf_id = 1;
+}
+
+message newSmurfRequest
+{
+    int32 menu_item_id = 1;
+    int32 smurf_id = 2;
+    float percentage = 3;
+}
+
+message itemId
+{
+    int32 item_id = 1;
+}
+
+message storePartList
+{
+    repeated common.StorePart parts = 1;
+}
+
+message storeItemList
+{
+    repeated common.StoreItem store_item = 2;
+}
+
+message storeSmurf
+{
+    int32    smurf_id =1;
+    int32    danger_level =2;
+    float    year_consumption =3;
+    float    total_sold =4;
+    int32    total_ordered =5;
+    int32    total_received =6;
+    int32    total_cancelled =7;
+    float    total_stock =8;
+    string   local_name =9;
+    string   chinese_name =10;
+    string   end_time =11;
+}
+

@@ -1,0 +1,52 @@
+//==============================================================================
+//  @file       sql_archive_menu_name.proto
+//  @ingroup    proto database interface
+//  @brief		Operations on archive database
+//
+//  Messages for 7 year accounting
+//
+//  @author     Bart Houkes
+//
+//------------------------------------------------------------------------------
+//  Copyright (c) Bart Houkes, 2-2-2024
+//
+//  Copyright notice:
+//  This software is property of Bart Houkes.
+//  Unauthorized duplication and disclosure to third parties is forbidden.
+//============================================================================*/
+
+syntax = "proto3";
+
+option csharp_namespace = "GrpcService";
+
+package amn;
+
+import "common_types.proto";
+
+// Add these Kotlin-specific options
+option java_multiple_files = true;
+option java_package = "com.hha.archive.menu.name";
+
+service ArchiveMenuNameService
+{
+    rpc AddNamesFromCurrentOrders(common.Empty)  returns (common.Empty) {}
+    rpc ConvertName(MenuItemId)  returns(SqlStatement) {}
+    rpc FindArchiveMenuName(NameRequest)  returns (MenuItemId) {}
+}
+
+message MenuItemId
+{
+    int32 menu_item_id = 1;
+}
+    
+message SqlStatement
+{
+    string query = 1;
+}
+
+message NameRequest
+{   
+    string local = 1;
+    string chinese = 2;
+}  
+

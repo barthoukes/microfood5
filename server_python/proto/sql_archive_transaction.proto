@@ -1,0 +1,561 @@
+//==============================================================================
+//  @file       sql_archive_transaction.proto
+//  @ingroup    proto database interface
+//  @brief		Operations on archive database
+//
+//  Messages for 7 year accounting
+//
+//  @author     Bart Houkes
+//
+//------------------------------------------------------------------------------
+//  Copyright (c) Bart Houkes, 2-2-2024
+//
+//  Copyright notice:
+//  This software is property of Bart Houkes.
+//  Unauthorized duplication and disclosure to third parties is forbidden.
+//============================================================================*/
+
+syntax = "proto3";
+
+option csharp_namespace = "GrpcService";
+
+package at;
+
+import "common_types.proto";
+
+// Add these Kotlin-specific options
+option java_multiple_files = true;
+option java_package = "com.hha.archive.transaction";
+
+service ArchiveTransactionService
+{
+    rpc GetTransactionRange(Date)  returns (Range) {}
+    rpc UpdateTotal(TransactionId)  returns (common.Empty) {}
+    rpc FindCustomerOpenTransactions(FindCustomerRequest)  returns (CustomerTransactionList) {}
+    rpc GetStatiegeldItems(TransactionRange)  returns (NrItemsReply) {}
+    rpc GetStatiegeld(TransactionRange)  returns (common.MoneyReply) {}
+
+    rpc GetYearsTotals(common.Empty)  returns (TotalTimeLowHighList) {}
+    rpc GetQuartersTotals(DateFromTo)  returns (TotalPerTimeList) {}
+    rpc GetMonthTotals(Date)  returns (TotalPerTimeList) {}
+    rpc GetOrderTotals(Date)  returns (TotalPerTimeList) {}
+    rpc GetTransactionTotals(Date)  returns (TotalPerTransactionList) {}
+    rpc GetDayTotal(Date)  returns (TotalPerTimeList) {}
+    rpc GetDaysTotals(DateFromTo)  returns (TotalTimeLowHighList) {}
+    rpc GetWeeksTotals(DateFromTo)  returns (TotalTimeLowHighList) {}
+    rpc GetHoursTotals(DateFromTo)  returns (TotalTimeLowHighList) {}
+
+    rpc GetYearsDiscount(common.Empty)  returns (TotalTimeLowHighList) {}
+    rpc GetQuartersDiscount(DateFromTo)  returns (TotalTimeLowHighList) {}
+    rpc GetMonthsDiscount(DateFromTo)  returns (TotalTimeLowHighList) {}
+    rpc GetDaysDiscount(DateFromTo)  returns (TotalTimeLowHighList) {}
+    rpc GetWeeksDiscount(DateFromTo)  returns (TotalTimeLowHighList) {}
+    rpc GetHoursDiscount(DateFromTo)  returns (TotalTimeLowHighList) {}
+
+    rpc GetYearsQuantity(common.Empty)  returns (TotalTimesQuantityList) {}
+    rpc GetQuartersQuantity(DateFromTo)  returns (TotalTimesQuantityList) {}
+    rpc GetMonthsQuantity(DateFromTo)  returns (TotalTimesQuantityList) {}
+    rpc GetDaysQuantity(DateFromTo)  returns (TotalTimesQuantityList) {}
+    rpc GetWeeksQuantity(DateFromTo)  returns (TotalTimesQuantityList) {}
+    rpc GetHoursQuantity(DateFromTo)  returns (TotalTimesQuantityList) {}
+
+    rpc GetYearsWaiters(common.Empty)  returns (TotalTimeRfidKeyIdList) {}
+    rpc GetQuartersWaiters(DateFromTo)  returns (TotalTimeRfidKeyIdList) {}
+    rpc GetMonthsWaiters(DateFromTo)  returns (TotalTimeRfidKeyIdList) {}
+    rpc GetDaysWaiters(DateFromTo)  returns (TotalTimeRfidKeyIdList) {}
+    rpc GetWeeksWaiters(DateFromTo)  returns (TotalTimeRfidKeyIdList) {}
+    rpc GetHoursWaiters(DateFromTo)  returns (TotalTimeRfidKeyIdList) {}
+
+    rpc CalculateTotalForEachYear(common.Empty)  returns (TotalPerTimeList) {}
+    rpc GetQuartersTotal(common.Empty)  returns (TotalPerTimeList) {}
+    rpc SetCustomer(SetCustomerRequest)  returns (common.Empty) {}
+    rpc CopyTransaction(CopyTransactionRequest)  returns (common.Empty) {}
+    rpc SelectTransactionId(TransactionId)  returns (TransactionData) {}
+    rpc InsertTransaction(InsertTransactionRequest)  returns (TransactionId) {}
+    rpc FindUnusedDays(common.Empty)  returns (YearMonthDayList) {}
+    rpc GetLowestTimeStamp(common.Empty)  returns (common.Timestamp) {}
+}
+
+message CopyTransactionRequest
+{
+    string table = 1;
+    int32 transaction_id = 2;
+}
+
+message YearsTotalRequest1
+{
+    repeated string where = 1;
+    int32 menu_group = 2;
+}
+
+message ItemsTotal
+{
+    int32 menu_item_id = 1;
+    string local_name = 2;
+    string chinese_name = 3;
+    int32 total = 4;
+}
+
+message SetCustomerRequest
+{
+    int32 transaction_id = 1;
+    int32 customer_id = 2;
+}
+
+message TransactionRange
+{
+    int32 lowest = 1;
+    int32 highest = 2;
+}
+
+message NrItemsReply
+{
+    int32 nr_items = 1;
+}
+
+message CustomerTotal
+{
+    int32 transaction_id = 1;
+    int32 total = 2;
+    common.PaymentMethod pay_method = 3;
+    common.Timestamp end_time = 4;
+    int32 tax_total_high = 5;
+    int32 tax_total_low = 6;
+    int32 total_high = 7;
+    int32 total_low = 8;
+    int32 total_tax_free = 9;
+    int32 customer_id = 10;
+}
+
+message CustomerTotalList1
+{
+    repeated CustomerTotal customer = 1;
+}
+
+message ItemsTotalList1
+{
+    repeated ItemsTotal item = 1;
+}
+
+message GroupsRfidKeyId
+{
+    int32 menu_page_id = 1;
+    int32 rfid_key_id = 2;
+    int32 total = 3;
+}
+
+message GroupsWaiterList1
+{
+    repeated GroupsRfidKeyId rfid_key = 1;
+}
+
+message ItemsWaiter
+{
+    int32 menu_item_id = 1;
+    string local_name = 2;
+    string chinese_name = 3;
+    int32 rfid_key_id = 4;
+    int32 total = 5;
+}
+
+message ItemsWaiterList1
+{
+    repeated ItemsWaiter rfid_key = 1;
+}
+
+message PageIdQuantity
+{
+    int32 menu_page_id = 1;
+    double quantity = 2;
+}
+
+
+message PageIdQuantityList1
+{
+    repeated PageIdQuantity page = 1;
+}
+
+message ItemsQuantityReply
+{
+    int32 menu_item_id = 1;
+    double quantity = 2;
+}
+
+message ItemIdQuantityName
+{
+    int32 menu_item_id = 1;
+    double quantity = 2;
+    string local_name = 3;
+    string chinese_name = 4;
+}
+
+message PagePercentageTotal
+{
+    int32 menu_page_id = 1;
+    double tax_percentage = 2;
+    double total = 3;
+}
+
+message PagePercentageTotalList1
+{
+    repeated PagePercentageTotal page = 1;
+}
+
+message CustomerTransaction
+{
+    int32 id = 1;
+    int32 sum_money_received = 2;
+    common.PaymentMethod pay_method = 3;
+    string end_time = 4;
+    int32 tax_total_high = 5;
+    int32 tax_total_low = 6;
+    int32 total_high = 7;
+    int32 total_low = 8;
+    int32 total_tax_free = 9;
+    int32 customer_id = 10;
+}
+
+message CustomerTransactionList
+{
+    repeated CustomerTransaction  customer_transaction = 1;
+}
+
+message FindCustomerRequest
+{
+    int32 customer_id = 1;
+}
+
+message TransactionSort1
+{
+    int32 transaction_id = 1;
+    bool sort_descending = 2;
+}
+
+message YearMonth1
+{
+    int32 year = 1;
+    int32 month = 2;
+}
+
+message YearQuarterMonthDayRequest1
+{
+    string parent = 1;
+    int32 year = 2;
+    int32 quarter = 3;
+    int32 month = 4;
+    int32 day = 5;
+}
+
+message SqlStatement1
+{
+    string query = 1;
+}
+
+message TimeFrame
+{
+    int32 transaction_id = 1;
+    int32 time_frame_index = 2;
+    string name = 3;
+    string end_time = 4;
+    int32 type = 5;
+    int32 status = 6;
+    int32 minutes = 7;
+    int32 days = 8;
+    int32 total = 9;
+    common.TransType trans_type = 10;
+}
+
+message TimeFrameList1
+{
+    repeated TimeFrame time_frame = 1;
+}
+
+message TransactionId
+{
+    int32 transaction_id = 1;
+}
+
+message TransactionToTransaction1
+{
+    int32 daily_transaction_id = 1;
+    int32 archive_transaction_id = 2;
+}
+
+message TransactionTotalTimes
+{
+    int32 total = 1;
+    common.Timestamp timestamp = 2;
+}
+
+message TransactionTotalTimesList
+{
+    repeated TransactionTotalTimes total = 1;
+}
+
+message Range
+{
+    int32 lowest = 1;
+    int32 highest = 2;
+}
+
+message PageDays1
+{
+    int32 page = 1;
+    int32 days = 2;
+}
+
+message YearMonthDay
+{
+    int32 year = 1;
+    int32 month = 2;
+    int32 day = 3;
+}
+
+message YearMonthDayList
+{
+    repeated YearMonthDay raw_date = 1;
+}
+
+message ItemIdQuantity
+{
+    int32 menu_item_id = 1;
+    int32 quantity = 2;
+}
+
+message ItemQuantities
+{
+    string name = 1;
+    int32 quantity = 2;
+    int32 portion = 3;
+    int32 menu_item_id = 4;
+    int32 unit_price = 5;
+    int32 statiegeld = 6;
+    int32 total_price = 7;
+}
+
+message ItemIdQuantityList1
+{
+    repeated ItemIdQuantity item = 1;
+}
+
+message ItemQuantitiesList
+{
+    repeated ItemQuantities item = 1;
+}
+
+message TotalPerTime
+{
+    int32  id = 1;
+    common.Timestamp timestamp = 2;
+    int32  total_restaurant_low = 7;
+    int32  total_restaurant_high = 8;
+    int32  total_takeaway_low = 9;
+    int32  total_takeaway_high = 10;
+    int32  total_delivery_low = 11;
+    int32  total_delivery_high = 12;
+    int32  tax_total_restaurant_low = 13;
+    int32  tax_total_restaurant_high = 14;
+    int32  tax_total_takeaway_low = 15;
+    int32  tax_total_takeaway_high = 16;
+    int32  tax_total_delivery_low = 17;
+    int32  tax_total_delivery_high = 18;
+    int32  total_restaurant_tax_free = 19;
+    int32  total_takeaway_tax_free = 20;
+    int32  total_delivery_tax_free = 21;
+    int32  total_statiegeld = 22;
+}
+
+message AccountMoney
+{
+    int32  total_restaurant_high = 1;
+    int32  total_restaurant_low = 2;
+    int32  total_restaurant_tax_free = 3;
+    int32  total_restaurant_charity = 4;
+    int32  total_takeaway_high = 5;
+    int32  total_takeaway_low = 6;
+    int32  total_takeaway_tax_free = 7;
+    int32  total_takeaway_charity = 8;
+    int32  total_delivery_high = 9;
+    int32  total_delivery_low = 10;
+    int32  total_delivery_tax_free = 11;
+    int32  tax_total_restaurant_high = 20;
+    int32  tax_total_restaurant_low = 21;
+    int32  tax_total_takeaway_high = 22;
+    int32  tax_total_takeaway_low = 23;
+    int32  tax_total_delivery_high = 24;
+    int32  tax_total_delivery_low = 25;
+}
+
+message TotalPerTransaction
+{
+    int32 transaction_id = 1;
+    string name = 2;
+    common.Timestamp timestamp = 3;
+    AccountMoney totals = 4;
+    int32 statiegeld = 5;
+    common.ClientOrdersType status = 6;
+}
+
+message TotalPerTransactionList
+{
+    repeated TotalPerTransaction total = 1;
+}
+
+message TotalPerTimeList
+{
+    repeated TotalPerTime total = 1;
+}
+
+message RfidKey1
+{
+    int32 rfid_key_id = 1;
+}
+
+message Date
+{
+    int32 year = 1;
+    int32 quarter = 2;
+    int32 month = 3;
+    int32 day = 4;
+    int32 weekDay = 5;
+}
+
+message DateFromTo
+{
+    Date cong = 1;
+    Date dao = 2;
+}
+
+message DateFromWhereGroupTo1
+{
+    Date cong = 1;
+    Date dao = 2;
+    repeated string where = 3;
+    int32 menu_group = 4;
+}
+
+message Name1
+{
+    string local = 1;
+    string chinese = 2;
+}
+
+message MenuItemId1
+{
+    int32 menu_item_id = 1;
+}
+
+message ParentDate1
+{
+    int32 year = 1;
+    int32 quarter = 2;
+    int32 month = 3;
+    int32 day = 4;
+    string parent = 5;
+}
+
+message TotalTaxGroup
+{
+    bool is_takeaway = 1;
+    int32 location = 2;
+    double percentage =3;
+    int32 subtotal = 4;
+    int32 discount = 5;
+    int32 total = 6;
+}
+
+message TotalsTaxGroupList1
+{
+    repeated TotalTaxGroup total_tax_groups = 1;
+}
+
+message TaxClusterToMenuItem1
+{
+    int32 menu_item_id = 1;
+    int32 tax_cluster_id = 2;
+}
+
+message TotalTimeLowHigh
+{
+    common.Timestamp timestamp = 1;
+    int32 total_high = 2;
+    int32 total_low = 3;
+}
+
+message TotalTimeLowHighList
+{
+    repeated TotalTimeLowHigh total = 1;
+}
+
+message TotalTimeQuantity
+{
+    common.Timestamp timestamp = 1;
+    double quantity = 2;
+}
+
+message TotalTimesQuantityList
+{
+    repeated TotalTimeQuantity total = 1;
+}
+
+message TransactionData
+{
+    int32 transaction_id = 1;
+    string name = 2;
+    common.TransType trans_type = 3;
+    int32 rfid_key_id = 5;
+    common.ClientOrdersType status = 6;
+    int32 deposit = 7;
+    string time_start = 8;
+    string time_end = 9;
+    string time_customer = 10;
+    common.Money subtotal_low = 20;
+    common.Money subtotal_high = 21;
+    common.Money discount_low = 22;
+    common.Money discount_high = 23;
+    float remains_low = 24;
+    float remains_high = 25;
+    common.Money tips_low = 26;
+    common.Money tips_high = 27;
+    common.Money total_low = 28;
+    common.Money total_high = 29;
+    common.Money tax_total_low = 30;
+    common.Money tax_total_high = 31;
+    int32 customer_id = 40;
+    bool archived = 41;
+    string message = 42;
+    common.Money subtotal_tax_free = 43;
+    common.Money total_tax_free = 44;
+    common.Money discount_tax_free = 45;
+    common.Money tips_tax_free = 46;
+}
+
+message TotalTimeRfidKeyId
+{
+    int32 rfid_key_id = 1;
+    int32 total = 2;
+    common.Timestamp timestamp = 3;
+}
+
+message TotalTimeRfidKeyIdList
+{
+    repeated TotalTimeRfidKeyId time = 1;
+}
+
+message InsertTransactionRequest
+{
+    string table_name = 1;
+    int32 rfid_key_id = 2;
+    common.ClientOrdersType status = 3;
+    string start_time = 4;
+    string end_time = 5;
+    int32 customer_id = 6;
+    int32 archived = 7;
+    string message = 8;
+    common.Money high = 9;
+    common.Money low = 10;
+    common.Money tax_free = 11;
+    float tax_percentage_high = 12;
+    float tax_percentage_low = 13;
+    common.TransType trans_type = 14;
+}

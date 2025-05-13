@@ -1,0 +1,118 @@
+//==============================================================================
+//  @file       sql_menu_card.proto
+//  @ingroup    proto database interface
+//  @brief	Operations on item database
+//
+//  Messages for menu cards
+//
+//  @author     Bart Houkes
+//
+//------------------------------------------------------------------------------
+//  Copyright (c) Bart Houkes, 25-12-2023
+//
+//  Copyright notice:
+//  This software is property of Bart Houkes.
+//  Unauthorized duplication and disclosure to third parties is forbidden.
+//============================================================================*/
+
+syntax = "proto3";
+
+option csharp_namespace = "menuItemService";
+
+package menu;
+
+import "common_types.proto";
+
+// Add these Kotlin-specific options
+option java_multiple_files = true;
+option java_package = "com.hha.menu.card";
+
+service MenuCardService
+{
+    rpc FindAllMenuCards(common.Empty)  returns (MenuCardList) {}
+    rpc SetMenuCardName(SetMenuCardNameRequest)  returns (common.Empty) {}
+    rpc InsertMenuCard(NewMenuCardRequest)  returns (MenuCard) {}
+    rpc RemoveMenuCard(common.MenuCardId)  returns (common.Empty) {}
+    rpc UpdateMenuCard(MenuCard)  returns (common.Empty) {}
+    rpc ExchangeMenuCards(ExchangeRequest)  returns (common.Empty) {}
+    rpc GetMaxSequence(common.Empty)  returns (common.MenuCardId) {}
+    rpc GetProductFromProductId(ProductRequest)  returns (common.MenuItem) {}
+    rpc Backup(common.Empty)  returns (common.Empty) {}
+    rpc Restore(common.Empty)  returns (common.Empty) {}
+    rpc Rotate(MenuCardPageId)  returns (common.Empty) {}
+    rpc ExchangeCluster(ExchangeClusterRequest)  returns (common.Empty) {}
+    rpc SetSize(WidthHeightRequest)  returns (common.Empty) {}
+    rpc Clear(MenuCardPageId)  returns (common.Empty) {}
+}
+
+message WidthHeightRequest
+{
+    int32 menu_card_id = 1;
+    int32 menu_page_id = 2;
+    int32 new_width = 3;
+    int32 new_height = 4;
+}
+
+message ProductRequest
+{
+    int32 menu_card_id = 1;
+    int32 menu_page_id = 2;
+    int32 menu_item_id = 3;
+}
+
+message NewMenuCardRequest
+{
+    string local_name = 1;
+    string chinese_name = 2;
+}
+
+message MenuCardPageId
+{
+    int32 menu_card_id = 1;
+    int32 menu_page_id = 2;
+}
+
+message ExchangeRequest
+{
+    int32 sequence1 = 1;
+    int32 sequence2 = 2;
+}
+
+message MenuCard
+{
+    int32 menu_card_id = 1;
+    int32 sequence = 2;
+    string chinese_name = 3;
+    string local_name = 4;
+    bool is_takeaway = 5;
+    bool is_delivery = 6;
+    bool is_restaurant = 7;
+    bool is_wok = 8;
+}
+
+message MenuCardList
+{
+    repeated MenuCard menu_cards = 1;
+}
+
+enum SkipInvisible
+{
+    SKIP_INVISIBLE_TRUE   = 0;  ///< Do show only the background.
+    SKIP_INVISIBLE_FALSE  = 70; ///< Do show like normal items.
+    SKIP_INVISIBLE_SHOW   = 83;  ///< Do show the items with an indication if skipped.
+}
+
+message SetMenuCardNameRequest
+{
+    int32 menu_card_id = 1;
+    string name = 2;
+    bool is_chinese = 3;
+}
+ 
+message ExchangeClusterRequest
+{
+    int32 menu_card_id = 1;
+    int32 cluster1 = 2;
+    int32 cluster2 = 3;
+}
+

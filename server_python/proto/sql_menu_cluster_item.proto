@@ -1,0 +1,163 @@
+//==============================================================================
+//  @file       sql_menu_cluster_item.proto
+//  @ingroup    proto database interface
+//  @brief	Operations on cluster items database
+//
+//  Messages for menu cards clusters + items
+//
+//  @author     Bart Houkes
+//
+//------------------------------------------------------------------------------
+//  Copyright (c) Bart Houkes, 12-1-2024
+//
+//  Copyright notice:
+//  This software is property of Bart Houkes.
+//  Unauthorized duplication and disclosure to third parties is forbidden.
+//============================================================================*/
+
+syntax = "proto3";
+
+option csharp_namespace = "menuService";
+
+package mci;
+
+import "common_types.proto";
+
+// Add these Kotlin-specific options
+option java_multiple_files = true;
+option java_package = "com.hha.menu.cluster.item";
+
+service menuClusterItemService
+{
+    rpc BackupClusterItems(common.Empty) returns (common.Empty);
+    rpc DeleteClusterItem(deleteClusterItemRequest) returns (common.Empty);
+    rpc DuplicateClusterItem(duplicateClusterItemRequest) returns (common.Empty);
+    rpc DuplicateMenuCard(duplicateMenuCardRequest) returns (common.Empty);
+    rpc ExchangeCluster(exchangeClusterRequest) returns (common.Empty);
+    rpc FindAllExcelItems(menuCardId) returns (clusterItemList);
+    rpc GetSize(menuCardId) returns (clusterItemSize);
+    rpc InsertClusterItem(insertClusterItemRequest) returns (common.Empty);
+    rpc MysqlDump(common.Empty) returns (textDump);
+    rpc SaveAllClusterItems(saveClusterItemsRequest) returns (common.Empty);
+    rpc SelectClusterItems(clusterIdRequest) returns (clusterItemList);
+    rpc UpdateClusterItem(clusterItem) returns (common.Empty);
+    rpc RenumberClusterItems(menuCardId) returns (common.Empty);
+    rpc RemoveAllClusterItemsFromMenuCard(menuCardId) returns (common.Empty);
+    rpc RestoreClusterItems(common.Empty) returns (common.Empty);
+}   
+
+message cluster
+{
+	int32  menu_card_id = 1;  ///< What menu card.
+	int32  menu_cluster_id = 2;  ///< Which cluster index 1..32
+	EclusterType  cluster_type = 3;  ///< Select many, all or N.
+	string  local_name = 4;   ///< Name for the cluster.
+	string  chinese_name = 5; ///< Name for the cluster.
+	int32  quantity = 6;    ///< In case of N, this is the amount.
+}
+
+message clusterIdRequest
+{
+    int32 menu_card_id = 1;
+    int32 cluster_id = 2;
+}
+
+message clusterItem
+{
+    int32 database_id = 1;
+    bool valid = 2;
+    int32 sequence_nr = 3;
+    int32 menu_card_id = 4;
+    int32 menu_item_id = 5;
+    money restaurant_price = 6;
+    money takeaway_price = 7;
+    string local_name = 8;
+    string chinese_name = 9;
+    int32 height = 10;
+    int32 cluster_id = 11;
+    int32 menu_page_id = 12;
+}
+
+message clusterItemId
+{
+    int32 cluster_item_id = 1;
+}
+
+message clusterItemList
+{
+    repeated clusterItem  cluster_item = 1;
+}
+
+message clusterItemSize
+{
+    int32 nr_items = 1;
+}
+
+message clusterList
+{
+    repeated cluster clusters = 1;
+}
+
+message deleteClusterItemRequest
+{
+    int32 menu_card_id = 1;
+    int32 cluster_id = 2;
+    int32 sequence = 3;
+}
+
+message duplicateClusterItemRequest 
+{
+  int32 menu_card_id = 1;
+  int32 cluster_item_index = 2;
+  int32 new_cluster_item_index = 3;
+}
+
+message duplicateMenuCardRequest
+{
+    int32 menu_card_id = 1;
+    int32 destination_id = 2;
+}
+
+message exchangeClusterRequest
+{
+  int32 menu_card_id = 1;
+  int32 src_cluster_id = 2;  // Assuming short can be represented as int32.
+  int32 dst_cluster_id = 3;  // Assuming short can be represented as int32.
+}
+
+message insertClusterItemRequest
+{
+    int32 menu_card_id = 1;
+    int32 cluster_id = 2;
+    int32 sequence = 3;
+    int32 menu_item_id = 4;
+}
+
+message money
+{
+    int32 cents = 1;
+}
+
+message menuCardId
+{
+    int32 menu_card_id = 1;
+}
+
+message saveClusterItemsRequest
+{
+    int32 menu_card_id = 1;
+    repeated clusterItem cluster_items = 2;
+}
+
+message textDump
+{
+    string dump = 1;
+}
+
+enum EclusterType
+{
+    GROUP_CHOOSE_SINGLE_SELECTION = 0;
+    GROUP_CHOOSE_MULTIPLE_SELECTION = 1;
+    GROUP_SELECT_ALL = 2;
+    GROUP_SELECT_UNKNOWN = 3;
+}

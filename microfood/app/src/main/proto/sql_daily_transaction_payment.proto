@@ -1,0 +1,198 @@
+//==============================================================================
+//  @file       sql_daily_transaction_payment.proto
+//  @ingroup    proto database interface
+//  @brief		Operations on transactions
+//
+//  Messages for daily transaction payments
+//
+//  @author     Bart Houkes
+//
+//------------------------------------------------------------------------------
+//  Copyright (c) Bart Houkes, 18-8-2024
+//
+//  Copyright notice:
+//  This software is property of Bart Houkes.
+//  Unauthorized duplication and disclosure to third parties is forbidden.
+//============================================================================*/
+
+syntax = "proto3";
+
+option csharp_namespace = "GrpcService";
+
+package dtp;
+
+import "common_types.proto";
+
+// Add these Kotlin-specific options
+option java_multiple_files = true;
+option java_package = "com.hha.daily.payment";
+
+service DailyTransactionPaymentService
+{
+    rpc AddPayment(AddPaymentRequest)  returns (common.Empty);
+    rpc AddPayment2(AddPaymentRequest2)  returns (common.Empty);	
+    rpc CopyTransaction(CopyTransactionRequest)  returns (common.Empty);               
+    rpc CreatePartialIndex(TransactionId)  returns (PartialIndex);
+    rpc CancelMoneyPayments(TransactionId)  returns (common.Empty);
+    rpc CancelPayment(CancelPaymentRequest)  returns (common.Empty);
+    rpc DeleteTransaction(TransactionId)  returns (common.Empty);
+    rpc CancelPayments(TransactionId)  returns (common.Empty);
+    rpc CancelPayments2(CancelPaymentsRequest2)  returns (common.Empty);
+    rpc CancelPayments3(CancelPaymentsRequest3)  returns (common.Empty);
+    rpc CancelTransaction(TransactionId)  returns (common.Empty);
+    rpc DuplicateTransaction(DuplicateTransactionRequest)  returns (common.Empty);
+    rpc FindAllTransactionsSorted(common.Empty)  returns (PaymentMap);
+    rpc FindAllTransactionsUnsorted(common.Empty)  returns (PaymentMap);
+    rpc FinishPayments(TransactionId)  returns (common.Empty);
+    rpc GetNewPaymentIndex(TransactionId)  returns (PartialIndex);
+    rpc GetHighestPaymentIndex(TransactionId)  returns (PartialIndex);
+    rpc GetPartialTotal(PartialTotalRequest)  returns (PartialTotal);
+    rpc GetTransactionPaymentTotals(TransactionPaymentRequest)  returns(PaymentDetailsList);
+    rpc GetTransactionPaymentsList(TransactionPaymentRequest)  returns (PaymentList); 
+    rpc SelectTransactionId(TransactionPaymentRequest)  returns (PaymentDetailsList);
+    rpc SetCashTotal(SetCashTotalRequest)  returns (common.Empty);
+    rpc SetTimes(SetTimesRequest)  returns (common.Empty);
+    rpc UpdatePaymentIndexMethod(UpdatePaymentMethodRequest)  returns (common.Empty);
+    rpc UpdateTransactionPaymentTotal(UpdatePaymentRequest)  returns (common.Empty);
+}
+
+message UpdatePaymentMethodRequest
+{
+    int32 transaction_id = 1;
+    int32 payment_index = 2;
+    common.PaymentMethod new_payment_method = 3;
+}
+
+message TransactionPaymentRequest
+{
+    int32 transaction_id = 1;
+    bool include_cancelled_payments = 2;
+}
+
+message UpdatePaymentRequest
+{
+    int32 transaction_id = 1;
+    int32 total = 2;
+}
+
+message SetTimesRequest
+{
+    int32 transaction_id = 1;
+    string timestamp = 2;
+}
+ 
+message SetCashTotalRequest
+{
+    uint32 transaction_id = 1;
+    uint32 client_id  = 2;
+    int32 total = 3;
+}
+
+message PaymentDetails
+{
+    common.PaymentMethod payment_method = 1;
+    int32 total = 2;
+    common.Payed is_paid = 3;
+}
+
+message PaymentDetailsList
+{
+    repeated PaymentDetails payment_details = 1;
+}
+
+message AddPaymentRequest
+{
+    int32 transaction_id = 1;
+    Payment payment = 2;
+    int32 payment_index = 3;
+}
+
+message Payment
+{
+    int32 partial_index = 1;
+    int32 customer_id = 2;
+    common.PaymentMethod payment_method = 3;
+    int32 total = 4;
+    string msg = 5;
+    common.Payed is_paid = 6;
+}
+
+message PaymentList
+{
+    repeated Payment payment = 1;
+}
+
+message AddPaymentRequest2
+{
+    int32 transaction_id = 1;
+    common.PaymentMethod payment_method = 2;
+    int32 total = 3;
+    string end_time = 4;
+    common.Payed is_paid = 5;
+}
+
+message CopyTransactionRequest
+{
+    string new_table = 1;
+    int32  new_transaction_id = 2;
+}
+
+message TransactionId
+{
+    int32 transaction_id = 1;
+}
+
+message PartialIndex
+{
+    int32 partial_index = 1;
+}
+
+message CancelPaymentRequest
+{
+    int32 transaction_id = 1;
+    int32 index = 2;
+    common.PaymentStatus status = 3;
+}
+
+message CancelPaymentsRequest2
+{
+    int32 transaction_id = 1;
+    common.PaymentStatus pay_status = 2;
+}
+
+message CancelPaymentsRequest3
+{ 
+    int32 transaction_id = 1;
+    int32 partial_index = 2;
+    bool only_unfinished_payments = 3;
+}
+
+message DuplicateTransactionRequest
+{
+    int32 transaction_id = 1;
+    int32 new_transaction_id = 2;
+}
+
+message PaymentTuple
+{
+    int32 transaction_id = 1;
+    common.PaymentMethod payment_method = 2;
+}
+
+message PaymentMap
+{
+    repeated PaymentTuple payment = 1;
+}
+
+message PartialTotalRequest
+{
+    int32 transaction_id = 1;
+    int32 partial_index = 2;
+    common.PaymentMethod payment_method = 3;
+}
+
+message PartialTotal
+{
+    int32 total = 1;
+}
+

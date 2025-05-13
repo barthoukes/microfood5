@@ -1,0 +1,203 @@
+//==============================================================================
+//  @file       sql_menu.proto
+//  @ingroup    proto database interface
+//  @brief		Operations on item database
+//
+//  Messages for menu cards
+//
+//  @author     Bart Houkes
+//
+//------------------------------------------------------------------------------
+//  Copyright (c) Bart Houkes, 25-12-2023
+//
+//  Copyright notice:
+//  This software is property of Bart Houkes.
+//  Unauthorized duplication and disclosure to third parties is forbidden.
+//============================================================================*/
+
+syntax = "proto3";
+
+option csharp_namespace = "menuItemService";
+
+package mp;
+
+import "common_types.proto";
+
+// Add these Kotlin-specific options
+option java_multiple_files = true;
+option java_package = "com.hha.menu.page";
+
+service MenuPageService
+{
+    rpc DuplicateMenuCard(DuplicationRequest)  returns (common.Empty) {}
+    rpc GetSize(common.MenuCardId)  returns (SizeReply) {}
+    rpc FindAllPages(common.MenuCardId)  returns (MenuPageList) {}
+    rpc SetPageButtonSize(PageButtonSizeRequest)  returns (common.Empty) {}
+    rpc SetPageOrientation(PageOrientation)  returns (common.Empty) {}
+    rpc SetChineseName(NameChange)  returns (common.Empty) {}
+    rpc SetLocalName(NameChange)  returns (common.Empty) {}
+    rpc SetImage(NameChange)  returns (common.Empty) {}
+    rpc ExchangePages(ExchangePagesRequest)  returns (common.Empty) {}
+    rpc RemovePagesFromMenuCard(common.MenuCardId)  returns (common.Empty) {}
+    rpc SaveAllPages(SavePagesRequest)  returns (common.Empty) {}
+    rpc Backup(common.Empty)  returns (common.Empty) {}
+    rpc Restore(common.Empty)  returns (common.Empty) {}
+    rpc MysqlDump(common.Empty)  returns (common.TextDump) {}
+    rpc Verify(VerifyRequest)  returns (common.Empty) {}
+}
+
+service MenuTranslationService
+{
+    rpc  FindOrCreateTranslation(MenuTranslation)  returns (MenuTranslationList) {}
+    rpc  FindTranslation(LocalNameRequest)  returns (FoundReply) {}
+    rpc  FindLike(FindLikeRequest)  returns (MenuTranslationList) {}
+    rpc Dump(common.Empty)  returns (common.Empty) {}
+}
+
+message FindLikeRequest
+{
+    string search_string = 1;
+    bool in_chinese = 2;
+}
+
+message MenuTranslation
+{
+    string local_name = 1;
+    string chinese_name = 2;
+}
+
+message MenuTranslationList
+{
+    repeated MenuTranslation translations = 1;
+}
+
+message LocalNameRequest
+{
+    string local_name = 1;
+}
+
+message FoundReply
+{
+    string name = 1;
+}
+	
+message MenuPage
+{
+    int32 menu_card_id = 1;
+    int32 menu_page_id = 2;
+    string local_name = 3;
+    string chinese_name = 4;
+    int32 page_button_size = 5;
+    string picture = 6;
+    bool is_vertical_orientation = 7;
+}
+
+message SavePagesRequest
+{
+    int32 menu_card_id = 1;
+    repeated MenuPage pages = 2;
+}
+
+message WidthHeightRequest
+{
+    int32 menu_card_id = 1;
+    int32 menu_page_id = 2;
+    int32 new_width = 3;
+    int32 new_height = 4;
+}
+
+message PageButtonSizeRequest
+{
+    int32 menu_card_id = 1;
+    int32 menu_page_id = 2;
+    int32 new_page_button_size = 3;
+}
+
+message NameChange
+{
+    int32 menu_card_id = 1;
+    int32 menu_page_id = 2;
+    string name = 3;
+}
+
+message PageOrientation
+{
+    int32 menu_card_id = 1;
+    int32 menu_page_id = 2;
+    bool is_vertical_orientation = 3;
+}
+
+message MenuPageList
+{
+    repeated MenuPage menu_pages = 1;
+} 
+
+enum SkipInvisible
+{
+    SKIP_INVISIBLE_TRUE   = 0;  ///< Do show only the background.
+    SKIP_INVISIBLE_FALSE  = 70; ///< Do show like normal items.
+    SKIP_INVISIBLE_SHOW   = 83;  ///< Do show the items with an indication if skipped.
+}
+
+message ExchangePagesRequest
+{
+    int32 menu_card_id = 1;
+    int32 menu_page_id1 = 2;
+    int32 menu_page_id2 = 3;
+}
+
+message ExchangeSpecialPricesRequest
+{
+    int32 menu_card_id = 1;
+    int32 special_prices_index1 = 2;
+    int32 special_prices_index2 = 3;
+}
+
+message ExchangeClusterRequest
+{
+    int32 menu_card_id = 1;
+    int32 cluster1 = 2;
+    int32 cluster2 = 3;
+}
+
+message DuplicationRequest
+{
+    int32 menu_card_id1 = 1;
+    int32 menu_card_id2 = 2;
+}
+
+message SizeReply
+{
+    int32 size = 1;
+}
+
+message FirstItemReply
+{
+    int32 menu_card_id = 1;
+    int32 menu_page_id = 2;
+    int32 menu_item_id = 3;
+    bool valid = 4;
+}
+
+message FindItemRequest
+{
+    string local_name = 1;
+    string chinese_name = 2;
+    string menu_page_id = 3;
+    int32 menu_card_id = 4;
+}
+
+message GetMenuItemsRequest
+{
+    int32 menu_card_id = 1;
+    int32 menu_page_id = 2;
+    bool is_vertical = 3;
+    SkipInvisible skip_invisible = 4;
+}
+
+message VerifyRequest
+{
+    int32 menu_card_id = 1;
+    int32 max_groups = 2;
+}
+

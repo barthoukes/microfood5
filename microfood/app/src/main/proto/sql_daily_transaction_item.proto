@@ -1,0 +1,333 @@
+//==============================================================================
+//  @file       sql_daily_transaction_item.proto
+//  @ingroup    proto database interface
+//  @brief		Operations on transactions
+//
+//  Messages for daily transactions
+//
+//  @author     Bart Houkes
+//
+//------------------------------------------------------------------------------
+//  Copyright (c) Bart Houkes, 25-12-2023
+//
+//  Copyright notice:
+//  This software is property of Bart Houkes.
+//  Unauthorized duplication and disclosure to third parties is forbidden.
+//============================================================================*/
+
+syntax = "proto3";
+
+option csharp_namespace = "GrpcService";
+
+package dti;
+
+import "common_types.proto";
+
+// Add these Kotlin-specific options
+option java_multiple_files = true;
+option java_package = "com.hha.daily.item";
+
+service DailyTransactionItemService
+{
+    // Transaction Item
+    //rpc GetRows (common.Empty)  returns (RowsReply) {}
+    //rpc GetItem (IndexRequest)  returns (Item) {}
+    rpc NumberKitchenItems (TransactionTimeFrame)  returns (NumberReply) {}
+    rpc SelectTimeFrame (TransactionTimeFrame)  returns (common.ItemList) {}
+    rpc SelectTransaction(TransactionId)  returns (common.ItemList) {}
+    rpc SelectTransactionId(SelectTransactionSort)  returns (common.ItemList) {}
+    rpc CreateItem (CreateItemRequest)  returns (NumberReply) {}
+    rpc CreateItemWithTimestamp (CreateItemWithTimestampRequest)  returns (NumberReply) {}
+    rpc FinishPayments (TransactionId)  returns (common.Empty) {}
+    rpc DuplicateTransaction (TransactionToTransaction)  returns (common.Empty) {}
+    rpc DeleteAll (TransactionTimeFrameDeviceWhy)  returns (common.Empty) {}
+    rpc ItemCount (TransactionTimeFrame)  returns (NumberReply) {}
+    rpc ItemSum (TransactionTimeFrame)  returns (Money) {}
+    rpc UpdateItemToDatabase (common.Item)  returns (common.Empty) {}
+    rpc GetAllDrinksTotal (GetAllDrinksTotalRequest)  returns (Money) {}
+    rpc GetAllKitchenTotal (GetAllKitchenTotalRequest)  returns (Money) {}
+    rpc GetTimeFrameLocationTotal (TransactionLocationIndex)  returns (Money) {}
+    rpc SetTimeFrameLocation (TransactionLocationIndex)  returns (common.ItemList) {}
+    rpc DeleteTransactionItems (TransactionId)  returns (common.Empty) {}
+    rpc SetNegativeQuantityToRemovedItems (TransactionId)  returns (common.Empty) {}
+    rpc UndoTimeFrame (UndoTimeFrameRequest)  returns (common.Empty) {}
+    rpc InsertSequence (InsertSequenceRequest)  returns (common.Empty) {}
+    rpc Select (TransactionSubItems)  returns (common.ItemList) {}
+    rpc ReplaceListItem (ReplaceListItemRequest)  returns (common.Empty) {}
+    rpc SetTwinQuantity (SetTwinQuantityRequest)  returns (common.Empty) {}
+    rpc DeleteTwinItem (DeleteTwinItemRequest)  returns (common.Empty) {}
+    rpc ExchangeSequences (ExchangeSequencesRequest)  returns (common.Empty) {}
+    rpc FindSequences(FindSequencesRequest)  returns (FindSequencesReply) {}
+    rpc GetExtraHalfHourTotal(TransactionId)  returns (Money) {}
+    rpc FindItems(FindItemsRequest)  returns (ItemGroupQuantityList) {}
+    rpc IsEmpty(common.MenuCardId)  returns (IsEmptyResponse) {}
+    rpc IsEmptyTransaction(EmptyTransactionRequest)  returns (IsEmptyResponse) {}
+    rpc MergeTransactionItems(TransactionIds)  returns (common.Empty) {}
+    rpc FindSequenceItems(FindSequenceItemsRequest)  returns (common.ItemList) {}
+}
+
+message FindSequenceItemsRequest
+{
+    int32 transaction_id = 1;
+    repeated int32 sequence_list = 2;
+    int32 max_time_frame_index = 3;
+    bool  negative = 4;
+}
+
+message FindItemsRequest
+{
+    bool all_rfid_key_ids = 1;
+    repeated int32 rfid_key_id = 2;
+    string date = 3;
+    int32 deleted = 4;
+    int32 tax_cluster_id = 5; 
+}
+
+message EmptyTransactionRequest
+{
+    int32 transaction_id = 1;
+    bool exclude_frame_id = 2;
+}
+
+message IsEmptyResponse
+{
+    bool is_empty = 1;
+}
+
+message ItemGroupQuantity
+{
+    int32 item_id = 1;
+    double quantity = 2;
+    int32 item_group = 3;
+    string local_name = 4;
+    string chinese_name = 5;
+}
+
+message ItemGroupQuantityList
+{
+    repeated ItemGroupQuantity item = 1;
+}
+
+message FindSequencesRequest
+{
+    int32 transaction_id = 1;
+    int32 time_frame_low = 2;
+    int32 time_frame_high = 3;
+    int32 item_locations = 4;
+}
+
+message FindSequencesReply
+{
+    repeated int32 output = 1;
+}
+
+message TransactionId
+{
+    int32 transaction_id = 1;
+}
+
+message TransactionIds
+{
+    int32 source_order = 1;
+    int32 destination_order = 2;
+}
+
+message Money
+{
+    int32 cents = 1;
+}
+
+message IndexRequest
+{
+    int32 index = 1;
+}
+
+message TimeFrameIndex
+{
+    int32 time_frame_index = 1;
+}
+
+message BoolValue
+{
+    bool value = 1;
+}
+
+message RowsReply
+{
+    int32 rows = 1;
+}
+
+message NumberReply 
+{
+    int32 number = 1;
+}
+
+message TransactionTimeFrame 
+{
+    int64 transaction_id = 1;
+    int32 time_frame_index = 2;
+}
+
+message TransactionTimeFrameDeviceWhy
+{
+    int64 transaction_id = 1;
+    int32 time_frame_id = 2;  // Assuming EtimeFrameIndex can be represented as int32.
+    int32 device_id = 3;  // Assuming short can be represented as int32.
+    common.DeletedStatus deleted_why = 4;  // Assuming EdeletedStatus can be represented as int32.
+}
+
+message SelectTransactionSort
+{
+    int64 transaction_id = 1;
+    common.ItemSort sorted = 2; 
+    int32 time_frame_id = 3;
+    int32 device_id = 4;
+}
+
+message CreateItemRequest
+{
+    int64 item_id = 1;
+    int64 transaction_id = 2;
+    int32 sequence = 3;
+    int32 sub_sequence = 4;  // Assuming short can be represented as int32.
+    int32 sub_sub_sequence = 5;  // Assuming short can be represented as int32.
+    int32 quantity = 6;
+    common.OrderLevel level = 7;  // Assuming order_level can be represented as int32.
+    int32 tax_group = 8;
+    int32 page = 9;
+    int32 parts = 10;
+    int32 unit_price = 11;
+    int32 original_price = 12;
+    int32 original_half_price = 13;
+    double tax = 14;
+    int32 locations = 15;  // Assuming EitemLocations can be represented as int32.
+    int32 time_frame_index = 16;  // Assuming short can be represented as int32.
+    int32 device_id = 17;  // Assuming short can be represented as int32.
+    int32 cluster_id = 18;  // Assuming short can be represented as int32.
+    common.Payed is_paid = 19;  // Assuming Epayed can be represented as int32.
+    int32 statiegeld = 20;
+    common.DeletedStatus deleted_status = 21;  // Assuming EdeletedStatus can be represented as int32.
+    int32 deleted_time_frame = 22;  // Assuming EtimeFrameIndex can be represented as int32.
+}
+
+message CreateItemWithTimestampRequest 
+{
+    Timestamp timestamp = 1;  // Assuming Timestamp can be represented as a message.
+    int32 item_id = 2;
+    int32 transaction_id = 3;
+    int32 sequence = 4;
+    int32 sub_sequence = 5;  // Assuming short can be represented as int32.
+    int32 sub_sub_sequence = 6;  // Assuming short can be represented as int32.
+    int32 quantity = 7;
+    common.OrderLevel level = 8;  // Assuming order_level can be represented as int32.
+    int32 tax_group = 9;
+    int32 page = 10;
+    int32 parts = 11;
+    int32 unit_price = 12;
+    int32 original_price = 13;
+    int32 original_half_price = 14;
+    double tax = 15;
+    int32 locations = 16;  // EitemLocations can be represented as int32.
+    int32 time_frame_index = 17;  // Assuming short can be represented as int32.
+    int32 device_id = 18;  // Assuming short can be represented as int32.
+    int32 cluster_id = 19;  // Assuming short can be represented as int32.
+    common.Payed is_paid = 20;  // Assuming Epayed can be represented as int32.
+    int32 statiegeld = 21;
+    common.DeletedStatus status = 22;  // Assuming EdeletedStatus can be represented as int32.
+    int32 deleted_time_frame = 23;  // Assuming EtimeFrameIndex can be represented as int32.
+}
+
+message TransactionToTransaction
+{
+    int32 transaction_id = 1;
+    int32 new_transaction_id = 2;
+}
+
+message GetAllDrinksTotalRequest 
+{
+    int64 transaction_id = 1;
+    common.PaymentStatus pay_status = 2;  // Assuming EpaymentStatus can be represented as int32.
+    bool is_with_statiegeld = 3;
+}
+
+message GetAllKitchenTotalRequest
+{
+    int64 transaction_id = 1;
+    common.PaymentStatus pay_status = 2;  // Assuming EpaymentStatus can be represented as int32.
+    bool is_with_statiegeld = 3;
+}
+
+message TransactionLocationIndex
+{
+    int64 transaction_id = 1;
+    int32 index = 2;
+    common.ItemLocation location = 3;  // Assuming EitemLocation can be represented as int32.
+}
+
+message UndoTimeFrameRequest 
+{
+    int64 transaction_id = 1;
+    int32 time_frame_index = 2;  // Assuming short can be represented as int32.
+    int32 device_id = 3;  // Assuming short can be represented as int32.
+}
+    
+message InsertSequenceRequest
+{
+    int64 transaction_id = 1;
+    int32 sequence = 2;
+}
+
+message TransactionSubItems 
+{
+  int64 transaction_id = 1;
+  common.SubItems sub_items = 2;  // Assuming EsubItems can be represented as int32.
+}
+
+message ReplaceListItemRequest 
+{
+    int64 transaction_id = 1;
+    int32 sequence = 2;
+    int32 old_menu_item = 3;
+    int32 new_item_id = 4;
+    int32 unit_price = 5;
+    double new_tax_percentage = 6;
+}
+
+message SetTwinQuantityRequest
+{
+    int64 transaction_id = 1;
+    int32 sequence = 2;
+    int32 sub_quantity = 3;  // Assuming short can be represented as int32.
+    int32 sub_sub_quantity = 4;  // Assuming short can be represented as int32.
+    int32 quantity = 5;
+    int32 parts = 6;  // Assuming short can be represented as int32.
+}
+
+message DeleteTwinItemRequest
+{
+    int64 twin_item_id = 1;
+    int64 transaction_id = 2;
+    int32 sequence = 3;
+    int32 sub_sequence = 4;  // Assuming short can be represented as int32.
+    int32 sub_sub_sequence = 5;  // Assuming short can be represented as int32.
+    common.DeletedStatus deleted_why = 6;
+}
+
+message ExchangeSequencesRequest
+{
+    int64 transaction_id = 1;
+    int32 sequence1 = 2;
+    int32 sequence2 = 3;
+}
+
+message Timestamp
+{
+    int32 year = 1;
+    int32 month = 2;
+    int32 day = 3;
+    int32 hour = 4;
+    int32 minutes = 5;
+    int32 seconds = 6;
+    int32 milliseconds = 7;
+}
+

@@ -1,0 +1,234 @@
+//==============================================================================
+//  @file       sql_daily_reservation.proto
+//  @ingroup    proto database interface
+//  @brief	Operations on locations
+// 
+//  Messages for delivery locations
+//
+//  @author     Bart Houkes
+//
+//------------------------------------------------------------------------------
+//  Copyright (c) Bart Houkes, 25-12-2023
+//
+//  Copyright notice:
+//  This software is property of Bart Houkes.
+//  Unauthorized duplication and disclosure to third parties is forbidden.
+//============================================================================*/
+
+syntax = "proto3";
+
+option csharp_namespace = "GrpcService";
+
+package reservation;
+
+// Add these Kotlin-specific options
+option java_multiple_files = true;
+option java_package = "com.hha.daily.reservation";
+
+service ReservationService
+{
+    rpc AddReservation(Reservation) returns (empty) {}
+    rpc UpdateReservation(Reservation) returns (empty) {}
+    rpc DropReservation(ReservationIdRequest) returns (empty) {}
+    rpc getLocations(empty) returns (ReservationLocationNames) {}
+    rpc GetDays(empty) returns (ReservationDaysReply) {}
+    rpc GetTotalDays(empty) returns (ReservationDaysReply) {}
+    rpc GetTotalLocations(empty) returns (ReservationLocationsReply) {}
+    rpc FindReservations(DaysRequest) returns (ReservationListReply) {}
+    rpc GetReservationTime(IndexRequest) returns (ReservationTimeReply) {}
+    rpc PopulateReservations(empty) returns (empty) {}
+    rpc RemoveReservation(ReservationIdRequest) returns (empty) {}
+    rpc FindAllPostcodes(empty) returns (StreetListReply) {}
+    rpc FindAllStreets(empty) returns (StreetListReply) {}
+}
+
+message empty
+{
+     int32 status = 1;
+}
+
+message IndexRequest
+{
+    int32 index = 1;
+}
+
+message ReservationIdRequest
+{
+    int32 reservationId = 1;
+}
+
+message DaysRequest
+{
+    int32 numberOfDays = 1;
+}
+
+message ClientIdRequest
+{
+    int32 customerId = 1;
+}
+
+message ClientIdReply
+{
+    int32 customerId = 1;
+}
+
+message ClientNamePartRequest
+{
+	string name = 1;
+}
+
+message ClientTextReply
+{
+    string text = 1;
+}
+
+message ClientIndexReply
+{
+    int32 customerIndex = 1;
+}
+
+message TransactionIdRequest
+{
+    int32 transactionId = 1;
+}
+
+message AddressRequest
+{
+    string street = 1;
+    string houseNr = 2;
+    string city = 3;
+}
+
+message CustomerPayRequest
+{
+    int32 customerId = 1;
+}
+
+message OnlyValidRequest
+{
+    bool onlyValid = 1;
+}
+
+message PhoneRequest
+{
+    string phoneNumber = 1;
+}
+
+message ClientReply
+{
+     string phone = 1;
+     string postcode = 2;
+    string houseNr = 3;
+     string name = 4;
+    string street = 5;
+     string city = 6;
+     string company = 7;
+    int32 totalEaten = 8;
+    int32 totalOrdered = 9;
+    int32 totalPayed = 10;
+    int32 customerId = 11;
+}
+
+message ClientRequest
+{
+     string phone = 1;
+     string postcode = 2;
+    string houseNr = 3;
+     string name = 4;
+    string street = 5;
+     string city = 6;
+     string company = 7;
+    int32 totalEaten = 8;
+    int32 totalOrdered = 9;
+    int32 totalPayed = 10;
+    int32 customerId = 11;
+}
+
+message CustomerDetails
+{
+     string phone = 1;
+     string postcode = 2;
+    string houseNr = 3;
+     string name = 4;
+     string company = 5;
+    string street = 6;
+     string city = 7;
+}
+
+message ClientListReply
+{
+    repeated ClientReply clients = 1;
+}
+
+message CustomerTotal
+{
+    int32 customerId = 1;
+    int32 total = 2;
+}
+
+enum EreservationStatus
+{
+	RESERVATION_UNKNOWN = 0;
+	RESERVATION_BY_PHONE =70;
+	RESERVATION_BY_EMAIL = 69;
+	RESERVATION_BY_PERSON = 80;
+	RESERVATION_CANCELLED = 67;
+	RESERVATION_ARRIVED = 65;
+}
+
+message Reservation
+{
+    int32 databaseId = 1;
+    string name = 2;
+	int32 clientId = 3;
+	string time = 4;
+	int32 minutes = 5;
+	int32 numberOfPersons = 6;
+	int32 numberOfTables = 7;
+	string remark = 8;
+	EreservationStatus status = 9;
+}
+
+message ReservationListReply
+{
+    repeated Reservation reservations = 1;
+}
+
+message ReservationTimeReply
+{
+	int32 year = 1;
+	int32 month = 2;
+	int32 day = 3;
+	int32 hour = 4;
+	int32 quarter = 5;
+	int32 duration = 6;
+	int32 personsUsed = 7;
+	int32 tablesUsed = 8;
+}
+
+message ReservationLocationNames
+{
+    repeated string locations = 1;
+}	
+
+message ReservationDaysReply
+{
+    repeated string date = 1;
+}
+
+message ReservationLocationsReply
+{
+    repeated int32 location = 1;
+}
+
+message Street
+{
+    int32 streetId = 1;
+    string streetName = 2;
+}
+
+message StreetListReply
+{
+    repeated Street streets = 1;
+}
+

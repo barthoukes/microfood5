@@ -1,0 +1,54 @@
+syntax = "proto3";
+
+option csharp_namespace = "GrpcService";
+
+package ads;
+
+import "common_types.proto";
+
+// Add these Kotlin-specific options
+option java_multiple_files = true;
+option java_package = "com.hha.advertisement";
+
+service AdvertisementService
+{
+     rpc GetAdvertisementList(common.Empty)  returns (AdvertisementList) {}
+     rpc UpdateAdvertisementList(AdvertisementList)  returns (common.Empty) {}
+     rpc UpdateAdvertisement(Advertisement)  returns (common.Empty) {}
+     rpc NewAdvertisement(common.Empty)  returns (Advertisement) {}
+}
+
+message Advertisement
+{
+    int32 database_id = 1;
+    Timing type = 2;
+    string picture = 3;
+    string top = 4;
+    string center = 5;
+    string local_name = 6;
+    string chinese_name = 7;
+    repeated string bottom = 8;
+    int32 top_colour = 9;
+    int32 center_colour = 10;
+    repeated int32 bottom_colour = 11;
+    string start = 12;
+    string end = 13;
+    repeated int32 start_hour = 14;
+    repeated int32 hour_end = 15;
+}
+
+message AdvertisementList
+{
+    repeated Advertisement advertisement = 1;
+}
+
+enum Timing
+{
+    ADD_NONE = 0;
+    ADD_DURING_TAKEAWAY = 1;
+    ADD_DURING_RESTAURANT = 2;
+    ADD_AFTER_TAKEAWAY = 3;
+    ADD_AFTER_RESTAURANT = 4;
+    ADD_NORMAL = 5;
+}
+

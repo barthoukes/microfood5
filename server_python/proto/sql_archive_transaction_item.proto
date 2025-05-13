@@ -1,0 +1,273 @@
+//==============================================================================
+//  @file       sql_archive_menu_item.proto
+//  @ingroup    proto database interface
+//  @brief		Operations on archive database
+//
+//  Messages for 7 year accounting
+//
+//  @author     Bart Houkes
+//
+//------------------------------------------------------------------------------
+//  Copyright (c) Bart Houkes, 2-2-2024
+//
+//  Copyright notice:
+//  This software is property of Bart Houkes.
+//  Unauthorized duplication and disclosure to third parties is forbidden.
+//============================================================================*/
+
+syntax = "proto3";
+
+option csharp_namespace = "GrpcService";
+
+package ati;
+
+import "common_types.proto";
+
+// Add these Kotlin-specific options
+option java_multiple_files = true;
+option java_package = "com.hha.archive.item";
+
+service ArchiveTransactionItemService
+{
+    rpc FindArchiveItemQuantities(PageDays)  returns (ItemIdQuantityList) {}
+    rpc FindArchiveItemSale(Date)  returns (ItemQuantitiesList) {}
+    rpc FindItemsPerTaxGroupAndPrinter(Date)  returns (TotalsTaxGroupList) {}
+    rpc RemoveCluster(TaxClusterId)  returns (common.Empty) {}
+    rpc SetTaxClusterId(TaxClusterToMenuItem)  returns (common.Empty) {}
+    rpc GetTransactionItems(TransactionId)  returns (common.ItemList) {}
+    rpc CopyItems(TransactionId)  returns (common.Empty) {}
+    rpc FindClusterTotals(Date)  returns (ClusterTotalList) {}
+    rpc GetGroupsTotals(DateFromTo)  returns (PagePercentageTotalList) {}
+    rpc GetItemsTotals(DateFromTo)  returns (ItemsTaxPriceList) {}
+    rpc GetGroupsChangePrice(DateFromTo)  returns (PagePercentageTotalList) {}
+    rpc GetItemsChangePrice(DateFromTo)  returns (ItemsTaxPriceList) {}
+    rpc GetGroupsWaiters(DateFromTo)  returns (MenuPageTotalRfidKeyIdList) {}
+    rpc GetItemsWaiters(DateFromTo)  returns (ItemsWaiterList) {}
+    rpc GetGroupsQuantity(DateFromTo)  returns (PageIdQuantityList) {}
+    rpc GetItemsQuantity(DateFromTo)  returns (ItemIdQuantityNameList) {}
+
+    rpc GetYearsTotals(YearsTotalRequest)  returns (TransactionTotalTimesList) {}
+    rpc GetQuartersTotals(DateFromWhereGroupTo)  returns (TransactionTotalTimesList) {}
+    rpc GetMonthsTotals(DateFromWhereGroupTo)  returns (TransactionTotalTimesList) {}
+    rpc GetWeeksTotals(DateFromWhereGroupTo)  returns (TransactionTotalTimesList) {}
+    rpc GetDaysTotals(DateFromWhereGroupTo)  returns (TransactionTotalTimesList) {}
+    rpc GetHoursTotals(DateFromWhereGroupTo)  returns (TransactionTotalTimesList) {}
+
+    rpc CreateItem(CreateItemRequest)  returns (common.Empty) {}
+}
+
+message ItemsTaxPrice
+{
+    int32 menu_item_id = 1;
+    string local_name = 2;
+    string chinese_name = 3;
+    double tax_percentage = 4;
+    int32 total = 5;
+}
+
+message PageIdQuantity
+{
+    int32 menu_page_id = 1;
+    double quantity = 2;
+}
+
+
+message PageIdQuantityList
+{
+    repeated PageIdQuantity page = 1; 
+}
+
+message TransactionId
+{   
+    int32 transaction_id = 1;
+} 
+
+message YearsTotalRequest
+{
+    int32 menu_group_id = 1;
+    int32 menu_item_id = 2;
+}
+
+message ItemsTaxPriceList
+{
+    repeated ItemsTaxPrice item = 1;
+}
+
+message ItemsWaiter
+{
+    int32 menu_item_id = 1;
+    string local_name = 2;
+    string chinese_name = 3;
+    int32 rfid_key_id = 4;
+    int32 total = 5;
+}
+
+message ItemsWaiterList
+{
+    repeated ItemsWaiter rfid_key = 1;
+}
+
+message ItemIdQuantityName
+{
+    int32 menu_item_id = 1;
+    double quantity = 2;
+    string local_name = 3;
+    string chinese_name = 4;
+}
+
+message ItemIdQuantityNameList
+{
+    repeated ItemIdQuantityName item = 1;
+}
+
+message PagePercentageTotal
+{
+    int32 menu_page_id = 1;
+    double tax_percentage = 2;
+    double total = 3;
+}
+
+message PagePercentageTotalList
+{
+    repeated PagePercentageTotal page = 1;
+}
+
+message YearQuarterMonthDayRequest
+{
+    int32 year = 2;
+    int32 quarter = 3;
+    int32 month = 4;
+    int32 day = 5;
+}
+
+message TransactionTotalTimes
+{
+    int32 total = 1;
+    common.Timestamp timestamp = 2;
+}
+
+message TransactionTotalTimesList
+{
+    repeated TransactionTotalTimes total = 1;
+}
+
+message PageDays
+{
+    int32 page = 1;
+    int32 days = 2;
+}
+
+message ItemIdQuantity
+{
+    int32 menu_item_id = 1;
+    int32 quantity = 2;
+}
+
+message ItemQuantities
+{
+    string name = 1;
+    int32 quantity = 2;
+    int32 portion = 3;
+    int32 menu_item_id = 4;
+    int32 unit_price = 5;
+    int32 statiegeld = 6;
+    int32 total_price = 7;
+}
+
+message ItemIdQuantityList
+{
+    repeated ItemIdQuantity item = 1;
+}
+
+message ItemQuantitiesList
+{
+    repeated ItemQuantities item = 1;
+}
+
+message DateFromTo
+{
+    Date cong = 1;
+    Date dao = 2;
+}
+
+message DateFromWhereGroupTo
+{
+    Date cong = 1;
+    Date dao = 2;
+    int32 menu_item_id = 3;
+    int32 menu_group_id = 4;
+}
+
+message Date
+{
+    int32 year = 1;
+    int32 quarter = 2;
+    int32 month = 3;
+    int32 day = 4;
+}
+
+message TotalTaxGroup
+{
+    bool is_takeaway = 1;
+    int32 location = 2;
+    double percentage =3;
+    int32 subtotal = 4;
+    int32 discount = 5;
+    int32 total = 6;
+}
+
+message TotalsTaxGroupList
+{
+    repeated TotalTaxGroup total_tax_groups = 1;
+}
+
+message TaxClusterToMenuItem
+{
+    int32 menu_item_id = 1;
+    int32 tax_cluster_id = 2;
+}
+
+message TaxClusterId
+{
+    int32 tax_cluster_id = 1;
+}
+
+message ClusterTotal
+{
+    double tax_percentage = 1;
+    int32  menu_group = 2;
+    int32  tax_sub_total = 3;
+    int32  tax_total = 4;
+    string local_name = 5;
+    string chinese_name = 6;
+}
+
+message ClusterTotalList
+{
+    repeated ClusterTotal item = 1;
+}
+
+message MenuPageTotalRfidKeyId
+{
+    int32 menu_page_id = 1;
+    int32 rfid_key_id = 2;
+    int32 total = 3;
+}
+
+message MenuPageTotalRfidKeyIdList
+{
+    repeated MenuPageTotalRfidKeyId total = 1;
+}
+
+message CreateItemRequest
+{
+    int32 menu_item_id = 1;
+    int32 transaction_id = 2;
+    string time = 3;
+    int32 tax_group = 4;
+    int32 device_id = 5;
+    common.Money original_price = 6;
+    float tax_percentage = 7;
+    common.Money statiegeld = 8;
+}
+

@@ -1,0 +1,112 @@
+//==============================================================================
+//  @file       sql_archive_transaction_payment.proto
+//  @ingroup    proto database interface
+//  @brief		Operations on archive database
+//
+//  Messages for 7 year accounting
+//
+//  @author     Bart Houkes
+//
+//------------------------------------------------------------------------------
+//  Copyright (c) Bart Houkes, 2-2-2024
+//
+//  Copyright notice:
+//  This software is property of Bart Houkes.
+//  Unauthorized duplication and disclosure to third parties is forbidden.
+//============================================================================*/
+
+syntax = "proto3";
+
+option csharp_namespace = "GrpcService";
+
+package atp;
+
+import "common_types.proto";
+
+// Add these Kotlin-specific options
+option java_multiple_files = true;
+option java_package = "com.hha.archive.payment";
+
+service ArchiveTransactionPaymentService
+{
+    rpc AddPayment(AddPaymentRequest)  returns (common.Empty);
+    rpc GetPaymentMoney(GetPaymentMoneyRequest)  returns (PaymentDetailsList);
+    rpc GetTransactionPaymentsList(TransactionPaymentRequest)  returns (PaymentList);
+    rpc SelectTransactionId(TransactionId)  returns (PaymentDetailsList);
+    rpc UpdateTransactionPaymentMethod(TransactionIdMethod)  returns (common.Empty);
+    rpc UpdateTransactionIdTotal(TransactionIdTotal)  returns (common.Empty);
+}
+
+message AddPaymentRequest
+{
+    int32 transaction_id = 1;
+    common.PaymentMethod payment_method = 2;
+    int32 total = 3;
+    string endTime = 4;
+    common.Payed is_paid = 5;
+}
+
+message TransactionPaymentRequest
+{
+    int32 transaction_id = 1;
+    bool include_cancelled_payments = 2;
+}
+
+message GetPaymentMoneyRequest
+{  
+    Date date = 1;
+    common.PaymentStatus pay_status = 2;
+}  
+
+message Date
+{
+    int32 year = 1;
+    int32 quarter = 2;
+    int32 month = 3;
+    int32 day = 4;
+}
+
+message Payment
+{
+    int32 partial_index = 1;
+    int32 customer_id = 2;
+    common.PaymentMethod payment_method = 3;
+    int32 total = 4;
+    string msg = 5;
+    common.Payed is_paid = 6;
+}
+    
+message PaymentList
+{   
+    repeated Payment payment = 1;
+}
+
+message PaymentDetails
+{
+    common.PaymentMethod method = 1;
+    int32 total = 2;
+    common.Payed is_paid = 3;
+}   
+    
+message PaymentDetailsList
+{   
+    repeated PaymentDetails payment_details = 1;
+}
+ 
+message TransactionId
+{   
+    int32 transaction_id = 1;
+}   
+
+message TransactionIdMethod
+{
+    int32 transaction_id = 1;
+    common.PaymentMethod payment_method = 2;
+}   
+
+message TransactionIdTotal
+{
+    int32 transaction_id = 1;
+    int32 total = 2;
+}
+
