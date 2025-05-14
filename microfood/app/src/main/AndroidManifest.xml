@@ -12,13 +12,13 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.SimpleGRPCClient"
+        android:theme="@style/Theme.KassakuGRPCClient"
         tools:targetApi="31">
         <activity
             android:name="connect.hha.grpc_client.MainActivity"
             android:exported="true"
             android:label="@string/app_name"
-            android:theme="@style/Theme.SimpleGRPCClient.NoActionBar">
+            android:theme="@style/Theme.KassakuGRPCClient.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
