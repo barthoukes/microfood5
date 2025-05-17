@@ -1,7 +1,6 @@
 package com.hha.grpc
 
 import io.grpc.ManagedChannel
-import com.hha.service.PingPongService
 import com.hha.service.AddressService
 import com.hha.service.AdvertisementService
 import com.hha.service.ArchiveTransactionService
@@ -14,10 +13,6 @@ class GrpcServiceFactory {
 
     fun createAddressService(channel: ManagedChannel): AddressService {
         return AddressService(channel)
-    }
-
-    fun createPingPongService(channel: ManagedChannel): PingPongService {
-        return PingPongService(channel);
     }
 
     fun createAdvertisementService(channel: ManagedChannel): AdvertisementService {

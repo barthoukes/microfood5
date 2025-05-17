@@ -365,11 +365,6 @@ message TotalPerTime
     int32  total_statiegeld = 22;
 }
 
-message TotalPerTimeList
-{
-    repeated TotalPerTime total = 1;
-}
-
 message AccountMoney
 {
     int32  total_restaurant_high = 1;
@@ -404,6 +399,11 @@ message TotalPerTransaction
 message TotalPerTransactionList
 {
     repeated TotalPerTransaction total = 1;
+}
+
+message TotalPerTimeList
+{
+    repeated TotalPerTime total = 1;
 }
 
 message RfidKey1

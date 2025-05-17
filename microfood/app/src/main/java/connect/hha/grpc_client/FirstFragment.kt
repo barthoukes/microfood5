@@ -7,13 +7,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.hha.grpc.GrpcChannelFactory
-import com.hha.service.PingPongService
+import com.hha.service.AddressService
 import tech.hha.microfood.databinding.FragmentFirstBinding
 
 class FirstFragment : Fragment() {
     private var _binding: FragmentFirstBinding? = null
     private val binding get() = _binding!!
-    private lateinit var pingPongService: PingPongService
+    private lateinit var addressService: AddressService
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -28,17 +28,17 @@ class FirstFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val channel = GrpcChannelFactory.createChannel()
-        pingPongService = PingPongService(channel)
+        addressService = AddressService(channel)
 
         binding.buttonFirst.setOnClickListener {
-            val response = pingPongService.ping("Bart")
+            val response = addressService.getAllAddressLines()
             Log.i("FirstFragment", "Response: $response")
             // You could also update UI here with the response
         }
     }
 
     override fun onDestroyView() {
-        pingPongService.shutdown()
+        addressService.shutdown()
         _binding = null
         super.onDestroyView()
     }
