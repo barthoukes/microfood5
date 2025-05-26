@@ -14,8 +14,8 @@
                         <option name="values">
                           <map>
                             <entry key="assetSourceType" value="FILE" />
-                            <entry key="outputName" value="abc" />
-                            <entry key="sourceFile" value="$PROJECT_DIR$/app/src/main/res/drawable-ldpi/abc.svg" />
+                            <entry key="outputName" value="width_plus" />
+                            <entry key="sourceFile" value="$PROJECT_DIR$/app/src/main/res/drawable-ldpi/width_plus.svg" />
                           </map>
                         </option>
                       </PersistentState>
