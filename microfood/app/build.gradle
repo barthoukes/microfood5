@@ -10,7 +10,8 @@ android {
 
     defaultConfig {
         applicationId "tech.hha.microfood"
-        minSdk 21
+        minSdk 26
+        minSdkVersion 26
         targetSdk 33
         versionCode 1
         versionName "1.0"
@@ -37,6 +38,8 @@ android {
 }
 
 dependencies {
+
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4"
 
     implementation 'androidx.core:core-ktx:1.9.0'
     implementation 'androidx.appcompat:appcompat:1.6.0'

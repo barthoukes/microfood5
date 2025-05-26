@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:id="@+id/main_layout_menu"
+    android:background="@drawable/backrepeat"
+    android:layout_height="match_parent" >
+	<TableRow
+	     android:layout_height="0dp"
+    	 android:layout_width="fill_parent"
+	     android:layout_weight="3">
+   		<TextView 
+	    	android:id="@+id/new_table"
+	    	android:text="@string/app_name"
+	    	android:textSize="24sp"
+	    	android:layout_weight="1"
+	    	android:layout_width="0dp"
+	    	android:gravity="center"
+	    	android:background="@color/COLOUR_HEADER_BACKGROUND"
+            android:textColor="#ffeeeeee"
+            android:layout_marginBottom="4dp"
+    		android:layout_height="fill_parent" />
+	</TableRow>
+	<TableRow
+	     android:layout_height="0dp"
+    	 android:layout_width="fill_parent"
+	     android:layout_weight="5">      
+	    <Button 
+	        android:id="@+id/tafel_overzicht"
+	        android:layout_weight="14"
+	        android:textSize="24sp"
+			android:background="@color/ANDROID_BUTTON_BACKGROUND"
+          	android:textColor="@color/ANDROID_BUTTON_TEXT"
+            android:layout_margin="4dp"
+	        android:layout_height="fill_parent"
+	        android:layout_width ="fill_parent"
+	        android:drawableBottom="@drawable/sitin"
+	        android:onClick="button_tafel_overzicht"
+	        android:text ="@string/table_overview"/>
+	   <Button 
+	        android:id="@+id/button_takeaway"
+	        android:layout_weight="14"
+	        android:textSize="24sp"
+			android:background="@color/ANDROID_BUTTON_BACKGROUND"
+          	android:textColor="@color/ANDROID_BUTTON_TEXT"
+            android:layout_margin="4dp"
+	        android:layout_height="fill_parent"
+	        android:layout_width ="fill_parent"
+	        android:onClick="button_takeaway"
+	        android:drawableBottom="@drawable/bag"
+	        android:text ="send"/>	    
+	</TableRow>
+	
+	<TableRow
+	     android:layout_height="0dp"
+    	 android:layout_width="fill_parent"
+	     android:layout_weight="5">     
+	    <Button 
+	        android:id="@+id/button_settings"
+	        android:layout_weight="14"
+	        android:textSize="24sp"
+			android:background="@color/ANDROID_BUTTON_BACKGROUND"
+       		android:textColor="@color/ANDROID_BUTTON_TEXT"
+            android:layout_margin="4dp"
+	        android:layout_height="fill_parent"
+	        android:layout_width ="fill_parent"
+	        android:onClick="button_settings"
+	        android:drawableBottom="@drawable/settings48"
+	        android:text ="@string/configuration"/>
+	    
+	    <Button 
+	        android:id="@+id/button_update"
+	        android:layout_height="fill_parent"
+	        android:layout_width ="fill_parent"
+	        android:layout_weight="14"
+	        android:textSize="24sp"
+			android:background="@color/ANDROID_BUTTON_BACKGROUND"
+          	android:textColor="@color/ANDROID_BUTTON_TEXT"
+            android:layout_margin="4dp"
+	        android:onClick="button_update_tablet"
+	        android:drawableBottom="@drawable/menu"
+	        android:text ="@string/update_name_card"/>
+	</TableRow>
+	
+	<TableRow
+	     android:layout_height="0dp"
+    	 android:layout_width="fill_parent"
+	     android:layout_weight="5">
+	    	    	        
+<Button 
+	        android:id="@+id/button_calculator"
+	        android:layout_height="fill_parent"
+	        android:layout_width ="fill_parent"
+	        android:drawableBottom="@drawable/icon_calculator"
+	        android:layout_weight="14"
+	        android:textSize="24sp"
+			android:background="@color/ANDROID_BUTTON_BACKGROUND"
+          	android:textColor="@color/ANDROID_BUTTON_TEXT"
+            android:layout_margin="4dp"
+		    android:onClick="button_calculator"
+	        android:text ="Rekenmachine"/>
+	  
+		<Button 
+	        android:id="@+id/button_change_language"
+	        android:layout_weight="14"
+	        android:textSize="24sp"
+			android:background="@color/ANDROID_BUTTON_BACKGROUND"
+          	android:textColor="@color/ANDROID_BUTTON_TEXT"
+            android:layout_margin="4dp"
+	        android:layout_height="fill_parent"
+	        android:layout_width ="fill_parent"
+	        android:onClick="button_change_language"
+	        android:drawableBottom="@drawable/languages"
+	        android:text ="language"/>
+	    
+	</TableRow>
+	
+	<TableRow
+	     android:layout_height="0dp"
+    	 android:layout_width="fill_parent"
+	     android:layout_weight="5">
+	 
+	    <Button 
+	        android:id="@+id/button_stop"
+	        android:layout_height="fill_parent"
+	        android:layout_width ="fill_parent"
+	        android:layout_weight="14"
+	        android:textSize="24sp"
+			android:background="@color/ANDROID_BUTTON_BACKGROUND"
+          	android:textColor="@color/ANDROID_BUTTON_TEXT"
+            android:layout_margin="4dp"
+	        android:onClick="button_stop"
+	        android:drawableBottom="@drawable/shutdown"
+	        android:text ="@string/stop"/>
+	    	        
+
+	    <Button 
+	        android:id="@+id/about_us"
+	        android:layout_weight="14"
+	        android:textSize="24sp"
+			android:background="@color/ANDROID_BUTTON_BACKGROUND"
+          	android:textColor="@color/ANDROID_BUTTON_TEXT"
+            android:layout_margin="4dp"
+	        android:layout_height="fill_parent"
+	        android:layout_width ="fill_parent"
+	        android:drawableBottom="@drawable/info48"
+	        android:onClick="button_about_us"
+	        android:text ="@string/about_us"/>
+	</TableRow>
+	
+	<TableRow
+	     android:layout_height="0dp"
+    	 android:layout_width="fill_parent"
+	     android:layout_weight="3">
+		<TextView 
+	    	android:id="@+id/text_info"
+	    	android:text=""
+	    	android:textSize="12sp"
+	    	android:layout_weight="15"
+	    	android:layout_width="0dp"
+	    	android:gravity="center"
+	    	android:background="#ff404080"
+            android:textColor="#ff808080"
+           	android:layout_margin="4dp"
+    		android:layout_height="fill_parent" />
+		<TextView 
+	    	android:id="@+id/buffer_colour"
+	    	android:text=""
+	    	android:layout_weight="1"
+	    	android:layout_width="0dp"
+	    	android:gravity="center"
+	    	android:background="#ffffffff"
+            android:textColor="#00FFFFFF"
+           	android:layout_margin="4dp"
+    		android:layout_height="fill_parent" />
+		<TextView 
+	    	android:id="@+id/connection_colour"
+	    	android:text=""
+	    	android:layout_weight="1"
+	    	android:layout_width="0dp"
+	    	android:gravity="center"
+	    	android:background="#ffffffff"
+            android:textColor="#00FFFFFF"
+           	android:layout_margin="4dp"
+    		android:layout_height="fill_parent" />
+	</TableRow>
+
+</TableLayout>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:id="@+id/popup_not_implemented_layout"
+    android:padding="20dip"
+    android:background="#6060FF"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    >
+       <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20sp"
+        android:textColor="#ffFFFFFF"
+        android:text="Jan"
+        android:textSize="25sp"
+        android:padding="20dip"
+        android:id="@+id/text_popup"
+    />
+	<Button
+	    android:id="@+id/button_ok"
+	    android:layout_width="wrap_content"
+	    android:layout_height="wrap_content"
+	    android:background="#a0a0FF"
+	    android:onClick="onButtonInPopup"
+	    android:textColor="#ffffffff"
+	    android:padding="25dip"
+	    android:textSize="25sp" />
+</LinearLayout>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout android:id="@+id/lineItem"
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent" 
+	android:layout_height="wrap_content"
+	android:gravity="center_vertical"
+	android:orientation="horizontal">
+	<LinearLayout
+	    android:layout_height="fill_parent"
+	   	android:layout_width="fill_parent"
+	   	android:background="@color/COLOUR_ORDER_BACKGROUND_ODD"
+	    android:orientation="vertical">
+	    <FrameLayout
+	        android:layout_width="fill_parent"
+	        android:layout_height="wrap_content"
+	        android:layout_margin="4dp">
+		<TextView android:id="@+id/item_name" 
+		    android:layout_width="fill_parent"
+		    android:layout_height="wrap_content"
+		    android:gravity="left"
+		    android:paddingRight="1dp"
+		    android:paddingLeft="2dp"
+		    android:paddingTop="16dp"
+		    android:paddingBottom="16dp"
+			android:textSize="18sp"
+			android:background="@color/COLOUR_DARK_BACKGROUND"
+			android:textColor="@color/COLOUR_ITEM_TEXT" 
+			android:text="2x Loempia speciaal"/>
+		<!--TextView
+		    android:id="@+id/item_price"
+		    android:layout_width="fill_parent"
+		    android:layout_height="fill_parent"
+		    android:gravity="right|bottom"
+		    android:paddingRight="2dp"
+		    android:paddingBottom="0dp"
+		    android:layout_marginBottom="0dp"
+		    android:text="15,75"
+		    android:textColor="@color/COLOUR_ITEM_TEXT"
+		    android:textSize="12sp"/-->
+		</FrameLayout>
+	</LinearLayout>
+</LinearLayout>

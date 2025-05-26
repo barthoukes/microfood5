@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:baselineAligned="false"
+    android:layout_weight="1">
+    <LinearLayout
+    	android:layout_height="wrap_content"  
+    	android:layout_width="fill_parent"
+    	android:background="@color/COLOUR_HEADER_BACKGROUND">
+    	<TextView android:id="@+id/grid_order_table_name"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:background="@color/COLOUR_SELECTED_BACKGROUND"
+            android:textColor="@color/COLOUR_SELECTED_TEXT"
+            android:text="TAFEL 15"/>
+    	<TextView 
+	    	android:id="@+id/new_table"
+	    	android:text="Microfood 微餐 3.5.15"
+	    	android:textSize="24sp"
+	    	android:layout_weight="1"
+	    	android:layout_width="0dp"
+	    	android:gravity="center"
+	    	android:background="@color/COLOUR_HEADER_BACKGROUND"
+            android:textColor="#ffeeeeee"
+            android:layout_marginBottom="4dp"
+    		android:layout_height="fill_parent" />
+    </LinearLayout> 
+    <LinearLayout
+        android:layout_height="fill_parent"
+        android:orientation="horizontal"
+        android:layout_width="fill_parent">
+        <LinearLayout
+        	android:layout_height="fill_parent"
+        	android:background="@color/ANDROID_BUTTON_BACKGROUND"   
+        	android:orientation="vertical"
+        	android:layout_width="100dp"
+        	android:layout_weight="25">
+	        <ListView
+			    android:id="@android:id/list"
+			    android:layout_width="fill_parent"
+			    android:layout_height="match_parent"
+			    android:choiceMode="singleChoice"
+			    android:scrollingCache="true"
+			    android:scrollbars="none"
+			    android:fadingEdge="none"
+			    android:background="@color/COLOUR_ORDER_BACKGROUND_EMPTY"
+			    android:layout_marginBottom="120dip"/>	
+			<TableLayout 
+		   	 	android:layout_width="fill_parent"
+		    	android:layout_height="wrap_content"
+		    	android:layout_marginTop="-120dip">
+		  		<TableRow
+			  	    android:layout_height="60dp" 
+			  	 	android:layout_width="fill_parent"
+			  	    android:background="@color/COLOUR_TOTAL_BACKGROUND">
+					<TextView android:id="@+id/total_price_text"
+		    		    android:layout_width="0dp"
+		    		    android:layout_weight="1" 
+		    		    android:layout_margin="1dp"
+			            android:layout_height="60dp"
+						android:text="TOTAL"
+						android:gravity="left|center_vertical"
+						android:background="@color/COLOUR_TOTAL_BACKGROUND"
+		            	android:textColor="@color/COLOUR_TOTAL_TEXT"/>   
+		    		<TextView android:id="@+id/total_price"
+		    		    android:layout_width="0dp"
+		    		    android:layout_margin="1dp"
+			            android:layout_height="60dp"
+			            android:layout_weight="1"
+						android:text="500,00"
+						android:gravity="right|center_vertical"
+						android:background="@color/COLOUR_TOTAL_BACKGROUND"
+		            	android:textColor="@color/COLOUR_TOTAL_TEXT"/>    
+		    	</TableRow>   
+			</TableLayout>
+		    </LinearLayout>
+        <LinearLayout
+        	android:layout_height="fill_parent"
+        	android:orientation="vertical"
+        	android:background="@color/ANDROID_MESSAGE_BACKGROUND"   
+        	android:layout_width="100dp"
+        	android:layout_weight="75">
+			<!--  GridView xmlns:android="http://schemas.android.com/apk/res/android" 
+			    android:id="@+id/grid_items"
+			    android:layout_width="fill_parent" 
+			    android:layout_height="fill_parent"
+			    android:columnWidth="90dp"
+			    android:numColumns="auto_fit"
+			    android:verticalSpacing="10dp"
+			    android:horizontalSpacing="10dp"
+			    android:stretchMode="columnWidth"
+			    android:gravity="center"/ -->
+   		</LinearLayout>  		
+   	</LinearLayout>
+    <LinearLayout
+    	android:layout_height="60dp"  
+    	android:layout_width="fill_parent"
+    	android:background="@color/ANDROID_BUTTON_TEXT"
+    	android:layout_marginTop="-60dip">
+        <Button
+                android:id="@+id/minus_1"
+				android:text="-1"
+				android:layout_weight="15"
+				android:layout_margin="4dp"
+				android:layout_width="0dp"
+				android:background="@color/ANDROID_BUTTON_BACKGROUND"
+         		android:textColor="@color/ANDROID_BUTTON_TEXT"
+         		android:onClick="on_button_minus1"
+				android:layout_height="fill_parent" />
+        <Button
+	                android:id="@+id/portion"
+					android:text="Portie"
+					android:layout_weight="15"
+					android:layout_margin="4dp"
+					android:layout_width="0dp"
+					android:background="@color/ANDROID_BUTTON_BACKGROUND"
+          			android:textColor="@color/ANDROID_BUTTON_TEXT"
+          			android:onClick="on_button_portion"
+					android:layout_height="fill_parent" />
+        <Button
+	            android:id="@+id/plus_one"
+				android:text="+1"
+				android:layout_weight="15"
+				android:layout_margin="4dp"
+				android:layout_width="0dp"
+				android:background="@color/ANDROID_BUTTON_BACKGROUND"
+	        	android:textColor="@color/ANDROID_BUTTON_TEXT"
+	        	android:onClick="on_button_plus1"
+				android:layout_height="fill_parent" />
+        
+        <Button
+                android:id="@+id/remove_item"
+				android:text="weg"
+				android:layout_weight="15"
+				android:layout_margin="4dp"
+				android:layout_width="0dp"
+				android:background="@color/ANDROID_BUTTON_BACKGROUND"
+         		android:textColor="@color/ANDROID_BUTTON_TEXT"
+         		android:onClick="on_button_remove"
+				android:layout_height="fill_parent" />
+        <Button
+                android:id="@+id/LANGUAGE"
+                style="?android:attr/buttonStyleSmall"
+	            android:lines="2"				            
+             	android:layout_weight="15"
+             	android:layout_margin="4dp"
+                android:layout_width="0dp"
+                android:layout_height="fill_parent"
+                android:gravity="center"
+				android:background="@color/ANDROID_BUTTON_BACKGROUND"
+          		android:textColor="@color/ANDROID_BUTTON_TEXT"
+	            android:onClick="on_button_language"
+                android:text="NL" />
+        
+        <Button
+                android:id="@+id/OK"
+                style="?android:attr/buttonStyleSmall"
+	            android:lines="2"				            
+             	android:layout_weight="15"
+             	android:layout_margin="4dp"
+                android:layout_width="0dp"
+                android:layout_height="fill_parent"
+				android:background="@color/ANDROID_BUTTON_BACKGROUND"
+          		android:textColor="@color/ANDROID_BUTTON_TEXT"
+	            android:gravity="center"
+	            android:onClick="on_button_enter"
+                android:text="OK" />
+    </LinearLayout>
+</LinearLayout>	
+

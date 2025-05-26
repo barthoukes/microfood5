@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:id="@+id/popup_not_implemented_layout"
+    android:padding="20dip"
+    android:background="@color/ANDROID_MESSAGE_BACKGROUND"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+	<TableLayout
+		android:layout_width="fill_parent" 
+		android:layout_height="wrap_content">
+		<TableRow 
+	        android:layout_width="fill_parent"
+	        android:layout_height="wrap_content">
+	    	<TextView
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:layout_marginTop="20sp"
+		        android:textColor="#ffFFFFFF"
+		        android:text="Update menu"
+		        android:textSize="25sp"
+		        android:padding="20dip"
+		        android:id="@+id/text_update_menu"/>
+	    </TableRow>
+	    <TableRow>
+	    	<ProgressBar android:id="@+id/progress_menu" 
+		    android:layout_width="fill_parent" 
+		    android:layout_marginBottom="20dp"
+		    android:layout_height="20dp"
+		    android:max="1000" 
+		    android:progress="0" 
+		    android:indeterminateDrawable="@android:drawable/progress_indeterminate_horizontal"
+		    android:progressDrawable="@android:drawable/progress_horizontal"
+		    android:indeterminateOnly="false"
+		    android:scrollbarStyle="outsideOverlay"/>		
+	    </TableRow>
+	</TableLayout>
+</LinearLayout>
