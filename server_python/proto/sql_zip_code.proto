@@ -2,13 +2,13 @@ syntax = "proto3";
 
 option csharp_namespace = "GrpcService";
 
-package pc;
+package zc;
 
 import "common_types.proto";
 
 // Add these Kotlin-specific options
 option java_multiple_files = true;
-option java_package = "com.hha.postcode";
+option java_package = "com.hha.zipcode";
 
 service ZipCodeService
 {

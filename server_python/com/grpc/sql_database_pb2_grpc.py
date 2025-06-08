@@ -40,6 +40,26 @@ class DatabaseServiceStub(object):
         request_serializer=sql__database__pb2.ConfigurationRequest.SerializeToString,
         response_deserializer=common__types__pb2.Empty.FromString,
         )
+    self.SetConfigurationList = channel.unary_unary(
+        '/db.DatabaseService/SetConfigurationList',
+        request_serializer=sql__database__pb2.ConfigurationItemList.SerializeToString,
+        response_deserializer=common__types__pb2.Empty.FromString,
+        )
+    self.GetConfigurationList = channel.unary_unary(
+        '/db.DatabaseService/GetConfigurationList',
+        request_serializer=common__types__pb2.Empty.SerializeToString,
+        response_deserializer=sql__database__pb2.ConfigurationItemList.FromString,
+        )
+    self.SetUserConfigurationList = channel.unary_unary(
+        '/db.DatabaseService/SetUserConfigurationList',
+        request_serializer=sql__database__pb2.ConfigurationItemList.SerializeToString,
+        response_deserializer=common__types__pb2.Empty.FromString,
+        )
+    self.GetUserConfigurationList = channel.unary_unary(
+        '/db.DatabaseService/GetUserConfigurationList',
+        request_serializer=common__types__pb2.Empty.SerializeToString,
+        response_deserializer=sql__database__pb2.ConfigurationItemList.FromString,
+        )
     self.ResetProgram = channel.unary_unary(
         '/db.DatabaseService/ResetProgram',
         request_serializer=common__types__pb2.Empty.SerializeToString,
@@ -86,6 +106,34 @@ class DatabaseServiceServicer(object):
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
+  def SetConfigurationList(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def GetConfigurationList(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def SetUserConfigurationList(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def GetUserConfigurationList(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
   def ResetProgram(self, request, context):
     # missing associated documentation comment in .proto file
     pass
@@ -120,6 +168,26 @@ def add_DatabaseServiceServicer_to_server(servicer, server):
           servicer.SetConfiguration,
           request_deserializer=sql__database__pb2.ConfigurationRequest.FromString,
           response_serializer=common__types__pb2.Empty.SerializeToString,
+      ),
+      'SetConfigurationList': grpc.unary_unary_rpc_method_handler(
+          servicer.SetConfigurationList,
+          request_deserializer=sql__database__pb2.ConfigurationItemList.FromString,
+          response_serializer=common__types__pb2.Empty.SerializeToString,
+      ),
+      'GetConfigurationList': grpc.unary_unary_rpc_method_handler(
+          servicer.GetConfigurationList,
+          request_deserializer=common__types__pb2.Empty.FromString,
+          response_serializer=sql__database__pb2.ConfigurationItemList.SerializeToString,
+      ),
+      'SetUserConfigurationList': grpc.unary_unary_rpc_method_handler(
+          servicer.SetUserConfigurationList,
+          request_deserializer=sql__database__pb2.ConfigurationItemList.FromString,
+          response_serializer=common__types__pb2.Empty.SerializeToString,
+      ),
+      'GetUserConfigurationList': grpc.unary_unary_rpc_method_handler(
+          servicer.GetUserConfigurationList,
+          request_deserializer=common__types__pb2.Empty.FromString,
+          response_serializer=sql__database__pb2.ConfigurationItemList.SerializeToString,
       ),
       'ResetProgram': grpc.unary_unary_rpc_method_handler(
           servicer.ResetProgram,

@@ -2,9 +2,14 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- For general internet access -->
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <!-- For Wi-Fi/Mobile network state checks (optional) -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
     <application
+        android:networkSecurityConfig="@xml/network_security_config"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -15,7 +20,7 @@
         android:theme="@style/Theme.KassakuGRPCClient"
         tools:targetApi="31">
         <activity
-            android:name="connect.hha.grpc_client.MainActivity"
+            android:name="com.hha.dialog.SplashLayout"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.KassakuGRPCClient.NoActionBar">
@@ -29,8 +34,8 @@
                 android:name="android.app.lib_name"
                 android:value="" />
         </activity>
-        <activity android:name=".SplashActivity" />
-
+        <activity android:name="com.hha.activities.SplashActivity" />
+        <activity android:name="com.hha.dialog.MainMenuActivity" />
     </application>
 
 </manifest>

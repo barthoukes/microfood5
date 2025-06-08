@@ -2,7 +2,7 @@
 import grpc
 
 import common_types_pb2 as common__types__pb2
-import sql_postcode_pb2 as sql__postcode__pb2
+import sql_zip_code_pb2 as sql__zip__code__pb2
 
 
 class ZipCodeServiceStub(object):
@@ -16,38 +16,38 @@ class ZipCodeServiceStub(object):
       channel: A grpc.Channel.
     """
     self.Verify = channel.unary_unary(
-        '/pc.ZipCodeService/Verify',
+        '/zc.ZipCodeService/Verify',
         request_serializer=common__types__pb2.Empty.SerializeToString,
-        response_deserializer=sql__postcode__pb2.VerifyResponse.FromString,
+        response_deserializer=sql__zip__code__pb2.VerifyResponse.FromString,
         )
     self.FindAllZipCodes = channel.unary_unary(
-        '/pc.ZipCodeService/FindAllZipCodes',
+        '/zc.ZipCodeService/FindAllZipCodes',
         request_serializer=common__types__pb2.Empty.SerializeToString,
-        response_deserializer=sql__postcode__pb2.GetZipCodesResponse.FromString,
+        response_deserializer=sql__zip__code__pb2.GetZipCodesResponse.FromString,
         )
     self.FindAllStreets = channel.unary_unary(
-        '/pc.ZipCodeService/FindAllStreets',
+        '/zc.ZipCodeService/FindAllStreets',
         request_serializer=common__types__pb2.Empty.SerializeToString,
-        response_deserializer=sql__postcode__pb2.GetZipCodesResponse.FromString,
+        response_deserializer=sql__zip__code__pb2.GetZipCodesResponse.FromString,
         )
     self.FindLowHighZipCode = channel.unary_unary(
-        '/pc.ZipCodeService/FindLowHighZipCode',
-        request_serializer=sql__postcode__pb2.FindLowHighZipCodeRequest.SerializeToString,
-        response_deserializer=sql__postcode__pb2.GetZipCodesResponse.FromString,
+        '/zc.ZipCodeService/FindLowHighZipCode',
+        request_serializer=sql__zip__code__pb2.FindLowHighZipCodeRequest.SerializeToString,
+        response_deserializer=sql__zip__code__pb2.GetZipCodesResponse.FromString,
         )
     self.FindLowHighStreet = channel.unary_unary(
-        '/pc.ZipCodeService/FindLowHighStreet',
-        request_serializer=sql__postcode__pb2.FindLowHighStreetRequest.SerializeToString,
-        response_deserializer=sql__postcode__pb2.GetZipCodesResponse.FromString,
+        '/zc.ZipCodeService/FindLowHighStreet',
+        request_serializer=sql__zip__code__pb2.FindLowHighStreetRequest.SerializeToString,
+        response_deserializer=sql__zip__code__pb2.GetZipCodesResponse.FromString,
         )
     self.FindZipCode = channel.unary_unary(
-        '/pc.ZipCodeService/FindZipCode',
-        request_serializer=sql__postcode__pb2.FindZipCodeRequest.SerializeToString,
-        response_deserializer=sql__postcode__pb2.GetZipCodesResponse.FromString,
+        '/zc.ZipCodeService/FindZipCode',
+        request_serializer=sql__zip__code__pb2.FindZipCodeRequest.SerializeToString,
+        response_deserializer=sql__zip__code__pb2.GetZipCodesResponse.FromString,
         )
     self.SetZipCodes = channel.unary_unary(
-        '/pc.ZipCodeService/SetZipCodes',
-        request_serializer=sql__postcode__pb2.SetZipCodesRequest.SerializeToString,
+        '/zc.ZipCodeService/SetZipCodes',
+        request_serializer=sql__zip__code__pb2.SetZipCodesRequest.SerializeToString,
         response_deserializer=common__types__pb2.Empty.FromString,
         )
 
@@ -111,39 +111,39 @@ def add_ZipCodeServiceServicer_to_server(servicer, server):
       'Verify': grpc.unary_unary_rpc_method_handler(
           servicer.Verify,
           request_deserializer=common__types__pb2.Empty.FromString,
-          response_serializer=sql__postcode__pb2.VerifyResponse.SerializeToString,
+          response_serializer=sql__zip__code__pb2.VerifyResponse.SerializeToString,
       ),
       'FindAllZipCodes': grpc.unary_unary_rpc_method_handler(
           servicer.FindAllZipCodes,
           request_deserializer=common__types__pb2.Empty.FromString,
-          response_serializer=sql__postcode__pb2.GetZipCodesResponse.SerializeToString,
+          response_serializer=sql__zip__code__pb2.GetZipCodesResponse.SerializeToString,
       ),
       'FindAllStreets': grpc.unary_unary_rpc_method_handler(
           servicer.FindAllStreets,
           request_deserializer=common__types__pb2.Empty.FromString,
-          response_serializer=sql__postcode__pb2.GetZipCodesResponse.SerializeToString,
+          response_serializer=sql__zip__code__pb2.GetZipCodesResponse.SerializeToString,
       ),
       'FindLowHighZipCode': grpc.unary_unary_rpc_method_handler(
           servicer.FindLowHighZipCode,
-          request_deserializer=sql__postcode__pb2.FindLowHighZipCodeRequest.FromString,
-          response_serializer=sql__postcode__pb2.GetZipCodesResponse.SerializeToString,
+          request_deserializer=sql__zip__code__pb2.FindLowHighZipCodeRequest.FromString,
+          response_serializer=sql__zip__code__pb2.GetZipCodesResponse.SerializeToString,
       ),
       'FindLowHighStreet': grpc.unary_unary_rpc_method_handler(
           servicer.FindLowHighStreet,
-          request_deserializer=sql__postcode__pb2.FindLowHighStreetRequest.FromString,
-          response_serializer=sql__postcode__pb2.GetZipCodesResponse.SerializeToString,
+          request_deserializer=sql__zip__code__pb2.FindLowHighStreetRequest.FromString,
+          response_serializer=sql__zip__code__pb2.GetZipCodesResponse.SerializeToString,
       ),
       'FindZipCode': grpc.unary_unary_rpc_method_handler(
           servicer.FindZipCode,
-          request_deserializer=sql__postcode__pb2.FindZipCodeRequest.FromString,
-          response_serializer=sql__postcode__pb2.GetZipCodesResponse.SerializeToString,
+          request_deserializer=sql__zip__code__pb2.FindZipCodeRequest.FromString,
+          response_serializer=sql__zip__code__pb2.GetZipCodesResponse.SerializeToString,
       ),
       'SetZipCodes': grpc.unary_unary_rpc_method_handler(
           servicer.SetZipCodes,
-          request_deserializer=sql__postcode__pb2.SetZipCodesRequest.FromString,
+          request_deserializer=sql__zip__code__pb2.SetZipCodesRequest.FromString,
           response_serializer=common__types__pb2.Empty.SerializeToString,
       ),
   }
   generic_handler = grpc.method_handlers_generic_handler(
-      'pc.ZipCodeService', rpc_method_handlers)
+      'zc.ZipCodeService', rpc_method_handlers)
   server.add_generic_rpc_handlers((generic_handler,))

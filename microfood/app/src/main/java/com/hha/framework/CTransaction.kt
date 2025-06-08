@@ -94,6 +94,54 @@ class CTransaction {
 
     fun minus1() {
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         //if (size() == 0) return
         //var y = m_global.cursor
         //var item = get(y) ?: get(--y) ?: return

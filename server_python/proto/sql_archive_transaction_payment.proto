@@ -30,6 +30,7 @@ option java_package = "com.hha.archive.payment";
 service ArchiveTransactionPaymentService
 {
     rpc AddPayment(AddPaymentRequest)  returns (common.Empty);
+    rpc CopyTransaction(TransactionId)  returns (common.Empty);
     rpc GetPaymentMoney(GetPaymentMoneyRequest)  returns (PaymentDetailsList);
     rpc GetTransactionPaymentsList(TransactionPaymentRequest)  returns (PaymentList);
     rpc SelectTransactionId(TransactionId)  returns (PaymentDetailsList);

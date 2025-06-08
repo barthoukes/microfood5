@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='sql_database.proto',
   package='db',
   syntax='proto3',
-  serialized_pb=_b('\n\x12sql_database.proto\x12\x02\x64\x62\x1a\x12\x63ommon_types.proto\"X\n\x12SetDatabaseRequest\x12\x10\n\x08hostname\x18\x01 \x01(\t\x12\x0c\n\x04user\x18\x02 \x01(\t\x12\x10\n\x08password\x18\x03 \x01(\t\x12\x10\n\x08\x64\x61tabase\x18\x04 \x01(\t\"\x1d\n\x0cQueryRequest\x12\r\n\x05query\x18\x01 \x01(\t\"\x1f\n\rQueryResponse\x12\x0e\n\x06result\x18\x01 \x01(\t\"(\n\x17ValidataDatabaseRequest\x12\r\n\x05index\x18\x01 \x01(\x05\"*\n\x18ValidateDatabaseResponse\x12\x0e\n\x06result\x18\x01 \x01(\x08\"\xab\x07\n\x0bSqlDefaults\x12\x0f\n\x07sq_size\x18\x01 \x01(\x05\x12\r\n\x05speed\x18\x02 \x01(\x05\x12\x15\n\rlog_file_name\x18\x03 \x01(\t\x12\x11\n\tpc_number\x18\x04 \x01(\x05\x12\x15\n\rversion_major\x18\x05 \x01(\x05\x12\x15\n\rversion_minor\x18\x06 \x01(\x05\x12\x15\n\rversion_build\x18\x07 \x01(\x05\x12\x14\n\x0cversion_date\x18\x08 \x01(\t\x12\x14\n\x0cversion_time\x18\t \x01(\t\x12\x0f\n\x07\x62utton1\x18\n \x01(\x05\x12\x15\n\rsquares_width\x18\x0b \x01(\x05\x12\x17\n\x0fmenu_card_sitin\x18\x0c \x01(\x05\x12\x1a\n\x12menu_card_takeaway\x18\r \x01(\x05\x12\x1a\n\x12menu_card_delivery\x18\x0e \x01(\x05\x12\x16\n\x0e\x64isplay_groups\x18\x0f \x01(\x05\x12\x1e\n\x16item_pixels_horizontal\x18\x10 \x01(\x05\x12\x1c\n\x14item_pixels_vertical\x18\x11 \x01(\x05\x12\x14\n\x0citems_height\x18\x12 \x01(\x05\x12\x11\n\tname_half\x18\x13 \x01(\t\x12\x1a\n\x12transactions_width\x18\x14 \x01(\x05\x12\x1e\n\x16\x65ntry_display_capitals\x18\x15 \x01(\x05\x12\x18\n\x10printer_capitals\x18\x16 \x01(\x05\x12\x18\n\x10\x63olour_item_text\x18\x17 \x01(\t\x12\x1e\n\x16prepare_display_enable\x18\x18 \x01(\x05\x12!\n\x19prepare_display_ask_table\x18\x19 \x01(\x05\x12\x14\n\x0cstore_enable\x18\x1a \x01(\x05\x12\x11\n\tfont_path\x18\x1b \x01(\t\x12\x16\n\x0e\x62\x61\x63kground_dir\x18\x1c \x01(\t\x12\x11\n\tdata_path\x18\x1d \x01(\t\x12\x17\n\x0f\x62\x61\x63kup_database\x18\x1e \x01(\t\x12\x13\n\x0b\x62\x61\x63kup_user\x18\x1f \x01(\t\x12\x17\n\x0f\x62\x61\x63kup_password\x18  \x01(\t\x12\x17\n\x0f\x62\x61\x63kup_hostname\x18! \x01(\t\x12\x10\n\x08\x64\x61tabase\x18\" \x01(\t\x12\x0c\n\x04user\x18# \x01(\t\x12\x10\n\x08password\x18$ \x01(\t\x12\x10\n\x08hostname\x18% \x01(\t\x12\x14\n\x0cperson_count\x18& \x01(\x08\x12\x11\n\tlog_level\x18\' \x01(\x05\x12\x15\n\raccount_years\x18( \x01(\x05\"\x90\x02\n\x14\x43onfigurationRequest\x12\x16\n\x0e\x64isplay_groups\x18\x01 \x01(\x05\x12\x1e\n\x16prepare_display_enable\x18\x02 \x01(\x08\x12\x1a\n\x12\x65nable_reservation\x18\x03 \x01(\x08\x12\x15\n\rwallet_enable\x18\x04 \x01(\x08\x12\x12\n\nsitin_only\x18\x05 \x01(\x08\x12\x15\n\rtakeaway_only\x18\x06 \x01(\x08\x12\x17\n\x0ftelephone_order\x18\x07 \x01(\x08\x12\x19\n\x11\x61\x63\x63ounting_verify\x18\x08 \x01(\x05\x12\x18\n\x10\x61\x63\x63ount_clusters\x18\t \x01(\x05\x12\x14\n\x0cstore_enable\x18\n \x01(\x05\x32\xf0\x02\n\x0f\x44\x61tabaseService\x12\x36\n\x0bSetDatabase\x12\x16.db.SetDatabaseRequest\x1a\r.common.Empty\"\x00\x12\x31\n\x08RunQuery\x12\x10.db.QueryRequest\x1a\x11.db.QueryResponse\"\x00\x12O\n\x10ValidateDatabase\x12\x1b.db.ValidataDatabaseRequest\x1a\x1c.db.ValidateDatabaseResponse\"\x00\x12\x32\n\x0eSetSqlDefaults\x12\x0f.db.SqlDefaults\x1a\r.common.Empty\"\x00\x12=\n\x10SetConfiguration\x12\x18.db.ConfigurationRequest\x1a\r.common.Empty\"\x00\x12.\n\x0cResetProgram\x12\r.common.Empty\x1a\r.common.Empty\"\x00\x42\x14\n\x10\x63om.hha.databaseP\x01\x62\x06proto3')
+  serialized_pb=_b('\n\x12sql_database.proto\x12\x02\x64\x62\x1a\x12\x63ommon_types.proto\"X\n\x12SetDatabaseRequest\x12\x10\n\x08hostname\x18\x01 \x01(\t\x12\x0c\n\x04user\x18\x02 \x01(\t\x12\x10\n\x08password\x18\x03 \x01(\t\x12\x10\n\x08\x64\x61tabase\x18\x04 \x01(\t\"\x1d\n\x0cQueryRequest\x12\r\n\x05query\x18\x01 \x01(\t\"\x1f\n\rQueryResponse\x12\x0e\n\x06result\x18\x01 \x01(\t\"(\n\x17ValidataDatabaseRequest\x12\r\n\x05index\x18\x01 \x01(\x05\"*\n\x18ValidateDatabaseResponse\x12\x0e\n\x06result\x18\x01 \x01(\x08\"\xab\x07\n\x0bSqlDefaults\x12\x0f\n\x07sq_size\x18\x01 \x01(\x05\x12\r\n\x05speed\x18\x02 \x01(\x05\x12\x15\n\rlog_file_name\x18\x03 \x01(\t\x12\x11\n\tpc_number\x18\x04 \x01(\x05\x12\x15\n\rversion_major\x18\x05 \x01(\x05\x12\x15\n\rversion_minor\x18\x06 \x01(\x05\x12\x15\n\rversion_build\x18\x07 \x01(\x05\x12\x14\n\x0cversion_date\x18\x08 \x01(\t\x12\x14\n\x0cversion_time\x18\t \x01(\t\x12\x0f\n\x07\x62utton1\x18\n \x01(\x05\x12\x15\n\rsquares_width\x18\x0b \x01(\x05\x12\x17\n\x0fmenu_card_sitin\x18\x0c \x01(\x05\x12\x1a\n\x12menu_card_takeaway\x18\r \x01(\x05\x12\x1a\n\x12menu_card_delivery\x18\x0e \x01(\x05\x12\x16\n\x0e\x64isplay_groups\x18\x0f \x01(\x05\x12\x1e\n\x16item_pixels_horizontal\x18\x10 \x01(\x05\x12\x1c\n\x14item_pixels_vertical\x18\x11 \x01(\x05\x12\x14\n\x0citems_height\x18\x12 \x01(\x05\x12\x11\n\tname_half\x18\x13 \x01(\t\x12\x1a\n\x12transactions_width\x18\x14 \x01(\x05\x12\x1e\n\x16\x65ntry_display_capitals\x18\x15 \x01(\x05\x12\x18\n\x10printer_capitals\x18\x16 \x01(\x05\x12\x18\n\x10\x63olour_item_text\x18\x17 \x01(\t\x12\x1e\n\x16prepare_display_enable\x18\x18 \x01(\x05\x12!\n\x19prepare_display_ask_table\x18\x19 \x01(\x05\x12\x14\n\x0cstore_enable\x18\x1a \x01(\x05\x12\x11\n\tfont_path\x18\x1b \x01(\t\x12\x16\n\x0e\x62\x61\x63kground_dir\x18\x1c \x01(\t\x12\x11\n\tdata_path\x18\x1d \x01(\t\x12\x17\n\x0f\x62\x61\x63kup_database\x18\x1e \x01(\t\x12\x13\n\x0b\x62\x61\x63kup_user\x18\x1f \x01(\t\x12\x17\n\x0f\x62\x61\x63kup_password\x18  \x01(\t\x12\x17\n\x0f\x62\x61\x63kup_hostname\x18! \x01(\t\x12\x10\n\x08\x64\x61tabase\x18\" \x01(\t\x12\x0c\n\x04user\x18# \x01(\t\x12\x10\n\x08password\x18$ \x01(\t\x12\x10\n\x08hostname\x18% \x01(\t\x12\x14\n\x0cperson_count\x18& \x01(\x08\x12\x11\n\tlog_level\x18\' \x01(\x05\x12\x15\n\raccount_years\x18( \x01(\x05\"\x90\x02\n\x14\x43onfigurationRequest\x12\x16\n\x0e\x64isplay_groups\x18\x01 \x01(\x05\x12\x1e\n\x16prepare_display_enable\x18\x02 \x01(\x08\x12\x1a\n\x12\x65nable_reservation\x18\x03 \x01(\x08\x12\x15\n\rwallet_enable\x18\x04 \x01(\x08\x12\x12\n\nsitin_only\x18\x05 \x01(\x08\x12\x15\n\rtakeaway_only\x18\x06 \x01(\x08\x12\x17\n\x0ftelephone_order\x18\x07 \x01(\x08\x12\x19\n\x11\x61\x63\x63ounting_verify\x18\x08 \x01(\x05\x12\x18\n\x10\x61\x63\x63ount_clusters\x18\t \x01(\x05\x12\x14\n\x0cstore_enable\x18\n \x01(\x05\"9\n\x11\x43onfigurationItem\x12\x15\n\rconfiguration\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\"<\n\x15\x43onfigurationItemList\x12#\n\x04item\x18\x01 \x03(\x0b\x32\x15.db.ConfigurationItem2\x88\x05\n\x0f\x44\x61tabaseService\x12\x36\n\x0bSetDatabase\x12\x16.db.SetDatabaseRequest\x1a\r.common.Empty\"\x00\x12\x31\n\x08RunQuery\x12\x10.db.QueryRequest\x1a\x11.db.QueryResponse\"\x00\x12O\n\x10ValidateDatabase\x12\x1b.db.ValidataDatabaseRequest\x1a\x1c.db.ValidateDatabaseResponse\"\x00\x12\x32\n\x0eSetSqlDefaults\x12\x0f.db.SqlDefaults\x1a\r.common.Empty\"\x00\x12=\n\x10SetConfiguration\x12\x18.db.ConfigurationRequest\x1a\r.common.Empty\"\x00\x12\x42\n\x14SetConfigurationList\x12\x19.db.ConfigurationItemList\x1a\r.common.Empty\"\x00\x12\x42\n\x14GetConfigurationList\x12\r.common.Empty\x1a\x19.db.ConfigurationItemList\"\x00\x12\x46\n\x18SetUserConfigurationList\x12\x19.db.ConfigurationItemList\x1a\r.common.Empty\"\x00\x12\x46\n\x18GetUserConfigurationList\x12\r.common.Empty\x1a\x19.db.ConfigurationItemList\"\x00\x12.\n\x0cResetProgram\x12\r.common.Empty\x1a\r.common.Empty\"\x00\x42\x14\n\x10\x63om.hha.databaseP\x01\x62\x06proto3')
   ,
   dependencies=[common__types__pb2.DESCRIPTOR,])
 
@@ -600,6 +600,76 @@ _CONFIGURATIONREQUEST = _descriptor.Descriptor(
   serialized_end=1501,
 )
 
+
+_CONFIGURATIONITEM = _descriptor.Descriptor(
+  name='ConfigurationItem',
+  full_name='db.ConfigurationItem',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='configuration', full_name='db.ConfigurationItem.configuration', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='value', full_name='db.ConfigurationItem.value', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=1503,
+  serialized_end=1560,
+)
+
+
+_CONFIGURATIONITEMLIST = _descriptor.Descriptor(
+  name='ConfigurationItemList',
+  full_name='db.ConfigurationItemList',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='item', full_name='db.ConfigurationItemList.item', index=0,
+      number=1, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=1562,
+  serialized_end=1622,
+)
+
+_CONFIGURATIONITEMLIST.fields_by_name['item'].message_type = _CONFIGURATIONITEM
 DESCRIPTOR.message_types_by_name['SetDatabaseRequest'] = _SETDATABASEREQUEST
 DESCRIPTOR.message_types_by_name['QueryRequest'] = _QUERYREQUEST
 DESCRIPTOR.message_types_by_name['QueryResponse'] = _QUERYRESPONSE
@@ -607,6 +677,8 @@ DESCRIPTOR.message_types_by_name['ValidataDatabaseRequest'] = _VALIDATADATABASER
 DESCRIPTOR.message_types_by_name['ValidateDatabaseResponse'] = _VALIDATEDATABASERESPONSE
 DESCRIPTOR.message_types_by_name['SqlDefaults'] = _SQLDEFAULTS
 DESCRIPTOR.message_types_by_name['ConfigurationRequest'] = _CONFIGURATIONREQUEST
+DESCRIPTOR.message_types_by_name['ConfigurationItem'] = _CONFIGURATIONITEM
+DESCRIPTOR.message_types_by_name['ConfigurationItemList'] = _CONFIGURATIONITEMLIST
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 SetDatabaseRequest = _reflection.GeneratedProtocolMessageType('SetDatabaseRequest', (_message.Message,), dict(
@@ -658,6 +730,20 @@ ConfigurationRequest = _reflection.GeneratedProtocolMessageType('ConfigurationRe
   ))
 _sym_db.RegisterMessage(ConfigurationRequest)
 
+ConfigurationItem = _reflection.GeneratedProtocolMessageType('ConfigurationItem', (_message.Message,), dict(
+  DESCRIPTOR = _CONFIGURATIONITEM,
+  __module__ = 'sql_database_pb2'
+  # @@protoc_insertion_point(class_scope:db.ConfigurationItem)
+  ))
+_sym_db.RegisterMessage(ConfigurationItem)
+
+ConfigurationItemList = _reflection.GeneratedProtocolMessageType('ConfigurationItemList', (_message.Message,), dict(
+  DESCRIPTOR = _CONFIGURATIONITEMLIST,
+  __module__ = 'sql_database_pb2'
+  # @@protoc_insertion_point(class_scope:db.ConfigurationItemList)
+  ))
+_sym_db.RegisterMessage(ConfigurationItemList)
+
 
 DESCRIPTOR.has_options = True
 DESCRIPTOR._options = _descriptor._ParseOptions(descriptor_pb2.FileOptions(), _b('\n\020com.hha.databaseP\001'))
@@ -668,8 +754,8 @@ _DATABASESERVICE = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=0,
   options=None,
-  serialized_start=1504,
-  serialized_end=1872,
+  serialized_start=1625,
+  serialized_end=2273,
   methods=[
   _descriptor.MethodDescriptor(
     name='SetDatabase',
@@ -717,9 +803,45 @@ _DATABASESERVICE = _descriptor.ServiceDescriptor(
     options=None,
   ),
   _descriptor.MethodDescriptor(
+    name='SetConfigurationList',
+    full_name='db.DatabaseService.SetConfigurationList',
+    index=5,
+    containing_service=None,
+    input_type=_CONFIGURATIONITEMLIST,
+    output_type=common__types__pb2._EMPTY,
+    options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='GetConfigurationList',
+    full_name='db.DatabaseService.GetConfigurationList',
+    index=6,
+    containing_service=None,
+    input_type=common__types__pb2._EMPTY,
+    output_type=_CONFIGURATIONITEMLIST,
+    options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='SetUserConfigurationList',
+    full_name='db.DatabaseService.SetUserConfigurationList',
+    index=7,
+    containing_service=None,
+    input_type=_CONFIGURATIONITEMLIST,
+    output_type=common__types__pb2._EMPTY,
+    options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='GetUserConfigurationList',
+    full_name='db.DatabaseService.GetUserConfigurationList',
+    index=8,
+    containing_service=None,
+    input_type=common__types__pb2._EMPTY,
+    output_type=_CONFIGURATIONITEMLIST,
+    options=None,
+  ),
+  _descriptor.MethodDescriptor(
     name='ResetProgram',
     full_name='db.DatabaseService.ResetProgram',
-    index=5,
+    index=9,
     containing_service=None,
     input_type=common__types__pb2._EMPTY,
     output_type=common__types__pb2._EMPTY,

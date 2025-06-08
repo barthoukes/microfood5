@@ -558,4 +558,5 @@ message InsertTransactionRequest
     float tax_percentage_high = 12;
     float tax_percentage_low = 13;
     common.TransType trans_type = 14;
+    common.Money statiegeld = 15;
 }

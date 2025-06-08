@@ -133,7 +133,7 @@ message AddPaymentRequest2
 
 message CopyTransactionRequest
 {
-    string new_table = 1;
+    string from_table = 1;
     int32  new_transaction_id = 2;
 }
 

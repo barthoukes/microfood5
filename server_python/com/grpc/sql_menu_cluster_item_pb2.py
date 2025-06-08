@@ -21,13 +21,13 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='sql_menu_cluster_item.proto',
   package='mci',
   syntax='proto3',
-  serialized_pb=_b('\n\x1bsql_menu_cluster_item.proto\x12\x03mci\x1a\x12\x63ommon_types.proto\"\x9d\x01\n\x07\x63luster\x12\x14\n\x0cmenu_card_id\x18\x01 \x01(\x05\x12\x17\n\x0fmenu_cluster_id\x18\x02 \x01(\x05\x12\'\n\x0c\x63luster_type\x18\x03 \x01(\x0e\x32\x11.mci.EclusterType\x12\x12\n\nlocal_name\x18\x04 \x01(\t\x12\x14\n\x0c\x63hinese_name\x18\x05 \x01(\t\x12\x10\n\x08quantity\x18\x06 \x01(\x05\"<\n\x10\x63lusterIdRequest\x12\x14\n\x0cmenu_card_id\x18\x01 \x01(\x05\x12\x12\n\ncluster_id\x18\x02 \x01(\x05\"\xa0\x02\n\x0b\x63lusterItem\x12\x13\n\x0b\x64\x61tabase_id\x18\x01 \x01(\x05\x12\r\n\x05valid\x18\x02 \x01(\x08\x12\x13\n\x0bsequence_nr\x18\x03 \x01(\x05\x12\x14\n\x0cmenu_card_id\x18\x04 \x01(\x05\x12\x14\n\x0cmenu_item_id\x18\x05 \x01(\x05\x12$\n\x10restaurant_price\x18\x06 \x01(\x0b\x32\n.mci.money\x12\"\n\x0etakeaway_price\x18\x07 \x01(\x0b\x32\n.mci.money\x12\x12\n\nlocal_name\x18\x08 \x01(\t\x12\x14\n\x0c\x63hinese_name\x18\t \x01(\t\x12\x0e\n\x06height\x18\n \x01(\x05\x12\x12\n\ncluster_id\x18\x0b \x01(\x05\x12\x14\n\x0cmenu_page_id\x18\x0c \x01(\x05\"(\n\rclusterItemId\x12\x17\n\x0f\x63luster_item_id\x18\x01 \x01(\x05\"9\n\x0f\x63lusterItemList\x12&\n\x0c\x63luster_item\x18\x01 \x03(\x0b\x32\x10.mci.clusterItem\"#\n\x0f\x63lusterItemSize\x12\x10\n\x08nr_items\x18\x01 \x01(\x05\"-\n\x0b\x63lusterList\x12\x1e\n\x08\x63lusters\x18\x01 \x03(\x0b\x32\x0c.mci.cluster\"V\n\x18\x64\x65leteClusterItemRequest\x12\x14\n\x0cmenu_card_id\x18\x01 \x01(\x05\x12\x12\n\ncluster_id\x18\x02 \x01(\x05\x12\x10\n\x08sequence\x18\x03 \x01(\x05\"o\n\x1b\x64uplicateClusterItemRequest\x12\x14\n\x0cmenu_card_id\x18\x01 \x01(\x05\x12\x1a\n\x12\x63luster_item_index\x18\x02 \x01(\x05\x12\x1e\n\x16new_cluster_item_index\x18\x03 \x01(\x05\"H\n\x18\x64uplicateMenuCardRequest\x12\x14\n\x0cmenu_card_id\x18\x01 \x01(\x05\x12\x16\n\x0e\x64\x65stination_id\x18\x02 \x01(\x05\"^\n\x16\x65xchangeClusterRequest\x12\x14\n\x0cmenu_card_id\x18\x01 \x01(\x05\x12\x16\n\x0esrc_cluster_id\x18\x02 \x01(\x05\x12\x16\n\x0e\x64st_cluster_id\x18\x03 \x01(\x05\"l\n\x18insertClusterItemRequest\x12\x14\n\x0cmenu_card_id\x18\x01 \x01(\x05\x12\x12\n\ncluster_id\x18\x02 \x01(\x05\x12\x10\n\x08sequence\x18\x03 \x01(\x05\x12\x14\n\x0cmenu_item_id\x18\x04 \x01(\x05\"\x16\n\x05money\x12\r\n\x05\x63\x65nts\x18\x01 \x01(\x05\"\"\n\nmenuCardId\x12\x14\n\x0cmenu_card_id\x18\x01 \x01(\x05\"X\n\x17saveClusterItemsRequest\x12\x14\n\x0cmenu_card_id\x18\x01 \x01(\x05\x12\'\n\rcluster_items\x18\x02 \x03(\x0b\x32\x10.mci.clusterItem\"\x18\n\x08textDump\x12\x0c\n\x04\x64ump\x18\x01 \x01(\t*\x86\x01\n\x0c\x45\x63lusterType\x12!\n\x1dGROUP_CHOOSE_SINGLE_SELECTION\x10\x00\x12#\n\x1fGROUP_CHOOSE_MULTIPLE_SELECTION\x10\x01\x12\x14\n\x10GROUP_SELECT_ALL\x10\x02\x12\x18\n\x14GROUP_SELECT_UNKNOWN\x10\x03\x32\xa5\x07\n\x16menuClusterItemService\x12\x32\n\x12\x42\x61\x63kupClusterItems\x12\r.common.Empty\x1a\r.common.Empty\x12\x41\n\x11\x44\x65leteClusterItem\x12\x1d.mci.deleteClusterItemRequest\x1a\r.common.Empty\x12G\n\x14\x44uplicateClusterItem\x12 .mci.duplicateClusterItemRequest\x1a\r.common.Empty\x12\x41\n\x11\x44uplicateMenuCard\x12\x1d.mci.duplicateMenuCardRequest\x1a\r.common.Empty\x12=\n\x0f\x45xchangeCluster\x12\x1b.mci.exchangeClusterRequest\x1a\r.common.Empty\x12:\n\x11\x46indAllExcelItems\x12\x0f.mci.menuCardId\x1a\x14.mci.clusterItemList\x12\x30\n\x07GetSize\x12\x0f.mci.menuCardId\x1a\x14.mci.clusterItemSize\x12\x41\n\x11InsertClusterItem\x12\x1d.mci.insertClusterItemRequest\x1a\r.common.Empty\x12)\n\tMysqlDump\x12\r.common.Empty\x1a\r.mci.textDump\x12\x42\n\x13SaveAllClusterItems\x12\x1c.mci.saveClusterItemsRequest\x1a\r.common.Empty\x12\x41\n\x12SelectClusterItems\x12\x15.mci.clusterIdRequest\x1a\x14.mci.clusterItemList\x12\x34\n\x11UpdateClusterItem\x12\x10.mci.clusterItem\x1a\r.common.Empty\x12\x36\n\x14RenumberClusterItems\x12\x0f.mci.menuCardId\x1a\r.common.Empty\x12\x43\n!RemoveAllClusterItemsFromMenuCard\x12\x0f.mci.menuCardId\x1a\r.common.Empty\x12\x33\n\x13RestoreClusterItems\x12\r.common.Empty\x1a\r.common.EmptyB+\n\x19\x63om.hha.menu.cluster.itemP\x01\xaa\x02\x0bmenuServiceb\x06proto3')
+  serialized_pb=_b('\n\x1bsql_menu_cluster_item.proto\x12\x03mci\x1a\x12\x63ommon_types.proto\"\x9c\x01\n\x07\x43luster\x12\x14\n\x0cmenu_card_id\x18\x01 \x01(\x05\x12\x17\n\x0fmenu_cluster_id\x18\x02 \x01(\x05\x12&\n\x0c\x63luster_type\x18\x03 \x01(\x0e\x32\x10.mci.ClusterType\x12\x12\n\nlocal_name\x18\x04 \x01(\t\x12\x14\n\x0c\x63hinese_name\x18\x05 \x01(\t\x12\x10\n\x08quantity\x18\x06 \x01(\x05\"<\n\x10\x43lusterIdRequest\x12\x14\n\x0cmenu_card_id\x18\x01 \x01(\x05\x12\x12\n\ncluster_id\x18\x02 \x01(\x05\"\xa6\x02\n\x0b\x43lusterItem\x12\x13\n\x0b\x64\x61tabase_id\x18\x01 \x01(\x05\x12\r\n\x05valid\x18\x02 \x01(\x08\x12\x13\n\x0bsequence_nr\x18\x03 \x01(\x05\x12\x14\n\x0cmenu_card_id\x18\x04 \x01(\x05\x12\x14\n\x0cmenu_item_id\x18\x05 \x01(\x05\x12\'\n\x10restaurant_price\x18\x06 \x01(\x0b\x32\r.common.Money\x12%\n\x0etakeaway_price\x18\x07 \x01(\x0b\x32\r.common.Money\x12\x12\n\nlocal_name\x18\x08 \x01(\t\x12\x14\n\x0c\x63hinese_name\x18\t \x01(\t\x12\x0e\n\x06height\x18\n \x01(\x05\x12\x12\n\ncluster_id\x18\x0b \x01(\x05\x12\x14\n\x0cmenu_page_id\x18\x0c \x01(\x05\"(\n\rClusterItemId\x12\x17\n\x0f\x63luster_item_id\x18\x01 \x01(\x05\"9\n\x0f\x43lusterItemList\x12&\n\x0c\x63luster_item\x18\x01 \x03(\x0b\x32\x10.mci.ClusterItem\"#\n\x0f\x43lusterItemSize\x12\x10\n\x08nr_items\x18\x01 \x01(\x05\"-\n\x0b\x43lusterList\x12\x1e\n\x08\x63lusters\x18\x01 \x03(\x0b\x32\x0c.mci.Cluster\"V\n\x18\x44\x65leteClusterItemRequest\x12\x14\n\x0cmenu_card_id\x18\x01 \x01(\x05\x12\x12\n\ncluster_id\x18\x02 \x01(\x05\x12\x10\n\x08sequence\x18\x03 \x01(\x05\"o\n\x1b\x44uplicateClusterItemRequest\x12\x14\n\x0cmenu_card_id\x18\x01 \x01(\x05\x12\x1a\n\x12\x63luster_item_index\x18\x02 \x01(\x05\x12\x1e\n\x16new_cluster_item_index\x18\x03 \x01(\x05\"H\n\x18\x44uplicateMenuCardRequest\x12\x14\n\x0cmenu_card_id\x18\x01 \x01(\x05\x12\x16\n\x0e\x64\x65stination_id\x18\x02 \x01(\x05\"^\n\x16\x45xchangeClusterRequest\x12\x14\n\x0cmenu_card_id\x18\x01 \x01(\x05\x12\x16\n\x0esrc_cluster_id\x18\x02 \x01(\x05\x12\x16\n\x0e\x64st_cluster_id\x18\x03 \x01(\x05\"l\n\x18InsertClusterItemRequest\x12\x14\n\x0cmenu_card_id\x18\x01 \x01(\x05\x12\x12\n\ncluster_id\x18\x02 \x01(\x05\x12\x10\n\x08sequence\x18\x03 \x01(\x05\x12\x14\n\x0cmenu_item_id\x18\x04 \x01(\x05\"\"\n\nMenuCardId\x12\x14\n\x0cmenu_card_id\x18\x01 \x01(\x05\"X\n\x17SaveClusterItemsRequest\x12\x14\n\x0cmenu_card_id\x18\x01 \x01(\x05\x12\'\n\rcluster_items\x18\x02 \x03(\x0b\x32\x10.mci.ClusterItem\"\x18\n\x08TextDump\x12\x0c\n\x04\x64ump\x18\x01 \x01(\t*\x85\x01\n\x0b\x43lusterType\x12!\n\x1dGROUP_CHOOSE_SINGLE_SELECTION\x10\x00\x12#\n\x1fGROUP_CHOOSE_MULTIPLE_SELECTION\x10\x01\x12\x14\n\x10GROUP_SELECT_ALL\x10\x02\x12\x18\n\x14GROUP_SELECT_UNKNOWN\x10\x03\x32\xa5\x07\n\x16MenuClusterItemService\x12\x32\n\x12\x42\x61\x63kupClusterItems\x12\r.common.Empty\x1a\r.common.Empty\x12\x41\n\x11\x44\x65leteClusterItem\x12\x1d.mci.DeleteClusterItemRequest\x1a\r.common.Empty\x12G\n\x14\x44uplicateClusterItem\x12 .mci.DuplicateClusterItemRequest\x1a\r.common.Empty\x12\x41\n\x11\x44uplicateMenuCard\x12\x1d.mci.DuplicateMenuCardRequest\x1a\r.common.Empty\x12=\n\x0f\x45xchangeCluster\x12\x1b.mci.ExchangeClusterRequest\x1a\r.common.Empty\x12:\n\x11\x46indAllExcelItems\x12\x0f.mci.MenuCardId\x1a\x14.mci.ClusterItemList\x12\x30\n\x07GetSize\x12\x0f.mci.MenuCardId\x1a\x14.mci.ClusterItemSize\x12\x41\n\x11InsertClusterItem\x12\x1d.mci.InsertClusterItemRequest\x1a\r.common.Empty\x12)\n\tMysqlDump\x12\r.common.Empty\x1a\r.mci.TextDump\x12\x42\n\x13SaveAllClusterItems\x12\x1c.mci.SaveClusterItemsRequest\x1a\r.common.Empty\x12\x41\n\x12SelectClusterItems\x12\x15.mci.ClusterIdRequest\x1a\x14.mci.ClusterItemList\x12\x34\n\x11UpdateClusterItem\x12\x10.mci.ClusterItem\x1a\r.common.Empty\x12\x36\n\x14RenumberClusterItems\x12\x0f.mci.MenuCardId\x1a\r.common.Empty\x12\x43\n!RemoveAllClusterItemsFromMenuCard\x12\x0f.mci.MenuCardId\x1a\r.common.Empty\x12\x33\n\x13RestoreClusterItems\x12\r.common.Empty\x1a\r.common.EmptyB+\n\x19\x63om.hha.menu.cluster.itemP\x01\xaa\x02\x0bmenuServiceb\x06proto3')
   ,
   dependencies=[common__types__pb2.DESCRIPTOR,])
 
-_ECLUSTERTYPE = _descriptor.EnumDescriptor(
-  name='EclusterType',
-  full_name='mci.EclusterType',
+_CLUSTERTYPE = _descriptor.EnumDescriptor(
+  name='ClusterType',
+  full_name='mci.ClusterType',
   filename=None,
   file=DESCRIPTOR,
   values=[
@@ -50,12 +50,12 @@ _ECLUSTERTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=1412,
-  serialized_end=1546,
+  serialized_start=1393,
+  serialized_end=1526,
 )
-_sym_db.RegisterEnumDescriptor(_ECLUSTERTYPE)
+_sym_db.RegisterEnumDescriptor(_CLUSTERTYPE)
 
-EclusterType = enum_type_wrapper.EnumTypeWrapper(_ECLUSTERTYPE)
+ClusterType = enum_type_wrapper.EnumTypeWrapper(_CLUSTERTYPE)
 GROUP_CHOOSE_SINGLE_SELECTION = 0
 GROUP_CHOOSE_MULTIPLE_SELECTION = 1
 GROUP_SELECT_ALL = 2
@@ -64,49 +64,49 @@ GROUP_SELECT_UNKNOWN = 3
 
 
 _CLUSTER = _descriptor.Descriptor(
-  name='cluster',
-  full_name='mci.cluster',
+  name='Cluster',
+  full_name='mci.Cluster',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='menu_card_id', full_name='mci.cluster.menu_card_id', index=0,
+      name='menu_card_id', full_name='mci.Cluster.menu_card_id', index=0,
       number=1, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='menu_cluster_id', full_name='mci.cluster.menu_cluster_id', index=1,
+      name='menu_cluster_id', full_name='mci.Cluster.menu_cluster_id', index=1,
       number=2, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='cluster_type', full_name='mci.cluster.cluster_type', index=2,
+      name='cluster_type', full_name='mci.Cluster.cluster_type', index=2,
       number=3, type=14, cpp_type=8, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='local_name', full_name='mci.cluster.local_name', index=3,
+      name='local_name', full_name='mci.Cluster.local_name', index=3,
       number=4, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='chinese_name', full_name='mci.cluster.chinese_name', index=4,
+      name='chinese_name', full_name='mci.Cluster.chinese_name', index=4,
       number=5, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='quantity', full_name='mci.cluster.quantity', index=5,
+      name='quantity', full_name='mci.Cluster.quantity', index=5,
       number=6, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
@@ -125,26 +125,26 @@ _CLUSTER = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=57,
-  serialized_end=214,
+  serialized_end=213,
 )
 
 
 _CLUSTERIDREQUEST = _descriptor.Descriptor(
-  name='clusterIdRequest',
-  full_name='mci.clusterIdRequest',
+  name='ClusterIdRequest',
+  full_name='mci.ClusterIdRequest',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='menu_card_id', full_name='mci.clusterIdRequest.menu_card_id', index=0,
+      name='menu_card_id', full_name='mci.ClusterIdRequest.menu_card_id', index=0,
       number=1, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='cluster_id', full_name='mci.clusterIdRequest.cluster_id', index=1,
+      name='cluster_id', full_name='mci.ClusterIdRequest.cluster_id', index=1,
       number=2, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
@@ -162,97 +162,97 @@ _CLUSTERIDREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=216,
-  serialized_end=276,
+  serialized_start=215,
+  serialized_end=275,
 )
 
 
 _CLUSTERITEM = _descriptor.Descriptor(
-  name='clusterItem',
-  full_name='mci.clusterItem',
+  name='ClusterItem',
+  full_name='mci.ClusterItem',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='database_id', full_name='mci.clusterItem.database_id', index=0,
+      name='database_id', full_name='mci.ClusterItem.database_id', index=0,
       number=1, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='valid', full_name='mci.clusterItem.valid', index=1,
+      name='valid', full_name='mci.ClusterItem.valid', index=1,
       number=2, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='sequence_nr', full_name='mci.clusterItem.sequence_nr', index=2,
+      name='sequence_nr', full_name='mci.ClusterItem.sequence_nr', index=2,
       number=3, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='menu_card_id', full_name='mci.clusterItem.menu_card_id', index=3,
+      name='menu_card_id', full_name='mci.ClusterItem.menu_card_id', index=3,
       number=4, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='menu_item_id', full_name='mci.clusterItem.menu_item_id', index=4,
+      name='menu_item_id', full_name='mci.ClusterItem.menu_item_id', index=4,
       number=5, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='restaurant_price', full_name='mci.clusterItem.restaurant_price', index=5,
+      name='restaurant_price', full_name='mci.ClusterItem.restaurant_price', index=5,
       number=6, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='takeaway_price', full_name='mci.clusterItem.takeaway_price', index=6,
+      name='takeaway_price', full_name='mci.ClusterItem.takeaway_price', index=6,
       number=7, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='local_name', full_name='mci.clusterItem.local_name', index=7,
+      name='local_name', full_name='mci.ClusterItem.local_name', index=7,
       number=8, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='chinese_name', full_name='mci.clusterItem.chinese_name', index=8,
+      name='chinese_name', full_name='mci.ClusterItem.chinese_name', index=8,
       number=9, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='height', full_name='mci.clusterItem.height', index=9,
+      name='height', full_name='mci.ClusterItem.height', index=9,
       number=10, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='cluster_id', full_name='mci.clusterItem.cluster_id', index=10,
+      name='cluster_id', full_name='mci.ClusterItem.cluster_id', index=10,
       number=11, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='menu_page_id', full_name='mci.clusterItem.menu_page_id', index=11,
+      name='menu_page_id', full_name='mci.ClusterItem.menu_page_id', index=11,
       number=12, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
@@ -270,20 +270,20 @@ _CLUSTERITEM = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=279,
-  serialized_end=567,
+  serialized_start=278,
+  serialized_end=572,
 )
 
 
 _CLUSTERITEMID = _descriptor.Descriptor(
-  name='clusterItemId',
-  full_name='mci.clusterItemId',
+  name='ClusterItemId',
+  full_name='mci.ClusterItemId',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='cluster_item_id', full_name='mci.clusterItemId.cluster_item_id', index=0,
+      name='cluster_item_id', full_name='mci.ClusterItemId.cluster_item_id', index=0,
       number=1, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
@@ -301,20 +301,20 @@ _CLUSTERITEMID = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=569,
-  serialized_end=609,
+  serialized_start=574,
+  serialized_end=614,
 )
 
 
 _CLUSTERITEMLIST = _descriptor.Descriptor(
-  name='clusterItemList',
-  full_name='mci.clusterItemList',
+  name='ClusterItemList',
+  full_name='mci.ClusterItemList',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='cluster_item', full_name='mci.clusterItemList.cluster_item', index=0,
+      name='cluster_item', full_name='mci.ClusterItemList.cluster_item', index=0,
       number=1, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
@@ -332,20 +332,20 @@ _CLUSTERITEMLIST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=611,
-  serialized_end=668,
+  serialized_start=616,
+  serialized_end=673,
 )
 
 
 _CLUSTERITEMSIZE = _descriptor.Descriptor(
-  name='clusterItemSize',
-  full_name='mci.clusterItemSize',
+  name='ClusterItemSize',
+  full_name='mci.ClusterItemSize',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='nr_items', full_name='mci.clusterItemSize.nr_items', index=0,
+      name='nr_items', full_name='mci.ClusterItemSize.nr_items', index=0,
       number=1, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
@@ -363,20 +363,20 @@ _CLUSTERITEMSIZE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=670,
-  serialized_end=705,
+  serialized_start=675,
+  serialized_end=710,
 )
 
 
 _CLUSTERLIST = _descriptor.Descriptor(
-  name='clusterList',
-  full_name='mci.clusterList',
+  name='ClusterList',
+  full_name='mci.ClusterList',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='clusters', full_name='mci.clusterList.clusters', index=0,
+      name='clusters', full_name='mci.ClusterList.clusters', index=0,
       number=1, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
@@ -394,34 +394,34 @@ _CLUSTERLIST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=707,
-  serialized_end=752,
+  serialized_start=712,
+  serialized_end=757,
 )
 
 
 _DELETECLUSTERITEMREQUEST = _descriptor.Descriptor(
-  name='deleteClusterItemRequest',
-  full_name='mci.deleteClusterItemRequest',
+  name='DeleteClusterItemRequest',
+  full_name='mci.DeleteClusterItemRequest',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='menu_card_id', full_name='mci.deleteClusterItemRequest.menu_card_id', index=0,
+      name='menu_card_id', full_name='mci.DeleteClusterItemRequest.menu_card_id', index=0,
       number=1, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='cluster_id', full_name='mci.deleteClusterItemRequest.cluster_id', index=1,
+      name='cluster_id', full_name='mci.DeleteClusterItemRequest.cluster_id', index=1,
       number=2, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='sequence', full_name='mci.deleteClusterItemRequest.sequence', index=2,
+      name='sequence', full_name='mci.DeleteClusterItemRequest.sequence', index=2,
       number=3, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
@@ -439,34 +439,34 @@ _DELETECLUSTERITEMREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=754,
-  serialized_end=840,
+  serialized_start=759,
+  serialized_end=845,
 )
 
 
 _DUPLICATECLUSTERITEMREQUEST = _descriptor.Descriptor(
-  name='duplicateClusterItemRequest',
-  full_name='mci.duplicateClusterItemRequest',
+  name='DuplicateClusterItemRequest',
+  full_name='mci.DuplicateClusterItemRequest',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='menu_card_id', full_name='mci.duplicateClusterItemRequest.menu_card_id', index=0,
+      name='menu_card_id', full_name='mci.DuplicateClusterItemRequest.menu_card_id', index=0,
       number=1, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='cluster_item_index', full_name='mci.duplicateClusterItemRequest.cluster_item_index', index=1,
+      name='cluster_item_index', full_name='mci.DuplicateClusterItemRequest.cluster_item_index', index=1,
       number=2, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='new_cluster_item_index', full_name='mci.duplicateClusterItemRequest.new_cluster_item_index', index=2,
+      name='new_cluster_item_index', full_name='mci.DuplicateClusterItemRequest.new_cluster_item_index', index=2,
       number=3, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
@@ -484,27 +484,27 @@ _DUPLICATECLUSTERITEMREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=842,
-  serialized_end=953,
+  serialized_start=847,
+  serialized_end=958,
 )
 
 
 _DUPLICATEMENUCARDREQUEST = _descriptor.Descriptor(
-  name='duplicateMenuCardRequest',
-  full_name='mci.duplicateMenuCardRequest',
+  name='DuplicateMenuCardRequest',
+  full_name='mci.DuplicateMenuCardRequest',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='menu_card_id', full_name='mci.duplicateMenuCardRequest.menu_card_id', index=0,
+      name='menu_card_id', full_name='mci.DuplicateMenuCardRequest.menu_card_id', index=0,
       number=1, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='destination_id', full_name='mci.duplicateMenuCardRequest.destination_id', index=1,
+      name='destination_id', full_name='mci.DuplicateMenuCardRequest.destination_id', index=1,
       number=2, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
@@ -522,34 +522,34 @@ _DUPLICATEMENUCARDREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=955,
-  serialized_end=1027,
+  serialized_start=960,
+  serialized_end=1032,
 )
 
 
 _EXCHANGECLUSTERREQUEST = _descriptor.Descriptor(
-  name='exchangeClusterRequest',
-  full_name='mci.exchangeClusterRequest',
+  name='ExchangeClusterRequest',
+  full_name='mci.ExchangeClusterRequest',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='menu_card_id', full_name='mci.exchangeClusterRequest.menu_card_id', index=0,
+      name='menu_card_id', full_name='mci.ExchangeClusterRequest.menu_card_id', index=0,
       number=1, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='src_cluster_id', full_name='mci.exchangeClusterRequest.src_cluster_id', index=1,
+      name='src_cluster_id', full_name='mci.ExchangeClusterRequest.src_cluster_id', index=1,
       number=2, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='dst_cluster_id', full_name='mci.exchangeClusterRequest.dst_cluster_id', index=2,
+      name='dst_cluster_id', full_name='mci.ExchangeClusterRequest.dst_cluster_id', index=2,
       number=3, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
@@ -567,41 +567,41 @@ _EXCHANGECLUSTERREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1029,
-  serialized_end=1123,
+  serialized_start=1034,
+  serialized_end=1128,
 )
 
 
 _INSERTCLUSTERITEMREQUEST = _descriptor.Descriptor(
-  name='insertClusterItemRequest',
-  full_name='mci.insertClusterItemRequest',
+  name='InsertClusterItemRequest',
+  full_name='mci.InsertClusterItemRequest',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='menu_card_id', full_name='mci.insertClusterItemRequest.menu_card_id', index=0,
+      name='menu_card_id', full_name='mci.InsertClusterItemRequest.menu_card_id', index=0,
       number=1, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='cluster_id', full_name='mci.insertClusterItemRequest.cluster_id', index=1,
+      name='cluster_id', full_name='mci.InsertClusterItemRequest.cluster_id', index=1,
       number=2, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='sequence', full_name='mci.insertClusterItemRequest.sequence', index=2,
+      name='sequence', full_name='mci.InsertClusterItemRequest.sequence', index=2,
       number=3, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='menu_item_id', full_name='mci.insertClusterItemRequest.menu_item_id', index=3,
+      name='menu_item_id', full_name='mci.InsertClusterItemRequest.menu_item_id', index=3,
       number=4, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
@@ -619,51 +619,20 @@ _INSERTCLUSTERITEMREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1125,
-  serialized_end=1233,
-)
-
-
-_MONEY = _descriptor.Descriptor(
-  name='money',
-  full_name='mci.money',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='cents', full_name='mci.money.cents', index=0,
-      number=1, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1235,
-  serialized_end=1257,
+  serialized_start=1130,
+  serialized_end=1238,
 )
 
 
 _MENUCARDID = _descriptor.Descriptor(
-  name='menuCardId',
-  full_name='mci.menuCardId',
+  name='MenuCardId',
+  full_name='mci.MenuCardId',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='menu_card_id', full_name='mci.menuCardId.menu_card_id', index=0,
+      name='menu_card_id', full_name='mci.MenuCardId.menu_card_id', index=0,
       number=1, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
@@ -681,27 +650,27 @@ _MENUCARDID = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1259,
-  serialized_end=1293,
+  serialized_start=1240,
+  serialized_end=1274,
 )
 
 
 _SAVECLUSTERITEMSREQUEST = _descriptor.Descriptor(
-  name='saveClusterItemsRequest',
-  full_name='mci.saveClusterItemsRequest',
+  name='SaveClusterItemsRequest',
+  full_name='mci.SaveClusterItemsRequest',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='menu_card_id', full_name='mci.saveClusterItemsRequest.menu_card_id', index=0,
+      name='menu_card_id', full_name='mci.SaveClusterItemsRequest.menu_card_id', index=0,
       number=1, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='cluster_items', full_name='mci.saveClusterItemsRequest.cluster_items', index=1,
+      name='cluster_items', full_name='mci.SaveClusterItemsRequest.cluster_items', index=1,
       number=2, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
@@ -719,20 +688,20 @@ _SAVECLUSTERITEMSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1295,
-  serialized_end=1383,
+  serialized_start=1276,
+  serialized_end=1364,
 )
 
 
 _TEXTDUMP = _descriptor.Descriptor(
-  name='textDump',
-  full_name='mci.textDump',
+  name='TextDump',
+  full_name='mci.TextDump',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='dump', full_name='mci.textDump.dump', index=0,
+      name='dump', full_name='mci.TextDump.dump', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
@@ -750,163 +719,155 @@ _TEXTDUMP = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1385,
-  serialized_end=1409,
+  serialized_start=1366,
+  serialized_end=1390,
 )
 
-_CLUSTER.fields_by_name['cluster_type'].enum_type = _ECLUSTERTYPE
-_CLUSTERITEM.fields_by_name['restaurant_price'].message_type = _MONEY
-_CLUSTERITEM.fields_by_name['takeaway_price'].message_type = _MONEY
+_CLUSTER.fields_by_name['cluster_type'].enum_type = _CLUSTERTYPE
+_CLUSTERITEM.fields_by_name['restaurant_price'].message_type = common__types__pb2._MONEY
+_CLUSTERITEM.fields_by_name['takeaway_price'].message_type = common__types__pb2._MONEY
 _CLUSTERITEMLIST.fields_by_name['cluster_item'].message_type = _CLUSTERITEM
 _CLUSTERLIST.fields_by_name['clusters'].message_type = _CLUSTER
 _SAVECLUSTERITEMSREQUEST.fields_by_name['cluster_items'].message_type = _CLUSTERITEM
-DESCRIPTOR.message_types_by_name['cluster'] = _CLUSTER
-DESCRIPTOR.message_types_by_name['clusterIdRequest'] = _CLUSTERIDREQUEST
-DESCRIPTOR.message_types_by_name['clusterItem'] = _CLUSTERITEM
-DESCRIPTOR.message_types_by_name['clusterItemId'] = _CLUSTERITEMID
-DESCRIPTOR.message_types_by_name['clusterItemList'] = _CLUSTERITEMLIST
-DESCRIPTOR.message_types_by_name['clusterItemSize'] = _CLUSTERITEMSIZE
-DESCRIPTOR.message_types_by_name['clusterList'] = _CLUSTERLIST
-DESCRIPTOR.message_types_by_name['deleteClusterItemRequest'] = _DELETECLUSTERITEMREQUEST
-DESCRIPTOR.message_types_by_name['duplicateClusterItemRequest'] = _DUPLICATECLUSTERITEMREQUEST
-DESCRIPTOR.message_types_by_name['duplicateMenuCardRequest'] = _DUPLICATEMENUCARDREQUEST
-DESCRIPTOR.message_types_by_name['exchangeClusterRequest'] = _EXCHANGECLUSTERREQUEST
-DESCRIPTOR.message_types_by_name['insertClusterItemRequest'] = _INSERTCLUSTERITEMREQUEST
-DESCRIPTOR.message_types_by_name['money'] = _MONEY
-DESCRIPTOR.message_types_by_name['menuCardId'] = _MENUCARDID
-DESCRIPTOR.message_types_by_name['saveClusterItemsRequest'] = _SAVECLUSTERITEMSREQUEST
-DESCRIPTOR.message_types_by_name['textDump'] = _TEXTDUMP
-DESCRIPTOR.enum_types_by_name['EclusterType'] = _ECLUSTERTYPE
+DESCRIPTOR.message_types_by_name['Cluster'] = _CLUSTER
+DESCRIPTOR.message_types_by_name['ClusterIdRequest'] = _CLUSTERIDREQUEST
+DESCRIPTOR.message_types_by_name['ClusterItem'] = _CLUSTERITEM
+DESCRIPTOR.message_types_by_name['ClusterItemId'] = _CLUSTERITEMID
+DESCRIPTOR.message_types_by_name['ClusterItemList'] = _CLUSTERITEMLIST
+DESCRIPTOR.message_types_by_name['ClusterItemSize'] = _CLUSTERITEMSIZE
+DESCRIPTOR.message_types_by_name['ClusterList'] = _CLUSTERLIST
+DESCRIPTOR.message_types_by_name['DeleteClusterItemRequest'] = _DELETECLUSTERITEMREQUEST
+DESCRIPTOR.message_types_by_name['DuplicateClusterItemRequest'] = _DUPLICATECLUSTERITEMREQUEST
+DESCRIPTOR.message_types_by_name['DuplicateMenuCardRequest'] = _DUPLICATEMENUCARDREQUEST
+DESCRIPTOR.message_types_by_name['ExchangeClusterRequest'] = _EXCHANGECLUSTERREQUEST
+DESCRIPTOR.message_types_by_name['InsertClusterItemRequest'] = _INSERTCLUSTERITEMREQUEST
+DESCRIPTOR.message_types_by_name['MenuCardId'] = _MENUCARDID
+DESCRIPTOR.message_types_by_name['SaveClusterItemsRequest'] = _SAVECLUSTERITEMSREQUEST
+DESCRIPTOR.message_types_by_name['TextDump'] = _TEXTDUMP
+DESCRIPTOR.enum_types_by_name['ClusterType'] = _CLUSTERTYPE
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
-cluster = _reflection.GeneratedProtocolMessageType('cluster', (_message.Message,), dict(
+Cluster = _reflection.GeneratedProtocolMessageType('Cluster', (_message.Message,), dict(
   DESCRIPTOR = _CLUSTER,
   __module__ = 'sql_menu_cluster_item_pb2'
-  # @@protoc_insertion_point(class_scope:mci.cluster)
+  # @@protoc_insertion_point(class_scope:mci.Cluster)
   ))
-_sym_db.RegisterMessage(cluster)
+_sym_db.RegisterMessage(Cluster)
 
-clusterIdRequest = _reflection.GeneratedProtocolMessageType('clusterIdRequest', (_message.Message,), dict(
+ClusterIdRequest = _reflection.GeneratedProtocolMessageType('ClusterIdRequest', (_message.Message,), dict(
   DESCRIPTOR = _CLUSTERIDREQUEST,
   __module__ = 'sql_menu_cluster_item_pb2'
-  # @@protoc_insertion_point(class_scope:mci.clusterIdRequest)
+  # @@protoc_insertion_point(class_scope:mci.ClusterIdRequest)
   ))
-_sym_db.RegisterMessage(clusterIdRequest)
+_sym_db.RegisterMessage(ClusterIdRequest)
 
-clusterItem = _reflection.GeneratedProtocolMessageType('clusterItem', (_message.Message,), dict(
+ClusterItem = _reflection.GeneratedProtocolMessageType('ClusterItem', (_message.Message,), dict(
   DESCRIPTOR = _CLUSTERITEM,
   __module__ = 'sql_menu_cluster_item_pb2'
-  # @@protoc_insertion_point(class_scope:mci.clusterItem)
+  # @@protoc_insertion_point(class_scope:mci.ClusterItem)
   ))
-_sym_db.RegisterMessage(clusterItem)
+_sym_db.RegisterMessage(ClusterItem)
 
-clusterItemId = _reflection.GeneratedProtocolMessageType('clusterItemId', (_message.Message,), dict(
+ClusterItemId = _reflection.GeneratedProtocolMessageType('ClusterItemId', (_message.Message,), dict(
   DESCRIPTOR = _CLUSTERITEMID,
   __module__ = 'sql_menu_cluster_item_pb2'
-  # @@protoc_insertion_point(class_scope:mci.clusterItemId)
+  # @@protoc_insertion_point(class_scope:mci.ClusterItemId)
   ))
-_sym_db.RegisterMessage(clusterItemId)
+_sym_db.RegisterMessage(ClusterItemId)
 
-clusterItemList = _reflection.GeneratedProtocolMessageType('clusterItemList', (_message.Message,), dict(
+ClusterItemList = _reflection.GeneratedProtocolMessageType('ClusterItemList', (_message.Message,), dict(
   DESCRIPTOR = _CLUSTERITEMLIST,
   __module__ = 'sql_menu_cluster_item_pb2'
-  # @@protoc_insertion_point(class_scope:mci.clusterItemList)
+  # @@protoc_insertion_point(class_scope:mci.ClusterItemList)
   ))
-_sym_db.RegisterMessage(clusterItemList)
+_sym_db.RegisterMessage(ClusterItemList)
 
-clusterItemSize = _reflection.GeneratedProtocolMessageType('clusterItemSize', (_message.Message,), dict(
+ClusterItemSize = _reflection.GeneratedProtocolMessageType('ClusterItemSize', (_message.Message,), dict(
   DESCRIPTOR = _CLUSTERITEMSIZE,
   __module__ = 'sql_menu_cluster_item_pb2'
-  # @@protoc_insertion_point(class_scope:mci.clusterItemSize)
+  # @@protoc_insertion_point(class_scope:mci.ClusterItemSize)
   ))
-_sym_db.RegisterMessage(clusterItemSize)
+_sym_db.RegisterMessage(ClusterItemSize)
 
-clusterList = _reflection.GeneratedProtocolMessageType('clusterList', (_message.Message,), dict(
+ClusterList = _reflection.GeneratedProtocolMessageType('ClusterList', (_message.Message,), dict(
   DESCRIPTOR = _CLUSTERLIST,
   __module__ = 'sql_menu_cluster_item_pb2'
-  # @@protoc_insertion_point(class_scope:mci.clusterList)
+  # @@protoc_insertion_point(class_scope:mci.ClusterList)
   ))
-_sym_db.RegisterMessage(clusterList)
+_sym_db.RegisterMessage(ClusterList)
 
-deleteClusterItemRequest = _reflection.GeneratedProtocolMessageType('deleteClusterItemRequest', (_message.Message,), dict(
+DeleteClusterItemRequest = _reflection.GeneratedProtocolMessageType('DeleteClusterItemRequest', (_message.Message,), dict(
   DESCRIPTOR = _DELETECLUSTERITEMREQUEST,
   __module__ = 'sql_menu_cluster_item_pb2'
-  # @@protoc_insertion_point(class_scope:mci.deleteClusterItemRequest)
+  # @@protoc_insertion_point(class_scope:mci.DeleteClusterItemRequest)
   ))
-_sym_db.RegisterMessage(deleteClusterItemRequest)
+_sym_db.RegisterMessage(DeleteClusterItemRequest)
 
-duplicateClusterItemRequest = _reflection.GeneratedProtocolMessageType('duplicateClusterItemRequest', (_message.Message,), dict(
+DuplicateClusterItemRequest = _reflection.GeneratedProtocolMessageType('DuplicateClusterItemRequest', (_message.Message,), dict(
   DESCRIPTOR = _DUPLICATECLUSTERITEMREQUEST,
   __module__ = 'sql_menu_cluster_item_pb2'
-  # @@protoc_insertion_point(class_scope:mci.duplicateClusterItemRequest)
+  # @@protoc_insertion_point(class_scope:mci.DuplicateClusterItemRequest)
   ))
-_sym_db.RegisterMessage(duplicateClusterItemRequest)
+_sym_db.RegisterMessage(DuplicateClusterItemRequest)
 
-duplicateMenuCardRequest = _reflection.GeneratedProtocolMessageType('duplicateMenuCardRequest', (_message.Message,), dict(
+DuplicateMenuCardRequest = _reflection.GeneratedProtocolMessageType('DuplicateMenuCardRequest', (_message.Message,), dict(
   DESCRIPTOR = _DUPLICATEMENUCARDREQUEST,
   __module__ = 'sql_menu_cluster_item_pb2'
-  # @@protoc_insertion_point(class_scope:mci.duplicateMenuCardRequest)
+  # @@protoc_insertion_point(class_scope:mci.DuplicateMenuCardRequest)
   ))
-_sym_db.RegisterMessage(duplicateMenuCardRequest)
+_sym_db.RegisterMessage(DuplicateMenuCardRequest)
 
-exchangeClusterRequest = _reflection.GeneratedProtocolMessageType('exchangeClusterRequest', (_message.Message,), dict(
+ExchangeClusterRequest = _reflection.GeneratedProtocolMessageType('ExchangeClusterRequest', (_message.Message,), dict(
   DESCRIPTOR = _EXCHANGECLUSTERREQUEST,
   __module__ = 'sql_menu_cluster_item_pb2'
-  # @@protoc_insertion_point(class_scope:mci.exchangeClusterRequest)
+  # @@protoc_insertion_point(class_scope:mci.ExchangeClusterRequest)
   ))
-_sym_db.RegisterMessage(exchangeClusterRequest)
+_sym_db.RegisterMessage(ExchangeClusterRequest)
 
-insertClusterItemRequest = _reflection.GeneratedProtocolMessageType('insertClusterItemRequest', (_message.Message,), dict(
+InsertClusterItemRequest = _reflection.GeneratedProtocolMessageType('InsertClusterItemRequest', (_message.Message,), dict(
   DESCRIPTOR = _INSERTCLUSTERITEMREQUEST,
   __module__ = 'sql_menu_cluster_item_pb2'
-  # @@protoc_insertion_point(class_scope:mci.insertClusterItemRequest)
+  # @@protoc_insertion_point(class_scope:mci.InsertClusterItemRequest)
   ))
-_sym_db.RegisterMessage(insertClusterItemRequest)
+_sym_db.RegisterMessage(InsertClusterItemRequest)
 
-money = _reflection.GeneratedProtocolMessageType('money', (_message.Message,), dict(
-  DESCRIPTOR = _MONEY,
-  __module__ = 'sql_menu_cluster_item_pb2'
-  # @@protoc_insertion_point(class_scope:mci.money)
-  ))
-_sym_db.RegisterMessage(money)
-
-menuCardId = _reflection.GeneratedProtocolMessageType('menuCardId', (_message.Message,), dict(
+MenuCardId = _reflection.GeneratedProtocolMessageType('MenuCardId', (_message.Message,), dict(
   DESCRIPTOR = _MENUCARDID,
   __module__ = 'sql_menu_cluster_item_pb2'
-  # @@protoc_insertion_point(class_scope:mci.menuCardId)
+  # @@protoc_insertion_point(class_scope:mci.MenuCardId)
   ))
-_sym_db.RegisterMessage(menuCardId)
+_sym_db.RegisterMessage(MenuCardId)
 
-saveClusterItemsRequest = _reflection.GeneratedProtocolMessageType('saveClusterItemsRequest', (_message.Message,), dict(
+SaveClusterItemsRequest = _reflection.GeneratedProtocolMessageType('SaveClusterItemsRequest', (_message.Message,), dict(
   DESCRIPTOR = _SAVECLUSTERITEMSREQUEST,
   __module__ = 'sql_menu_cluster_item_pb2'
-  # @@protoc_insertion_point(class_scope:mci.saveClusterItemsRequest)
+  # @@protoc_insertion_point(class_scope:mci.SaveClusterItemsRequest)
   ))
-_sym_db.RegisterMessage(saveClusterItemsRequest)
+_sym_db.RegisterMessage(SaveClusterItemsRequest)
 
-textDump = _reflection.GeneratedProtocolMessageType('textDump', (_message.Message,), dict(
+TextDump = _reflection.GeneratedProtocolMessageType('TextDump', (_message.Message,), dict(
   DESCRIPTOR = _TEXTDUMP,
   __module__ = 'sql_menu_cluster_item_pb2'
-  # @@protoc_insertion_point(class_scope:mci.textDump)
+  # @@protoc_insertion_point(class_scope:mci.TextDump)
   ))
-_sym_db.RegisterMessage(textDump)
+_sym_db.RegisterMessage(TextDump)
 
 
 DESCRIPTOR.has_options = True
 DESCRIPTOR._options = _descriptor._ParseOptions(descriptor_pb2.FileOptions(), _b('\n\031com.hha.menu.cluster.itemP\001\252\002\013menuService'))
 
 _MENUCLUSTERITEMSERVICE = _descriptor.ServiceDescriptor(
-  name='menuClusterItemService',
-  full_name='mci.menuClusterItemService',
+  name='MenuClusterItemService',
+  full_name='mci.MenuClusterItemService',
   file=DESCRIPTOR,
   index=0,
   options=None,
-  serialized_start=1549,
-  serialized_end=2482,
+  serialized_start=1529,
+  serialized_end=2462,
   methods=[
   _descriptor.MethodDescriptor(
     name='BackupClusterItems',
-    full_name='mci.menuClusterItemService.BackupClusterItems',
+    full_name='mci.MenuClusterItemService.BackupClusterItems',
     index=0,
     containing_service=None,
     input_type=common__types__pb2._EMPTY,
@@ -915,7 +876,7 @@ _MENUCLUSTERITEMSERVICE = _descriptor.ServiceDescriptor(
   ),
   _descriptor.MethodDescriptor(
     name='DeleteClusterItem',
-    full_name='mci.menuClusterItemService.DeleteClusterItem',
+    full_name='mci.MenuClusterItemService.DeleteClusterItem',
     index=1,
     containing_service=None,
     input_type=_DELETECLUSTERITEMREQUEST,
@@ -924,7 +885,7 @@ _MENUCLUSTERITEMSERVICE = _descriptor.ServiceDescriptor(
   ),
   _descriptor.MethodDescriptor(
     name='DuplicateClusterItem',
-    full_name='mci.menuClusterItemService.DuplicateClusterItem',
+    full_name='mci.MenuClusterItemService.DuplicateClusterItem',
     index=2,
     containing_service=None,
     input_type=_DUPLICATECLUSTERITEMREQUEST,
@@ -933,7 +894,7 @@ _MENUCLUSTERITEMSERVICE = _descriptor.ServiceDescriptor(
   ),
   _descriptor.MethodDescriptor(
     name='DuplicateMenuCard',
-    full_name='mci.menuClusterItemService.DuplicateMenuCard',
+    full_name='mci.MenuClusterItemService.DuplicateMenuCard',
     index=3,
     containing_service=None,
     input_type=_DUPLICATEMENUCARDREQUEST,
@@ -942,7 +903,7 @@ _MENUCLUSTERITEMSERVICE = _descriptor.ServiceDescriptor(
   ),
   _descriptor.MethodDescriptor(
     name='ExchangeCluster',
-    full_name='mci.menuClusterItemService.ExchangeCluster',
+    full_name='mci.MenuClusterItemService.ExchangeCluster',
     index=4,
     containing_service=None,
     input_type=_EXCHANGECLUSTERREQUEST,
@@ -951,7 +912,7 @@ _MENUCLUSTERITEMSERVICE = _descriptor.ServiceDescriptor(
   ),
   _descriptor.MethodDescriptor(
     name='FindAllExcelItems',
-    full_name='mci.menuClusterItemService.FindAllExcelItems',
+    full_name='mci.MenuClusterItemService.FindAllExcelItems',
     index=5,
     containing_service=None,
     input_type=_MENUCARDID,
@@ -960,7 +921,7 @@ _MENUCLUSTERITEMSERVICE = _descriptor.ServiceDescriptor(
   ),
   _descriptor.MethodDescriptor(
     name='GetSize',
-    full_name='mci.menuClusterItemService.GetSize',
+    full_name='mci.MenuClusterItemService.GetSize',
     index=6,
     containing_service=None,
     input_type=_MENUCARDID,
@@ -969,7 +930,7 @@ _MENUCLUSTERITEMSERVICE = _descriptor.ServiceDescriptor(
   ),
   _descriptor.MethodDescriptor(
     name='InsertClusterItem',
-    full_name='mci.menuClusterItemService.InsertClusterItem',
+    full_name='mci.MenuClusterItemService.InsertClusterItem',
     index=7,
     containing_service=None,
     input_type=_INSERTCLUSTERITEMREQUEST,
@@ -978,7 +939,7 @@ _MENUCLUSTERITEMSERVICE = _descriptor.ServiceDescriptor(
   ),
   _descriptor.MethodDescriptor(
     name='MysqlDump',
-    full_name='mci.menuClusterItemService.MysqlDump',
+    full_name='mci.MenuClusterItemService.MysqlDump',
     index=8,
     containing_service=None,
     input_type=common__types__pb2._EMPTY,
@@ -987,7 +948,7 @@ _MENUCLUSTERITEMSERVICE = _descriptor.ServiceDescriptor(
   ),
   _descriptor.MethodDescriptor(
     name='SaveAllClusterItems',
-    full_name='mci.menuClusterItemService.SaveAllClusterItems',
+    full_name='mci.MenuClusterItemService.SaveAllClusterItems',
     index=9,
     containing_service=None,
     input_type=_SAVECLUSTERITEMSREQUEST,
@@ -996,7 +957,7 @@ _MENUCLUSTERITEMSERVICE = _descriptor.ServiceDescriptor(
   ),
   _descriptor.MethodDescriptor(
     name='SelectClusterItems',
-    full_name='mci.menuClusterItemService.SelectClusterItems',
+    full_name='mci.MenuClusterItemService.SelectClusterItems',
     index=10,
     containing_service=None,
     input_type=_CLUSTERIDREQUEST,
@@ -1005,7 +966,7 @@ _MENUCLUSTERITEMSERVICE = _descriptor.ServiceDescriptor(
   ),
   _descriptor.MethodDescriptor(
     name='UpdateClusterItem',
-    full_name='mci.menuClusterItemService.UpdateClusterItem',
+    full_name='mci.MenuClusterItemService.UpdateClusterItem',
     index=11,
     containing_service=None,
     input_type=_CLUSTERITEM,
@@ -1014,7 +975,7 @@ _MENUCLUSTERITEMSERVICE = _descriptor.ServiceDescriptor(
   ),
   _descriptor.MethodDescriptor(
     name='RenumberClusterItems',
-    full_name='mci.menuClusterItemService.RenumberClusterItems',
+    full_name='mci.MenuClusterItemService.RenumberClusterItems',
     index=12,
     containing_service=None,
     input_type=_MENUCARDID,
@@ -1023,7 +984,7 @@ _MENUCLUSTERITEMSERVICE = _descriptor.ServiceDescriptor(
   ),
   _descriptor.MethodDescriptor(
     name='RemoveAllClusterItemsFromMenuCard',
-    full_name='mci.menuClusterItemService.RemoveAllClusterItemsFromMenuCard',
+    full_name='mci.MenuClusterItemService.RemoveAllClusterItemsFromMenuCard',
     index=13,
     containing_service=None,
     input_type=_MENUCARDID,
@@ -1032,7 +993,7 @@ _MENUCLUSTERITEMSERVICE = _descriptor.ServiceDescriptor(
   ),
   _descriptor.MethodDescriptor(
     name='RestoreClusterItems',
-    full_name='mci.menuClusterItemService.RestoreClusterItems',
+    full_name='mci.MenuClusterItemService.RestoreClusterItems',
     index=14,
     containing_service=None,
     input_type=common__types__pb2._EMPTY,
@@ -1042,6 +1003,6 @@ _MENUCLUSTERITEMSERVICE = _descriptor.ServiceDescriptor(
 ])
 _sym_db.RegisterServiceDescriptor(_MENUCLUSTERITEMSERVICE)
 
-DESCRIPTOR.services_by_name['menuClusterItemService'] = _MENUCLUSTERITEMSERVICE
+DESCRIPTOR.services_by_name['MenuClusterItemService'] = _MENUCLUSTERITEMSERVICE
 
 # @@protoc_insertion_point(module_scope)

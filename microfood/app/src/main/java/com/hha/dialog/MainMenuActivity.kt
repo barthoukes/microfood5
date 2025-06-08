@@ -1,29 +1,25 @@
+package com.hha.dialog
+
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.util.Log
 import android.widget.Toast
 import androidx.annotation.StringRes
-import androidx.fragment.app.DialogFragment
-import androidx.fragment.app.viewModels
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.viewModelScope
+import com.hha.grpc.GrpcServiceFactory
+import com.hha.service.AddressService
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import tech.hha.microfood.R
 import tech.hha.microfood.databinding.DialogMainMenuBinding
 
-class MainMenuDialog : DialogFragment() {
+class MainMenuActivity : AppCompatActivity() {
     // View binding
-    private var _binding: DialogMainMenuBinding? = null
-    private val binding get() = _binding!!
+    private lateinit var binding: DialogMainMenuBinding
 
     // Connection status colors
     private val connectionColors = listOf(
@@ -32,98 +28,88 @@ class MainMenuDialog : DialogFragment() {
     )
     private var connectionColorIndex = 0
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        _binding = DialogMainMenuBinding.inflate(inflater, container, false)
-        return binding.root
-    }
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        binding = DialogMainMenuBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        setupDialog()
+        setupActivity()
         setupClickListeners()
         setupObservers()
         startConnectionUpdates()
     }
 
-    private fun setupDialog() {
-        // Set dialog window properties
-        dialog?.window?.apply {
-            setBackgroundDrawableResource(R.drawable.backrepeat)
-            setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
-        }
+    private fun setupActivity() {
+        // Set window properties if needed
+        window.setBackgroundDrawableResource(R.drawable.backrepeat)
     }
 
     private fun setupClickListeners() {
         // Table overview button
         binding.tafelOverzicht.apply {
             setOnClickListener { navigateToTableOverview() }
-            setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, R.drawable.sitin)
+            setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, R.drawable.sitin_yellow)
         }
 
         // Takeaway button
         binding.buttonTakeaway.apply {
             setOnClickListener { navigateToTakeaway() }
-            setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, R.drawable.bag)
+            setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, R.drawable.bag_yellow)
         }
 
         // Settings button
         binding.buttonSettings.apply {
             setOnClickListener { navigateToSettings() }
-            setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, R.drawable.settings48)
+            setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, R.drawable.settings_yellow)
         }
 
         // Update button
         binding.buttonUpdate.apply {
             setOnClickListener { updateMenuCard() }
-            setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, R.drawable.menu)
+            setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, R.drawable.menu_yellow)
         }
 
         // Calculator button
         binding.buttonCalculator.apply {
             setOnClickListener { openCalculator() }
-            setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, R.drawable.icon_calculator)
+            setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, R.drawable.icon_calculator_yellow)
         }
 
         // Language button
         binding.buttonChangeLanguage.apply {
             setOnClickListener { changeLanguage() }
-            setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, R.drawable.languages)
+            setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, R.drawable.languages_yellow)
         }
 
         // Stop button
         binding.buttonStop.apply {
             setOnClickListener { confirmExit() }
-            setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, R.drawable.shutdown)
+            setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, R.drawable.shutdown_yellow)
         }
 
         // About button
         binding.aboutUs.apply {
             setOnClickListener { showAbout() }
-            setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, R.drawable.info48)
+            setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, R.drawable.info_icon_yellow)
         }
     }
 
     private fun setupObservers() {
-//        viewModel.restaurantName.observe(viewLifecycleOwner) { name ->
+//        viewModel.restaurantName.observe(this) { name ->
 //            binding.textInfo.text = name
 //        }
 //
-//        viewModel.connectionStatus.observe(viewLifecycleOwner) { isConnected ->
+//        viewModel.connectionStatus.observe(this) { isConnected ->
 //            updateConnectionStatus(isConnected)
 //        }
 //
-//        viewModel.bufferStatus.observe(viewLifecycleOwner) { level ->
+//        viewModel.bufferStatus.observe(this) { level ->
 //            updateBufferStatus(level)
 //        }
     }
 
     private fun startConnectionUpdates() {
-        viewLifecycleOwner.lifecycleScope.launch {
+        lifecycleScope.launch {
             while (true) {
                 //viewModel.checkConnectionStatus()
                 delay(10_000) // Update every 10 seconds
@@ -151,28 +137,33 @@ class MainMenuDialog : DialogFragment() {
 
     // Navigation functions
     private fun navigateToTableOverview() {
-        //findNavController().navigate(R.id.action_to_table_overview)
+        val addressService : AddressService = GrpcServiceFactory.createAddressService()
+        val response = addressService.getAllAddressLines()
+        Log.i("FirstFragment", "Response: $response")
+            // You could also update UI here with the response
+
+        //startActivity(Intent(this, TableOverviewActivity::class.java))
     }
 
     private fun navigateToTakeaway() {
-        //findNavController().navigate(R.id.action_to_takeaway)
+        //startActivity(Intent(this, TakeawayActivity::class.java))
     }
 
     private fun navigateToSettings() {
-        //findNavController().navigate(R.id.action_to_settings)
+        //startActivity(Intent(this, SettingsActivity::class.java))
     }
 
     private fun updateMenuCard() {
-        viewLifecycleOwner.lifecycleScope.launch {
-        // @todo create a class that retrieves the menu card every minute.
-        //viewModel.updateMenuCard()
+        lifecycleScope.launch {
+            // @todo create a class that retrieves the menu card every minute.
+            //viewModel.updateMenuCard()
             showToast(R.string.menu_update_started)
         }
     }
 
     private fun openCalculator() {
         try {
-            startActivity(requireContext().packageManager.getLaunchIntentForPackage("com.android.calculator2"))
+            startActivity(packageManager.getLaunchIntentForPackage("com.android.calculator2"))
         } catch (e: Exception) {
             //showToast(R.string.calculator_not_found)
         }
@@ -184,11 +175,11 @@ class MainMenuDialog : DialogFragment() {
     }
 
     private fun confirmExit() {
-//        MaterialAlertDialogBuilder(requireContext())
+//        MaterialAlertDialogBuilder(this)
 //            .setTitle(R.string.confirm_exit_title)
 //            .setMessage(R.string.confirm_exit_message)
 //            .setPositiveButton(R.string.exit) { _, _ ->
-//                requireActivity().finish()
+//                finish()
 //            }
 //            .setNegativeButton(R.string.cancel, null)
 //            .show()
@@ -212,15 +203,12 @@ class MainMenuDialog : DialogFragment() {
     }
 
     private fun showToast(@StringRes messageRes: Int) {
-        Toast.makeText(requireContext(), messageRes, Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, messageRes, Toast.LENGTH_SHORT).show()
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
-    }
-
-    companion object {
-        fun newInstance() = MainMenuDialog()
-    }
+//    companion object {
+//        fun start(context: Context) {
+//            context.startActivity(Intent(context, MainMenuActivity::class.java))
+//        }
+    //}
 }

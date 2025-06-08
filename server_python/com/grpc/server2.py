@@ -3,7 +3,7 @@ from com.grpc import sql_address_pb2_grpc
 from concurrent import futures
 import grpc
 
-class SqlAddressServicer(sql_address_pb2_grpc.AddressServiceServicer):
+class AddressServicer(sql_address_pb2_grpc.AddressServiceServicer):
     def GetAllLines(self, request, context):
         print(f"GetAllLines: {request.payload}")
         all = sql_address_pb2.AddressLineList()
@@ -21,12 +21,13 @@ class SqlAddressServicer(sql_address_pb2_grpc.AddressServiceServicer):
 
 def serve():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=1))
-    sql_address_servicer = SqlAddressServicer()
-    sql_address_pb2_grpc.add_AddressServiceServicer_to_server(sql_address_servicer, server)
-    server.add_insecure_port("0.0.0.0:50051")
+    address_servicer = AddressServicer()
+    sql_address_pb2_grpc.add_AddressServiceServicer_to_server(address_servicer, server)
+    server.add_insecure_port("0.0.0.0:50053")
     server.start()
     print("Server started")
     server.wait_for_termination()
+    print("Server stopped")
 
 if __name__ == "__main__":
     serve()

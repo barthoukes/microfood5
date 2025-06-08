@@ -1,14 +1,15 @@
 from com.grpc import sql_address_pb2_grpc
 from com.grpc import sql_address_pb2
+from com.grpc import common_types_pb2
 import grpc
 
 def run():
-    with grpc.insecure_channel("127.0.0.1:50051") as channel:
-        server = sql_address_pb2_grpc.SqlAddressServiceStub(channel)
-        #msg = sql_address_pb2.AddressLineList()
-        msg = generate_content()
-        response = server.getAllLines(msg)
-        print("Received AddressLineList:")
+    with grpc.insecure_channel("127.0.0.1:50053") as channel:
+        server = sql_address_pb2_grpc.AddressServiceStub(channel)
+        msg = common_types_pb2.Empty()
+        #msg = generate_content()
+        response = server.GetAllLines(msg)
+        print("Received AddressLineList:", response)
         for line in response.line:
             print(f"ID: {line.line_id}, Value: '{line.value}', Features: {line.features}")
 

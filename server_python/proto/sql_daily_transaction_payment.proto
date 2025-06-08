@@ -31,7 +31,6 @@ service DailyTransactionPaymentService
 {
     rpc AddPayment(AddPaymentRequest)  returns (common.Empty);
     rpc AddPayment2(AddPaymentRequest2)  returns (common.Empty);	
-    rpc CopyTransaction(CopyTransactionRequest)  returns (common.Empty);               
     rpc CreatePartialIndex(TransactionId)  returns (PartialIndex);
     rpc CancelMoneyPayments(TransactionId)  returns (common.Empty);
     rpc CancelPayment(CancelPaymentRequest)  returns (common.Empty);
@@ -129,12 +128,6 @@ message AddPaymentRequest2
     int32 total = 3;
     string end_time = 4;
     common.Payed is_paid = 5;
-}
-
-message CopyTransactionRequest
-{
-    string new_table = 1;
-    int32  new_transaction_id = 2;
 }
 
 message TransactionId

@@ -65,19 +65,6 @@ class DailyTransactionPaymentService(channel: ManagedChannel) : BaseGrpcService<
         }
     }
 
-    fun copyTransaction(newTable: String, newTransactionId: Int): Boolean = runBlocking {
-        try {
-            val request = CopyTransactionRequest.newBuilder()
-                .setNewTable(newTable)
-                .setNewTransactionId(newTransactionId)
-                .build()
-            stub.copyTransaction(request)
-            true
-        } catch (e: Exception) {
-            false
-        }
-    }
-
     fun createPartialIndex(transactionId: Int): Int? = runBlocking {
         try {
             val request = TransactionId.newBuilder()

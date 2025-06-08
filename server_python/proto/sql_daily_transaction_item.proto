@@ -200,7 +200,7 @@ message CreateItemRequest
     int32 original_price = 12;
     int32 original_half_price = 13;
     double tax = 14;
-    int32 locations = 15;  // Assuming EitemLocations can be represented as int32.
+    int32 locations = 15;  // Assuming EItemLocations can be represented as int32.
     int32 time_frame_index = 16;  // Assuming short can be represented as int32.
     int32 device_id = 17;  // Assuming short can be represented as int32.
     int32 cluster_id = 18;  // Assuming short can be represented as int32.
@@ -227,7 +227,7 @@ message CreateItemWithTimestampRequest
     int32 original_price = 13;
     int32 original_half_price = 14;
     double tax = 15;
-    int32 locations = 16;  // EitemLocations can be represented as int32.
+    int32 locations = 16;  // EItemLocations can be represented as int32.
     int32 time_frame_index = 17;  // Assuming short can be represented as int32.
     int32 device_id = 18;  // Assuming short can be represented as int32.
     int32 cluster_id = 19;  // Assuming short can be represented as int32.

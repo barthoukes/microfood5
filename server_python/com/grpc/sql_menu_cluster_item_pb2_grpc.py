@@ -5,7 +5,7 @@ import common_types_pb2 as common__types__pb2
 import sql_menu_cluster_item_pb2 as sql__menu__cluster__item__pb2
 
 
-class menuClusterItemServiceStub(object):
+class MenuClusterItemServiceStub(object):
   # missing associated documentation comment in .proto file
   pass
 
@@ -16,83 +16,83 @@ class menuClusterItemServiceStub(object):
       channel: A grpc.Channel.
     """
     self.BackupClusterItems = channel.unary_unary(
-        '/mci.menuClusterItemService/BackupClusterItems',
+        '/mci.MenuClusterItemService/BackupClusterItems',
         request_serializer=common__types__pb2.Empty.SerializeToString,
         response_deserializer=common__types__pb2.Empty.FromString,
         )
     self.DeleteClusterItem = channel.unary_unary(
-        '/mci.menuClusterItemService/DeleteClusterItem',
-        request_serializer=sql__menu__cluster__item__pb2.deleteClusterItemRequest.SerializeToString,
+        '/mci.MenuClusterItemService/DeleteClusterItem',
+        request_serializer=sql__menu__cluster__item__pb2.DeleteClusterItemRequest.SerializeToString,
         response_deserializer=common__types__pb2.Empty.FromString,
         )
     self.DuplicateClusterItem = channel.unary_unary(
-        '/mci.menuClusterItemService/DuplicateClusterItem',
-        request_serializer=sql__menu__cluster__item__pb2.duplicateClusterItemRequest.SerializeToString,
+        '/mci.MenuClusterItemService/DuplicateClusterItem',
+        request_serializer=sql__menu__cluster__item__pb2.DuplicateClusterItemRequest.SerializeToString,
         response_deserializer=common__types__pb2.Empty.FromString,
         )
     self.DuplicateMenuCard = channel.unary_unary(
-        '/mci.menuClusterItemService/DuplicateMenuCard',
-        request_serializer=sql__menu__cluster__item__pb2.duplicateMenuCardRequest.SerializeToString,
+        '/mci.MenuClusterItemService/DuplicateMenuCard',
+        request_serializer=sql__menu__cluster__item__pb2.DuplicateMenuCardRequest.SerializeToString,
         response_deserializer=common__types__pb2.Empty.FromString,
         )
     self.ExchangeCluster = channel.unary_unary(
-        '/mci.menuClusterItemService/ExchangeCluster',
-        request_serializer=sql__menu__cluster__item__pb2.exchangeClusterRequest.SerializeToString,
+        '/mci.MenuClusterItemService/ExchangeCluster',
+        request_serializer=sql__menu__cluster__item__pb2.ExchangeClusterRequest.SerializeToString,
         response_deserializer=common__types__pb2.Empty.FromString,
         )
     self.FindAllExcelItems = channel.unary_unary(
-        '/mci.menuClusterItemService/FindAllExcelItems',
-        request_serializer=sql__menu__cluster__item__pb2.menuCardId.SerializeToString,
-        response_deserializer=sql__menu__cluster__item__pb2.clusterItemList.FromString,
+        '/mci.MenuClusterItemService/FindAllExcelItems',
+        request_serializer=sql__menu__cluster__item__pb2.MenuCardId.SerializeToString,
+        response_deserializer=sql__menu__cluster__item__pb2.ClusterItemList.FromString,
         )
     self.GetSize = channel.unary_unary(
-        '/mci.menuClusterItemService/GetSize',
-        request_serializer=sql__menu__cluster__item__pb2.menuCardId.SerializeToString,
-        response_deserializer=sql__menu__cluster__item__pb2.clusterItemSize.FromString,
+        '/mci.MenuClusterItemService/GetSize',
+        request_serializer=sql__menu__cluster__item__pb2.MenuCardId.SerializeToString,
+        response_deserializer=sql__menu__cluster__item__pb2.ClusterItemSize.FromString,
         )
     self.InsertClusterItem = channel.unary_unary(
-        '/mci.menuClusterItemService/InsertClusterItem',
-        request_serializer=sql__menu__cluster__item__pb2.insertClusterItemRequest.SerializeToString,
+        '/mci.MenuClusterItemService/InsertClusterItem',
+        request_serializer=sql__menu__cluster__item__pb2.InsertClusterItemRequest.SerializeToString,
         response_deserializer=common__types__pb2.Empty.FromString,
         )
     self.MysqlDump = channel.unary_unary(
-        '/mci.menuClusterItemService/MysqlDump',
+        '/mci.MenuClusterItemService/MysqlDump',
         request_serializer=common__types__pb2.Empty.SerializeToString,
-        response_deserializer=sql__menu__cluster__item__pb2.textDump.FromString,
+        response_deserializer=sql__menu__cluster__item__pb2.TextDump.FromString,
         )
     self.SaveAllClusterItems = channel.unary_unary(
-        '/mci.menuClusterItemService/SaveAllClusterItems',
-        request_serializer=sql__menu__cluster__item__pb2.saveClusterItemsRequest.SerializeToString,
+        '/mci.MenuClusterItemService/SaveAllClusterItems',
+        request_serializer=sql__menu__cluster__item__pb2.SaveClusterItemsRequest.SerializeToString,
         response_deserializer=common__types__pb2.Empty.FromString,
         )
     self.SelectClusterItems = channel.unary_unary(
-        '/mci.menuClusterItemService/SelectClusterItems',
-        request_serializer=sql__menu__cluster__item__pb2.clusterIdRequest.SerializeToString,
-        response_deserializer=sql__menu__cluster__item__pb2.clusterItemList.FromString,
+        '/mci.MenuClusterItemService/SelectClusterItems',
+        request_serializer=sql__menu__cluster__item__pb2.ClusterIdRequest.SerializeToString,
+        response_deserializer=sql__menu__cluster__item__pb2.ClusterItemList.FromString,
         )
     self.UpdateClusterItem = channel.unary_unary(
-        '/mci.menuClusterItemService/UpdateClusterItem',
-        request_serializer=sql__menu__cluster__item__pb2.clusterItem.SerializeToString,
+        '/mci.MenuClusterItemService/UpdateClusterItem',
+        request_serializer=sql__menu__cluster__item__pb2.ClusterItem.SerializeToString,
         response_deserializer=common__types__pb2.Empty.FromString,
         )
     self.RenumberClusterItems = channel.unary_unary(
-        '/mci.menuClusterItemService/RenumberClusterItems',
-        request_serializer=sql__menu__cluster__item__pb2.menuCardId.SerializeToString,
+        '/mci.MenuClusterItemService/RenumberClusterItems',
+        request_serializer=sql__menu__cluster__item__pb2.MenuCardId.SerializeToString,
         response_deserializer=common__types__pb2.Empty.FromString,
         )
     self.RemoveAllClusterItemsFromMenuCard = channel.unary_unary(
-        '/mci.menuClusterItemService/RemoveAllClusterItemsFromMenuCard',
-        request_serializer=sql__menu__cluster__item__pb2.menuCardId.SerializeToString,
+        '/mci.MenuClusterItemService/RemoveAllClusterItemsFromMenuCard',
+        request_serializer=sql__menu__cluster__item__pb2.MenuCardId.SerializeToString,
         response_deserializer=common__types__pb2.Empty.FromString,
         )
     self.RestoreClusterItems = channel.unary_unary(
-        '/mci.menuClusterItemService/RestoreClusterItems',
+        '/mci.MenuClusterItemService/RestoreClusterItems',
         request_serializer=common__types__pb2.Empty.SerializeToString,
         response_deserializer=common__types__pb2.Empty.FromString,
         )
 
 
-class menuClusterItemServiceServicer(object):
+class MenuClusterItemServiceServicer(object):
   # missing associated documentation comment in .proto file
   pass
 
@@ -202,7 +202,7 @@ class menuClusterItemServiceServicer(object):
     raise NotImplementedError('Method not implemented!')
 
 
-def add_menuClusterItemServiceServicer_to_server(servicer, server):
+def add_MenuClusterItemServiceServicer_to_server(servicer, server):
   rpc_method_handlers = {
       'BackupClusterItems': grpc.unary_unary_rpc_method_handler(
           servicer.BackupClusterItems,
@@ -211,67 +211,67 @@ def add_menuClusterItemServiceServicer_to_server(servicer, server):
       ),
       'DeleteClusterItem': grpc.unary_unary_rpc_method_handler(
           servicer.DeleteClusterItem,
-          request_deserializer=sql__menu__cluster__item__pb2.deleteClusterItemRequest.FromString,
+          request_deserializer=sql__menu__cluster__item__pb2.DeleteClusterItemRequest.FromString,
           response_serializer=common__types__pb2.Empty.SerializeToString,
       ),
       'DuplicateClusterItem': grpc.unary_unary_rpc_method_handler(
           servicer.DuplicateClusterItem,
-          request_deserializer=sql__menu__cluster__item__pb2.duplicateClusterItemRequest.FromString,
+          request_deserializer=sql__menu__cluster__item__pb2.DuplicateClusterItemRequest.FromString,
           response_serializer=common__types__pb2.Empty.SerializeToString,
       ),
       'DuplicateMenuCard': grpc.unary_unary_rpc_method_handler(
           servicer.DuplicateMenuCard,
-          request_deserializer=sql__menu__cluster__item__pb2.duplicateMenuCardRequest.FromString,
+          request_deserializer=sql__menu__cluster__item__pb2.DuplicateMenuCardRequest.FromString,
           response_serializer=common__types__pb2.Empty.SerializeToString,
       ),
       'ExchangeCluster': grpc.unary_unary_rpc_method_handler(
           servicer.ExchangeCluster,
-          request_deserializer=sql__menu__cluster__item__pb2.exchangeClusterRequest.FromString,
+          request_deserializer=sql__menu__cluster__item__pb2.ExchangeClusterRequest.FromString,
           response_serializer=common__types__pb2.Empty.SerializeToString,
       ),
       'FindAllExcelItems': grpc.unary_unary_rpc_method_handler(
           servicer.FindAllExcelItems,
-          request_deserializer=sql__menu__cluster__item__pb2.menuCardId.FromString,
-          response_serializer=sql__menu__cluster__item__pb2.clusterItemList.SerializeToString,
+          request_deserializer=sql__menu__cluster__item__pb2.MenuCardId.FromString,
+          response_serializer=sql__menu__cluster__item__pb2.ClusterItemList.SerializeToString,
       ),
       'GetSize': grpc.unary_unary_rpc_method_handler(
           servicer.GetSize,
-          request_deserializer=sql__menu__cluster__item__pb2.menuCardId.FromString,
-          response_serializer=sql__menu__cluster__item__pb2.clusterItemSize.SerializeToString,
+          request_deserializer=sql__menu__cluster__item__pb2.MenuCardId.FromString,
+          response_serializer=sql__menu__cluster__item__pb2.ClusterItemSize.SerializeToString,
       ),
       'InsertClusterItem': grpc.unary_unary_rpc_method_handler(
           servicer.InsertClusterItem,
-          request_deserializer=sql__menu__cluster__item__pb2.insertClusterItemRequest.FromString,
+          request_deserializer=sql__menu__cluster__item__pb2.InsertClusterItemRequest.FromString,
           response_serializer=common__types__pb2.Empty.SerializeToString,
       ),
       'MysqlDump': grpc.unary_unary_rpc_method_handler(
           servicer.MysqlDump,
           request_deserializer=common__types__pb2.Empty.FromString,
-          response_serializer=sql__menu__cluster__item__pb2.textDump.SerializeToString,
+          response_serializer=sql__menu__cluster__item__pb2.TextDump.SerializeToString,
       ),
       'SaveAllClusterItems': grpc.unary_unary_rpc_method_handler(
           servicer.SaveAllClusterItems,
-          request_deserializer=sql__menu__cluster__item__pb2.saveClusterItemsRequest.FromString,
+          request_deserializer=sql__menu__cluster__item__pb2.SaveClusterItemsRequest.FromString,
           response_serializer=common__types__pb2.Empty.SerializeToString,
       ),
       'SelectClusterItems': grpc.unary_unary_rpc_method_handler(
           servicer.SelectClusterItems,
-          request_deserializer=sql__menu__cluster__item__pb2.clusterIdRequest.FromString,
-          response_serializer=sql__menu__cluster__item__pb2.clusterItemList.SerializeToString,
+          request_deserializer=sql__menu__cluster__item__pb2.ClusterIdRequest.FromString,
+          response_serializer=sql__menu__cluster__item__pb2.ClusterItemList.SerializeToString,
       ),
       'UpdateClusterItem': grpc.unary_unary_rpc_method_handler(
           servicer.UpdateClusterItem,
-          request_deserializer=sql__menu__cluster__item__pb2.clusterItem.FromString,
+          request_deserializer=sql__menu__cluster__item__pb2.ClusterItem.FromString,
           response_serializer=common__types__pb2.Empty.SerializeToString,
       ),
       'RenumberClusterItems': grpc.unary_unary_rpc_method_handler(
           servicer.RenumberClusterItems,
-          request_deserializer=sql__menu__cluster__item__pb2.menuCardId.FromString,
+          request_deserializer=sql__menu__cluster__item__pb2.MenuCardId.FromString,
           response_serializer=common__types__pb2.Empty.SerializeToString,
       ),
       'RemoveAllClusterItemsFromMenuCard': grpc.unary_unary_rpc_method_handler(
           servicer.RemoveAllClusterItemsFromMenuCard,
-          request_deserializer=sql__menu__cluster__item__pb2.menuCardId.FromString,
+          request_deserializer=sql__menu__cluster__item__pb2.MenuCardId.FromString,
           response_serializer=common__types__pb2.Empty.SerializeToString,
       ),
       'RestoreClusterItems': grpc.unary_unary_rpc_method_handler(
@@ -281,5 +281,5 @@ def add_menuClusterItemServiceServicer_to_server(servicer, server):
       ),
   }
   generic_handler = grpc.method_handlers_generic_handler(
-      'mci.menuClusterItemService', rpc_method_handlers)
+      'mci.MenuClusterItemService', rpc_method_handlers)
   server.add_generic_rpc_handlers((generic_handler,))

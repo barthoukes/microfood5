@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='sql_daily_transaction_payment.proto',
   package='dtp',
   syntax='proto3',
-  serialized_pb=_b('\n#sql_daily_transaction_payment.proto\x12\x03\x64tp\x1a\x12\x63ommon_types.proto\"~\n\x1aUpdatePaymentMethodRequest\x12\x16\n\x0etransaction_id\x18\x01 \x01(\x05\x12\x15\n\rpayment_index\x18\x02 \x01(\x05\x12\x31\n\x12new_payment_method\x18\x03 \x01(\x0e\x32\x15.common.PaymentMethod\"W\n\x19TransactionPaymentRequest\x12\x16\n\x0etransaction_id\x18\x01 \x01(\x05\x12\"\n\x1ainclude_cancelled_payments\x18\x02 \x01(\x08\"=\n\x14UpdatePaymentRequest\x12\x16\n\x0etransaction_id\x18\x01 \x01(\x05\x12\r\n\x05total\x18\x02 \x01(\x05\"<\n\x0fSetTimesRequest\x12\x16\n\x0etransaction_id\x18\x01 \x01(\x05\x12\x11\n\ttimestamp\x18\x02 \x01(\t\"O\n\x13SetCashTotalRequest\x12\x16\n\x0etransaction_id\x18\x01 \x01(\r\x12\x11\n\tclient_id\x18\x02 \x01(\r\x12\r\n\x05total\x18\x03 \x01(\x05\"n\n\x0ePaymentDetails\x12-\n\x0epayment_method\x18\x01 \x01(\x0e\x32\x15.common.PaymentMethod\x12\r\n\x05total\x18\x02 \x01(\x05\x12\x1e\n\x07is_paid\x18\x03 \x01(\x0e\x32\r.common.Payed\"B\n\x12PaymentDetailsList\x12,\n\x0fpayment_details\x18\x01 \x03(\x0b\x32\x13.dtp.PaymentDetails\"a\n\x11\x41\x64\x64PaymentRequest\x12\x16\n\x0etransaction_id\x18\x01 \x01(\x05\x12\x1d\n\x07payment\x18\x02 \x01(\x0b\x32\x0c.dtp.Payment\x12\x15\n\rpayment_index\x18\x03 \x01(\x05\"\xa0\x01\n\x07Payment\x12\x15\n\rpartial_index\x18\x01 \x01(\x05\x12\x13\n\x0b\x63ustomer_id\x18\x02 \x01(\x05\x12-\n\x0epayment_method\x18\x03 \x01(\x0e\x32\x15.common.PaymentMethod\x12\r\n\x05total\x18\x04 \x01(\x05\x12\x0b\n\x03msg\x18\x05 \x01(\t\x12\x1e\n\x07is_paid\x18\x06 \x01(\x0e\x32\r.common.Payed\",\n\x0bPaymentList\x12\x1d\n\x07payment\x18\x01 \x03(\x0b\x32\x0c.dtp.Payment\"\x9c\x01\n\x12\x41\x64\x64PaymentRequest2\x12\x16\n\x0etransaction_id\x18\x01 \x01(\x05\x12-\n\x0epayment_method\x18\x02 \x01(\x0e\x32\x15.common.PaymentMethod\x12\r\n\x05total\x18\x03 \x01(\x05\x12\x10\n\x08\x65nd_time\x18\x04 \x01(\t\x12\x1e\n\x07is_paid\x18\x05 \x01(\x0e\x32\r.common.Payed\"G\n\x16\x43opyTransactionRequest\x12\x11\n\tnew_table\x18\x01 \x01(\t\x12\x1a\n\x12new_transaction_id\x18\x02 \x01(\x05\"\'\n\rTransactionId\x12\x16\n\x0etransaction_id\x18\x01 \x01(\x05\"%\n\x0cPartialIndex\x12\x15\n\rpartial_index\x18\x01 \x01(\x05\"d\n\x14\x43\x61ncelPaymentRequest\x12\x16\n\x0etransaction_id\x18\x01 \x01(\x05\x12\r\n\x05index\x18\x02 \x01(\x05\x12%\n\x06status\x18\x03 \x01(\x0e\x32\x15.common.PaymentStatus\"[\n\x16\x43\x61ncelPaymentsRequest2\x12\x16\n\x0etransaction_id\x18\x01 \x01(\x05\x12)\n\npay_status\x18\x02 \x01(\x0e\x32\x15.common.PaymentStatus\"i\n\x16\x43\x61ncelPaymentsRequest3\x12\x16\n\x0etransaction_id\x18\x01 \x01(\x05\x12\x15\n\rpartial_index\x18\x02 \x01(\x05\x12 \n\x18only_unfinished_payments\x18\x03 \x01(\x08\"Q\n\x1b\x44uplicateTransactionRequest\x12\x16\n\x0etransaction_id\x18\x01 \x01(\x05\x12\x1a\n\x12new_transaction_id\x18\x02 \x01(\x05\"U\n\x0cPaymentTuple\x12\x16\n\x0etransaction_id\x18\x01 \x01(\x05\x12-\n\x0epayment_method\x18\x02 \x01(\x0e\x32\x15.common.PaymentMethod\"0\n\nPaymentMap\x12\"\n\x07payment\x18\x01 \x03(\x0b\x32\x11.dtp.PaymentTuple\"s\n\x13PartialTotalRequest\x12\x16\n\x0etransaction_id\x18\x01 \x01(\x05\x12\x15\n\rpartial_index\x18\x02 \x01(\x05\x12-\n\x0epayment_method\x18\x03 \x01(\x0e\x32\x15.common.PaymentMethod\"\x1d\n\x0cPartialTotal\x12\r\n\x05total\x18\x01 \x01(\x05\x32\xd1\x0c\n\x1e\x44\x61ilyTransactionPaymentService\x12\x33\n\nAddPayment\x12\x16.dtp.AddPaymentRequest\x1a\r.common.Empty\x12\x35\n\x0b\x41\x64\x64Payment2\x12\x17.dtp.AddPaymentRequest2\x1a\r.common.Empty\x12=\n\x0f\x43opyTransaction\x12\x1b.dtp.CopyTransactionRequest\x1a\r.common.Empty\x12;\n\x12\x43reatePartialIndex\x12\x12.dtp.TransactionId\x1a\x11.dtp.PartialIndex\x12\x38\n\x13\x43\x61ncelMoneyPayments\x12\x12.dtp.TransactionId\x1a\r.common.Empty\x12\x39\n\rCancelPayment\x12\x19.dtp.CancelPaymentRequest\x1a\r.common.Empty\x12\x36\n\x11\x44\x65leteTransaction\x12\x12.dtp.TransactionId\x1a\r.common.Empty\x12\x33\n\x0e\x43\x61ncelPayments\x12\x12.dtp.TransactionId\x1a\r.common.Empty\x12=\n\x0f\x43\x61ncelPayments2\x12\x1b.dtp.CancelPaymentsRequest2\x1a\r.common.Empty\x12=\n\x0f\x43\x61ncelPayments3\x12\x1b.dtp.CancelPaymentsRequest3\x1a\r.common.Empty\x12\x36\n\x11\x43\x61ncelTransaction\x12\x12.dtp.TransactionId\x1a\r.common.Empty\x12G\n\x14\x44uplicateTransaction\x12 .dtp.DuplicateTransactionRequest\x1a\r.common.Empty\x12;\n\x19\x46indAllTransactionsSorted\x12\r.common.Empty\x1a\x0f.dtp.PaymentMap\x12=\n\x1b\x46indAllTransactionsUnsorted\x12\r.common.Empty\x1a\x0f.dtp.PaymentMap\x12\x33\n\x0e\x46inishPayments\x12\x12.dtp.TransactionId\x1a\r.common.Empty\x12;\n\x12GetNewPaymentIndex\x12\x12.dtp.TransactionId\x1a\x11.dtp.PartialIndex\x12?\n\x16GetHighestPaymentIndex\x12\x12.dtp.TransactionId\x1a\x11.dtp.PartialIndex\x12>\n\x0fGetPartialTotal\x12\x18.dtp.PartialTotalRequest\x1a\x11.dtp.PartialTotal\x12V\n\x1bGetTransactionPaymentTotals\x12\x1e.dtp.TransactionPaymentRequest\x1a\x17.dtp.PaymentDetailsList\x12N\n\x1aGetTransactionPaymentsList\x12\x1e.dtp.TransactionPaymentRequest\x1a\x10.dtp.PaymentList\x12N\n\x13SelectTransactionId\x12\x1e.dtp.TransactionPaymentRequest\x1a\x17.dtp.PaymentDetailsList\x12\x37\n\x0cSetCashTotal\x12\x18.dtp.SetCashTotalRequest\x1a\r.common.Empty\x12/\n\x08SetTimes\x12\x14.dtp.SetTimesRequest\x1a\r.common.Empty\x12J\n\x18UpdatePaymentIndexMethod\x12\x1f.dtp.UpdatePaymentMethodRequest\x1a\r.common.Empty\x12I\n\x1dUpdateTransactionPaymentTotal\x12\x19.dtp.UpdatePaymentRequest\x1a\r.common.EmptyB\'\n\x15\x63om.hha.daily.paymentP\x01\xaa\x02\x0bGrpcServiceb\x06proto3')
+  serialized_pb=_b('\n#sql_daily_transaction_payment.proto\x12\x03\x64tp\x1a\x12\x63ommon_types.proto\"~\n\x1aUpdatePaymentMethodRequest\x12\x16\n\x0etransaction_id\x18\x01 \x01(\x05\x12\x15\n\rpayment_index\x18\x02 \x01(\x05\x12\x31\n\x12new_payment_method\x18\x03 \x01(\x0e\x32\x15.common.PaymentMethod\"W\n\x19TransactionPaymentRequest\x12\x16\n\x0etransaction_id\x18\x01 \x01(\x05\x12\"\n\x1ainclude_cancelled_payments\x18\x02 \x01(\x08\"=\n\x14UpdatePaymentRequest\x12\x16\n\x0etransaction_id\x18\x01 \x01(\x05\x12\r\n\x05total\x18\x02 \x01(\x05\"<\n\x0fSetTimesRequest\x12\x16\n\x0etransaction_id\x18\x01 \x01(\x05\x12\x11\n\ttimestamp\x18\x02 \x01(\t\"O\n\x13SetCashTotalRequest\x12\x16\n\x0etransaction_id\x18\x01 \x01(\r\x12\x11\n\tclient_id\x18\x02 \x01(\r\x12\r\n\x05total\x18\x03 \x01(\x05\"n\n\x0ePaymentDetails\x12-\n\x0epayment_method\x18\x01 \x01(\x0e\x32\x15.common.PaymentMethod\x12\r\n\x05total\x18\x02 \x01(\x05\x12\x1e\n\x07is_paid\x18\x03 \x01(\x0e\x32\r.common.Payed\"B\n\x12PaymentDetailsList\x12,\n\x0fpayment_details\x18\x01 \x03(\x0b\x32\x13.dtp.PaymentDetails\"a\n\x11\x41\x64\x64PaymentRequest\x12\x16\n\x0etransaction_id\x18\x01 \x01(\x05\x12\x1d\n\x07payment\x18\x02 \x01(\x0b\x32\x0c.dtp.Payment\x12\x15\n\rpayment_index\x18\x03 \x01(\x05\"\xa0\x01\n\x07Payment\x12\x15\n\rpartial_index\x18\x01 \x01(\x05\x12\x13\n\x0b\x63ustomer_id\x18\x02 \x01(\x05\x12-\n\x0epayment_method\x18\x03 \x01(\x0e\x32\x15.common.PaymentMethod\x12\r\n\x05total\x18\x04 \x01(\x05\x12\x0b\n\x03msg\x18\x05 \x01(\t\x12\x1e\n\x07is_paid\x18\x06 \x01(\x0e\x32\r.common.Payed\",\n\x0bPaymentList\x12\x1d\n\x07payment\x18\x01 \x03(\x0b\x32\x0c.dtp.Payment\"\x9c\x01\n\x12\x41\x64\x64PaymentRequest2\x12\x16\n\x0etransaction_id\x18\x01 \x01(\x05\x12-\n\x0epayment_method\x18\x02 \x01(\x0e\x32\x15.common.PaymentMethod\x12\r\n\x05total\x18\x03 \x01(\x05\x12\x10\n\x08\x65nd_time\x18\x04 \x01(\t\x12\x1e\n\x07is_paid\x18\x05 \x01(\x0e\x32\r.common.Payed\"H\n\x16\x43opyTransactionRequest\x12\x12\n\nfrom_table\x18\x01 \x01(\t\x12\x1a\n\x12new_transaction_id\x18\x02 \x01(\x05\"\'\n\rTransactionId\x12\x16\n\x0etransaction_id\x18\x01 \x01(\x05\"%\n\x0cPartialIndex\x12\x15\n\rpartial_index\x18\x01 \x01(\x05\"d\n\x14\x43\x61ncelPaymentRequest\x12\x16\n\x0etransaction_id\x18\x01 \x01(\x05\x12\r\n\x05index\x18\x02 \x01(\x05\x12%\n\x06status\x18\x03 \x01(\x0e\x32\x15.common.PaymentStatus\"[\n\x16\x43\x61ncelPaymentsRequest2\x12\x16\n\x0etransaction_id\x18\x01 \x01(\x05\x12)\n\npay_status\x18\x02 \x01(\x0e\x32\x15.common.PaymentStatus\"i\n\x16\x43\x61ncelPaymentsRequest3\x12\x16\n\x0etransaction_id\x18\x01 \x01(\x05\x12\x15\n\rpartial_index\x18\x02 \x01(\x05\x12 \n\x18only_unfinished_payments\x18\x03 \x01(\x08\"Q\n\x1b\x44uplicateTransactionRequest\x12\x16\n\x0etransaction_id\x18\x01 \x01(\x05\x12\x1a\n\x12new_transaction_id\x18\x02 \x01(\x05\"U\n\x0cPaymentTuple\x12\x16\n\x0etransaction_id\x18\x01 \x01(\x05\x12-\n\x0epayment_method\x18\x02 \x01(\x0e\x32\x15.common.PaymentMethod\"0\n\nPaymentMap\x12\"\n\x07payment\x18\x01 \x03(\x0b\x32\x11.dtp.PaymentTuple\"s\n\x13PartialTotalRequest\x12\x16\n\x0etransaction_id\x18\x01 \x01(\x05\x12\x15\n\rpartial_index\x18\x02 \x01(\x05\x12-\n\x0epayment_method\x18\x03 \x01(\x0e\x32\x15.common.PaymentMethod\"\x1d\n\x0cPartialTotal\x12\r\n\x05total\x18\x01 \x01(\x05\x32\xd1\x0c\n\x1e\x44\x61ilyTransactionPaymentService\x12\x33\n\nAddPayment\x12\x16.dtp.AddPaymentRequest\x1a\r.common.Empty\x12\x35\n\x0b\x41\x64\x64Payment2\x12\x17.dtp.AddPaymentRequest2\x1a\r.common.Empty\x12=\n\x0f\x43opyTransaction\x12\x1b.dtp.CopyTransactionRequest\x1a\r.common.Empty\x12;\n\x12\x43reatePartialIndex\x12\x12.dtp.TransactionId\x1a\x11.dtp.PartialIndex\x12\x38\n\x13\x43\x61ncelMoneyPayments\x12\x12.dtp.TransactionId\x1a\r.common.Empty\x12\x39\n\rCancelPayment\x12\x19.dtp.CancelPaymentRequest\x1a\r.common.Empty\x12\x36\n\x11\x44\x65leteTransaction\x12\x12.dtp.TransactionId\x1a\r.common.Empty\x12\x33\n\x0e\x43\x61ncelPayments\x12\x12.dtp.TransactionId\x1a\r.common.Empty\x12=\n\x0f\x43\x61ncelPayments2\x12\x1b.dtp.CancelPaymentsRequest2\x1a\r.common.Empty\x12=\n\x0f\x43\x61ncelPayments3\x12\x1b.dtp.CancelPaymentsRequest3\x1a\r.common.Empty\x12\x36\n\x11\x43\x61ncelTransaction\x12\x12.dtp.TransactionId\x1a\r.common.Empty\x12G\n\x14\x44uplicateTransaction\x12 .dtp.DuplicateTransactionRequest\x1a\r.common.Empty\x12;\n\x19\x46indAllTransactionsSorted\x12\r.common.Empty\x1a\x0f.dtp.PaymentMap\x12=\n\x1b\x46indAllTransactionsUnsorted\x12\r.common.Empty\x1a\x0f.dtp.PaymentMap\x12\x33\n\x0e\x46inishPayments\x12\x12.dtp.TransactionId\x1a\r.common.Empty\x12;\n\x12GetNewPaymentIndex\x12\x12.dtp.TransactionId\x1a\x11.dtp.PartialIndex\x12?\n\x16GetHighestPaymentIndex\x12\x12.dtp.TransactionId\x1a\x11.dtp.PartialIndex\x12>\n\x0fGetPartialTotal\x12\x18.dtp.PartialTotalRequest\x1a\x11.dtp.PartialTotal\x12V\n\x1bGetTransactionPaymentTotals\x12\x1e.dtp.TransactionPaymentRequest\x1a\x17.dtp.PaymentDetailsList\x12N\n\x1aGetTransactionPaymentsList\x12\x1e.dtp.TransactionPaymentRequest\x1a\x10.dtp.PaymentList\x12N\n\x13SelectTransactionId\x12\x1e.dtp.TransactionPaymentRequest\x1a\x17.dtp.PaymentDetailsList\x12\x37\n\x0cSetCashTotal\x12\x18.dtp.SetCashTotalRequest\x1a\r.common.Empty\x12/\n\x08SetTimes\x12\x14.dtp.SetTimesRequest\x1a\r.common.Empty\x12J\n\x18UpdatePaymentIndexMethod\x12\x1f.dtp.UpdatePaymentMethodRequest\x1a\r.common.Empty\x12I\n\x1dUpdateTransactionPaymentTotal\x12\x19.dtp.UpdatePaymentRequest\x1a\r.common.EmptyB\'\n\x15\x63om.hha.daily.paymentP\x01\xaa\x02\x0bGrpcServiceb\x06proto3')
   ,
   dependencies=[common__types__pb2.DESCRIPTOR,])
 
@@ -516,7 +516,7 @@ _COPYTRANSACTIONREQUEST = _descriptor.Descriptor(
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='new_table', full_name='dtp.CopyTransactionRequest.new_table', index=0,
+      name='from_table', full_name='dtp.CopyTransactionRequest.from_table', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
@@ -542,7 +542,7 @@ _COPYTRANSACTIONREQUEST = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=1134,
-  serialized_end=1205,
+  serialized_end=1206,
 )
 
 
@@ -572,8 +572,8 @@ _TRANSACTIONID = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1207,
-  serialized_end=1246,
+  serialized_start=1208,
+  serialized_end=1247,
 )
 
 
@@ -603,8 +603,8 @@ _PARTIALINDEX = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1248,
-  serialized_end=1285,
+  serialized_start=1249,
+  serialized_end=1286,
 )
 
 
@@ -648,8 +648,8 @@ _CANCELPAYMENTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1287,
-  serialized_end=1387,
+  serialized_start=1288,
+  serialized_end=1388,
 )
 
 
@@ -686,8 +686,8 @@ _CANCELPAYMENTSREQUEST2 = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1389,
-  serialized_end=1480,
+  serialized_start=1390,
+  serialized_end=1481,
 )
 
 
@@ -731,8 +731,8 @@ _CANCELPAYMENTSREQUEST3 = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1482,
-  serialized_end=1587,
+  serialized_start=1483,
+  serialized_end=1588,
 )
 
 
@@ -769,8 +769,8 @@ _DUPLICATETRANSACTIONREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1589,
-  serialized_end=1670,
+  serialized_start=1590,
+  serialized_end=1671,
 )
 
 
@@ -807,8 +807,8 @@ _PAYMENTTUPLE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1672,
-  serialized_end=1757,
+  serialized_start=1673,
+  serialized_end=1758,
 )
 
 
@@ -838,8 +838,8 @@ _PAYMENTMAP = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1759,
-  serialized_end=1807,
+  serialized_start=1760,
+  serialized_end=1808,
 )
 
 
@@ -883,8 +883,8 @@ _PARTIALTOTALREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1809,
-  serialized_end=1924,
+  serialized_start=1810,
+  serialized_end=1925,
 )
 
 
@@ -914,8 +914,8 @@ _PARTIALTOTAL = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1926,
-  serialized_end=1955,
+  serialized_start=1927,
+  serialized_end=1956,
 )
 
 _UPDATEPAYMENTMETHODREQUEST.fields_by_name['new_payment_method'].enum_type = common__types__pb2._PAYMENTMETHOD
@@ -1121,8 +1121,8 @@ _DAILYTRANSACTIONPAYMENTSERVICE = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=0,
   options=None,
-  serialized_start=1958,
-  serialized_end=3575,
+  serialized_start=1959,
+  serialized_end=3576,
   methods=[
   _descriptor.MethodDescriptor(
     name='AddPayment',

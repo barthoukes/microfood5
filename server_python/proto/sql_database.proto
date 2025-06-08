@@ -32,6 +32,10 @@ service DatabaseService
   rpc ValidateDatabase(ValidataDatabaseRequest)  returns (ValidateDatabaseResponse) {}
   rpc SetSqlDefaults(SqlDefaults)  returns (common.Empty) {}
   rpc SetConfiguration(ConfigurationRequest)  returns (common.Empty) {}
+  rpc SetConfigurationList(ConfigurationItemList)  returns (common.Empty) {}
+  rpc GetConfigurationList(common.Empty)  returns (ConfigurationItemList) {}
+  rpc SetUserConfigurationList(ConfigurationItemList)  returns (common.Empty) {}
+  rpc GetUserConfigurationList(common.Empty)  returns (ConfigurationItemList) {}
   rpc ResetProgram(common.Empty)  returns (common.Empty) {}
 }
 
@@ -120,4 +124,16 @@ message ConfigurationRequest
     int32        account_clusters = 9;
     int32        store_enable = 10;
 }
+
+message ConfigurationItem
+{
+    string       configuration = 1;
+    string       value = 2;
+}
+
+message ConfigurationItemList
+{
+    repeated ConfigurationItem  item = 1;
+}
+
 

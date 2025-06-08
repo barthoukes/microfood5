@@ -1,6 +1,6 @@
 package com.hha.activities
 
-import MainMenuDialog
+import com.hha.dialog.MainMenuActivity
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
@@ -65,7 +65,7 @@ class SplashActivity : AppCompatActivity() {
 
     private fun navigateToMain() {
         // Intent to start MainActivity which will host your MainMenuDialog
-        val mainIntent = Intent(this@SplashActivity, MainMenuDialog::class.java)
+        val mainIntent = Intent(this@SplashActivity, MainMenuActivity::class.java)
         // Optional: Pass any fetched data to MainActivity
         // mainIntent.putExtra("MENU_DATA", "your_fetched_menu_data_string_or_parcelable")
         startActivity(mainIntent)
