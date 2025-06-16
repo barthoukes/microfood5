@@ -5,7 +5,6 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import connect.hha.grpc_client.MainActivity
 import kotlinx.coroutines.delay
 import tech.hha.microfood.databinding.ActivitySplashBinding
 import kotlinx.coroutines.launch
@@ -51,6 +50,10 @@ class SplashActivity : AppCompatActivity() {
 
             if (remainingDelay > 0) {
                 delay(remainingDelay) // Ensure splash is shown for at least 2 seconds
+
+
+
+
             }
 
             navigateToMain()

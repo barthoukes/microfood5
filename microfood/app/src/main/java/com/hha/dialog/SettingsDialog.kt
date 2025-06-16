@@ -6,9 +6,9 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.CheckBox
 import android.widget.TextView
-import com.hha.framework.CConfiguration
 import com.hha.exceptions.ConfigNotFoundException
 import tech.hha.microfood.R
+import com.hha.resources.Global
 
 class SettingsDialog : Activity() {
     private lateinit var mSettingsNaam: TextView
@@ -22,7 +22,7 @@ class SettingsDialog : Activity() {
     private lateinit var mSettingsDutch: CheckBox
     private lateinit var mSettingsChinese: CheckBox
     private lateinit var mSettingsDemo: CheckBox
-    private val mConfig: CConfiguration = CConfiguration.getInstance
+    val CFG = Global.getInstance().CFG
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,17 +47,17 @@ class SettingsDialog : Activity() {
 
     private fun setButtons() {
         try {
-            mSettingsNaam.text = mConfig.getString("name")
-            mSettingsIP.text = mConfig.getString("IP")
-            mSettingsHandHeld.text = mConfig.getValue("handheld_id").toString()
-            mSettingsPassword.text = mConfig.getString("password")
-            mSettingsFontFood.text = mConfig.getValue("font_item").toString()
-            mSettingsFontText.text = mConfig.getValue("font_text").toString()
-            mSettingsDutch.isChecked = mConfig.getValue("dutch") == 1
-            mSettingsChinese.isChecked = mConfig.getValue("chinese") == 1
-            mSettingsDemo.isChecked = mConfig.getValue("demo") == 1
-            mSettingsFontSplash.text = mConfig.getValue("font_splash").toString()
-            mSettingsFontButton.text = mConfig.getValue("font_button").toString()
+            mSettingsNaam.text = CFG.getString("name")
+            mSettingsIP.text = CFG.getString("IP")
+            mSettingsHandHeld.text = CFG.getString("handheld_id")
+            mSettingsPassword.text = CFG.getString("password")
+            mSettingsFontFood.text = CFG.getString("font_item")
+            mSettingsFontText.text = CFG.getString("font_text")
+            mSettingsDutch.isChecked = CFG.getOption("dutch")
+            mSettingsChinese.isChecked = CFG.getOption("chinese")
+            mSettingsDemo.isChecked = CFG.getOption("demo")
+            mSettingsFontSplash.text = CFG.getString("font_splash")
+            mSettingsFontButton.text = CFG.getString("font_button")
         } catch (e: ConfigNotFoundException) {
             e.printStackTrace()
         }
@@ -69,32 +69,32 @@ class SettingsDialog : Activity() {
 
     fun button_settings_ok(view: View) {
         try {
-            mConfig.setString("name", mSettingsNaam.text.toString())
-            mConfig.setString("IP", mSettingsIP.text.toString())
-            mConfig.setString("handheld_id", mSettingsHandHeld.text.toString())
+            CFG.setString("name", mSettingsNaam.text.toString())
+            CFG.setString("IP", mSettingsIP.text.toString())
+            CFG.setString("handheld_id", mSettingsHandHeld.text.toString())
 
-            if (mConfig.getValue("handheld_id") <= 0 || mConfig.getValue("handheld_id") > 10) {
-                mConfig.setValue("handheld_id", 1)
+            if (CFG.getValue("handheld_id") <= 0 || CFG.getValue("handheld_id") > 10) {
+                CFG.setValue("handheld_id", 1)
             }
 
-            mConfig.setString("password", mSettingsPassword.text.toString())
-            mConfig.setString("font_item", mSettingsFontFood.text.toString())
+            CFG.setString("password", mSettingsPassword.text.toString())
+            CFG.setString("font_item", mSettingsFontFood.text.toString())
 
-            if (mConfig.getValue("font_item") < 10 || mConfig.getValue("font_item") > 40) {
-                mConfig.setValue("font_item", 15)
+            if (CFG.getValue("font_item") < 10 || CFG.getValue("font_item") > 40) {
+                CFG.setValue("font_item", 15)
             }
 
-            mConfig.setString("font_text", mSettingsFontText.text.toString())
+            CFG.setString("font_text", mSettingsFontText.text.toString())
 
-            if (mConfig.getValue("font_text") < 10 || mConfig.getValue("font_text") > 40) {
-                mConfig.setValue("font_text", 15)
+            if (CFG.getValue("font_text") < 10 || CFG.getValue("font_text") > 40) {
+                CFG.setValue("font_text", 15)
             }
 
-            mConfig.setValue("dutch", if (mSettingsDutch.isChecked) 1 else 0)
-            mConfig.setValue("chinese", if (mSettingsChinese.isChecked) 1 else 0)
-            mConfig.setString("font_splash", mSettingsFontSplash.text.toString())
-            mConfig.setString("font_button", mSettingsFontButton.text.toString())
-            mConfig.setValue("demo", if (mSettingsDemo.isChecked) 1 else 0)
+            CFG.setValue("dutch", if (mSettingsDutch.isChecked) 1 else 0)
+            CFG.setValue("chinese", if (mSettingsChinese.isChecked) 1 else 0)
+            CFG.setString("font_splash", mSettingsFontSplash.text.toString())
+            CFG.setString("font_button", mSettingsFontButton.text.toString())
+            CFG.setValue("demo", if (mSettingsDemo.isChecked) 1 else 0)
            // mConfig.Save(mConfig.fileName)
 
             // Send update...

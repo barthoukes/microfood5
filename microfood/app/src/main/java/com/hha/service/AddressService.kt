@@ -6,7 +6,8 @@ import com.hha.common.Empty
 import io.grpc.ManagedChannel
 import kotlinx.coroutines.runBlocking
 
-class AddressService(channel: ManagedChannel) : BaseGrpcService<AddressServiceGrpcKt.AddressServiceCoroutineStub>(channel) {
+class AddressService(channel: ManagedChannel) :
+    BaseGrpcService<AddressServiceGrpcKt.AddressServiceCoroutineStub>(channel) {
     override val stub: AddressServiceGrpcKt.AddressServiceCoroutineStub =
         AddressServiceGrpcKt.AddressServiceCoroutineStub(channel)
 

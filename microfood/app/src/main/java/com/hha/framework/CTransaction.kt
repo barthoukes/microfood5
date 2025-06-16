@@ -200,8 +200,10 @@ class CTransaction {
 
     fun start(): Int {
         var deviceId: Short = 3000
+        val CFG = Global.getInstance().CFG
+
         try {
-            deviceId = (CConfiguration.getInstance.getValue("handheld_id") + 3000).toShort()
+            deviceId = (CFG.getValue("handheld_id") + 3000).toShort()
         } catch (e: Exception) {
             e.printStackTrace()
         }

@@ -13,6 +13,7 @@ class CTimeFrame {
     var start_time: String = ""
     var end_time: String = ""
     var device_id: Short = 0
+    val CFG = Global.getInstance().CFG
 
     /// @brief constructor.
     constructor(cf: CTimeFrame) {
@@ -41,7 +42,7 @@ class CTimeFrame {
         time_frame_index = tfi
         try {
             device_id = (Global.getInstance().firstTablet +
-                    CConfiguration.getInstance.getValue("handheld_id") + 3000).toShort()
+                    CFG.getValue("handheld_id") + 3000).toShort()
         } catch (e: NumberFormatException) {
             e.printStackTrace()
         } catch (e: ConfigNotFoundException) {
@@ -56,7 +57,7 @@ class CTimeFrame {
         transaction_id = trx
         try {
             device_id = (Global.getInstance().firstTablet +
-                    CConfiguration.getInstance.getValue("handheld_id") + 3000).toShort()
+                    CFG.getValue("handheld_id") + 3000).toShort()
         } catch (e: NumberFormatException) {
             e.printStackTrace()
         } catch (e: ConfigNotFoundException) {

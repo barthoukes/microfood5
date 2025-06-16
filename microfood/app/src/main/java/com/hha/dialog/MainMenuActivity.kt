@@ -10,12 +10,17 @@ import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import com.hha.grpc.GrpcServiceFactory
-import com.hha.service.AddressService
+import com.hha.dialog.SplashLayout
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import tech.hha.microfood.R
 import tech.hha.microfood.databinding.DialogMainMenuBinding
+
+import com.hha.service.AddressService
+import com.hha.grpc.GrpcServiceFactory
+import com.hha.framework.COpenClientsHandler
+import com.hha.framework.COpenClientsHandler.createNewTakeawayTransaction
+import com.hha.resources.Global
 
 class MainMenuActivity : AppCompatActivity() {
     // View binding
@@ -140,13 +145,32 @@ class MainMenuActivity : AppCompatActivity() {
         val addressService : AddressService = GrpcServiceFactory.createAddressService()
         val response = addressService.getAllAddressLines()
         Log.i("FirstFragment", "Response: $response")
-            // You could also update UI here with the response
+
+        // You could also update UI here with the response
 
         //startActivity(Intent(this, TableOverviewActivity::class.java))
     }
 
     private fun navigateToTakeaway() {
-        //startActivity(Intent(this, TakeawayActivity::class.java))
+        // Todo new takeaway
+        val useBag = true
+        val user = Global.getInstance().currentKeyIndex
+        val transactionId : Int? =
+            createNewTakeawayTransaction(
+                0, useBag, user, false);
+
+        if (transactionId == null) {
+            return
+        }
+        Global.getInstance().transactionId = transactionId
+        if (Global.getInstance().transactionId > 0) {
+            navigateToPageOrderActivity()
+        }
+    }
+
+    private fun navigateToPageOrderActivity() {
+        startActivity(Intent(this@MainMenuActivity, MainMenuActivity::class.java))
+        finish()
     }
 
     private fun navigateToSettings() {

@@ -189,7 +189,7 @@ class DailyTransactionService(channel: ManagedChannel) : BaseGrpcService<DailyTr
         }
     }
 
-    fun findLatestTransaction(transType: TransType, separateNumbers: Boolean, maxRange: Int): Int? = runBlocking {
+    fun findLatestTransaction(transType: TransType, separateNumbers: Boolean, maxRange: Int): Int = runBlocking {
         try {
             val request = LatestTransactionRequest.newBuilder()
                 .setTransType(transType)
@@ -198,7 +198,7 @@ class DailyTransactionService(channel: ManagedChannel) : BaseGrpcService<DailyTr
                 .build()
             stub.findLatestTransaction(request).number
         } catch (e: Exception) {
-            null
+            0
         }
     }
 
@@ -401,7 +401,7 @@ class DailyTransactionService(channel: ManagedChannel) : BaseGrpcService<DailyTr
         }
     }
 
-    fun insertTransaction(tableName: String, rfidKeyId: Int, transType: TransType, customerId: Int): Int? = runBlocking {
+    fun insertTransaction(tableName: String, customerId: Int, rfidKeyId: Int, transType: TransType): Int? = runBlocking {
         try {
             val request = InsertTransactionRequest.newBuilder()
                 .setTableName(tableName)

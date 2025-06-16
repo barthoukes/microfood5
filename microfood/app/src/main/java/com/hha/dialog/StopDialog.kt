@@ -4,21 +4,21 @@ import android.app.Activity
 import android.os.Bundle
 import android.view.WindowManager
 import android.widget.TextView
-import com.hha.framework.CConfiguration
+import com.hha.resources.Global
 import tech.hha.microfood.R
 import java.io.DataOutputStream
 
 class StopDialog : Activity() {
+    val CFG = Global.getInstance().CFG
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.stop_layout)
 
-        val config = CConfiguration.getInstance
         val bigText = findViewById<TextView>(R.id.stopBig)
 
         try {
-            bigText.textSize = config.getValue("font_splash").toFloat()
+            bigText.textSize = CFG.getValue("font_splash").toFloat()
         } catch (e: Exception) {
             e.printStackTrace()
         }

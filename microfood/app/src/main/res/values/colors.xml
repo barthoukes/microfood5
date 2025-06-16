@@ -80,4 +80,8 @@
     <color name="ANDROID_BUTTON_BACKGROUND">#ff404080</color>
     <color name="ANDROID_MESSAGE_BACKGROUND">#ff6060FF</color>
     <color name="ANDROID_TABLE_BACKGROUND">#ff8080c0</color>
+
+    <!-- Special colors for your order screen -->
+    <color name="price_text_yellow">#FFFF00</color>
+    <color name="price_bg_purple">#800080</color>
 </resources>

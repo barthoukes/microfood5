@@ -1,6 +1,5 @@
 package com.hha.dialog
 
-import com.hha.framework.CConfiguration
 import com.hha.resources.Global
 import com.hha.types.ETaal
 
@@ -15,6 +14,7 @@ object Translation {
         TEXT_ERROR,
         TEXT_EXIT_PROGRAM,
         TEXT_MIN_1,
+        TEXT_NAME,
         TEXT_OK,
         TEXT_PLUS_1,
         TEXT_PORTION,
@@ -44,6 +44,7 @@ object Translation {
         TextId.TEXT_ERROR to arrayOf("ERROR", "ERROR", "ERROR", "ERROR", "ERROR"),
         TextId.TEXT_EXIT_PROGRAM to arrayOf("停止软件", "STOP PROGRAMMA", "STOP PROGRAM", "PROGRAM STOP", "STOP PROGRAM"),
         TextId.TEXT_MIN_1 to arrayOf("减一", "MIN 1", "", "", "-1"),
+        TextId.TEXT_NAME to arrayOf("换菜单名字", "NAMEN VERANDEREN", "MENU NAMES CHANGE", "MENU NAMEN ANDERN", "NAMA MENU GANTI", "換菜單名字"),
         TextId.TEXT_OK to arrayOf("好 !", "OK !", "OK !", "GUT !", "OK !"),
         TextId.TEXT_PLUS_1 to arrayOf("递增", "PLUS 1", "", "", "+1"),
         TextId.TEXT_PORTION to arrayOf("部分", "PORTIE", "PORTION", "PORTIE", "MELAYANI"),
@@ -72,7 +73,7 @@ object Translation {
 
     fun nextLanguage(): ETaal {
         val global = Global.getInstance()
-        val config = CConfiguration.getInstance
+        val CFG = Global.getInstance().CFG
 
         while (true) {
             global.language = when (global.language) {
@@ -85,17 +86,17 @@ object Translation {
             }
             when (global.language) {
                 ETaal.LANG_SIMPLIFIED -> try {
-                    if (config.getValue("chinese") != 0) return global.language
+                    if (CFG.getValue("chinese") != 0) return global.language
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
                 ETaal.LANG_DUTCH -> try {
-                    if (config.getValue("dutch") != 0) return global.language
+                    if (CFG.getValue("dutch") != 0) return global.language
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
                 ETaal.LANG_INDONESIAN -> try {
-                    if (config.getValue("indonesian") != 0) return global.language
+                    if (CFG.getValue("indonesian") != 0) return global.language
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }

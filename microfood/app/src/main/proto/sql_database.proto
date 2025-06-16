@@ -29,13 +29,15 @@ service DatabaseService
 {
   rpc SetDatabase(SetDatabaseRequest) returns (common.Empty) {}
   rpc RunQuery(QueryRequest) returns (QueryResponse) {}
-  rpc ValidateDatabase(ValidataDatabaseRequest)  returns (ValidateDatabaseResponse) {}
+  rpc ValidateDatabase(ValidateDatabaseRequest)  returns (ValidateDatabaseResponse) {}
   rpc SetSqlDefaults(SqlDefaults)  returns (common.Empty) {}
   rpc SetConfiguration(ConfigurationRequest)  returns (common.Empty) {}
   rpc SetConfigurationList(ConfigurationItemList)  returns (common.Empty) {}
   rpc GetConfigurationList(common.Empty)  returns (ConfigurationItemList) {}
   rpc SetUserConfigurationList(ConfigurationItemList)  returns (common.Empty) {}
   rpc GetUserConfigurationList(common.Empty)  returns (ConfigurationItemList) {}
+  rpc GetFontConfigurationList(common.Empty)  returns (ConfigurationItemList) {}
+  rpc GetColourConfigurationList(common.Empty)  returns (ConfigurationItemList) {}
   rpc ResetProgram(common.Empty)  returns (common.Empty) {}
 }
 
@@ -57,7 +59,7 @@ message QueryResponse
     string result = 1;
 }
 
-message ValidataDatabaseRequest
+message ValidateDatabaseRequest
 {
     int32  index = 1;
 }
@@ -128,7 +130,7 @@ message ConfigurationRequest
 message ConfigurationItem
 {
     string       configuration = 1;
-    string       value = 2;
+    bytes        value = 2;
 }
 
 message ConfigurationItemList

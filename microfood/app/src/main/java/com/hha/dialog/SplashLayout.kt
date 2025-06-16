@@ -14,14 +14,15 @@ import androidx.lifecycle.lifecycleScope
 import com.hha.exceptions.ConfigNotFoundException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import com.hha.framework.CConfiguration
 import com.hha.resources.Global
+import com.hha.grpc.GrpcServiceFactory
 import tech.hha.microfood.R
 
 @SuppressLint("CustomSplashScreen")
 class SplashLayout : androidx.activity.ComponentActivity() {
 
-    private lateinit var config: CConfiguration
+    val CFG = Global.getInstance().CFG
+    private lateinit var services: GrpcServiceFactory
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,7 +43,6 @@ class SplashLayout : androidx.activity.ComponentActivity() {
     }
 
     private fun setupConfiguration() {
-        config = CConfiguration.getInstance
     }
 
     private fun configureScreen() {
@@ -51,7 +51,7 @@ class SplashLayout : androidx.activity.ComponentActivity() {
 
     private fun setupMessageConnection() {
         try {
-            val path = config.getString("IP")
+            val path = CFG.getString("IP")
             val port = 9876 // Default port, could be made configurable
         } catch (e: ConfigNotFoundException) {
             e.printStackTrace()
@@ -64,7 +64,7 @@ class SplashLayout : androidx.activity.ComponentActivity() {
         try {
             bigTextView.setTextSize(
                 TypedValue.COMPLEX_UNIT_DIP,
-                config.getValue("font_splash").toFloat()
+                CFG.getValue("font_splash").toFloat()
             )
         } catch (e: Exception) {
             e.printStackTrace()
@@ -74,8 +74,10 @@ class SplashLayout : androidx.activity.ComponentActivity() {
 
     private fun scheduleNavigation() {
         lifecycleScope.launch {
-            delay(5000) // 2 seconds delay
-            navigateToMainMenu()
+            delay(100) // 2 seconds delay
+
+            Global.getInstance().getOptions()
+            navigateToMainActivity()
         }
     }
 

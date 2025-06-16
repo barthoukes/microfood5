@@ -9,7 +9,6 @@ import com.hha.daily.payment.AddPaymentRequest2
 import com.hha.daily.payment.CancelPaymentRequest
 import com.hha.daily.payment.CancelPaymentsRequest2
 import com.hha.daily.payment.CancelPaymentsRequest3
-import com.hha.daily.payment.CopyTransactionRequest
 import com.hha.daily.payment.DailyTransactionPaymentServiceGrpcKt
 import com.hha.daily.payment.DuplicateTransactionRequest
 import com.hha.daily.payment.PartialIndex
