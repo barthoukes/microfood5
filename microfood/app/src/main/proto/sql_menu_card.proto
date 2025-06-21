@@ -95,13 +95,6 @@ message MenuCardList
     repeated MenuCard menu_cards = 1;
 }
 
-enum SkipInvisible
-{
-    SKIP_INVISIBLE_TRUE   = 0;  ///< Do show only the background.
-    SKIP_INVISIBLE_FALSE  = 70; ///< Do show like normal items.
-    SKIP_INVISIBLE_SHOW   = 83;  ///< Do show the items with an indication if skipped.
-}
-
 message SetMenuCardNameRequest
 {
     int32 menu_card_id = 1;

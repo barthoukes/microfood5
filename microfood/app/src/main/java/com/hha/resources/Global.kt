@@ -2,6 +2,7 @@ package com.hha.resources
 
 import android.database.sqlite.SQLiteDatabase
 import android.os.Handler
+import com.hha.framework.CMenuCards
 import java.io.File
 
 import com.hha.framework.CTimeFrame
@@ -12,11 +13,10 @@ import com.hha.types.ETaal
 
 class Global private constructor() {
     // Properties
-    var firstTablet : Short = 15
+    var firstTablet: Short = 15
     lateinit var myDir: File
-    var currentMenuCardId = 1
-    var currentPage = 1
-    var currentItem = 5
+    var menuCardId = 1
+    var menuPageId = 1
     var currentKeyIndex = 2
     var cursor = 0
     var language: ETaal = ETaal.LANG_SIMPLIFIED
@@ -25,6 +25,7 @@ class Global private constructor() {
     var transactionId: Int = 0
     lateinit var timeFrameDB: CTimeFrame
     lateinit var transactionDB: CTransaction
+
     //lateinit var transactionList: CTransactionList
     var selectedItem = 10
     var pageBackgroundColor = 0xFF400040.toInt()
@@ -53,27 +54,34 @@ class Global private constructor() {
 
     fun setPage(page: Int) {
         pageOffset = 0
-        currentPage = page
+        menuPageId = page
     }
 
     fun getOptions() {
-        val dbs = GrpcServiceFactory.createDatabaseService()
-        val config = dbs.getConfigurationList()
-        if (config != null) {
-            CFG.setConfigurations(config)
-        }
-        val userConfig = dbs.getUserConfigurationList()
-        if (userConfig != null) {
-            userCFG.setConfigurations(userConfig)
-        }
-        val colourConfig = dbs.getColourConfigurationList()
-        if (colourConfig != null) {
-            colourCFG.setConfigurations(colourConfig)
-        }
-        val fontConfig = dbs.getFontConfigurationList()
-        if (fontConfig != null) {
-            fontCFG.setConfigurations(fontConfig)
+        while (true) {
+            if (tryLoadAllConfigs()) {
+                break  // Success - exit loop
+            }
+            GrpcServiceFactory.reconnect()
+            Thread.sleep(1000)  // Wait before retry
         }
     }
 
+    private fun tryLoadAllConfigs(): Boolean {
+        val dbs = GrpcServiceFactory.createDatabaseService()
+
+        val config = dbs.getConfigurationList() ?: return false
+        CFG.setConfigurations(config)
+
+        val userConfig = dbs.getUserConfigurationList() ?: return false
+        userCFG.setConfigurations(userConfig)
+
+        val colourConfig = dbs.getColourConfigurationList() ?: return false
+        colourCFG.setConfigurations(colourConfig)
+
+        val fontConfig = dbs.getFontConfigurationList() ?: return false
+        fontCFG.setConfigurations(fontConfig)
+
+        return true  // All configs loaded successfully
+    }
 }

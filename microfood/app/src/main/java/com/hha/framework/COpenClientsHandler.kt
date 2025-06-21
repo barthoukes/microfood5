@@ -18,8 +18,8 @@ object COpenClientsHandler : StringDialog.StringListener {
 
     fun createNewTakeawayTransaction(
         client_id: Int, use_bag: Boolean, user: Int, ask_remark: Boolean
-    ): Int? {
-        if (!CFG.getOption("sitin_only")) {
+    ): Int {
+        if (CFG.getOption("sitin_only")) {
             return -1;
         }
 
@@ -45,6 +45,8 @@ object COpenClientsHandler : StringDialog.StringListener {
         if (order_id != null && remark != null) {
             service.setMessage(order_id, remark)
         }
+        if (order_id == null)
+            return -1
         return order_id
     }
 

@@ -1,163 +1,97 @@
 package com.hha.dialog
 
-import android.annotation.SuppressLint
-import android.content.ActivityNotFoundException
-import android.view.LayoutInflater
-import android.view.ViewGroup
-import android.widget.Button
-import android.widget.TextView
-import android.widget.Toast
+import android.graphics.Rect
+import android.os.Bundle
+import android.view.Menu
+import android.view.View
+import android.content.res.Resources
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.viewModelScope
-import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.ListAdapter
-import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.bottomsheet.BottomSheetDialog
-import com.hha.frame.MenuItemViewHolder
-import com.hha.frame.MenuPageViewHolder
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import tech.hha.microfood.R
+import tech.hha.microfood.databinding.PageOrderActivityBinding
+import androidx.recyclerview.widget.RecyclerView
 
-class PageOrderActivity(private val activity: AppCompatActivity) {
-    private lateinit var dialog: BottomSheetDialog
-    private lateinit var orderList: RecyclerView
-    private lateinit var menuItemsRecycler: RecyclerView
-    private lateinit var menuPagesGrid: RecyclerView
-    // Declare other views you need to access
-    private lateinit var okButton: Button
-    private lateinit var plusOne: Button
-    private lateinit var minusOne: Button
-    private lateinit var portionButton: Button
-    private lateinit var removeItem: Button
-    private lateinit var languageButton: Button
-    private lateinit var totalPrice: TextView
+import com.hha.adapter.MenuPagesAdapter
+import com.hha.framework.CMenuCards
+import com.hha.framework.CMenuPage
+import com.hha.resources.Global
 
-    @SuppressLint("MissingInflatedId")
-    fun show() {
-        val view = LayoutInflater.from(activity).inflate(R.layout.page_order_layout, null)
-        dialog = BottomSheetDialog(activity).apply {
-            setContentView(view)
-            window?.setDimAmount(0.5f)
-        }
 
-        // Initialize views
-        orderList = view.findViewById(R.id.orderList)
-        menuItemsRecycler = view.findViewById(R.id.menuItemsRecycler)
-        menuPagesGrid = view.findViewById(R.id.menuPagesGrid)
-        okButton = view.findViewById(R.id.okButton)
-        plusOne = view.findViewById(R.id.plusOne)
-        minusOne = view.findViewById(R.id.minusOne)
-        portionButton = view.findViewById(R.id.portionButton)
-        removeItem = view.findViewById(R.id.removeItem)
-        languageButton = view.findViewById(R.id.languageButton)
-        totalPrice = view.findViewById(R.id.totalPrice)
+class PageOrderActivity : AppCompatActivity() {
+    private lateinit var binding: PageOrderActivityBinding
+    val global = Global.getInstance()
+    val menuCardId = global.menuCardId
+    val menuCard = CMenuCards.getInstance().getMenuCard(menuCardId)
+    val menuPages = menuCard.getOrderedPages()
+    val totalColumns = (menuPages.size / 3) // 24 items / 3 rows = 8 columns
+    private lateinit var pagesAdapter: MenuPagesAdapter
 
-        setupUI()
-        loadData()
-        dialog.show()
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        binding = PageOrderActivityBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        setupRecyclerView()
     }
 
-    private fun setupUI() {
-        // 1. Order List Setup (Left Panel)
-        orderList.apply {
-            //adapter = OrderAdapter().apply {
-                //submitList(getDummyOrders())
-            //}
-            addItemDecoration(DividerItemDecoration(activity, DividerItemDecoration.VERTICAL))
-        }
+    private fun setupRecyclerView() {
+        // GridLayoutManager with 3 rows (vertical span) and horizontal scrolling
+        val gridLayoutManager = GridLayoutManager(
+            this@PageOrderActivity,
+            3, // Span count = number of rows (vertical)
+            GridLayoutManager.HORIZONTAL, // Horizontal scrolling
+            false
+        )
+        binding.layoutPages.layoutManager = gridLayoutManager
 
-        // 2. Menu Items Grid (Top Right - Horizontally Scrollable)
-        menuItemsRecycler.apply {
-            layoutManager = LinearLayoutManager(activity, LinearLayoutManager.HORIZONTAL, false)
-            adapter = MenuItemAdapter(4, 12) // 4 rows x 12 columns
+        // 2. Initialize adapter
+        pagesAdapter = MenuPagesAdapter(menuPages) { selectedPage ->
+            handlePageSelection(selectedPage)
+        }.apply {
+            // Set dynamic height based on screen size
+            binding.layoutPages.setItemViewCacheSize(18)
+            //itemHeight = (resources.displayMetrics.heightPixels * 0.15).toInt()
         }
+        binding.layoutPages.adapter = pagesAdapter
 
-        // 3. Menu Pages Grid (Bottom Right - Fixed)
-        menuPagesGrid.apply {
-            layoutManager = GridLayoutManager(activity, 6) // 6 columns
-            adapter = MenuPageAdapter(3, 6) // 3 rows x 6 columns
-        }
-
-        // 4. Action Buttons
-        plusOne.setOnClickListener {
-
-        }
-        minusOne.setOnClickListener {
-
-        }
-        portionButton.setOnClickListener {
-
-        }
-        removeItem.setOnClickListener {
-
-        }
-        languageButton.setOnClickListener {
-
-        }
-        okButton.setOnClickListener {
-
-        }
+        // 3. Add spacing between items
+        binding.layoutPages.addItemDecoration(
+            object : RecyclerView.ItemDecoration() {
+                override fun getItemOffsets(outRect: Rect, view: View,
+                                            parent: RecyclerView, state: RecyclerView.State) {
+                    outRect.set(8.dpToPx(), 8.dpToPx(), 8.dpToPx(), 8.dpToPx()) // 8dp spacing
+                }
+                }
+        )
     }
 
-    private fun loadData() {
-        //viewModelScope.launch {
-            try {
-                //val orders = repository.getOrders()
-                //val menuItems = repository.getMenuItems()
-                //val menuPages = repository.getMenuPages()
+    // DP-to-pixel conversion extension
+    fun Int.dpToPx(): Int = (this * Resources.getSystem().displayMetrics.density).toInt()
 
-                //withContext(Dispatchers.Main) {
-//                    orderList.adapter?.submitList(orders)
-//                    (menuItemsRecycler.adapter as MenuItemAdapter).updateData(menuItems)
-//                    (menuPagesGrid.adapter as MenuPageAdapter).updateData(menuPages)
-//                    totalPrice.text = calculateTotal(orders)
-                //}
-            } catch (e: Exception) {
-                Toast.makeText(activity, "Error loading data", Toast.LENGTH_SHORT).show()
-            }
+    private fun handlePageSelection(selectedPage: CMenuPage) {
+        // Update selection state
+        menuPages.forEach { page ->
+            page.isSelected = (page.menuPageId == selectedPage.menuPageId)
+        }
+        pagesAdapter.notifyDataSetChanged()
+
+        // Load items for the selected page
+        loadPageItems(selectedPage.menuPageId)
     }
 
-   private inner class MenuItemAdapter(
-       rows: Int, cols: Int) : RecyclerView.Adapter<MenuItemViewHolder>() {
-        // Implementation...
-        override fun onCreateViewHolder(
-            parent: ViewGroup,
-            viewType: Int,
-        ): MenuItemViewHolder {
-            TODO("Not yet implemented")
-        }
-
-        override fun onBindViewHolder(holder: MenuItemViewHolder, position: Int) {
-            TODO("Not yet implemented")
-        }
-
-        override fun getItemCount(): Int {
-            TODO("Not yet implemented")
-        }
+    private fun loadPageItems(pageId: Int) {
+        // Implement your logic to load items for the selected page
+        // This might involve another RecyclerView for the items in layout_items
     }
 
-    private inner class MenuPageAdapter(rows: Int, cols: Int) : RecyclerView.Adapter<MenuPageViewHolder>() {
-        // Implementation...
-        override fun onCreateViewHolder(
-            parent: ViewGroup,
-            viewType: Int,
-        ): MenuPageViewHolder {
-            TODO("Not yet implemented")
-        }
-
-        override fun onBindViewHolder(
-            holder: MenuPageViewHolder,
-            position: Int,
-        ) {
-            TODO("Not yet implemented")
-        }
-
-        override fun getItemCount(): Int {
-            TODO("Not yet implemented")
-        }
+    private fun navigateBack() {
+        // Intent to start MainActivity which will host your MainMenuDialog
+        //val mainIntent = Intent(this@AboutActivity, MainMenuActivity::class.java)
+        // Optional: Pass any fetched data to MainActivity
+        // mainIntent.putExtra("MENU_DATA", "your_fetched_menu_data_string_or_parcelable")
+        //startActivity(mainIntent)
+        finish() // Close the SplashActivity so it's not in the back stack
     }
 }

@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.delay
 import tech.hha.microfood.databinding.ActivitySplashBinding
+import tech.hha.microfood.databinding.ActivityAboutBinding
 import kotlinx.coroutines.launch
 
 class SplashActivity : AppCompatActivity() {
@@ -68,6 +69,7 @@ class SplashActivity : AppCompatActivity() {
 
     private fun navigateToMain() {
         // Intent to start MainActivity which will host your MainMenuDialog
+        //val mainIntent = Intent(this@SplashActivity, MainMenuActivity::class.java)
         val mainIntent = Intent(this@SplashActivity, MainMenuActivity::class.java)
         // Optional: Pass any fetched data to MainActivity
         // mainIntent.putExtra("MENU_DATA", "your_fetched_menu_data_string_or_parcelable")

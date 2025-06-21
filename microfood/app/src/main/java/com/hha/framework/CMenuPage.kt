@@ -1,35 +1,46 @@
 package com.hha.framework
 
-import com.hha.menu.page.MenuPage
+import com.hha.common.SkipInvisible
+import com.hha.framework.CMenuItem
+import com.hha.grpc.GrpcServiceFactory
+import com.hha.menu.item.MenuItemList
 
 data class CMenuPage(
-val menuCardId: Int,
-val menuPageId: Int,
-val localName: String,
-val chineseName: String,
-val pageButtonSize: Int,
-val picture: String,
-val isVerticalOrientation: Boolean,
-val menuItems: List<CMenuItem> = emptyList()  // Added list of MenuItems
+    var menuCardId: Int,
+    var menuPageId: Int,
+    var chineseName: String,
+    var localName: String,
+    var isSelected: Boolean,
+    var menuItem: MutableMap<Int, com.hha.framework.CMenuItem> = mutableMapOf()
 ) {
-    // Helper function to get display name based on locale
-    fun getDisplayName(useChinese: Boolean): String {
-        return if (useChinese) chineseName else localName
+    // Secondary constructor should properly delegate to primary constructor
+    constructor(
+        cardId: Int,
+        pageId: Int,
+        chinese: String,
+        local: String
+    ) : this (
+        menuCardId = cardId,
+        menuPageId = pageId,
+        chineseName = chinese,
+        localName = local,
+        isSelected = false
+    )
+
+    fun loadItems(skip : SkipInvisible) {
+        val menuItemService = GrpcServiceFactory.createMenuItemService()
+        val items: MenuItemList = menuItemService.findMenuItemsByPage(
+            menuCardId, menuPageId, skip)
+
+        menuItem.clear()
+        for (item in items.itemsList) {
+            val newItem = CMenuItem(item)
+            addMenuItem(newItem)
+        }
     }
 
-    // Helper function to add items (returns a new immutable instance)
-    fun withItems(newItems: List<CMenuItem>): CMenuPage {
-        return this.copy(menuItems = newItems)
-    }
-
-    // Helper function to add a single item
-    fun withAddedItem(item: CMenuItem): CMenuPage {
-        return this.copy(menuItems = menuItems + item)
-    }
-
-    // Helper function to remove an item
-    fun withoutItem(itemId: Int): CMenuPage {
-        return this.copy(menuItems =
-            menuItems.filter { it.menuItemId != itemId })
+    // Add a menu card to the structure
+    fun addMenuItem(newItem: CMenuItem) {
+        menuItem[newItem.menuItemId] = newItem
     }
 }

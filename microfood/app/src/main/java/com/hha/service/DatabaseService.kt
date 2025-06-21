@@ -133,3 +133,4 @@ class DatabaseService(channel: ManagedChannel) : BaseGrpcService<DatabaseService
         }
     }
 }
+

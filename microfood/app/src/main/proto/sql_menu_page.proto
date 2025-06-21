@@ -132,13 +132,6 @@ message MenuPageList
     repeated MenuPage menu_pages = 1;
 } 
 
-enum SkipInvisible
-{
-    SKIP_INVISIBLE_TRUE   = 0;  ///< Do show only the background.
-    SKIP_INVISIBLE_FALSE  = 70; ///< Do show like normal items.
-    SKIP_INVISIBLE_SHOW   = 83;  ///< Do show the items with an indication if skipped.
-}
-
 message ExchangePagesRequest
 {
     int32 menu_card_id = 1;
@@ -192,7 +185,7 @@ message GetMenuItemsRequest
     int32 menu_card_id = 1;
     int32 menu_page_id = 2;
     bool is_vertical = 3;
-    SkipInvisible skip_invisible = 4;
+    common.SkipInvisible skip_invisible = 4;
 }
 
 message VerifyRequest

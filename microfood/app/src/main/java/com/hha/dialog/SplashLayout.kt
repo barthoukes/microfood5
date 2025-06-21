@@ -103,7 +103,10 @@ class SplashLayout : androidx.activity.ComponentActivity() {
         }
     }
     private fun navigateToMainActivity() {
-        startActivity(Intent(this@SplashLayout, MainMenuActivity::class.java))
+        startActivity(Intent(this, MainMenuActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        })
+      //  startActivity(Intent(this@SplashLayout, MainMenuActivity::class.java))
         finish()
     }
 }

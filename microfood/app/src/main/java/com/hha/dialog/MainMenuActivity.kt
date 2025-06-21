@@ -11,6 +11,8 @@ import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.hha.dialog.SplashLayout
+import com.hha.activities.AboutActivity
+import com.hha.framework.CMenuCards
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import tech.hha.microfood.R
@@ -155,22 +157,23 @@ class MainMenuActivity : AppCompatActivity() {
         // Todo new takeaway
         val useBag = true
         val user = Global.getInstance().currentKeyIndex
-        val transactionId : Int? =
+        val transactionId : Int =
             createNewTakeawayTransaction(
                 0, useBag, user, false);
 
-        if (transactionId == null) {
+        if (transactionId <= 0) {
             return
         }
         Global.getInstance().transactionId = transactionId
-        if (Global.getInstance().transactionId > 0) {
-            navigateToPageOrderActivity()
-        }
+        CMenuCards.getInstance().loadTakeaway()
+        navigateToPageOrderActivity()
     }
 
     private fun navigateToPageOrderActivity() {
-        startActivity(Intent(this@MainMenuActivity, MainMenuActivity::class.java))
-        finish()
+        startActivity(Intent(this, PageOrderActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        })
+       // finish()
     }
 
     private fun navigateToSettings() {
@@ -210,11 +213,14 @@ class MainMenuActivity : AppCompatActivity() {
     }
 
     private fun showAbout() {
-        try {
-            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("http://www.houkes-horeca-applications.nl")))
-        } catch (e: ActivityNotFoundException) {
-            //showToast(R.string.no_browser_found)
-        }
+        startActivity(Intent(this, AboutActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        })
+//        try {
+//            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("http://www.houkes-horeca-applications.nl")))
+//        } catch (e: ActivityNotFoundException) {
+//            //showToast(R.string.no_browser_found)
+//        }
     }
 
     private fun updateTexts() {

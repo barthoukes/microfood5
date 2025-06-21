@@ -36,6 +36,9 @@
         </activity>
         <activity android:name="com.hha.activities.SplashActivity" />
         <activity android:name="com.hha.dialog.MainMenuActivity" />
+        <activity android:name="com.hha.activities.AboutActivity" />
+        <activity android:name="com.hha.dialog.StopDialog" />
+        <activity android:name="com.hha.dialog.PageOrderActivity" />
     </application>
 
 </manifest>
