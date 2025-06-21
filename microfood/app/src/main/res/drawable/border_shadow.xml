@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Shadow (offset by 2dp) -->
+    <item
+        android:left="2dp"
+        android:top="2dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#33000000" />  <!-- Semi-transparent black -->
+            <corners android:radius="4dp" />     <!-- Match your border radius -->
+        </shape>
+    </item>
+
+    <!-- Border (2dp thick) -->
+    <item>
+        <shape android:shape="rectangle">
+            <stroke
+                android:width="2dp"
+                android:color="#FF4081" />       <!-- Your border color (pink example) -->
+            <solid android:color="@color/COLOUR_GROUP_BACKGROUND"/> <!-- Inner fill color -->
+            <corners android:radius="4dp" />     <!-- Rounded corners -->
+        </shape>
+    </item>
+</layer-list>

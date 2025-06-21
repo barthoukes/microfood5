@@ -11,14 +11,14 @@
 	    android:background="@color/ANDROID_BUTTON_BACKGROUND"
 	    android:orientation="vertical" >
         <TextView android:id="@+id/page_order_table_name"
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/COLOUR_SELECTED_BACKGROUND"
             android:textColor="@color/COLOUR_SELECTED_TEXT"
             android:text="TAFEL 15"/>
 		<ListView
 		    android:id="@android:id/list"
-		    android:layout_width="fill_parent"
+		    android:layout_width="match_parent"
 		    android:layout_height="match_parent"
 		    android:choiceMode="singleChoice"
 		    android:scrollingCache="true"
@@ -27,7 +27,7 @@
 		    android:background="@color/COLOUR_ORDER_BACKGROUND_EMPTY"
 		    android:layout_marginBottom="60dip"/>
 		<LinearLayout
-		    android:layout_width="fill_parent"
+		    android:layout_width="match_parent"
 		    android:layout_height="60dp"
 		    android:layout_marginTop="-60dip"
 		  	android:background="@color/COLOUR_TOTAL_BACKGROUND">
@@ -43,7 +43,7 @@
 	    	<TextView android:id="@+id/total_price"
 	    	    android:layout_margin="1dp"
 		        android:layout_height="60dp"
-		        android:layout_width="fill_parent"
+		        android:layout_width="match_parent"
 				android:text="0,00"
 				android:gravity="center"
 				android:background="@color/COLOUR_TOTAL_BACKGROUND"
@@ -56,51 +56,55 @@
 	    android:layout_weight="57"
 	    android:background="@color/ANDROID_BUTTON_BACKGROUND"
 	    android:orientation="vertical" >
-        <HorizontalScrollView
-            android:layout_width="match_parent"
-            android:layout_weight="70"
-            android:layout_height="0dp">
-            <LinearLayout
-                android:id="@+id/layout_items"
-                android:layout_width="match_parent"
-                android:layout_marginLeft="1dp"
-                android:layout_marginBottom="1dp"
-                android:layout_marginTop="1dp"
-                android:layout_marginRight="1dp"
-                android:orientation="horizontal"
-				android:layout_height="match_parent">
-            </LinearLayout>
-        </HorizontalScrollView>
 
-        <HorizontalScrollView
-            android:layout_width="match_parent"
-            android:layout_weight="20"
-            android:layout_height="0dp">
-            <LinearLayout
-                android:id="@+id/layout_pages"
-                android:layout_width="match_parent"
-                android:layout_marginLeft="1dp"
-                android:layout_marginBottom="1dp"
-                android:layout_marginTop="1dp"
-                android:layout_marginRight="1dp"
-                android:orientation="horizontal"
-                android:layout_height="match_parent">
-            </LinearLayout>
-        </HorizontalScrollView>
+		<HorizontalScrollView
+			android:layout_width="match_parent"
+			android:layout_height="0dp"
+			android:layout_weight="80">
+
+			<LinearLayout
+				android:id="@+id/layout_items"
+				android:layout_width="match_parent"
+				android:layout_height="match_parent"
+				android:layout_marginLeft="1dp"
+				android:layout_marginTop="1dp"
+				android:layout_marginRight="1dp"
+				android:layout_marginBottom="1dp"
+				android:orientation="horizontal"></LinearLayout>
+		</HorizontalScrollView>
+
+		<HorizontalScrollView
+			android:layout_width="match_parent"
+			android:layout_height="0dp"
+			android:layout_weight="30">
+
+			<androidx.recyclerview.widget.RecyclerView
+				android:id="@+id/layout_pages"
+				android:background="@color/BLACK"
+				android:layout_width="0dp"
+				android:layout_height="50dp"
+				android:layout_marginLeft="1dp"
+				android:layout_marginTop="1dp"
+				android:layout_marginRight="1dp"
+				android:layout_marginBottom="1dp"
+				android:orientation="horizontal"
+				android:paddingHorizontal="2dp">
+			</androidx.recyclerview.widget.RecyclerView>
+		</HorizontalScrollView>
 	</LinearLayout>
 	<LinearLayout
 	    android:layout_width="0dp"
-	    android:layout_height="fill_parent"
+	    android:layout_height="match_parent"
 	    android:layout_weight="10"
 	    android:background="@color/ANDROID_TABLE_BACKGROUND"
 	    android:orientation="vertical" >
 	    <LinearLayout
-	   	 	android:layout_width="fill_parent"
-	    	android:layout_height="fill_parent"
+	   	 	android:layout_width="match_parent"
+	    	android:layout_height="match_parent"
 	    	android:orientation="vertical" >
 			<ImageButton
                 android:id="@+id/remove_item"
-				android:src="@drawable/eraser"
+				android:src="@drawable/eraser_yellow"
 				android:layout_weight="10"
 				android:layout_margin="4dp"
 				android:layout_width="fill_parent"
@@ -109,7 +113,7 @@
          		android:onClick="on_button_remove" />
 			<ImageButton
                 android:id="@+id/plus_one"
-				android:src="@drawable/plus48"
+				android:src="@drawable/plus_yellow"
 				android:layout_weight="10"
 				android:layout_margin="4dp"
 				android:layout_width="fill_parent"
@@ -118,19 +122,19 @@
        			android:onClick="on_button_plus1" />
 			<ImageButton
                 android:id="@+id/minus_1"
-				android:src="@drawable/min48"
+				android:src="@drawable/min_yellow"
 				android:layout_weight="10"
 				android:layout_margin="4dp"
-				android:layout_width="fill_parent"
+				android:layout_width="match_parent"
 				android:layout_height="0dp"
 				android:background="@color/ANDROID_BUTTON_BACKGROUND"
       			android:onClick="on_button_minus1" />
 			<ImageButton
                 android:id="@+id/portion"
-				android:src="@drawable/portion48"
+				android:src="@drawable/half_circle_yellow"
 				android:layout_weight="10"
 				android:layout_margin="4dp"
-				android:layout_width="fill_parent"
+				android:layout_width="match_parent"
 				android:layout_height="0dp"
 				android:background="@color/ANDROID_BUTTON_BACKGROUND"
        			android:onClick="on_button_portion" />	
@@ -139,23 +143,23 @@
                 style="?android:attr/buttonStyleSmall"		            
              	android:layout_weight="10"
              	android:layout_margin="4dp"
-                android:layout_width="fill_parent"
+                android:layout_width="match_parent"
 				android:layout_height="0dp"
                 android:gravity="center"
 				android:background="@color/ANDROID_BUTTON_BACKGROUND"
 	            android:onClick="on_button_language"
-                android:src="@drawable/languages"/>
+                android:src="@drawable/languages_yellow"/>
 	       <ImageButton
                 android:id="@+id/OK"
                 style="?android:attr/buttonStyleSmall"			            
              	android:layout_weight="15"
              	android:layout_margin="4dp"
-                android:layout_width="fill_parent"
+                android:layout_width="match_parent"
 				android:layout_height="0dp"
 				android:background="@color/ANDROID_BUTTON_BACKGROUND"
 	            android:gravity="center"
 	            android:onClick="on_button_enter"
-	            android:src="@drawable/ok32" />
+	            android:src="@drawable/enter_yellow" />
        </LinearLayout>
 	</LinearLayout>
 </LinearLayout>    		    		    	        
