@@ -12,9 +12,13 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import tech.hha.microfood.databinding.PageOrderActivityBinding
 import androidx.recyclerview.widget.RecyclerView
+import com.hha.adapter.MenuItemsAdapter
 
 import com.hha.adapter.MenuPagesAdapter
+import com.hha.common.SkipInvisible.SKIP_INVISIBLE_TRUE
 import com.hha.framework.CMenuCards
+import com.hha.framework.CMenuItem
+import com.hha.framework.CMenuItems
 import com.hha.framework.CMenuPage
 import com.hha.resources.Global
 
@@ -25,39 +29,62 @@ class PageOrderActivity : AppCompatActivity() {
     val menuCardId = global.menuCardId
     val menuCard = CMenuCards.getInstance().getMenuCard(menuCardId)
     val menuPages = menuCard.getOrderedPages()
+    val menuPage: CMenuPage = menuCard.getMenuPage(global.menuPageId)
+    val menuItems : CMenuItems =
+        menuPage.loadItems(SKIP_INVISIBLE_TRUE)
     val totalColumns = (menuPages.size / 3) // 24 items / 3 rows = 8 columns
-    private lateinit var pagesAdapter: MenuPagesAdapter
+    private lateinit var menuPagesAdapter: MenuPagesAdapter
+    private lateinit var menuItemsAdapter: MenuItemsAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = PageOrderActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
         setupRecyclerView()
     }
 
     private fun setupRecyclerView() {
-        // GridLayoutManager with 3 rows (vertical span) and horizontal scrolling
-        val gridLayoutManager = GridLayoutManager(
+        // 1. GridLayoutManager for pages with 3 rows (vertical span) and horizontal scrolling
+        val gridLayoutManagerMenuPages = GridLayoutManager(
             this@PageOrderActivity,
             3, // Span count = number of rows (vertical)
             GridLayoutManager.HORIZONTAL, // Horizontal scrolling
             false
         )
-        binding.layoutPages.layoutManager = gridLayoutManager
+        binding.layoutMenuPages.layoutManager = gridLayoutManagerMenuPages
 
         // 2. Initialize adapter
-        pagesAdapter = MenuPagesAdapter(menuPages) { selectedPage ->
+        menuPagesAdapter = MenuPagesAdapter(menuPages) { selectedPage ->
             handlePageSelection(selectedPage)
         }.apply {
             // Set dynamic height based on screen size
-            binding.layoutPages.setItemViewCacheSize(18)
-            //itemHeight = (resources.displayMetrics.heightPixels * 0.15).toInt()
+            binding.layoutMenuPages.setItemViewCacheSize(18)
         }
-        binding.layoutPages.adapter = pagesAdapter
+
+        // 1b. GridLayoutManager for menu items with 8 rows (vertical span) and horizontal scrolling
+        val gridLayoutManagerMenuItems = GridLayoutManager(
+            this@PageOrderActivity,
+            8, // Span count = number of rows (vertical)
+            GridLayoutManager.HORIZONTAL, // Horizontal scrolling
+            false
+        )
+        binding.layoutMenuItems.layoutManager = gridLayoutManagerMenuItems
+
+        // 2. Initialize adapter
+        menuItemsAdapter = MenuItemsAdapter(menuItems) { selectedMenuItem ->
+            handleMenuItemSelection(selectedMenuItem)
+        }.apply {
+            // Set dynamic height based on screen size
+            binding.layoutMenuItems.setItemViewCacheSize(28)
+        }
+        binding.layoutMenuPages.adapter = menuPagesAdapter
+        binding.layoutMenuItems.adapter = menuItemsAdapter
+
+
+
 
         // 3. Add spacing between items
-        binding.layoutPages.addItemDecoration(
+        binding.layoutMenuPages.addItemDecoration(
             object : RecyclerView.ItemDecoration() {
                 override fun getItemOffsets(outRect: Rect, view: View,
                                             parent: RecyclerView, state: RecyclerView.State) {
@@ -75,10 +102,21 @@ class PageOrderActivity : AppCompatActivity() {
         menuPages.forEach { page ->
             page.isSelected = (page.menuPageId == selectedPage.menuPageId)
         }
-        pagesAdapter.notifyDataSetChanged()
+        menuPagesAdapter.notifyDataSetChanged()
 
         // Load items for the selected page
         loadPageItems(selectedPage.menuPageId)
+    }
+
+    private fun handleMenuItemSelection(selectedMenuItem: CMenuItem) {
+        // Update selection state
+        menuItems.menuItems.values.forEach { item ->
+            item.isSelected = (item.menuItemId == selectedMenuItem.menuItemId)
+        }
+        menuItemsAdapter.notifyDataSetChanged()
+
+        // Load items for the selected page
+        loadPageItems(selectedMenuItem.menuItemId)
     }
 
     private fun loadPageItems(pageId: Int) {

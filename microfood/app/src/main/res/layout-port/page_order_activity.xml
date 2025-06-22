@@ -63,12 +63,12 @@
 		    android:layout_weight="60"
 		    android:background="@color/ANDROID_BUTTON_BACKGROUND"
 		    android:orientation="vertical">
-			<HorizontalScrollView
+			<LinearLayout
 				android:layout_width="match_parent"
                 android:layout_weight="80"
 				android:layout_height="0dp">
-				<LinearLayout
-                    android:id="@+id/layout_items"
+				<androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/layout_menu_items"
 					android:layout_width="match_parent"
                     android:layout_marginLeft="1dp"
                     android:layout_marginBottom="1dp"
@@ -76,14 +76,14 @@
                     android:layout_marginRight="1dp"
 					android:orientation="horizontal"
 					android:layout_height="match_parent">
-				</LinearLayout>
-			</HorizontalScrollView>
+				</androidx.recyclerview.widget.RecyclerView>
+			</LinearLayout>
 			<LinearLayout
 				android:layout_width="wrap_content"
                 android:layout_weight="30"
 				android:layout_height="wrap_content">
 				<androidx.recyclerview.widget.RecyclerView
-					android:id="@+id/layout_pages"
+					android:id="@+id/layout_menu_pages"
 					android:layout_width="match_parent"
 					android:layout_height="match_parent"
                     android:layout_marginLeft="1dp"

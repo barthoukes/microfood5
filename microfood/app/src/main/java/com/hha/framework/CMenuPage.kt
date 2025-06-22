@@ -1,7 +1,7 @@
 package com.hha.framework
 
 import com.hha.common.SkipInvisible
-import com.hha.framework.CMenuItem
+import com.hha.framework.CMenuItems
 import com.hha.grpc.GrpcServiceFactory
 import com.hha.menu.item.MenuItemList
 
@@ -11,7 +11,7 @@ data class CMenuPage(
     var chineseName: String,
     var localName: String,
     var isSelected: Boolean,
-    var menuItem: MutableMap<Int, com.hha.framework.CMenuItem> = mutableMapOf()
+    var menuItem: CMenuItems
 ) {
     // Secondary constructor should properly delegate to primary constructor
     constructor(
@@ -24,23 +24,22 @@ data class CMenuPage(
         menuPageId = pageId,
         chineseName = chinese,
         localName = local,
-        isSelected = false
+        isSelected = false,
+        menuItem = CMenuItems()
     )
 
-    fun loadItems(skip : SkipInvisible) {
+    fun loadItems(skip : SkipInvisible) : CMenuItems {
         val menuItemService = GrpcServiceFactory.createMenuItemService()
         val items: MenuItemList = menuItemService.findMenuItemsByPage(
             menuCardId, menuPageId, skip)
+        val menuItems : MutableMap<Int, CMenuItem> = mutableMapOf()
 
-        menuItem.clear()
         for (item in items.itemsList) {
             val newItem = CMenuItem(item)
-            addMenuItem(newItem)
+            menuItems[newItem.menuItemId] = newItem
         }
-    }
-
-    // Add a menu card to the structure
-    fun addMenuItem(newItem: CMenuItem) {
-        menuItem[newItem.menuItemId] = newItem
+        val mapItems = CMenuItems()
+        mapItems.setItems(menuItems)
+        return mapItems
     }
 }

@@ -39,7 +39,8 @@ data class CMenuItem(
     val colourSelectedBack2: Int = 0,
     val menuCardId: Int = 0,
     val statiegeld: Int = 0,
-    val sequence: Int = 0
+    var sequence: Int = 0,
+    var isSelected: Boolean = false
     ) {
     // Constructor that copies from XMenuItem
     constructor(xItem: MenuItem) : this(
@@ -76,7 +77,8 @@ data class CMenuItem(
         colourSelectedBack2 = xItem.colourSelectedBack2,
         menuCardId = xItem.menuCardId,
         statiegeld = xItem.statiegeld,
-        sequence = xItem.sequence
+        sequence = xItem.sequence,
+        isSelected = false
     )
 
     // Optional: Add extension function to XMenuItem for more fluent conversion
@@ -84,5 +86,6 @@ data class CMenuItem(
         fun MenuItem.toCMenuItem(): CMenuItem {
             return CMenuItem(this)
         }
+
     }
 }

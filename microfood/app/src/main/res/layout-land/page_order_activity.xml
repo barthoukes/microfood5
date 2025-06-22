@@ -57,32 +57,15 @@
 	    android:background="@color/ANDROID_BUTTON_BACKGROUND"
 	    android:orientation="vertical" >
 
-		<HorizontalScrollView
+		<LinearLayout
 			android:layout_width="match_parent"
-			android:layout_height="0dp"
+			android:layout_height="100dp"
 			android:layout_weight="80">
-
-			<LinearLayout
-				android:id="@+id/layout_items"
+			<androidx.recyclerview.widget.RecyclerView
+				android:id="@+id/layout_menu_items"
+				android:background="@color/BLACK"
 				android:layout_width="match_parent"
 				android:layout_height="match_parent"
-				android:layout_marginLeft="1dp"
-				android:layout_marginTop="1dp"
-				android:layout_marginRight="1dp"
-				android:layout_marginBottom="1dp"
-				android:orientation="horizontal"></LinearLayout>
-		</HorizontalScrollView>
-
-		<HorizontalScrollView
-			android:layout_width="match_parent"
-			android:layout_height="0dp"
-			android:layout_weight="30">
-
-			<androidx.recyclerview.widget.RecyclerView
-				android:id="@+id/layout_pages"
-				android:background="@color/BLACK"
-				android:layout_width="0dp"
-				android:layout_height="50dp"
 				android:layout_marginLeft="1dp"
 				android:layout_marginTop="1dp"
 				android:layout_marginRight="1dp"
@@ -90,7 +73,24 @@
 				android:orientation="horizontal"
 				android:paddingHorizontal="2dp">
 			</androidx.recyclerview.widget.RecyclerView>
-		</HorizontalScrollView>
+		</LinearLayout>
+		<LinearLayout
+			android:layout_width="match_parent"
+			android:layout_height="100dp"
+			android:layout_weight="30">
+			<androidx.recyclerview.widget.RecyclerView
+				android:id="@+id/layout_menu_pages"
+				android:background="@color/BLACK"
+				android:layout_width="match_parent"
+				android:layout_height="match_parent"
+				android:layout_marginLeft="1dp"
+				android:layout_marginTop="1dp"
+				android:layout_marginRight="1dp"
+				android:layout_marginBottom="1dp"
+				android:orientation="horizontal"
+				android:paddingHorizontal="2dp">
+			</androidx.recyclerview.widget.RecyclerView>
+		</LinearLayout>
 	</LinearLayout>
 	<LinearLayout
 	    android:layout_width="0dp"

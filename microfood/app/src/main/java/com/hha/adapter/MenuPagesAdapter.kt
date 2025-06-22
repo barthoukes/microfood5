@@ -10,21 +10,21 @@ import tech.hha.microfood.databinding.AdapterMenuPageBinding
 class MenuPagesAdapter(
     private val pages: List<CMenuPage>,
     private val onPageSelected: (CMenuPage) -> Unit
-) : RecyclerView.Adapter<MenuPagesAdapter.PageViewHolder>() {
+) : RecyclerView.Adapter<MenuPagesAdapter.MenuPageViewHolder>() {
 
-    inner class PageViewHolder(val binding: AdapterMenuPageBinding) :
+    inner class MenuPageViewHolder(val binding: AdapterMenuPageBinding) :
         RecyclerView.ViewHolder(binding.root)
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PageViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MenuPageViewHolder {
         val binding = AdapterMenuPageBinding.inflate(
             LayoutInflater.from(parent.context),
             parent,
             false
         )
-        return PageViewHolder(binding)
+        return MenuPageViewHolder(binding)
     }
 
-    override fun onBindViewHolder(holder: PageViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: MenuPageViewHolder, position: Int) {
         val page = pages[position]
         holder.binding.itemName.text = page.localName
 
