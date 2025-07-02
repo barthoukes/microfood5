@@ -16,7 +16,7 @@
             <stroke
                 android:width="2dp"
                 android:color="#FF4081" />       <!-- Your border color (pink example) -->
-            <solid android:color="@color/COLOUR_GROUP_BACKGROUND"/> <!-- Inner fill color -->
+            <solid android:color="@android:color/transparent"/>
             <corners android:radius="4dp" />     <!-- Rounded corners -->
         </shape>
     </item>

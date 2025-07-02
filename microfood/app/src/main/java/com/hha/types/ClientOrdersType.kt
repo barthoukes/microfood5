@@ -1,4 +1,4 @@
-package com.hha.framework
+package com.hha.types
 
 enum class ClientOrdersType(val value: Int) {
     INIT(0),               // No order yet

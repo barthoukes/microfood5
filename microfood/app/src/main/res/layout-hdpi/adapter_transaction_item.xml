@@ -1,24 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
 	xmlns:android="http://schemas.android.com/apk/res/android"
-	android:id="@+id/menuPageButton"
-	android:layout_width="20dp"
+	android:id="@+id/transaction_order"
+	android:layout_width="wrap_content"
 	android:layout_height="match_parent"
 	android:orientation="vertical"
-	android:background="@drawable/border_shadow"
 	android:gravity="center"
 	android:padding="2dp">
 	<TextView
-		android:id="@+id/item_name"
-		android:layout_width="wrap_content"
+		android:id="@+id/transaction_item"
+		android:layout_width="match_parent"
 		android:layout_height="match_parent"
 		android:gravity="center"
-		android:textColor="@color/COLOUR_GROUP_TEXT"
-		android:textSize="24sp"
+		android:textColor="@color/COLOUR_ORDER_TEXT"
+		android:background="@color/COLOUR_ORDER_BACKGROUND_EVEN"
+		android:textSize="14sp"
 		android:maxLines="4"
 		android:singleLine="false"
-		android:clickable="true"
-		android:focusable="true"
 		android:inputType="textMultiLine"
 		android:ellipsize="end"/>
 </LinearLayout>

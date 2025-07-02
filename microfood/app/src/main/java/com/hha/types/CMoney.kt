@@ -13,7 +13,7 @@ import kotlin.math.abs
  * val product = money1 * 2      // 2468 cents
  * val negative = -money1        // -1234 cents
  */
-class CMoney(private var cents: Long = 0) {
+class CMoney(private var cents: Int = 0) {
     companion object {
         const val MONEY_CENTS = 0x01
         const val MONEY_LINE = 0x02
@@ -22,14 +22,21 @@ class CMoney(private var cents: Long = 0) {
     }
 
     // Constructors
-    constructor(value: Int) : this(value.toLong())
-    constructor(value: Double) : this(value.toLong())
+    constructor(value: Double) : this((value*100.0).toInt())
     constructor(value: String) : this(0) {
         parseString(value)
     }
 
-    private fun long() : Long {
+    fun round(gap : Int) {
+        cents = cents - (cents%gap)
+    }
+
+    fun cents() : Int {
         return cents;
+    }
+
+    fun empty() : Boolean {
+        return cents == 0
     }
 
     // Parsing from string
@@ -44,10 +51,10 @@ class CMoney(private var cents: Long = 0) {
         }
 
         // Parse whole number part
-        var wholeNumber = 0L
+        var wholeNumber : Int = 0
         var i = 0
         while (i < x.length && x[i].isDigit()) {
-            wholeNumber = wholeNumber * 10 + (x[i] - '0').toLong()
+            wholeNumber = wholeNumber * 10 + (x[i] - '0')
             i++
         }
         cents = wholeNumber * 100
@@ -56,10 +63,10 @@ class CMoney(private var cents: Long = 0) {
         if (i < x.length && (x[i] == '.' || x[i] == ',')) {
             i++
             if (i < x.length && x[i].isDigit()) {
-                cents += 10 * (x[i] - '0').toLong()
+                cents += 10 * (x[i] - '0')
                 i++
                 if (i < x.length && x[i].isDigit()) {
-                    cents += (x[i] - '0').toLong()
+                    cents += (x[i] - '0')
                 }
             }
         }
@@ -75,17 +82,15 @@ class CMoney(private var cents: Long = 0) {
     operator fun unaryMinus(): CMoney = CMoney(-cents)
 
     operator fun times(multiplier: Int): CMoney = CMoney(cents * multiplier)
-    operator fun times(multiplier: Double): CMoney = CMoney((cents * multiplier).toLong())
+    operator fun times(multiplier: Double): CMoney = CMoney((cents * multiplier).toInt())
     operator fun div(divisor: Int): CMoney = CMoney(cents / divisor)
-    operator fun div(divisor: Long): CMoney = CMoney(cents / divisor)
 
     // Compound assignments
     operator fun plusAssign(other: CMoney) { cents += other.cents }
     operator fun minusAssign(other: CMoney) { cents -= other.cents }
     operator fun timesAssign(multiplier: Int) { cents *= multiplier }
-    operator fun timesAssign(multiplier: Double) { cents = (cents * multiplier).toLong() }
+    operator fun timesAssign(multiplier: Double) { cents = (cents * multiplier).toInt() }
     operator fun divAssign(divisor: Int) { cents /= divisor }
-    operator fun divAssign(divisor: Long) { cents /= divisor }
 
     // Comparison operators
     operator fun compareTo(other: CMoney): Int = cents.compareTo(other.cents)
@@ -94,9 +99,9 @@ class CMoney(private var cents: Long = 0) {
 
     // Conversion functions
     fun toDouble(): Double = cents.toDouble()
-    fun toLong(): Long = cents
-    fun isZero(): Boolean = cents == 0L
-    fun isNonZero(): Boolean = cents != 0L
+    fun toLong(): Long = cents.toLong()
+    fun isZero(): Boolean = cents == 0
+    fun isNonZero(): Boolean = cents != 0
 
     fun negative() { cents = -cents }
     fun clear() { cents = 0 }
@@ -107,7 +112,7 @@ class CMoney(private var cents: Long = 0) {
 
         if (abs(cents) > 1_000_000 && length < 9 && (flags and MONEY_CENTS) == 0) {
             builder.append(cents / 100)
-        } else if ((flags and MONEY_LINE) != 0 && cents == 0L) {
+        } else if ((flags and MONEY_LINE) != 0 && cents == 0) {
             builder.append("-.--")
         } else {
             if (cents < 0) builder.append("-")
@@ -141,14 +146,10 @@ class CMoney(private var cents: Long = 0) {
         // Simplified implementation - would need proper binary reading in real code
         val bytes = file.readBytes()
         if (bytes.size >= 3) {
-            cents = (bytes[0].toLong() and 0xFF) +
-                    ((bytes[1].toLong() and 0xFF) shl 8)
-            cents = cents * 100 + (bytes[2].toLong() and 0xFF)
+            cents = (bytes[0].toInt() and 0xFF) +
+                    ((bytes[1].toInt() and 0xFF) shl 8)
+            cents = cents * 100 + (bytes[2].toInt() and 0xFF)
         }
-    }
-
-    fun setLong(value: String) {
-        cents = value.toLongOrNull() ?: 0L
     }
 }
 

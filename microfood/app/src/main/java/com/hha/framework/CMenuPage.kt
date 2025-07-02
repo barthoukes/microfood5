@@ -8,6 +8,7 @@ import com.hha.menu.item.MenuItemList
 data class CMenuPage(
     var menuCardId: Int,
     var menuPageId: Int,
+    var pageWidth: Int,
     var chineseName: String,
     var localName: String,
     var isSelected: Boolean,
@@ -17,6 +18,7 @@ data class CMenuPage(
     constructor(
         cardId: Int,
         pageId: Int,
+        width: Int,
         chinese: String,
         local: String
     ) : this (
@@ -24,6 +26,7 @@ data class CMenuPage(
         menuPageId = pageId,
         chineseName = chinese,
         localName = local,
+        pageWidth = width,
         isSelected = false,
         menuItem = CMenuItems()
     )

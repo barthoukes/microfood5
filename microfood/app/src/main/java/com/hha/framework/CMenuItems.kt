@@ -22,9 +22,9 @@ data class CMenuItems(
 
     fun fillInSequenceIds() {
         for (item in menuItems) {
-            item.value.sequence =
-                columns.binarySearch(item.value.positionX)*verticalSize +
-                columns.binarySearch(item.value.positionY)
+            val x = columns.binarySearch(item.value.positionX)
+            val y = rows.binarySearch(item.value.positionY)
+            item.value.sequence = x*verticalSize +y
         }
         for (item in menuItems) {
             itemPerPosition[item.value.sequence] = item.value

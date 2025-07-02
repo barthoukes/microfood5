@@ -31,7 +31,7 @@ class CMenuCards private constructor() {
         }
     }
 
-    fun getProductFromProductId(menuItemId: Int): MenuItem? = runBlocking {
+    fun getProductFromProductId(menuItemId: Long): MenuItem? = runBlocking {
         try {
             val mis = GrpcServiceFactory.createMenuItemService()
             return@runBlocking mis.getProductFromProductId(menuItemId)

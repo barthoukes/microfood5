@@ -21,10 +21,10 @@
 	            android:background="@color/COLOUR_SELECTED_BACKGROUND"
 	            android:textColor="@color/COLOUR_SELECTED_TEXT"
 	            android:text="TAFEL 15"/>
-			<ListView
-			    android:id="@android:id/list"
-			    android:layout_width="match_parent"
-			    android:layout_height="match_parent"
+			<androidx.recyclerview.widget.RecyclerView
+				android:id="@+id/layout_transaction_items"
+				android:layout_width="match_parent"
+			    android:layout_height="wrap_content"
 			    android:choiceMode="singleChoice"
 			    android:scrollingCache="true"
 			    android:scrollbars="none"
@@ -66,22 +66,22 @@
 			<LinearLayout
 				android:layout_width="match_parent"
                 android:layout_weight="80"
-				android:layout_height="0dp">
+				android:layout_height="300dp">
 				<androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/layout_menu_items"
 					android:layout_width="match_parent"
-                    android:layout_marginLeft="1dp"
+					android:layout_height="match_parent"
+					android:layout_marginLeft="1dp"
                     android:layout_marginBottom="1dp"
                     android:layout_marginTop="1dp"
                     android:layout_marginRight="1dp"
-					android:orientation="horizontal"
-					android:layout_height="match_parent">
+					android:orientation="horizontal">
 				</androidx.recyclerview.widget.RecyclerView>
 			</LinearLayout>
 			<LinearLayout
-				android:layout_width="wrap_content"
+				android:layout_width="match_parent"
                 android:layout_weight="30"
-				android:layout_height="wrap_content">
+				android:layout_height="200dp">
 				<androidx.recyclerview.widget.RecyclerView
 					android:id="@+id/layout_menu_pages"
 					android:layout_width="match_parent"
@@ -139,15 +139,15 @@
 			android:layout_height="match_parent" />
         <ImageButton
             android:id="@+id/LANGUAGE"
-               style="?android:attr/buttonStyleSmall"		            
-            	android:layout_weight="10"
-            	android:layout_margin="4dp"
-               android:layout_width="0dp"
-               android:layout_height="match_parent"
-               android:gravity="center"
+			style="?android:attr/buttonStyleSmall"
+            android:layout_weight="10"
+            android:layout_margin="4dp"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:gravity="center"
 			android:background="@color/ANDROID_BUTTON_BACKGROUND"
             android:onClick="on_button_language"
-               android:src="@drawable/languages_yellow"/>
+            android:src="@drawable/languages_yellow"/>
 		<ImageButton
 	        android:id="@+id/OK"
 	        style="?android:attr/buttonStyleSmall"

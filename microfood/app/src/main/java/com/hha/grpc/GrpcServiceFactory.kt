@@ -71,6 +71,11 @@ object GrpcServiceFactory {
         return DailyTransactionPrintService(channel)
     }
 
+    fun createDailyTransactionItemService(): DailyTransactionItemService {
+        val channel = getChannel()
+        return DailyTransactionItemService(channel)
+    }
+
     fun createDailyTransactionService(): DailyTransactionService {
         val channel = getChannel()
         return DailyTransactionService(channel)

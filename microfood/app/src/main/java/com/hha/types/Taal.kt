@@ -3,7 +3,7 @@ package com.hha.types
 /**
  * Represents different languages.
  */
-enum class ETaal(val value: Int) {
+enum class ETaal(public val value: Int) {
     LANG_NONE(0),
     LANG_SIMPLIFIED(1),
     LANG_DUTCH(2),
@@ -21,5 +21,10 @@ enum class ETaal(val value: Int) {
         fun fromInt(value: Int): ETaal? {
             return values().firstOrNull { it.value == value }
         }
+    }
+
+    /** Check for chinese */
+    fun isChinese(): Boolean {
+        return this == LANG_SIMPLIFIED || this == LANG_TRADITIONAL
     }
 }

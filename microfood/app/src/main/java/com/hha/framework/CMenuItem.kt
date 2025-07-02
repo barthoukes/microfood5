@@ -3,7 +3,9 @@ package com.hha.framework
 import com.hha.common.ItemSort
 import com.hha.common.ItemVisible
 import com.hha.common.MenuItem
+import com.hha.common.OrderLevel
 import com.hha.common.TaxType
+import com.hha.types.EOrderLevel
 
 data class CMenuItem(
     val menuItemId: Int = 0,
@@ -16,7 +18,7 @@ data class CMenuItem(
     val takeawayHalfPrice: Int = 0,
     val restaurantTax: TaxType = TaxType.BTW_INVALID,
     val takeawayTax: TaxType = TaxType.BTW_INVALID,
-    val level: Int = 0,
+    var level: EOrderLevel = EOrderLevel.LEVEL_NOTHING,
     val taxClusterId: Int = 0,
     val page: Int = 0,
     val locations: Int = 0,
@@ -54,7 +56,7 @@ data class CMenuItem(
         takeawayHalfPrice = xItem.takeawayHalfPrice,
         restaurantTax = xItem.restaurantTax,
         takeawayTax = xItem.takeawayTax,
-        level = xItem.level,
+        level = EOrderLevel.fromOrderLevel(xItem.level),
         taxClusterId = xItem.taxClusterId,
         page = xItem.page,
         locations = xItem.locations,
@@ -68,13 +70,13 @@ data class CMenuItem(
         positionHeight = xItem.positionHeight,
         clusters = xItem.clusters,
         specialPrices = xItem.specialPrices,
-        colourText = xItem.colourText,
-        colourBack = xItem.colourBack,
-        colourSelectedText = xItem.colourSelectedText,
-        colourSelectedBack = xItem.colourSelectedBack,
+        colourText = toTabletColour(xItem.colourText),
+        colourBack = toTabletColour(xItem.colourBack),
+        colourSelectedText = toTabletColour(xItem.colourSelectedText),
+        colourSelectedBack = toTabletColour(xItem.colourSelectedBack),
         image = xItem.image,
-        colourBack2 = xItem.colourBack2,
-        colourSelectedBack2 = xItem.colourSelectedBack2,
+        colourBack2 = toTabletColour(xItem.colourBack2),
+        colourSelectedBack2 = toTabletColour(xItem.colourSelectedBack2),
         menuCardId = xItem.menuCardId,
         statiegeld = xItem.statiegeld,
         sequence = xItem.sequence,
@@ -85,6 +87,10 @@ data class CMenuItem(
     companion object {
         fun MenuItem.toCMenuItem(): CMenuItem {
             return CMenuItem(this)
+        }
+
+        fun toTabletColour(colour: Int): Int {
+            return colour or 0xFF000000.toInt()
         }
 
     }

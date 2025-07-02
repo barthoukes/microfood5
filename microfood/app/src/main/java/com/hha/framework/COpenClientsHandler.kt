@@ -11,7 +11,7 @@ import org.intellij.lang.annotations.Language
 
 
 object COpenClientsHandler : StringDialog.StringListener {
-    val CFG = Global.getInstance().CFG
+    private val CFG = Global.getInstance().CFG
     val service = GrpcServiceFactory.createDailyTransactionService()
     var stringTyped = ""
     var stringValid = false

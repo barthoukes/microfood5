@@ -37,7 +37,7 @@ data class CMenuCard(
         else
         {
             // Create empty menu page
-            val mp = CMenuPage(menuCardId, pageId, "CH", "ETEN")
+            val mp = CMenuPage(menuCardId, pageId, 24, "CH", "ETEN")
             menuPage[pageId] = mp
             return mp
         }
@@ -49,7 +49,8 @@ data class CMenuCard(
         menuPage.clear()
         for (page in pages) {
             val newPage = CMenuPage(page.menuCardId,
-                page.menuPageId, page.chineseName, page.localName)
+                page.menuPageId, page.pageButtonSize / 1000,
+                page.chineseName, page.localName)
             addMenuPage(newPage)
         }
     }
@@ -65,7 +66,7 @@ data class CMenuCard(
     }
 
     // Helper method to get ordered pages
-    fun getOrderedPages(): List<CMenuPage> {
-        return menuPage.values.sortedBy { sequence } // This line remains the same
+    fun getOrderedPages(): MutableMap<Int, CMenuPage> {
+        return menuPage // This line remains the same
     }
 }

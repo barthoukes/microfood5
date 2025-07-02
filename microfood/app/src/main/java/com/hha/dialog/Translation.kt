@@ -74,8 +74,9 @@ object Translation {
     fun nextLanguage(): ETaal {
         val global = Global.getInstance()
         val CFG = Global.getInstance().CFG
+        var retry = 7
 
-        while (true) {
+        while (--retry>0) {
             global.language = when (global.language) {
                 ETaal.LANG_SIMPLIFIED -> ETaal.LANG_DUTCH
                 ETaal.LANG_NONE -> ETaal.LANG_SIMPLIFIED
@@ -86,22 +87,33 @@ object Translation {
             }
             when (global.language) {
                 ETaal.LANG_SIMPLIFIED -> try {
-                    if (CFG.getValue("chinese") != 0) return global.language
+                    if (CFG.getOption("simplified")) break
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
                 ETaal.LANG_DUTCH -> try {
-                    if (CFG.getValue("dutch") != 0) return global.language
+                    if (CFG.getOption("nederlands")) break
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
                 ETaal.LANG_INDONESIAN -> try {
-                    if (CFG.getValue("indonesian") != 0) return global.language
+                    if (CFG.getOption("indonesian")) break
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+                ETaal.LANG_ENGLISH -> try {
+                    if (CFG.getOption("english")) break
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+                ETaal.LANG_GERMAN -> try {
+                    if (CFG.getOption("duits")) break
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
                 else -> {}
             }
         }
+        return global.language
     }
 }

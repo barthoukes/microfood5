@@ -8,6 +8,8 @@ import com.hha.common.DeletedStatus
 import com.hha.common.Item
 import com.hha.common.ItemLocation
 import com.hha.common.ItemSort
+import com.hha.common.OrderLevel
+import com.hha.common.Payed
 import com.hha.common.PaymentStatus
 import com.hha.common.SubItems
 import com.hha.daily.item.CreateItemRequest
@@ -37,9 +39,12 @@ import com.hha.daily.item.TransactionTimeFrame
 import com.hha.daily.item.TransactionTimeFrameDeviceWhy
 import com.hha.daily.item.TransactionToTransaction
 import com.hha.daily.item.UndoTimeFrameRequest
+import com.hha.daily.item.createItemRequest
+import com.hha.types.ETimeFrameIndex
 
 import io.grpc.ManagedChannel
 import kotlinx.coroutines.runBlocking
+import kotlin.collections.mutableListOf
 
 class DailyTransactionItemService(channel: ManagedChannel) : BaseGrpcService<DailyTransactionItemServiceGrpcKt.DailyTransactionItemServiceCoroutineStub>(channel) {
     override val stub: DailyTransactionItemServiceGrpcKt.DailyTransactionItemServiceCoroutineStub by lazy {
@@ -81,7 +86,8 @@ class DailyTransactionItemService(channel: ManagedChannel) : BaseGrpcService<Dai
         }
     }
 
-    fun selectTransactionId(transactionId: Long, sorted: ItemSort, timeFrameId: Int, deviceId: Int): ItemList? = runBlocking {
+    fun selectTransactionId(transactionId: Long, sorted: ItemSort,
+                            timeFrameId: Int, deviceId: Int): ItemList? = runBlocking {
         try {
             val request = SelectTransactionSort.newBuilder()
                 .setTransactionId(transactionId)
@@ -95,6 +101,60 @@ class DailyTransactionItemService(channel: ManagedChannel) : BaseGrpcService<Dai
         }
     }
 
+    fun createItem(
+        itemId: Long,
+        transactionId: Long,
+        sequence: Int,
+        subSequence: Int,
+        subSubSequence: Int,
+        quantity: Int,
+        level: OrderLevel,
+        taxGroup: Int,
+        page: Int,
+        parts: Int,
+        unitPrice: Int,
+        originalPrice: Int,
+        originalHalfPrice: Int,
+        tax: Double,
+        locations: Int,
+        timeFrameIndex: Int,
+        deviceId: Int,
+        clusterId: Int,
+        isPaid: Payed,
+        statiegeld: Int,
+        deletedStatus: DeletedStatus,
+        deletedTimeFrame: Int
+    ): Int? = runBlocking {
+        try {
+        val request = CreateItemRequest.newBuilder()
+            .setItemId(itemId)
+            .setTransactionId(transactionId)
+            .setSequence(sequence)
+            .setSubSequence(subSequence)
+            .setSubSubSequence(subSubSequence)
+            .setQuantity(quantity)
+            .setLevel(level)
+            .setTaxGroup(taxGroup)
+            .setPage(page)
+            .setParts(parts)
+            .setUnitPrice(unitPrice)
+            .setOriginalPrice(originalPrice)
+            .setOriginalHalfPrice(originalHalfPrice)
+            .setTax(tax)
+            .setLocations(locations)
+            .setTimeFrameIndex(timeFrameIndex)
+            .setDeviceId(deviceId)
+            .setClusterId(clusterId)
+            .setIsPaid(isPaid)
+            .setStatiegeld(statiegeld)
+            .setDeletedStatus(deletedStatus)
+            .setDeletedTimeFrame(deletedTimeFrame)
+            .build()
+            stub.createItem(request).number
+        } catch (e: Exception) {
+            null
+        }
+    }
     fun createItem(request: CreateItemRequest): Int? = runBlocking {
         try {
             stub.createItem(request).number
@@ -385,17 +445,18 @@ class DailyTransactionItemService(channel: ManagedChannel) : BaseGrpcService<Dai
         }
     }
 
-    fun findSequences(transactionId: Int, timeFrameLow: Int, timeFrameHigh: Int, itemLocations: Int): FindSequencesReply? = runBlocking {
+    fun findSequences(transactionId: Long, timeFrameLow: Int, timeFrameHigh: Int, itemLocations: Int): List<Int> = runBlocking {
         try {
             val request = FindSequencesRequest.newBuilder()
-                .setTransactionId(transactionId)
+                .setTransactionId(transactionId.toInt())
                 .setTimeFrameLow(timeFrameLow)
                 .setTimeFrameHigh(timeFrameHigh)
                 .setItemLocations(itemLocations)
                 .build()
-            stub.findSequences(request)
+            stub.findSequences(request).outputList ?:emptyList<Int>()
+            // FindSequencesReply?
         } catch (e: Exception) {
-            null
+            emptyList<Int>()
         }
     }
 
@@ -464,14 +525,14 @@ class DailyTransactionItemService(channel: ManagedChannel) : BaseGrpcService<Dai
     fun findSequenceItems(
         transactionId: Int,
         sequenceList: List<Int>,
-        maxTimeFrameIndex: Int,
+        maxTimeFrameIndex: ETimeFrameIndex,
         negative: Boolean
     ): ItemList? = runBlocking {
         try {
             val request = FindSequenceItemsRequest.newBuilder()
                 .setTransactionId(transactionId)
                 .addAllSequenceList(sequenceList)
-                .setMaxTimeFrameIndex(maxTimeFrameIndex)
+                .setMaxTimeFrameIndex(maxTimeFrameIndex.index.toInt())
                 .setNegative(negative)
                 .build()
             stub.findSequenceItems(request)

@@ -16,10 +16,10 @@
             android:background="@color/COLOUR_SELECTED_BACKGROUND"
             android:textColor="@color/COLOUR_SELECTED_TEXT"
             android:text="TAFEL 15"/>
-		<ListView
-		    android:id="@android:id/list"
+		<androidx.recyclerview.widget.RecyclerView
+			android:id="@+id/layout_transaction_items"
 		    android:layout_width="match_parent"
-		    android:layout_height="match_parent"
+		    android:layout_height="wrap_content"
 		    android:choiceMode="singleChoice"
 		    android:scrollingCache="true"
 		    android:scrollbars="none"
@@ -139,7 +139,7 @@
 				android:background="@color/ANDROID_BUTTON_BACKGROUND"
        			android:onClick="on_button_portion" />	
 	        <ImageButton
-	            android:id="@+id/LANGUAGE"
+	            android:id="@+id/next_language"
                 style="?android:attr/buttonStyleSmall"		            
              	android:layout_weight="10"
              	android:layout_margin="4dp"

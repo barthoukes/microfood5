@@ -1,16 +1,14 @@
 package com.hha.framework
 
-import CItem
 import android.util.Log
 import com.hha.resources.Global
-import com.hha.framework.Types
-import com.hha.framework.CTimeFrame
 import com.hha.types.CMoney
+import com.hha.types.ClientOrdersType
 import com.hha.types.EDeletedStatus
 import java.text.SimpleDateFormat
 import java.util.*
 
-class CTransaction {
+class CTransaction : Iterable<CSortedItem> {
     companion object {
         private const val TAG = "TRANS"
     }
@@ -24,8 +22,11 @@ class CTransaction {
     var has_orders: Boolean = false
     private val m_global: Global = Global.getInstance()
 
-    private val m_item: LinkedList<CItem> = LinkedList()
+    private val m_items = CTransactionItems()
     private val m_timeFrame: LinkedList<CTimeFrame> = LinkedList()
+
+    // Add this iterator implementation
+    override fun iterator(): Iterator<CSortedItem> = m_items.iterator()
 
     constructor(id: Long, name: String, time: String, status: ClientOrdersType, customerId: Int,
                 total: CMoney) {
@@ -35,6 +36,10 @@ class CTransaction {
         this.status = status
         this.customer_id = customerId
         this.total = total
+    }
+
+    constructor() {
+        this.id = -1
     }
 
     constructor(source: CTransaction) {
@@ -67,21 +72,11 @@ class CTransaction {
         }
     }
 
-    fun calculateTotal(): CMoney {
-        var total = CMoney(0)
-        m_item.forEach { item ->
-            if (item.deletedStatus == EDeletedStatus.DELETE_NOT) {
-                total = total + item.getTotal()
-            }
-        }
-        this.total = total
-        return total
-    }
-
-    fun size(): Int = m_item.size
+    val size : Int
+        get() = m_items.size
 
     fun plus1() {
-        if (size() == 0) return
+        if (size == 0) return
         var y = m_global.cursor
         var item = get(y) ?: get(--y) ?: return
         if (item.deletedStatus != EDeletedStatus.DELETE_NOT) return
@@ -92,65 +87,14 @@ class CTransaction {
 
     }
 
-    fun minus1() {
+    fun minus1()
+    {}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        //if (size() == 0) return
-        //var y = m_global.cursor
-        //var item = get(y) ?: get(--y) ?: return
-        //if (item.deleted != CItem.DELETE_NOT) return
-        //add(y, timeFrameIndex(), -1)
-    }
+    val empty : Boolean
+        get() = m_items.empty
 
     fun portion() {
-        if (size() == 0) return
+        if (size == 0) return
         var y = m_global.cursor
         var item = get(y) ?: get(--y) ?: return
         //if (item.deleted != CItem.DELETE_NOT) return
@@ -167,8 +111,8 @@ class CTransaction {
        // }
         //item.unit = price
 
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-        val date = dateFormat.format(Date())
+        //val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+        //val date = dateFormat.format(Date())
 
         //m_global.transactionItemDB.createItem(
         //    item.menu_item_id,
@@ -191,7 +135,13 @@ class CTransaction {
 
     fun get(position: Int): CItem? {
         return try {
-            m_item[position]
+            var idx : Int = 0
+            while (idx < m_items.size) {
+                if (position < m_items[idx].size)
+                    return m_items[idx][position]
+                idx++
+            }
+            return null
         } catch (e: Exception) {
             Log.e(TAG, e.toString())
             null
@@ -223,5 +173,12 @@ class CTransaction {
         tf.end_time = dateFormat.format(Date())
      //   m_global.timeFrameDB.closeTimeFrame(id, tf.time_frame_index, tf.end_time, count)
      //   m_global.transactionDB.updateTotal(m_global.transaction)
+    }
+
+    fun addTransactionItem(cursor: Int, selectedMenuItem: CMenuItem) : Boolean {
+        Log.d("CTransaction", "add transaction item: " +
+                "${selectedMenuItem.menuItemId} cursor $cursor")
+        return m_items.touchItem(cursor, selectedMenuItem)
+
     }
 }

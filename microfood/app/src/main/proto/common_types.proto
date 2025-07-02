@@ -81,7 +81,7 @@ message MenuItem
     int32 takeaway_half_price = 8;
     TaxType restaurant_tax = 9;
     TaxType takeaway_tax = 10;
-    int32 level = 11;
+    OrderLevel level = 11;
     int32 tax_cluster_id = 12;
     int32 page = 13;
     int32 locations = 14;

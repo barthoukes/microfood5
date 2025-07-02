@@ -14,6 +14,10 @@ fun duoShao(portion: Int, language: ETaal, isPrinter: Boolean): String {
     return "" // Default if portion is not handled or 0
 }
 
+fun MenuItem.getWidth() : Int {
+    return this.positionWidth
+}
+
 /**
  * Calculates a display name for the MenuItem.
  * This is an example, customize the logic based on your needs.

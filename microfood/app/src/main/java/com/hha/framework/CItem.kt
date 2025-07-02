@@ -1,30 +1,26 @@
-import com.hha.framework.CMenuCards
-import java.text.DecimalFormat
+package com.hha.framework
 
+import com.hha.common.Item
 import com.hha.types.EItemLocation
 import com.hha.types.EDeletedStatus
-import com.hha.framework.CTimeFrameIndex
-import com.hha.framework.CTimeFrameIndex.Companion.TIME_FRAME_UNDEFINED
 import com.hha.types.CMoney
-import com.hha.types.EItemLocation.Companion.location2Locations
 import com.hha.types.ENameType
 import com.hha.types.EOrderLevel
 import com.hha.types.EPayed
 import com.hha.types.ETaal
 import com.hha.types.ETreeRow
-import com.hha.framework.name
 
 class CItem(
-    var menuItemId: Int = -1,
-    var twinItemId: Int = 0,
+    var menuItemId: Long = -1,
+    var twinItemId: Long = 0,
     var alias: String = "",
     var sequence: Int = -1,
     var subSequence: Int = 0,
     var subSubSequence: Int = 0,
     var localName: String = "",
     var chineseName: String = "",
-    var originalAmount: Int = 0,
-    var originalHalfAmount: Int = 0,
+    var originalAmount: CMoney,
+    var originalHalfAmount: CMoney,
     var locations: Int = EItemLocation.location2Locations(EItemLocation.ITEM_OTHERS),
     var deletedStatus: EDeletedStatus = EDeletedStatus.DELETE_NOT,
     var parts: Int = 2,
@@ -40,21 +36,89 @@ class CItem(
     var clusterId: Short = 0,
     var treeRow: ETreeRow = ETreeRow.TREE_ITEM,
     var paperCutPerItem: Boolean = false,
-    var is_paid: EPayed = EPayed.PAID_NO,
+    var isPaid: EPayed = EPayed.PAID_NO,
     var shortTime: String = "",
-    private var m_unitPrice: CMoney = CMoney(0),
-    private var m_quantity: Int = 0,
-    private var m_statiegeld: Short = 0
+    private var unitPrice: CMoney = CMoney(0),
+    private var quantity: Int = 0,
+    private var statiegeld : CMoney = CMoney(0)
 ) {
-    private var m_totalPrice: CMoney = CMoney(0)
+
+    // Add this new parameterless constructor
+    constructor() : this(
+        menuItemId = -1,
+        twinItemId = 0,
+        alias = "",
+        sequence = -1,
+        subSequence = 0,
+        subSubSequence = 0,
+        localName = "",
+        chineseName = "",
+        originalAmount = CMoney(0),
+        originalHalfAmount = CMoney(0),
+        locations = EItemLocation.location2Locations(EItemLocation.ITEM_OTHERS),
+        deletedStatus = EDeletedStatus.DELETE_NOT,
+        parts = 2,
+        group = 0,
+        page = 0,
+        timeFrameId = CTimeFrameIndex(1),
+        level = EOrderLevel.LEVEL_OUTOFSTOCK,
+        tax = 0.0,
+        id = -1,
+        deviceId = 0,
+        localPrinterName = "",
+        chinesePrinterName = "",
+        clusterId = 0,
+        treeRow = ETreeRow.TREE_ITEM,
+        paperCutPerItem = false,
+        isPaid = EPayed.PAID_NO,
+        shortTime = "",
+        unitPrice = CMoney(0),
+        quantity = 0,
+        statiegeld = CMoney(0)
+    )
+
+    private var totalPrice: CMoney = CMoney(0)
         private set
 
     init {
         calculateTotal()
     }
 
+    constructor(item: CItem) : this (
+        menuItemId = item.menuItemId,
+        twinItemId = item.twinItemId,
+        alias = item.alias,
+        sequence = item.sequence,
+        subSequence = item.subSequence,
+        subSubSequence = item.subSubSequence,
+        localName = item.localName,
+        chineseName = item.chineseName,
+        originalAmount = item.originalAmount,
+        originalHalfAmount = item.originalHalfAmount,
+        locations = item.locations,
+        deletedStatus = item.deletedStatus,
+        parts = item.parts,
+        group = item.group,
+        page = item.page,
+        timeFrameId = item.timeFrameId,
+        level = item.level,
+        tax = item.tax,
+        id = item.id,
+        deviceId = item.deviceId,
+        localPrinterName = item.localPrinterName,
+        chinesePrinterName = item.chinesePrinterName,
+        clusterId = item.clusterId,
+        treeRow = item.treeRow,
+        paperCutPerItem = item.paperCutPerItem,
+        isPaid = item.isPaid,
+        shortTime = item.shortTime,
+        unitPrice = item.unitPrice,
+        quantity = item.quantity,
+        statiegeld = item.statiegeld
+    )
+
     constructor(
-        menu_item_id: Int,
+        menu_item_id: Long,
         alias_name: String,
         sequence_nr: Int,
         sub_sequence: Short,
@@ -89,8 +153,8 @@ class CItem(
         sub_sub_sequence.toInt(),
         local_name,
         chinese_name,
-        original_full_price.toLong().toInt(),
-        original_half_price.toLong().toInt(),
+        original_full_price,
+        original_half_price,
         locations = (if (print_locations < 10) (16 shl print_locations) else print_locations),
         deleted,
         parts.toInt(),
@@ -110,7 +174,40 @@ class CItem(
         short_time,
         unit_price,
         order_quantity,
-        unit_statiegeld.toShort()
+        CMoney(unit_statiegeld)
+    )
+
+    constructor(item : Item) : this(
+        menuItemId = item.menuItemId,
+        twinItemId = -1,
+        alias = item.aliasName,
+        sequence = item.sequenceNr,
+        subSequence = item.subSequence,
+        subSubSequence = item.subSubSequence,
+        localName = item.localName,
+        chineseName = item.chineseName,
+        originalAmount = CMoney(item.fullPrice.cents),
+        originalHalfAmount = CMoney(item.halfPrice.cents),
+        locations = item.printLocations,
+        deletedStatus = EDeletedStatus.fromDeletedStatus(item.deletedStatus),
+        parts = item.parts,
+        group = item.itemGroup,
+        page = item.itemPage,
+        timeFrameId = CTimeFrameIndex(item.timeFrame),
+        level = EOrderLevel.fromOrderLevel(item.orderLevel),
+        tax = item.taxPercentage,
+        id = -1,
+        deviceId = item.deviceId.toShort(),
+        localPrinterName = item.localPrinterName,
+        chinesePrinterName = item.chinesePrinterName,
+        clusterId = item.clusterId.toShort(),
+        treeRow = ETreeRow.TREE_ITEM,
+        paperCutPerItem = item.cutPaperKitchen,
+        isPaid = EPayed.fromPayed(item.isPaid),
+        shortTime = item.shortTime,
+        unitPrice = CMoney(item.unitPrice.cents),
+        quantity = item.orderQuantity,
+        statiegeld = CMoney(item.unitStatiegeld)
     )
 
     fun merge(found: CItem) {
@@ -121,9 +218,9 @@ class CItem(
         localPrinterName = found.localPrinterName
         parts = found.parts
         timeFrameId = found.timeFrameId
-        m_unitPrice = found.m_unitPrice
-        m_quantity += found.m_quantity
-        m_statiegeld = found.m_statiegeld
+        unitPrice = found.unitPrice
+        quantity += found.quantity
+        statiegeld = found.statiegeld
         calculateTotal()
         sequence = found.sequence
         subSequence = found.subSequence
@@ -140,7 +237,8 @@ class CItem(
     fun isValid(): Boolean = id >= 0
 
     fun name(lang: ETaal): String =
-        if (lang == ETaal.LANG_SIMPLIFIED || lang == ETaal.LANG_TRADITIONAL) chineseName else localName
+        if (lang == ETaal.LANG_SIMPLIFIED ||
+            lang == ETaal.LANG_TRADITIONAL) chineseName else localName
 
     fun updateName() {
         val product = CMenuCards.getInstance().getProductFromProductId(menuItemId)
@@ -212,63 +310,60 @@ class CItem(
     }
 
     fun setQuantity(quantity: Int) {
-        m_quantity = quantity
+        this.quantity = quantity
         calculateTotal()
     }
 
     fun addQuantity(quantity: Int) {
-        m_quantity += quantity
+        this.quantity += quantity
         calculateTotal()
     }
 
-    fun getTotal(): CMoney = m_totalPrice
+    fun getTotal(): CMoney = totalPrice
 
-    fun getQuantity(): Int = m_quantity
+    fun getQuantity(): Int = quantity
 
-    fun getTotalWithoutStatiegeld(): CMoney = CMoney(m_quantity * m_unitPrice.toLong())
+    fun getTotalWithoutStatiegeld(): CMoney = CMoney(quantity * unitPrice.cents())
 
-    fun getTotalStatiegeld(): CMoney = CMoney(m_quantity * m_statiegeld.toInt())
+    fun getTotalStatiegeld(): CMoney = CMoney(quantity * statiegeld.cents())
 
-    fun getStatiegeldPerPiece(): Int = m_statiegeld.toInt()
+    fun getStatiegeldPerPiece(): Int = statiegeld.cents()
 
     private fun calculateTotal() {
-        m_totalPrice = CMoney((m_unitPrice.toLong() + m_statiegeld) * m_quantity)
+        totalPrice = (unitPrice + statiegeld) * quantity
     }
 
-    fun setQuantityPrice(quantity: Int, unitPrice: Int, statiegeld: Int = 0) {
-        m_quantity = quantity
-        m_unitPrice = CMoney(unitPrice)
-        m_statiegeld = statiegeld.toShort()
+    fun setQuantityPrice(quantity: Int, unitPrice: Int, statiegld: Int = 0) {
+        this.quantity = quantity
+        this.unitPrice = CMoney(unitPrice)
+        statiegeld = CMoney(statiegld)
         calculateTotal()
     }
 
     fun setUnitPrice(unitPrice: CMoney) {
-        m_unitPrice = unitPrice
+        this.unitPrice = unitPrice
         calculateTotal()
     }
 
     fun setUnitPrice(unitPrice: Int) {
-        m_unitPrice = CMoney(unitPrice)
+        this.unitPrice = CMoney(unitPrice)
         calculateTotal()
     }
 
-    fun getUnitPrice(): CMoney = m_unitPrice
+    fun getUnitPrice(): CMoney = unitPrice
 
-    fun getStatiegeld(): Short = m_statiegeld
+    fun getStatiegeld(): CMoney = statiegeld
 
-    fun getTotalItemsStatiegeld(): Int = if (m_statiegeld != 0.toShort()) m_quantity else 0
+    fun getTotalItemsStatiegeld(): Int = if (!statiegeld.empty()) quantity else 0
 
-    fun setStatiegeld(statiegeld: Int) {
-        m_statiegeld = statiegeld.toShort()
+    fun setStatiegeld(statiegld: Int) {
+        statiegeld = CMoney(statiegld)
         calculateTotal()
     }
 
     fun getTaxAmount(): CMoney {
         val tx = (getTotalWithoutStatiegeld().toLong() * tax) / (100.0 + tax)
-        return CMoney((tx + 0.5).toLong())
+        return CMoney((tx + 0.5).toInt())
     }
-}
 
-typealias CitemPtr = CItem
-typealias CitemList = MutableList<CitemPtr>
-typealias CitemListIterator = MutableListIterator<CitemPtr>
+}

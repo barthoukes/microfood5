@@ -12,13 +12,10 @@ object GrpcChannelFactory {
             return channel!!
         channel = ManagedChannelBuilder.forAddress("192.168.0.124", 50051)
             .usePlaintext()
-            //.useTransportSecurity() // Or .usePlaintext() for non-TLS
-            //.enableRetry() // Enable built-in retries
             .defaultServiceConfig(getRetryPolicy()) // Custom retry policy
             .keepAliveTime(30, TimeUnit.SECONDS) // Send pings every 30s
-            .keepAliveTimeout(10, TimeUnit.SECONDS) // Wait 10s for ping response
+            .keepAliveTimeout(10, TimeUnit.SECONDS) // Wait 10s for ping
             .keepAliveWithoutCalls(true) // Keep alive even with no active calls
-            //.maxRetryAttempts(3) // Maximum retry attempts
             .build().also { channel = it }
         return channel!!
     }
@@ -38,7 +35,6 @@ object GrpcChannelFactory {
                 )
             )
         )
-
         return mapOf(
             "methodConfig" to listOf(methodConfig),
             "retryThrottling" to mapOf(

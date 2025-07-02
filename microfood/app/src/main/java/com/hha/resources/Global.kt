@@ -52,6 +52,11 @@ class Global private constructor() {
         }
     }
 
+    fun isChinese(): Boolean {
+        return language == ETaal.LANG_TRADITIONAL
+                || language == ETaal.LANG_SIMPLIFIED
+    }
+
     fun setPage(page: Int) {
         pageOffset = 0
         menuPageId = page

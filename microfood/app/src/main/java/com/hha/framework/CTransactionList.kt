@@ -1,9 +1,8 @@
 package com.hha.framework
 
 import com.hha.grpc.GrpcServiceFactory
-import com.hha.service.DailyTransactionService
 import com.hha.types.CMoney
-import java.util.*
+import com.hha.types.ClientOrdersType
 
 class CTransactionList() : Iterable<CTransaction> {
     private val transactions = mutableListOf<CTransaction>()

@@ -1,5 +1,7 @@
 package com.hha.types
 
+import com.hha.common.Payed
+
 /**
  * Represents different levels/types of payed items.
  */
@@ -18,6 +20,27 @@ enum class EPayed(val value: Int) {
          */
         fun fromInt(value: Int): EPayed? {
             return values().firstOrNull { it.value == value }
+        }
+
+        fun fromPayed(payed: Payed): EPayed {
+            return when (payed) {
+                Payed.PAID_CANCEL -> PAID_CANCEL
+                Payed.PAID_NO -> PAID_NO
+                Payed.PAID_ORDER -> PAID_ORDER
+                Payed.PAID_BEFORE -> PAID_BEFORE
+                Payed.PAID_ALL -> PAID_ALL
+                else -> PAID_NO
+            }
+        }
+
+        fun toPayed(payed: EPayed): Payed {
+            return when (payed) {
+                PAID_CANCEL -> Payed.PAID_CANCEL
+                PAID_NO -> Payed.PAID_NO
+                PAID_ORDER -> Payed.PAID_ORDER
+                PAID_BEFORE -> Payed.PAID_BEFORE
+                PAID_ALL -> Payed.PAID_ALL
+            }
         }
     }
 }

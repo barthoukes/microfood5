@@ -1,5 +1,7 @@
 package com.hha.framework
 
+import com.hha.types.ETimeFrameIndex
+
 
 /**
  * Represents a time frame index with validation and undefined state handling
@@ -20,6 +22,24 @@ class CTimeFrameIndex(val value: Int) {
                 else -> CTimeFrameIndex(index)
             }
         }
+
+        fun create(index: ETimeFrameIndex): CTimeFrameIndex {
+            return CTimeFrameIndex(index.index.toInt())
+        }
+    }
+
+    fun isBetween(lowest: CTimeFrameIndex, highest: CTimeFrameIndex) : Boolean
+    {
+        return value >= lowest.value && value <= highest.value
+    }
+
+    fun isBetween(lowest: ETimeFrameIndex, highest: ETimeFrameIndex) : Boolean
+    {
+        return value >= lowest.index && value <= highest.index
+    }
+
+    fun index() : Int {
+        return value
     }
 
     val isUndefined: Boolean
@@ -39,4 +59,6 @@ class CTimeFrameIndex(val value: Int) {
 
     override fun toString(): String =
         if (isUndefined) "TimeFrame(UNDEFINED)" else "TimeFrame($value)"
+
+//    toPrevious
 }

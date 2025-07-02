@@ -92,10 +92,10 @@ class MenuItemService(channel: ManagedChannel) : BaseGrpcService<MenuItemService
         }
     }
 
-    fun getProductFromProductId(menuItemId: Int): MenuItem? = runBlocking {
+    fun getProductFromProductId(menuItemId: Long): MenuItem? = runBlocking {
         try {
             val request = MenuItemId.newBuilder()
-                .setMenuItemId(menuItemId)
+                .setMenuItemId(menuItemId.toInt())
                 .build()
             stub.getProductFromProductId(request)
         } catch (e: Exception) {
