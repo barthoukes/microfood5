@@ -102,7 +102,7 @@ class DailyTransactionItemService(channel: ManagedChannel) : BaseGrpcService<Dai
     }
 
     fun createItem(
-        itemId: Long,
+        itemId: Int,
         transactionId: Long,
         sequence: Int,
         subSequence: Int,
@@ -118,16 +118,16 @@ class DailyTransactionItemService(channel: ManagedChannel) : BaseGrpcService<Dai
         tax: Double,
         locations: Int,
         timeFrameIndex: Int,
-        deviceId: Int,
-        clusterId: Int,
+        deviceId: Short,
+        clusterId: Short,
         isPaid: Payed,
         statiegeld: Int,
-        deletedStatus: DeletedStatus,
-        deletedTimeFrame: Int
+        deletedStatus: DeletedStatus = DeletedStatus.DELETE_NOT,
+        deletedTimeFrame: Int = 0
     ): Int? = runBlocking {
         try {
         val request = CreateItemRequest.newBuilder()
-            .setItemId(itemId)
+            .setItemId(itemId.toLong())
             .setTransactionId(transactionId)
             .setSequence(sequence)
             .setSubSequence(subSequence)
@@ -143,8 +143,8 @@ class DailyTransactionItemService(channel: ManagedChannel) : BaseGrpcService<Dai
             .setTax(tax)
             .setLocations(locations)
             .setTimeFrameIndex(timeFrameIndex)
-            .setDeviceId(deviceId)
-            .setClusterId(clusterId)
+            .setDeviceId(deviceId.toInt())
+            .setClusterId(clusterId.toInt())
             .setIsPaid(isPaid)
             .setStatiegeld(statiegeld)
             .setDeletedStatus(deletedStatus)
@@ -334,10 +334,10 @@ class DailyTransactionItemService(channel: ManagedChannel) : BaseGrpcService<Dai
         }
     }
 
-    fun insertSequence(transactionId: Long, sequence: Int): Boolean = runBlocking {
+    fun insertSequence(transactionId: Int, sequence: Int): Boolean = runBlocking {
         try {
             val request = InsertSequenceRequest.newBuilder()
-                .setTransactionId(transactionId)
+                .setTransactionId(transactionId.toLong())
                 .setSequence(sequence)
                 .build()
             stub.insertSequence(request)

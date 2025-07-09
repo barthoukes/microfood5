@@ -21,16 +21,17 @@
 	            android:background="@color/COLOUR_SELECTED_BACKGROUND"
 	            android:textColor="@color/COLOUR_SELECTED_TEXT"
 	            android:text="TAFEL 15"/>
+
 			<androidx.recyclerview.widget.RecyclerView
 				android:id="@+id/layout_transaction_items"
 				android:layout_width="match_parent"
-			    android:layout_height="wrap_content"
-			    android:choiceMode="singleChoice"
-			    android:scrollingCache="true"
-			    android:scrollbars="none"
-			    android:fadingEdge="none"
-			    android:background="@color/COLOUR_ORDER_BACKGROUND_EMPTY"
-			    android:layout_marginBottom="60dip"/>
+				android:layout_height="match_parent"
+				android:layout_marginBottom="60dip"
+				android:background="@color/COLOUR_ORDER_BACKGROUND_EMPTY"
+				android:choiceMode="singleChoice"
+				android:fadingEdge="none"
+				android:scrollbars="none"
+				android:scrollingCache="true" />
 			<LinearLayout 
 			    android:layout_width="match_parent"
 			    android:layout_height="60dp"

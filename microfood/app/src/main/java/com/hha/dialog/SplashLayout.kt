@@ -21,7 +21,8 @@ import tech.hha.microfood.R
 @SuppressLint("CustomSplashScreen")
 class SplashLayout : androidx.activity.ComponentActivity() {
 
-    val CFG = Global.getInstance().CFG
+    val global = Global.getInstance()
+    val CFG = global.CFG
     private lateinit var services: GrpcServiceFactory
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -43,6 +44,8 @@ class SplashLayout : androidx.activity.ComponentActivity() {
     }
 
     private fun setupConfiguration() {
+        global.showAllprices = CFG.getOption("entry_show_prices")
+        global.showAllTimes = CFG.getOption("entry_show_times")
     }
 
     private fun configureScreen() {

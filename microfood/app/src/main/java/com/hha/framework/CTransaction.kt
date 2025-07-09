@@ -1,69 +1,190 @@
 package com.hha.framework
 
 import android.util.Log
+import com.hha.common.TransactionData
+import com.hha.grpc.GrpcServiceFactory
 import com.hha.resources.Global
 import com.hha.types.CMoney
-import com.hha.types.ClientOrdersType
+import com.hha.types.EClientOrdersType
 import com.hha.types.EDeletedStatus
+import com.hha.types.ETransType
 import java.text.SimpleDateFormat
 import java.util.*
 
 class CTransaction : Iterable<CSortedItem> {
+    var transactionId: Int = 0
+    lateinit var name: String
+    lateinit var transType: ETransType
+    var rfidKeyId: Int = 0
+    lateinit var type: EClientOrdersType
+    var deposit: Int  = 0
+    lateinit var timeStart: String
+    lateinit var timeEnd: String
+    lateinit var timeCustomer: String
+    var subTotalLow = CMoney(0)
+    var subTotalHigh = CMoney(0)
+    var discountLow = CMoney(0)
+    var discountHigh = CMoney(0)
+    var remainsLow = 0f
+    var remainsHigh = 0f
+    var tipsLow = CMoney(0)
+    var tipsHigh = CMoney(0)
+    var totalLow = CMoney(0)
+    var totalHigh = CMoney(0)
+    var taxTotalLow = CMoney(0)
+    var taxTotalHigh = CMoney(0)
+    var customerId  = 0
+    var archived = false
+    var message = ""
+    var subtotalTaxFree = CMoney(0)
+    var totalTaxFree = CMoney(0)
+    var discountTaxFree = CMoney(0)
+    var tipsTaxFree = CMoney(0)
+
     companion object {
         private const val TAG = "TRANS"
     }
 
-    var id: Long = -1
-    var customer_id: Int = 0
-    lateinit var table_name: String
-    lateinit var start_time: String
-    var status: ClientOrdersType = ClientOrdersType.OPEN
+
+    var global = Global.getInstance()
+
+    var status: EClientOrdersType = EClientOrdersType.OPEN
     var total = CMoney(0)
-    var has_orders: Boolean = false
+    var hasOrders: Boolean = false
     private val m_global: Global = Global.getInstance()
 
     private val m_items = CTransactionItems()
-    private val m_timeFrame: LinkedList<CTimeFrame> = LinkedList()
+    private lateinit var timeFrame: CTimeFrame
 
     // Add this iterator implementation
     override fun iterator(): Iterator<CSortedItem> = m_items.iterator()
 
-    constructor(id: Long, name: String, time: String, status: ClientOrdersType, customerId: Int,
+    constructor(transactionId: Int, name: String, time: String,
+                status: EClientOrdersType, customerId: Int,
                 total: CMoney) {
-        this.id = id
-        this.table_name = name
-        this.start_time = time
+        this.name = name
         this.status = status
-        this.customer_id = customerId
         this.total = total
+
+        this.transactionId = transactionId
+        this.name = name
+        transType = ETransType.TRANS_TYPE_TAKEAWAY
+        rfidKeyId = -1
+        type = EClientOrdersType.OPEN
+        deposit = 0
+        timeStart = ""
+        timeEnd = ""
+        timeCustomer = ""
+        subTotalLow = CMoney(0)
+        subTotalHigh = CMoney(0)
+        discountLow = CMoney(0)
+        discountHigh = CMoney(0)
+        remainsLow  = 0.0F
+        remainsHigh = 0.0F
+        tipsLow = CMoney(0)
+        tipsHigh = CMoney(0)
+        totalLow = CMoney(0)
+        totalHigh = CMoney(0)
+        taxTotalLow = CMoney(0)
+        taxTotalHigh = CMoney(0)
+        this.customerId  = customerId
+        archived = false
+        message = ""
+        subtotalTaxFree = CMoney(0)
+        totalTaxFree = CMoney(0)
+        discountTaxFree = CMoney(0)
+        tipsTaxFree = CMoney(0)
     }
 
-    constructor() {
-        this.id = -1
+    constructor(transactionId : Int) {
+        val service = GrpcServiceFactory.createDailyTransactionService()
+        val data: TransactionData? = service.selectTransactionId(transactionId.toInt())
+
+        global.transaction = CTransaction(data)
     }
 
     constructor(source: CTransaction) {
-        this.id = source.id
-        this.table_name = source.table_name
-        this.start_time = source.start_time
-        this.status = source.status
-        this.customer_id = source.customer_id
-        this.total = source.total
+        customerId = source.customerId
+        name = source.name
+        transactionId = source.transactionId
+        transType = source.transType;
+        rfidKeyId = source.rfidKeyId;
+        deposit = source.deposit
+        timeStart = source.timeStart
+        timeCustomer = source.timeCustomer
+        status = source.status;
+        total = source.total;
+        hasOrders = false;
+        subTotalLow = source.subTotalLow
+        subTotalHigh = source.subTotalHigh
+        discountLow = source.discountLow
+        discountHigh = source.discountHigh
+        remainsLow = source.remainsLow
+        remainsHigh = source.remainsHigh
+        tipsLow = source.tipsLow
+        tipsHigh = source.tipsHigh
+        totalLow = source.totalLow
+        totalHigh = source.totalHigh
+        taxTotalLow = source.taxTotalLow
+        taxTotalHigh = source.taxTotalHigh
+        archived = source.archived
+        message = source.message
+        subtotalTaxFree = source.subtotalTaxFree
+        totalTaxFree = source.totalTaxFree
+        discountTaxFree = source.discountTaxFree
+        tipsTaxFree = source.tipsTaxFree
+        subtotalTaxFree = source.subtotalTaxFree
+        totalTaxFree = source.totalTaxFree
+        discountTaxFree = source.discountTaxFree
+        tipsTaxFree = source.tipsTaxFree
+    }
 
-        //source.m_item.forEach { item ->
-        //    m_item.add(CItem(item))
-        //}
-
-        source.m_timeFrame.forEach { timeFrame ->
-            m_timeFrame.add(CTimeFrame(timeFrame))
+    constructor(source: TransactionData?) {
+        if (source == null) {
+            transactionId = -1
+            name = "-"
+            status = EClientOrdersType.OPEN
+            return
         }
+        transactionId = source.transactionId
+        customerId = source.customerId
+        name = source.name
+        transType = ETransType.fromTransType(source.transType)
+        rfidKeyId = source.rfidKeyId;
+        deposit = source.deposit
+        timeStart = source.timeStart
+        timeCustomer = source.timeCustomer
+        status = EClientOrdersType.fromCLientOrdersType(source.getStatus());
+        hasOrders = false
+        subTotalLow = CMoney(source.subtotalLow.cents)
+        subTotalHigh = CMoney(source.subtotalHigh.cents)
+        discountLow = CMoney(source.discountLow.cents)
+        discountHigh = CMoney(source.discountHigh.cents)
+        remainsLow = source.remainsLow
+        remainsHigh = source.remainsHigh
+        tipsLow = CMoney(source.tipsLow.cents)
+        tipsHigh = CMoney(source.tipsHigh.cents)
+        totalLow = CMoney(source.totalLow.cents)
+        totalHigh = CMoney(source.totalHigh.cents)
+        taxTotalLow = CMoney(source.taxTotalLow.cents)
+        taxTotalHigh = CMoney(source.taxTotalHigh.cents)
+        archived = source.archived
+        message = source.message
+        subtotalTaxFree = CMoney(source.subtotalTaxFree.cents)
+        totalTaxFree = CMoney(source.totalTaxFree.cents)
+        discountTaxFree = CMoney(source.discountTaxFree.cents)
+        tipsTaxFree = CMoney(source.tipsTaxFree.cents)
+        subtotalTaxFree = CMoney(source.subtotalTaxFree.cents)
+        totalTaxFree = CMoney(source.totalTaxFree.cents)
+        discountTaxFree = CMoney(source.discountTaxFree.cents)
+        tipsTaxFree = CMoney(source.tipsTaxFree.cents)
     }
 
     fun getMinutes(): Int {
         return try {
             val inputFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US)
-            val date = inputFormat.parse(start_time)
-            val millisecond = date.time
+            val date = inputFormat.parse(timeStart)
+            val millisecond = date?.time ?: 0
             val now = Date().time
             ((now - millisecond + 30000) / (1000 * 60)).toInt()
         } catch (e: Exception) {
@@ -74,6 +195,10 @@ class CTransaction : Iterable<CSortedItem> {
 
     val size : Int
         get() = m_items.size
+
+    fun useTakeawayPrices() : Boolean {
+        return ETransType.useTakeawayPrices(transType)
+    }
 
     fun plus1() {
         if (size == 0) return
@@ -131,54 +256,32 @@ class CTransaction : Iterable<CSortedItem> {
 
     // ... [rest of the methods converted similarly] ...
 
-    private fun isTakeaway(): Boolean = table_name.startsWith("T")
-
-    fun get(position: Int): CItem? {
-        return try {
-            var idx : Int = 0
-            while (idx < m_items.size) {
-                if (position < m_items[idx].size)
-                    return m_items[idx][position]
-                idx++
-            }
-            return null
-        } catch (e: Exception) {
-            Log.e(TAG, e.toString())
-            null
-        }
+    private fun isTakeaway(): Boolean = when(transType) {
+        ETransType.TRANS_TYPE_TAKEAWAY, ETransType.TRANS_TYPE_EAT_INSIDE,
+        ETransType.TRANS_TYPE_RECHAUD, ETransType.TRANS_TYPE_UNDEFINED -> true
+            else -> true
     }
 
-    fun start(): Int {
-        var deviceId: Short = 3000
-        val CFG = Global.getInstance().CFG
-
-        try {
-            deviceId = (CFG.getValue("handheld_id") + 3000).toShort()
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-        val output = dateFormat.format(Date())
-        val tf = CTimeFrame(customer_id, (m_timeFrame.size + 1).toShort(), 100, output, "", id, deviceId)
-      //  m_global.timeFrameDB.createTimeFrame(tf.transaction_id, tf.time_frame_index)
-        m_timeFrame.add(tf)
-        m_global.timeFrame = tf
-        return m_timeFrame.size
+    operator fun get(position: Int): CItem? {
+        return m_items.getCItem(position)
     }
 
-    fun stop(count: Short) {
-        val tf = m_timeFrame.lastOrNull() ?: return
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-        tf.end_time = dateFormat.format(Date())
+    fun stopTimeFrame() {
+        timeFrame.end()
      //   m_global.timeFrameDB.closeTimeFrame(id, tf.time_frame_index, tf.end_time, count)
      //   m_global.transactionDB.updateTotal(m_global.transaction)
     }
 
-    fun addTransactionItem(cursor: Int, selectedMenuItem: CMenuItem) : Boolean {
+    fun addTransactionItem(selectedMenuItem: CMenuItem, clusterId: Short) : Boolean {
         Log.d("CTransaction", "add transaction item: " +
-                "${selectedMenuItem.menuItemId} cursor $cursor")
-        return m_items.touchItem(cursor, selectedMenuItem)
+                "${selectedMenuItem.menuItemId} cursor ${global.cursor}")
+        return m_items.touchItem( selectedMenuItem, clusterId)
+    }
 
+    fun startNextTimeFrame(): CTimeFrame {
+        Log.i("Ctransaction", "Start next TimeFrame")
+        timeFrame = CTimeFrame(transactionId)
+        global.timeFrame = timeFrame
+        return timeFrame
     }
 }

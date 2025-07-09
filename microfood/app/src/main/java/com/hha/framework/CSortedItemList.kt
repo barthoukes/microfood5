@@ -12,7 +12,7 @@ import com.hha.types.ETimeFrameIndex
 import java.util.logging.Logger
 import kotlin.collections.mutableListOf
 
-private const val FIRST_SEQUENCE_ID = 1
+const val FIRST_SEQUENCE_ID = 1
 private val log = Logger.getLogger("CsortedItemList")
 
 class CSortedItemList : Iterable<CSortedItem> {
@@ -40,6 +40,25 @@ class CSortedItemList : Iterable<CSortedItem> {
         m_sortedItems.add(item)
     }
 
+    fun cursor2index(cursor: Int): Int {
+        var index = 0
+        var sortedIndex = 0
+        for (item in m_sortedItems) {
+            if (index + item.size > cursor) {
+                break
+            }
+            index += item.size
+            sortedIndex +=1
+        }
+        return sortedIndex
+    }
+
+    fun add(cursor: Int, item: CItem) {
+        val c2i = cursor2index(cursor)
+        val cItem = CSortedItem(item)
+        m_sortedItems.add(c2i, cItem)
+    }
+
     // Same as removeIt
     fun erase(index: Int) {
         m_sortedItems.removeAt(index)
@@ -58,8 +77,22 @@ class CSortedItemList : Iterable<CSortedItem> {
             return sz
         }
 
+    val itemSize : Int
+        get() = m_sortedItems.size
+
     val empty: Boolean
         get() = m_sortedItems.isEmpty()
+
+    fun mainItem(cursor: Int): CSortedItem? {
+        var offset = 0
+        for (item in m_sortedItems) {
+            if (offset + item.size > cursor) {
+                return item
+            }
+            offset += item.size
+        }
+        return null
+    }
 
     fun convert(sort: EItemSort, itemsDb: ItemList): CItemList {
         val lst = mutableListOf<CItem>()

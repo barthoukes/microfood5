@@ -1,13 +1,16 @@
 package com.hha.adapter
 
+import android.util.Log
 import tech.hha.microfood.R
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
+import com.hha.framework.CItem
 import com.hha.framework.CMenuItem
 import com.hha.framework.CMenuItems
+import com.hha.framework.CTransaction
 import com.hha.resources.Global
 import tech.hha.microfood.databinding.AdapterTransactionItemBinding
 
@@ -15,6 +18,8 @@ class TransactionItemAdapter(
     //private val menuItems: CTransactionItems
 ) : RecyclerView.Adapter<TransactionItemAdapter.TransactionItemViewHolder>() {
     val global = Global.getInstance()
+    val CFG = global.CFG
+    val colourCFG = global.colourCFG
 
     inner class TransactionItemViewHolder(val binding: AdapterTransactionItemBinding) :
         RecyclerView.ViewHolder(binding.root)
@@ -28,28 +33,43 @@ class TransactionItemAdapter(
         return TransactionItemViewHolder(binding)
     }
 
-    override fun getItemCount() = 100
+    override fun getItemCount() : Int {
+        if (global.transaction != null) {
+            return global.transaction!!.size + 1
+        }
+        return 1
+    }
 
     override fun onBindViewHolder(holder: TransactionItemViewHolder, position: Int) {
         //holder.binding.transactionOrder.isSelected = true
-        holder.binding.transactionItem.text = "LOEMPIA     1241934938419"
+        val transaction: CTransaction = global.transaction!!
+        val item: CItem? = transaction[position]
+
+        // Draw background,
+        val background = getBackgroundColour(position)
+        holder.binding.transactionItem.setBackgroundColor(background)
+        if (item == null) {
+            return
+        }
+        val tc = colourCFG.getTextColour("COLOUR_ORDER_TEXT")
+        holder.binding.transactionItem.setTextColor(tc)
+        holder.binding.transactionItem.text = when {
+            global.isChinese() -> item.chineseName
+            else -> item.localName
+        }
         val context = holder.itemView.context
-
-        if (position and 1 == 0) {
-            holder.binding.transactionItem.setBackgroundColor(
-                ContextCompat.getColor(context, R.color.COLOUR_ORDER_BACKGROUND_EVEN))
-            holder.binding.transactionOrder.setBackgroundColor(
-                ContextCompat.getColor(context, R.color.COLOUR_ORDER_BACKGROUND_EVEN))
-        }
-        else {
-            holder.binding.transactionItem.setBackgroundColor(
-                ContextCompat.getColor(context, R.color.COLOUR_ORDER_BACKGROUND_ODD))
-            holder.binding.transactionOrder.setBackgroundColor(
-                ContextCompat.getColor(context, R.color.COLOUR_ORDER_BACKGROUND_ODD))
-        }
-
         holder.binding.root.setOnClickListener {
-            }
+            Log.i("TIA", "onBindViewHolder $position")
         }
-}
+    }
 
+    private fun getBackgroundColour(position: Int): Int {
+        return when {
+            // cursor colour when cursor, or odd/even colour when even/odd
+            global.cursor == position -> colourCFG.getBackgroundColour("COLOUR_ORDER_BACKGROUND_SELECTED")
+            (position and 1) == 0 -> colourCFG.getBackgroundColour("COLOUR_ORDER_BACKGROUND_ODD")
+            else -> colourCFG.getBackgroundColour("COLOUR_ORDER_BACKGROUND_EVEN")
+        }
+    }
+
+}

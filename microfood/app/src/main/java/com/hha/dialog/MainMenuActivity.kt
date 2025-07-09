@@ -22,6 +22,7 @@ import com.hha.service.AddressService
 import com.hha.grpc.GrpcServiceFactory
 import com.hha.framework.COpenClientsHandler
 import com.hha.framework.COpenClientsHandler.createNewTakeawayTransaction
+import com.hha.framework.CTimeFrame
 import com.hha.resources.Global
 
 class MainMenuActivity : AppCompatActivity() {

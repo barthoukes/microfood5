@@ -3,13 +3,15 @@ package com.hha.framework
 import com.hha.types.CMoney
 
 data class CPriceAndHalfPrice(
-    var full_price: CMoney = CMoney(0),
-    var half_price: CMoney = CMoney(0),
-    var valid: Boolean = true
-)
+    var fullPrice: CMoney = CMoney(0),
+    var halfPrice: CMoney = CMoney(0),
+) {
+    val isValid: Boolean
+        get() = true
+}
+
 
 fun CPriceAndHalfPrice.clear() {
-    full_price = CMoney(0)
-    half_price = CMoney(0)
-    valid = false
+    fullPrice = CMoney(0)
+    halfPrice = CMoney(0)
 }

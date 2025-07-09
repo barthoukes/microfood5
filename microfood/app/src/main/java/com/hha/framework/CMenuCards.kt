@@ -31,7 +31,7 @@ class CMenuCards private constructor() {
         }
     }
 
-    fun getProductFromProductId(menuItemId: Long): MenuItem? = runBlocking {
+    fun getProductFromProductId(menuItemId: Int): MenuItem? = runBlocking {
         try {
             val mis = GrpcServiceFactory.createMenuItemService()
             return@runBlocking mis.getProductFromProductId(menuItemId)
@@ -44,8 +44,8 @@ class CMenuCards private constructor() {
         val global = Global.getInstance()
         global.menuPageId = 1
         global.menuCardId = userCFG.getValue("menu_card_takeaway")
-        val groups = CFG.getValue("display_groups")
-        val horizontal = CFG.getValue("display_groups_horizontal")
+        //val groups = CFG.getValue("display_groups")
+        //val horizontal = CFG.getValue("display_groups_horizontal")
         if (menuCard.isEmpty()) {
             loadMenuCards()
         }

@@ -70,7 +70,7 @@ service ArchiveTransactionService
     rpc GetQuartersTotal(common.Empty)  returns (TotalPerTimeList) {}
     rpc SetCustomer(SetCustomerRequest)  returns (common.Empty) {}
     rpc CopyTransaction(CopyTransactionRequest)  returns (common.Empty) {}
-    rpc SelectTransactionId(TransactionId)  returns (TransactionData) {}
+    rpc SelectTransactionId(TransactionId)  returns (common.TransactionData) {}
     rpc InsertTransaction(InsertTransactionRequest)  returns (TransactionId) {}
     rpc FindUnusedDays(common.Empty)  returns (YearMonthDayList) {}
     rpc GetLowestTimeStamp(common.Empty)  returns (common.Timestamp) {}
@@ -496,38 +496,6 @@ message TotalTimeQuantity
 message TotalTimesQuantityList
 {
     repeated TotalTimeQuantity total = 1;
-}
-
-message TransactionData
-{
-    int32 transaction_id = 1;
-    string name = 2;
-    common.TransType trans_type = 3;
-    int32 rfid_key_id = 5;
-    common.ClientOrdersType status = 6;
-    int32 deposit = 7;
-    string time_start = 8;
-    string time_end = 9;
-    string time_customer = 10;
-    common.Money subtotal_low = 20;
-    common.Money subtotal_high = 21;
-    common.Money discount_low = 22;
-    common.Money discount_high = 23;
-    float remains_low = 24;
-    float remains_high = 25;
-    common.Money tips_low = 26;
-    common.Money tips_high = 27;
-    common.Money total_low = 28;
-    common.Money total_high = 29;
-    common.Money tax_total_low = 30;
-    common.Money tax_total_high = 31;
-    int32 customer_id = 40;
-    bool archived = 41;
-    string message = 42;
-    common.Money subtotal_tax_free = 43;
-    common.Money total_tax_free = 44;
-    common.Money discount_tax_free = 45;
-    common.Money tips_tax_free = 46;
 }
 
 message TotalTimeRfidKeyId

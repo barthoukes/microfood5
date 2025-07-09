@@ -2,7 +2,7 @@ package com.hha.framework
 
 import com.hha.grpc.GrpcServiceFactory
 import com.hha.types.CMoney
-import com.hha.types.ClientOrdersType
+import com.hha.types.EClientOrdersType
 
 class CTransactionList() : Iterable<CTransaction> {
     private val transactions = mutableListOf<CTransaction>()
@@ -15,7 +15,7 @@ class CTransactionList() : Iterable<CTransaction> {
             val response = transactionService.listOpen()
             response?.transactionsList?.mapNotNull { protoTransaction ->
                 CTransaction(
-                    id = protoTransaction.transactionId.toLong(),
+                    transactionId = protoTransaction.transactionId.toInt(),
                     name = protoTransaction.name,
                     time = protoTransaction.timeStart,
                     status = protoTransaction.status.toClientOrdersType(),
@@ -41,7 +41,7 @@ class CTransactionList() : Iterable<CTransaction> {
             val response = transactionService.listAll(sortOnTime)
             response?.transactionsList?.mapNotNull { protoTransaction ->
                 CTransaction(
-                    id = protoTransaction.transactionId.toLong(),
+                    transactionId = protoTransaction.transactionId.toInt(),
                     name = protoTransaction.name,
                     time = protoTransaction.timeStart,
                     status = protoTransaction.status.toClientOrdersType(),
@@ -61,21 +61,21 @@ class CTransactionList() : Iterable<CTransaction> {
     /**
      * Gets a transaction by ID
      */
-    fun getTransactionById(id: Long): CTransaction? {
-        return transactions.firstOrNull { it.id == id }
+    fun getTransactionById(id: Int): CTransaction? {
+        return transactions.firstOrNull { it.transactionId == id }
     }
 
     /**
      * Gets all transactions for a specific customer
      */
     fun getTransactionsByCustomer(customerId: Int): List<CTransaction> {
-        return transactions.filter { it.customer_id == customerId }
+        return transactions.filter { it.customerId == customerId }
     }
 
     /**
      * Gets all transactions with a specific status
      */
-    fun getTransactionsByStatus(status: ClientOrdersType): List<CTransaction> {
+    fun getTransactionsByStatus(status: EClientOrdersType): List<CTransaction> {
         return transactions.filter { it.status == status }
     }
 
@@ -131,12 +131,12 @@ class CTransactionList() : Iterable<CTransaction> {
     }
 
     // Extension functions for gRPC type conversion
-    private fun com.hha.common.ClientOrdersType.toClientOrdersType(): ClientOrdersType {
+    private fun com.hha.common.ClientOrdersType.toClientOrdersType(): EClientOrdersType {
         return when (this) {
-            com.hha.common.ClientOrdersType.CLIENT_ORDER_OPEN -> ClientOrdersType.OPEN
-            com.hha.common.ClientOrdersType.CLIENT_ORDER_CLOSED -> ClientOrdersType.CLOSED
-            com.hha.common.ClientOrdersType.CLIENT_ORDER_OPEN_PAID -> ClientOrdersType.OPEN_PAID
-            else -> ClientOrdersType.OPEN
+            com.hha.common.ClientOrdersType.CLIENT_ORDER_OPEN -> EClientOrdersType.OPEN
+            com.hha.common.ClientOrdersType.CLIENT_ORDER_CLOSED -> EClientOrdersType.CLOSED
+            com.hha.common.ClientOrdersType.CLIENT_ORDER_OPEN_PAID -> EClientOrdersType.OPEN_PAID
+            else -> EClientOrdersType.OPEN
         }
     }
 }

@@ -2,12 +2,24 @@ package com.hha.service
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import com.hha.archive.transaction.*
 import com.hha.archive.transaction.ArchiveTransactionServiceGrpcKt
+import com.hha.archive.transaction.CopyTransactionRequest
+import com.hha.archive.transaction.CustomerTransaction
+import com.hha.archive.transaction.Date
+import com.hha.archive.transaction.FindCustomerRequest
+import com.hha.archive.transaction.InsertTransactionRequest
+import com.hha.archive.transaction.Range
+import com.hha.archive.transaction.SetCustomerRequest
+import com.hha.archive.transaction.TotalPerTime
+import com.hha.archive.transaction.TotalTimeLowHighList
+import com.hha.archive.transaction.TransactionId
+import com.hha.archive.transaction.TransactionRange
+import com.hha.archive.transaction.YearMonthDay
 import com.hha.common.ClientOrdersType
 import com.hha.common.Empty
 import com.hha.common.Money
 import com.hha.common.TransType
+import com.hha.common.TransactionData
 import io.grpc.ManagedChannel
 import kotlinx.coroutines.runBlocking
 import java.time.LocalDateTime

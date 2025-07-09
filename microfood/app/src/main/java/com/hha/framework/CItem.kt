@@ -11,8 +11,8 @@ import com.hha.types.ETaal
 import com.hha.types.ETreeRow
 
 class CItem(
-    var menuItemId: Long = -1,
-    var twinItemId: Long = 0,
+    var menuItemId: Int = -1,
+    var twinItemId: Int = 0,
     var alias: String = "",
     var sequence: Int = -1,
     var subSequence: Int = 0,
@@ -118,7 +118,7 @@ class CItem(
     )
 
     constructor(
-        menu_item_id: Long,
+        menu_item_id: Int,
         alias_name: String,
         sequence_nr: Int,
         sub_sequence: Short,
@@ -178,7 +178,7 @@ class CItem(
     )
 
     constructor(item : Item) : this(
-        menuItemId = item.menuItemId,
+        menuItemId = item.menuItemId.toInt(),
         twinItemId = -1,
         alias = item.aliasName,
         sequence = item.sequenceNr,
@@ -193,7 +193,7 @@ class CItem(
         parts = item.parts,
         group = item.itemGroup,
         page = item.itemPage,
-        timeFrameId = CTimeFrameIndex(item.timeFrame),
+        timeFrameId = CTimeFrameIndex(item.timeFrame.toShort()),
         level = EOrderLevel.fromOrderLevel(item.orderLevel),
         tax = item.taxPercentage,
         id = -1,
@@ -333,10 +333,10 @@ class CItem(
         totalPrice = (unitPrice + statiegeld) * quantity
     }
 
-    fun setQuantityPrice(quantity: Int, unitPrice: Int, statiegld: Int = 0) {
+    fun setQuantityPrice(quantity: Int, unitPrice: CMoney, statiegld: CMoney = CMoney(0)) {
         this.quantity = quantity
-        this.unitPrice = CMoney(unitPrice)
-        statiegeld = CMoney(statiegld)
+        this.unitPrice = unitPrice
+        statiegeld = statiegld
         calculateTotal()
     }
 

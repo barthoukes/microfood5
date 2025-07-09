@@ -6,17 +6,17 @@ import com.hha.types.ETimeFrameIndex
 /**
  * Represents a time frame index with validation and undefined state handling
  */
-class CTimeFrameIndex(val value: Int) {
+class CTimeFrameIndex(val value: Short) {
     companion object {
-        const val TIME_FRAME_UNDEFINED = 0
-        const val TIME_FRAME1 = 1
+        const val TIME_FRAME_UNDEFINED :Short = 0
+        const val TIME_FRAME1 :Short = 1
 
         /**
          * Creates a CTimeFrameIndex with validation
          * @param index The time frame index value
          * @return Valid CTimeFrameIndex or UNDEFINED if input is invalid
          */
-        fun create(index: Int?): CTimeFrameIndex {
+        fun create(index: Short?): CTimeFrameIndex {
             return when {
                 index == null || index < 0 -> CTimeFrameIndex(TIME_FRAME_UNDEFINED)
                 else -> CTimeFrameIndex(index)
@@ -24,7 +24,7 @@ class CTimeFrameIndex(val value: Int) {
         }
 
         fun create(index: ETimeFrameIndex): CTimeFrameIndex {
-            return CTimeFrameIndex(index.index.toInt())
+            return CTimeFrameIndex(index.index.toShort())
         }
     }
 
@@ -38,7 +38,7 @@ class CTimeFrameIndex(val value: Int) {
         return value >= lowest.index && value <= highest.index
     }
 
-    fun index() : Int {
+    fun index() : Short {
         return value
     }
 

@@ -8,6 +8,7 @@ import com.hha.service.AddressService
 import com.hha.service.AdvertisementService
 import com.hha.service.ArchiveTransactionService
 import com.hha.service.ConfigurationService
+import com.hha.service.DailyTimeFrameService
 import com.hha.service.DailyTransactionItemService
 import com.hha.service.DailyTransactionPaymentService
 import com.hha.service.DailyTransactionPrintService
@@ -19,6 +20,7 @@ import com.hha.service.MenuClusterService
 import com.hha.service.MenuItemService
 import com.hha.service.MenuPageService
 import com.hha.service.PersonnelService
+import com.hha.service.TaxService
 import com.hha.service.ZipCodeService
 
 object GrpcServiceFactory {
@@ -61,6 +63,16 @@ object GrpcServiceFactory {
         return ConfigurationService(channel)
     }
 
+    fun createDailyTimeFrameService(): DailyTimeFrameService {
+        val channel = getChannel()
+        return DailyTimeFrameService(channel)
+    }
+
+    fun createDailyTransactionItemService(): DailyTransactionItemService {
+        val channel = getChannel()
+        return DailyTransactionItemService(channel)
+    }
+
     fun createDailyTransactionPaymentService(): DailyTransactionPaymentService {
         val channel = getChannel()
         return DailyTransactionPaymentService(channel)
@@ -71,9 +83,9 @@ object GrpcServiceFactory {
         return DailyTransactionPrintService(channel)
     }
 
-    fun createDailyTransactionItemService(): DailyTransactionItemService {
+    fun createDatabaseService(): DatabaseService {
         val channel = getChannel()
-        return DailyTransactionItemService(channel)
+        return DatabaseService(channel)
     }
 
     fun createDailyTransactionService(): DailyTransactionService {
@@ -86,14 +98,14 @@ object GrpcServiceFactory {
         return MenuCardService(channel)
     }
 
-    fun createMenuClusterService(): MenuClusterService {
-        val channel = getChannel()
-        return MenuClusterService(channel)
-    }
-
     fun createMenuClusterItemService(): MenuClusterItemService {
         val channel = getChannel()
         return MenuClusterItemService(channel)
+    }
+
+    fun createMenuClusterService(): MenuClusterService {
+        val channel = getChannel()
+        return MenuClusterService(channel)
     }
 
     fun createMenuItemService(): MenuItemService {
@@ -111,13 +123,14 @@ object GrpcServiceFactory {
         return PersonnelService(channel)
     }
 
+    fun createTaxService(): TaxService {
+        val channel = getChannel()
+        return TaxService(channel)
+    }
+
     fun createZipCodeService(): ZipCodeService {
         val channel = getChannel()
         return ZipCodeService(channel)
     }
 
-    fun createDatabaseService(): DatabaseService {
-        val channel = getChannel()
-        return DatabaseService(channel)
-    }
 }

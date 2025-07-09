@@ -4,6 +4,7 @@ import com.hha.common.Empty
 import com.hha.common.TimeFrameList
 import com.hha.common.Timestamp
 import com.hha.common.CookingState
+import com.hha.common.timeFrame
 import com.hha.daily.timeframe.DailyTimeFrameServiceGrpcKt
 import com.hha.daily.timeframe.DelayRequest
 import com.hha.daily.timeframe.DeliverTimeRequest
@@ -94,14 +95,14 @@ class DailyTimeFrameService(channel: ManagedChannel) : BaseGrpcService<DailyTime
         }
     }
 
-    fun getLatestTimeFrameIndex(transactionId: Int): Int? = runBlocking {
+    fun getLatestTimeFrameIndex(transactionId: Int): Int = runBlocking {
         try {
             val request = TransactionId.newBuilder()
                 .setTransactionId(transactionId)
                 .build()
             stub.getLatestTimeFrameIndex(request).timeFrameIndex
         } catch (e: Exception) {
-            null
+            0
         }
     }
 
@@ -114,8 +115,19 @@ class DailyTimeFrameService(channel: ManagedChannel) : BaseGrpcService<DailyTime
         }
     }
 
-    fun endTimeFrame(request: EndTimeFrameRequest): Boolean = runBlocking {
+    fun endTimeFrame(transactionId: Int, timeFrameId: Int,
+                     deviceId: Short, delayedTime: String,
+                     isDelayed: Boolean, newState: CookingState): Boolean = runBlocking {
         try {
+            val request = EndTimeFrameRequest
+                .newBuilder()
+                .setTransactionId(transactionId)
+                .setTimeFrameId(timeFrameId)
+                .setDeviceId(deviceId.toInt())
+                .setDelayedTime(delayedTime)
+                .setIsDelayed(isDelayed)
+                .setNewState(newState)
+                .build()
             stub.endTimeFrame(request)
             true
         } catch (e: Exception) {

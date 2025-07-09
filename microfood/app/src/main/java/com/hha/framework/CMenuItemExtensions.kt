@@ -25,20 +25,25 @@ fun MenuItem.getWidth() : Int {
 fun MenuItem.name(language: ETaal, portion: Int, type: ENameType, trim: Boolean = false): String {
     var resultString: String
     val portionString = duoShao(portion, language, type == ENameType.NAME_PRINTER)
+    return Name(language, portionString, this.localName,
+        this.chineseName, type, trim)
+}
 
-    var currentLocalName = this.localName
-    var currentChineseName = this.chineseName
+fun Name(language: ETaal, portionString: String, currentLocalName: String,
+         currentChineseName: String, type: ENameType, trim: Boolean = false): String {
 
-    if (currentLocalName.isEmpty() && type != ENameType.NAME_ORIGINAL) {
-        currentLocalName = currentChineseName
+    var local = when {
+        currentLocalName.isEmpty() && type != ENameType.NAME_ORIGINAL -> currentChineseName
+        else -> currentLocalName
     }
-    if (currentChineseName.isEmpty() && type != ENameType.NAME_ORIGINAL) {
-        currentChineseName = currentLocalName
+    var chinese = when {
+        currentChineseName.isEmpty() && type != ENameType.NAME_ORIGINAL -> currentLocalName
+        else -> currentChineseName
     }
     val baseName = if (language == ETaal.LANG_SIMPLIFIED || language == ETaal.LANG_TRADITIONAL) {
-        currentChineseName
+        chinese
     } else {
-        currentLocalName
+        local
     }
     // Prepend portion string only if it's not empty, similar to C++ string concatenation
     val str = if (portionString.isNotEmpty()) portionString + baseName else baseName

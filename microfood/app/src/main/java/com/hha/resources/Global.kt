@@ -6,6 +6,7 @@ import com.hha.framework.CMenuCards
 import java.io.File
 
 import com.hha.framework.CTimeFrame
+import com.hha.framework.CTimeFrameIndex
 import com.hha.framework.CTransaction
 import com.hha.grpc.GrpcServiceFactory
 import com.hha.resources.Configuration
@@ -21,23 +22,23 @@ class Global private constructor() {
     var cursor = 0
     var language: ETaal = ETaal.LANG_SIMPLIFIED
     var pageOffset = 0
-    lateinit var transaction: CTransaction
-    var transactionId: Int = 0
-    lateinit var timeFrameDB: CTimeFrame
-    lateinit var transactionDB: CTransaction
-
-    //lateinit var transactionList: CTransactionList
+    var transactionId = 0
+    var transaction: CTransaction? = null
     var selectedItem = 10
     var pageBackgroundColor = 0xFF400040.toInt()
     var pageSelectedBackgroundColor = 0xFFc000c0.toInt()
     var pageTextColor = 0xFFf0f080.toInt()
     var mainMenuHandler: Handler? = null
     var askTableHandler: Handler? = null
+    var clusterNoItems = false
+    var showAllprices = false
+    var showAllTimes = false
     public val CFG: Configuration = Configuration()
     val userCFG: Configuration = Configuration()
     val fontCFG: Configuration = Configuration()
     val colourCFG: Configuration = Configuration()
-    lateinit var timeFrame: CTimeFrame
+    var timeFrame: CTimeFrame? = null
+    val pcNumber: Short = 33
 
     companion object {
         const val MY_DATABASE_NAME = "ZhongCan"
@@ -87,6 +88,7 @@ class Global private constructor() {
         val fontConfig = dbs.getFontConfigurationList() ?: return false
         fontCFG.setConfigurations(fontConfig)
 
+        clusterNoItems = CFG.getOption("cluster_no_items")
         return true  // All configs loaded successfully
     }
 }

@@ -3,22 +3,27 @@ package com.hha.framework
 import java.text.SimpleDateFormat
 import java.util.Date
 import com.hha.exceptions.ConfigNotFoundException
+import com.hha.grpc.GrpcServiceFactory
 import com.hha.resources.Global
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import com.hha.common.CookingState
 
 class CTimeFrame {
     var id: Int = 0
-    var time_frame_index: Short = 0
-    var transaction_id: Long = 0
+    var time_frame_index = CTimeFrameIndex(1)
+    var transaction_id: Int = 0
     var waiter: Int = 0
     var start_time: String = ""
     var end_time: String = ""
     var device_id: Short = 0
-    val CFG = Global.getInstance().CFG
+    val global = Global.getInstance()
+    val CFG = global.CFG
 
     /// @brief constructor.
     constructor(cf: CTimeFrame) {
         id = cf.id
-        time_frame_index = cf.time_frame_index
+        this.time_frame_index = cf.time_frame_index
         transaction_id = cf.transaction_id
         waiter = cf.waiter
         start_time = cf.start_time
@@ -26,18 +31,36 @@ class CTimeFrame {
         device_id = cf.device_id
     }
 
-    constructor(idd: Int, tfi: Short, wtr: Int, st: String, et: String, trx: Long, dev: Short) {
-        id = idd
-        time_frame_index = tfi
-        waiter = wtr
-        start_time = st
-        end_time = et
-        transaction_id = trx
-        device_id = dev
+    constructor(transactionId: Int) {
+        val service = GrpcServiceFactory.createDailyTimeFrameService()
+        val timeFrameId = 1+service.getLatestTimeFrameIndex(transactionId.toInt())
+
+        val current = LocalDateTime.now()
+        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+        start_time = current.format(formatter)
+        var x = service.insertNewTimeFrame()
+        if (x == null) id=1 else id=x
+        time_frame_index = CTimeFrameIndex(timeFrameId.toShort())
+        waiter = 0
+        end_time = "1980-01-01 00:00:00"
+        transaction_id = global.transactionId
+        device_id = global.pcNumber
+    }
+
+    fun end() {
+        val current = LocalDateTime.now()
+        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+        end_time = current.format(formatter)
+
+        val service = GrpcServiceFactory.createDailyTimeFrameService()
+        service.endTimeFrame(transaction_id,
+            time_frame_index.value.toInt(),
+            device_id, "", false,
+            CookingState.COOKING_DONE)
     }
 
     /// @brief create a new time frame.
-    constructor(idd: Int, tfi: Short, trx: Long) {
+    constructor(idd: Int, tfi: CTimeFrameIndex, transactionId: Int) {
         id = idd
         time_frame_index = tfi
         try {
@@ -54,7 +77,7 @@ class CTimeFrame {
         val output = dateFormat.format(Date())
         start_time = output
         end_time = "0"
-        transaction_id = trx
+        transaction_id = transactionId
         try {
             device_id = (Global.getInstance().firstTablet +
                     CFG.getValue("handheld_id") + 3000).toShort()

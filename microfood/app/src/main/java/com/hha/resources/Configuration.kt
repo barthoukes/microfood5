@@ -137,6 +137,20 @@ class Configuration {
         }
     }
 
+    fun getBackgroundColour(name: String): Int = getColour(name) or 0xff000000.toInt()
+
+    fun getColour(name: String): Int {
+        val str = getString(name)
+        return when {
+            str.startsWith("0x") || str.startsWith("0X") -> {
+                str.substring(2).toIntOrNull(16) ?: 0
+            }
+            else -> str.toIntOrNull() ?: 0
+        }
+    }
+
+    fun getTextColour(name: String) : Int = getValue(name) or 0xFF000000.toInt()
+
     /**
      * Removes a configuration by name
      * @param name The configuration key to remove
@@ -150,4 +164,6 @@ class Configuration {
             false
         }
     }
+
+
 }

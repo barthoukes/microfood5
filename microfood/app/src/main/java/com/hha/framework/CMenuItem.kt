@@ -1,21 +1,26 @@
 package com.hha.framework
 
+import android.util.Log
 import com.hha.common.ItemSort
 import com.hha.common.ItemVisible
 import com.hha.common.MenuItem
 import com.hha.common.OrderLevel
 import com.hha.common.TaxType
+import com.hha.types.CMoney
+import com.hha.types.ENameType
 import com.hha.types.EOrderLevel
+import com.hha.types.ETaal
+import com.hha.types.ETaxType
 
 data class CMenuItem(
     val menuItemId: Int = 0,
     val alias: String = "",
     val localName: String = "",
     val chineseName: String = "",
-    val restaurantPrice: Int = 0,
-    val takeawayPrice: Int = 0,
-    val restaurantHalfPrice: Int = 0,
-    val takeawayHalfPrice: Int = 0,
+    val restaurantPrice: CMoney = CMoney(0),
+    val takeawayPrice : CMoney = CMoney(0),
+    val restaurantHalfPrice: CMoney = CMoney(0),
+    val takeawayHalfPrice: CMoney = CMoney(0),
     val restaurantTax: TaxType = TaxType.BTW_INVALID,
     val takeawayTax: TaxType = TaxType.BTW_INVALID,
     var level: EOrderLevel = EOrderLevel.LEVEL_NOTHING,
@@ -40,7 +45,7 @@ data class CMenuItem(
     val colourBack2: Int = 0,
     val colourSelectedBack2: Int = 0,
     val menuCardId: Int = 0,
-    val statiegeld: Int = 0,
+    val statiegeld: CMoney = CMoney(0),
     var sequence: Int = 0,
     var isSelected: Boolean = false
     ) {
@@ -50,10 +55,10 @@ data class CMenuItem(
         alias = xItem.alias,
         localName = xItem.localName,
         chineseName = xItem.chineseName,
-        restaurantPrice = xItem.restaurantPrice,
-        takeawayPrice = xItem.takeawayPrice,
-        restaurantHalfPrice = xItem.restaurantHalfPrice,
-        takeawayHalfPrice = xItem.takeawayHalfPrice,
+        restaurantPrice = CMoney(xItem.restaurantPrice),
+        takeawayPrice = CMoney(xItem.takeawayPrice),
+        restaurantHalfPrice = CMoney(xItem.restaurantHalfPrice),
+        takeawayHalfPrice = CMoney(xItem.takeawayHalfPrice),
         restaurantTax = xItem.restaurantTax,
         takeawayTax = xItem.takeawayTax,
         level = EOrderLevel.fromOrderLevel(xItem.level),
@@ -78,7 +83,7 @@ data class CMenuItem(
         colourBack2 = toTabletColour(xItem.colourBack2),
         colourSelectedBack2 = toTabletColour(xItem.colourSelectedBack2),
         menuCardId = xItem.menuCardId,
-        statiegeld = xItem.statiegeld,
+        statiegeld = CMoney(xItem.statiegeld),
         sequence = xItem.sequence,
         isSelected = false
     )
@@ -92,6 +97,39 @@ data class CMenuItem(
         fun toTabletColour(colour: Int): Int {
             return colour or 0xFF000000.toInt()
         }
+    }
 
+    fun getPriceAndHalfPrice(cluster_id: Int, isTakeawayPrice: Boolean): CPriceAndHalfPrice {
+        if (!isTakeawayPrice) {
+            return CPriceAndHalfPrice(restaurantPrice, restaurantHalfPrice)
+        }
+        return CPriceAndHalfPrice(takeawayPrice, takeawayHalfPrice)
+    }
+
+    fun isOutOfStock(): Boolean = menuItemId<0 || level == EOrderLevel.LEVEL_NOTHING
+                || level == EOrderLevel.LEVEL_OUTOFSTOCK
+
+    fun getTaxPercentage(isTakeawayPrice: Boolean) : Double {
+        val perc : TaxType = when (isTakeawayPrice) {
+            false -> restaurantTax
+            else -> takeawayTax
+        }
+        val percentage = CTaxProvider.getTax(perc)
+        Log.i("CMenuItem", "getTaxPercentage: $percentage")
+        return percentage
+    }
+
+    //----------------------------------------------------------------------------*/
+    // @brief Calculate the name for display.
+    // @param language [in] What language
+    // @param portion [in] What portion
+    // @param type [in] Type for the element, see #EnameType
+    //
+    fun Name(language: ETaal, portion: Int, type: ENameType, trim: Boolean): String
+    {
+        var resultString: String
+        val portionString = duoShao(portion, language, type == ENameType.NAME_PRINTER)
+        return Name(language, portionString, this.localName,
+            this.chineseName, type, trim)
     }
 }

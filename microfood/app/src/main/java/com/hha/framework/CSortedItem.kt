@@ -22,6 +22,15 @@ class CSortedItem : Iterable<CItem> {
     // Required iterator implementation
     override fun iterator(): Iterator<CItem> = items.iterator()
 
+    constructor(item: CItem) {
+        items.clear()
+        items.add(item)
+    }
+
+    constructor() {
+        items.clear()
+    }
+
     companion object {
         lateinit var startText: String
         lateinit var nextText: String
@@ -189,11 +198,17 @@ class CSortedItem : Iterable<CItem> {
         else -> 0
     }
 
-    fun getMenuItemId(): Long = items[0].menuItemId
+    fun getMenuItemId(): Int = items[0].menuItemId
     fun getPositionFactor(): Int = items[0].page * 1000000
     fun getSequence(): Int = items[0].sequence
+    fun setSequence(seq: Int) {
+        for (item in items) item.sequence = seq
+    }
+    fun increaseSequence() {
+        for (item in items) item.sequence += 1
+    }
     fun getOrder(): Int = items[0].subSequence
-    fun getTimeFrameIndex(): Int = items[0].timeFrameId.value
+    fun getTimeFrameIndex(): Short = items[0].timeFrameId.value
     fun isItemGroup(): Boolean = items[0].level == EOrderLevel.LEVEL_ITEMGROUP
 
     fun isSameTimeFrame(other: CSortedItem): Boolean {
@@ -372,4 +387,5 @@ class CSortedItem : Iterable<CItem> {
         }
     }
 
+    fun mainItem() : CItem = items[0]
 }

@@ -126,7 +126,7 @@ class CclientItemsHandler {
             unitPrice.cents(), item.originalAmount.cents(),
             item.originalHalfAmount.cents(), item.tax,
             item.locations, timeFrameId.index.toInt(),
-            item.deviceId.toInt(), item.clusterId.toInt(),
+            item.deviceId, item.clusterId,
             Payed.PAID_NO, item.getStatiegeldPerPiece(),
             EDeletedStatus.toDeletedStatus(why),
             item.timeFrameId.value.toInt()
@@ -159,7 +159,7 @@ class CclientItemsHandler {
             unitPrice.cents(), item.originalAmount.cents(),
             item.originalHalfAmount.cents(), item.tax,
             item.locations, timeFrameId.index.toInt(),
-            item.deviceId.toInt(), item.clusterId.toInt(),
+            item.deviceId, item.clusterId,
             Payed.PAID_NO, item.getStatiegeldPerPiece(),
             DeletedStatus.DELETE_NOT, 0)
         return true

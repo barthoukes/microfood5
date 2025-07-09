@@ -31,8 +31,6 @@ class PageOrderActivity : AppCompatActivity() {
     var menuPage: CMenuPage = menuCard.getMenuPage(global.menuPageId)
     var menuItems : CMenuItems =
         menuPage.loadItems(SKIP_INVISIBLE_TRUE)
-    val transaction : CTransaction = CTransaction()
-    val items : CTransactionItems = CTransactionItems()
     val CFG : Configuration = global.CFG
     var itemWidth = 24
     val groups = CFG.getValue("display_groups")
@@ -41,13 +39,28 @@ class PageOrderActivity : AppCompatActivity() {
     private lateinit var menuPagesAdapter: MenuPagesAdapter
     private lateinit var menuItemsAdapter: MenuItemsAdapter
     private lateinit var transactionItemsAdapter: TransactionItemAdapter
-
+    private lateinit var transaction: CTransaction
+    val clusterId : Short = -1
     val cursor = 0
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = PageOrderActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setupRecyclerView()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Refresh data when activity resumes
+        if (global.transaction == null) {
+            if (global.transactionId <1E6) assert(false)
+            transaction = CTransaction(global.transactionId)
+        }
+        transaction = global.transaction!!
+        transaction.startNextTimeFrame()
+        //menuItemsAdapter.notifyDataSetChanged()
+        //transactionItemsAdapter.notifyDataSetChanged()
     }
 
     // Add this new function to handle language changes
@@ -79,7 +92,7 @@ class PageOrderActivity : AppCompatActivity() {
                                             parent: RecyclerView, state: RecyclerView.State) {
                     outRect.set(8.dpToPx(), 8.dpToPx(), 8.dpToPx(), 8.dpToPx()) // 8dp spacing
                 }
-                }
+            }
         )
     }
 
@@ -161,7 +174,7 @@ class PageOrderActivity : AppCompatActivity() {
 
     private fun handleMenuItem(selectedMenuItem: CMenuItem) {
         Log.d("CLICK", "MenuItem clicked: ${selectedMenuItem.localName}")
-        if (transaction.addTransactionItem(cursor, selectedMenuItem)) {
+        if (transaction.addTransactionItem(selectedMenuItem, clusterId)) {
             menuItemsAdapter.notifyDataSetChanged()
             transactionItemsAdapter.notifyDataSetChanged()
         }
