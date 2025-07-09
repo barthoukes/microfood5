@@ -47,16 +47,20 @@ class TransactionItemAdapter(
 
         // Draw background,
         val background = getBackgroundColour(position)
-        holder.binding.transactionItem.setBackgroundColor(background)
+        holder.binding.transactionOrder.setBackgroundColor(background)
         if (item == null) {
             return
         }
         val tc = colourCFG.getTextColour("COLOUR_ORDER_TEXT")
         holder.binding.transactionItem.setTextColor(tc)
+        var str = "\n${item.getQuantity()}x "
         holder.binding.transactionItem.text = when {
-            global.isChinese() -> item.chineseName
-            else -> item.localName
+            global.isChinese() -> str + item.chineseName
+            else -> str + item.localName
         }
+        holder.binding.transactionPrice.text = item.getTotal().str()
+        holder.binding.transactionPrice.setTextColor(tc)
+
         val context = holder.itemView.context
         holder.binding.root.setOnClickListener {
             Log.i("TIA", "onBindViewHolder $position")

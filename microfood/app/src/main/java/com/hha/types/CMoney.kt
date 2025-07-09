@@ -39,6 +39,11 @@ class CMoney(private var cents: Int = 0) {
         return cents == 0
     }
 
+    fun str(): String {
+        val euros = cents / 100.0
+        return String.format("€%.2f", euros)
+    }
+
     // Parsing from string
     private fun parseString(m: String) {
         cents = 0

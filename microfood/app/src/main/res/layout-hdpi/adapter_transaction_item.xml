@@ -1,22 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<RelativeLayout
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	android:id="@+id/transaction_order"
 	android:layout_width="match_parent"
 	android:layout_height="wrap_content"
+	android:paddingBottom="4dp"
+	android:paddingTop="2dp"
+	android:paddingStart="2dp"
+	android:paddingEnd="2dp"
 	android:orientation="vertical"
-	android:gravity="center"
-	android:padding="2dp">
+	android:gravity="center">
 	<TextView
 		android:id="@+id/transaction_item"
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
-		android:gravity="center"
-		android:textColor="@color/COLOUR_ORDER_TEXT"
-		android:background="@color/COLOUR_ORDER_BACKGROUND_EVEN"
+		android:gravity="left|center_vertical"
+		android:textSize="18sp"
+		android:maxLines="4"
+		android:singleLine="false"
+		android:inputType="textMultiLine"
+		android:ellipsize="end"/>
+	<TextView
+		android:id="@+id/transaction_price"
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:gravity="end|top"
+		android:layout_marginBottom="8dp"
+		android:layout_marginTop="8dp"
+		android:layout_marginLeft="2dp"
+		android:layout_marginRight="2dp"
 		android:textSize="14sp"
 		android:maxLines="4"
 		android:singleLine="false"
 		android:inputType="textMultiLine"
 		android:ellipsize="end"/>
-</LinearLayout>
+</RelativeLayout>

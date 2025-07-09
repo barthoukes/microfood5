@@ -7,11 +7,17 @@ import com.hha.types.ETaal
 
 // Placeholder for the DuoShao function - implement its actual logic
 fun duoShao(portion: Int, language: ETaal, isPrinter: Boolean): String {
-    // Example: This needs to be your actual logic from C++ DuoShao
-    if (portion == 1) return if (language == ETaal.LANG_SIMPLIFIED || language == ETaal.LANG_TRADITIONAL) "单" else "1x "
-    if (portion == 2) return if (language == ETaal.LANG_SIMPLIFIED || language == ETaal.LANG_TRADITIONAL) "双" else "2x "
-    // ... more portion logic
-    return "" // Default if portion is not handled or 0
+    if (portion<0 || portion>7)
+    {
+        return ""
+    }
+    val halfChinese = arrayOf("", "一半", "", "一个半", "双", "两个半", "三个", "三个半")
+    val halfDutch = arrayOf("", "½", "", "1½", "2", "2½", "3", "3½");
+    if ( language == ETaal.LANG_SIMPLIFIED || language ==ETaal.LANG_TRADITIONAL)
+    {
+        return halfChinese[portion]
+    }
+    return halfDutch[portion]
 }
 
 fun MenuItem.getWidth() : Int {
