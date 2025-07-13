@@ -1,0 +1,256 @@
+//==============================================================================
+//  @file       sql_menu_item.proto
+//  @ingroup    proto database interface
+//  @brief      Operations on item database
+// 
+//  Messages for menu cards
+//
+//  @author     Bart Houkes
+//
+//------------------------------------------------------------------------------
+//  Copyright (c) Bart Houkes, 25-12-2023
+//
+//  Copyright notice:
+//  This software is property of Bart Houkes.
+//  Unauthorized duplication and disclosure to third parties is forbidden.
+//============================================================================*/
+
+syntax = "proto3";
+
+option csharp_namespace = "menuItemService";
+
+package mi;
+
+import "common_types.proto";
+
+// Add these Kotlin-specific options
+option java_multiple_files = true;
+option java_package = "com.hha.menu.item";
+
+service MenuItemService
+{
+    rpc GetMenuItemsFromPage(GetMenuItemsRequest)  returns (MenuItemList) {}
+    rpc InsertNewItemOnMenuCard(common.MenuItem)  returns (common.MenuItem) {}
+    rpc InsertItem(common.MenuItem)  returns (common.MenuItem) {}
+    rpc UpdateItem(common.MenuItem)  returns (common.Empty) {}
+    rpc EraseItem(MenuItemId)  returns (common.Empty) {}
+    rpc GetProductFromProductId(MenuItemId)  returns (common.MenuItem) {} 
+    rpc FindMenuItemsByPage(PageRequest)  returns (MenuItemList) {}
+    rpc GetMenuItemsFromName(NameRequest)  returns (MenuItemList) {}
+    rpc GetCluster(MenuCardClusterId)  returns (ShortMenuItemList) {}
+    rpc DeleteProduct(MenuItemId)  returns (common.Empty) {}
+    rpc DuplicateItem(MenuItemId)  returns (MenuItemId) {}
+    rpc SearchString(MenuCardSearchString)  returns (MenuItemList) {}
+    rpc FindItemsWithOptions1(FindOptions1)  returns (MenuItemList) {}
+    rpc Backup(common.Empty)  returns (common.Empty) {}
+    rpc Restore(common.Empty)  returns (common.Empty) {}
+    rpc GetMenuItem(MenuItemId)  returns (common.MenuItem) {}
+    rpc SetPageColour(PageColourRequest)  returns (common.Empty) {}
+    rpc SetPageLocations(PageLocationsRequest)  returns (common.Empty) {}
+    rpc FindAlias(FindAliasRequest)  returns (MenuItemList) {}
+    rpc NextMenuItemId(NextMenuItemIdRequest)  returns (MenuItemId) {}
+    rpc UpdatePos(UpdatePosRequest)  returns (common.Empty) {}
+    rpc SetWidthHeight(WidthHeigtRequest)  returns (common.Empty) {}
+    rpc RemoveMenuItemsFromMenuCard(common.MenuCardId)  returns (common.Empty) {}
+    rpc GetNewMenuCardId(common.Empty)  returns (common.MenuCardId) {}
+    rpc ExchangePages(ExchangePagesRequest)  returns (common.Empty) {}
+    rpc DuplicateMenuCard(DuplicationRequest)  returns (common.Empty) {}
+    rpc GetSize(common.MenuCardId)  returns (SizeReply) {}
+
+    rpc GetFirstMinutesItem(common.MenuCardId)  returns (FirstItemReply) {}
+    rpc FindMenuItemId(FindItemRequest)  returns (MenuItemId) {}
+    rpc ExchangeCluster(ExchangeClusterRequest)  returns (common.Empty) {}
+    rpc ExchangeSpecialPrices(ExchangeSpecialPricesRequest)  returns (common.Empty) {}
+    rpc GetProductsFromAlias(FindAliasRequest)  returns (MenuItemIdList) {}
+    rpc GetProductsFromName(MenuCardSearchString)  returns (MenuItemIdList) {}
+    rpc EraseClusterIndex(MenuCardClusterId)  returns (common.Empty) {}
+    rpc EraseSpecialPriceIndex(MenuCardIdSpecialPriceIndex)  returns (common.Empty) {}
+    rpc SaveAllItems(MenuItemList)  returns (common.Empty) {}
+    rpc MysqlDump(common.Empty)  returns (TextDump);
+    rpc GetPageIdFromMenuItemId(MenuItemId)  returns (MenuCardPageId) {}
+}
+
+message NextMenuItemIdRequest
+{
+    int32 menu_item_id = 3;
+}
+
+message ShortMenuItem
+{
+    int32 menu_item_id = 1;
+    string local_name = 3;
+    string chinese_name = 4;    
+}
+
+message ShortMenuItemList
+{
+    repeated ShortMenuItem menu_item = 1;
+}
+
+message MenuItemList
+{
+    int32 menu_card_id = 1;
+    repeated common.MenuItem items = 2;
+}
+
+message MenuCardPageId
+{
+    int32 menu_card_id = 1;
+    int32 menu_page_id = 2;
+}
+
+message TextDump
+{
+    string dump = 1;
+}   
+
+message UpdatePosRequest
+{
+    int32 item_id = 1;
+    int32 position_x = 2;
+    int32 position_y = 3;
+    int32 width = 4;
+}
+
+message WidthHeigtRequest
+{
+    int32 menu_card_id = 1;
+    int32 menu_page_id = 2;
+    int32 old_width_height = 3;
+    int32 new_width_height = 4;
+}
+
+message PageRequest
+{
+    int32 menu_card_id = 1;
+    int32 menu_page_id = 2;
+    common.SkipInvisible skip_invisible_items = 3;
+}
+
+message NameRequest
+{
+    int32 menu_card_id = 1;
+    string local_name = 2;
+    common.SkipInvisible skip_invisible_items = 3;
+}
+
+message MenuItemId
+{
+    int32 menu_item_id = 1;
+}
+
+message MenuItemIdList
+{
+    repeated int32 menu_item_id = 1;
+}
+ 
+message PageColourRequest
+{
+    int32 menu_card_id = 1;
+    int32 menu_page_id = 2;
+    int32 fg = 3;
+    int32 bg = 4;
+    int32 sel_fg = 5;
+    int32 sel_bg = 6;
+    int32 bg2 = 7;
+    int32 sel_bg2 = 8;
+}
+
+message FindAliasRequest
+{
+    int32 menu_card_id = 1;
+    string alias = 2;
+}
+
+message MenuCardIdSpecialPriceIndex
+{
+    int32 menu_card_id = 1;
+    int32 special_price_index = 2;
+}
+	
+message PageLocationsRequest
+{
+    int32 menu_card_id = 1;
+    int32 menu_page_id = 2;
+    int32 locations = 3;
+}
+
+message MenuCardClusterId
+{
+    int32 menu_card_id = 1;
+    int32 cluster_id = 2;
+}
+ 
+message MenuCardSearchString
+{
+    int32 menu_card_id = 1;
+    string search_string = 2;
+}
+ 
+message FindOptions1
+{
+    int32 menu_card_id = 1;
+    int32 menu_page_id = 2;
+    bool sort_by_local_name = 3;
+    bool include_nameless_items = 4;
+    bool order_by_position = 5;
+    bool is_vertical_page = 6;
+    common.SkipInvisible skip_invisible_items = 7;
+}
+
+message ExchangePagesRequest
+{
+    int32 menu_card_id = 1;
+    int32 menu_page_id1 = 2;
+    int32 menu_page_id2 = 3;
+}
+
+message ExchangeSpecialPricesRequest
+{
+    int32 menu_card_id = 1;
+    int32 special_prices_index1 = 2;
+    int32 special_prices_index2 = 3;
+}
+
+message ExchangeClusterRequest
+{
+    int32 menu_card_id = 1;
+    int32 cluster1 = 2;
+    int32 cluster2 = 3;
+}
+
+message DuplicationRequest
+{
+    int32 menu_card_id1 = 1;
+    int32 menu_card_id2 = 2;
+}
+
+message SizeReply
+{
+    int32 size = 1;
+}
+
+message FirstItemReply
+{
+    int32 menu_card_id = 1;
+    int32 menu_page_id = 2;
+    int32 menu_item_id = 3;
+    bool valid = 4;
+}
+
+message FindItemRequest
+{
+    string local_name = 1;
+    string chinese_name = 2;
+    string menu_page_id = 3;
+    int32 menu_card_id = 4;
+}
+
+message GetMenuItemsRequest
+{
+    int32 menu_card_id = 1;
+    int32 menu_page_id = 2;
+    bool is_vertical = 3;
+    common.SkipInvisible skip_invisible = 4;
+}
+

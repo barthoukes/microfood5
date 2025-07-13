@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- For general internet access -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- For Wi-Fi/Mobile network state checks (optional) -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <application
+        android:networkSecurityConfig="@xml/network_security_config"
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:label="@string/app_name"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.KassakuGRPCClient"
+        tools:targetApi="31">
+        <activity
+            android:name="com.hha.dialog.SplashLayout"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.KassakuGRPCClient.NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value="" />
+        </activity>
+        <activity android:name="com.hha.activities.SplashActivity" />
+        <activity android:name="com.hha.dialog.MainMenuActivity" />
+        <activity android:name="com.hha.activities.AboutActivity" />
+        <activity android:name="com.hha.dialog.StopDialog" />
+        <activity android:name="com.hha.dialog.PageOrderActivity" />
+        <activity android:name="com.hha.dialog.BillOrderActivity" />
+        <activity android:name="com.hha.dialog.AskTransactionActivity" />
+    </application>
+
+</manifest>

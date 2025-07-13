@@ -1,0 +1,249 @@
+syntax = "proto3";
+
+option csharp_namespace = "GrpcService";
+
+package cl;
+
+import "common_types.proto";
+
+// Add these Kotlin-specific options
+option java_multiple_files = true;
+option java_package = "com.hha.client";
+
+service ClientService
+{
+  rpc UpdateCustomer(UpdateCustomerRequest) returns (common.Empty) {}
+  rpc InsertNewCustomer(InsertNewCustomerRequest) returns (InsertNewCustomerResponse) {}
+  rpc Verify(common.Empty) returns (VerifyResponse) {}
+  rpc FindAll(common.Empty) returns (FindAllResponse) {}
+  rpc FindSortedClients(FindSortedClientsRequest) returns (FindSortedClientsResponse) {}
+  rpc InvisibleCustomer(InvisibleCustomerRequest) returns (common.Empty) {}
+  rpc FindSortedValidClients(FindSortedValidClientsRequest) returns (FindSortedValidClientsResponse) {}
+  rpc FindClientsWithOpenBills(common.Empty) returns (FindClientsWithOpenBillsResponse) {}
+  rpc GetCustomerFromId(GetCustomerFromIdRequest) returns (GetCustomerFromIdResponse) {}
+  rpc GetClientIdFromPhoneNumber(GetClientIdFromPhoneNumberRequest) returns (GetClientIdFromPhoneNumberResponse) {}
+  rpc DuplicateCustomer(DuplicateCustomerRequest) returns (DuplicateCustomerResponse) {}
+  rpc AddBuyOnAccountPayments(AddBuyOnAccountPaymentsRequest) returns (common.Empty) {}
+  rpc AddCustomerPayed(AddCustomerPayedRequest) returns (common.Empty) {}
+  rpc FindCustomerOrAdd(FindCustomerOrAddRequest) returns (FindCustomerOrAddResponse) {}
+  rpc AddCustomer(AddCustomerRequest) returns (AddCustomerResponse) {}
+  rpc UpdateOrAddCustomer(UpdateOrAddCustomerRequest) returns (UpdateOrAddCustomerResponse) {}
+  rpc GetCustomerText(GetCustomerTextRequest) returns (GetCustomerTextResponse) {}
+  rpc FindCustomerByName(FindCustomerByNameRequest) returns (FindCustomerByNameResponse) {}
+  rpc UpdateFoodOrdered(common.Empty) returns (common.Empty) {}
+  rpc UpdateTotalsOpenBills(UpdateTotalsOpenBillsRequest) returns (common.Empty) {}
+  rpc FindIdByAddress(FindIdByAddressRequest) returns (FindIdByAddressResponse) {}
+  rpc FindIdByPhone(FindIdByPhoneRequest)  returns (FindIdByPhoneResponse) {}
+  rpc DestroyClient(DeleteCustomerRequest)  returns (common.Empty) {}
+}
+
+message Customer
+{
+  int64 customer_id = 1;
+  string phone_number = 2;
+  string zip_code = 3;
+  string house_number = 4;
+  string name = 5;
+  string company = 6;
+  string street_name = 7;
+  string city = 8;
+  int32 total_eaten = 10;
+  int32 total_ordered = 11;
+  int32 total_payed = 12;
+}
+
+message CustomerList
+{
+  repeated Customer customer = 1;
+}
+
+message UpdateCustomerRequest
+{
+  Customer customer = 1;
+}
+
+message DeleteCustomerRequest
+{
+  int32 customer_id = 1;
+}
+
+message InsertNewCustomerRequest
+{
+  Customer customer = 1;
+}
+
+message InsertNewCustomerResponse
+{
+  int64 id = 1;
+}
+
+message VerifyResponse
+{
+  bool result = 1;
+}
+
+message FindAllResponse
+{
+  int32 count = 1;
+}
+
+message FindSortedClientsRequest
+{
+  int64 customer_id = 1;
+}
+
+message FindSortedClientsResponse
+{
+  CustomerList customers = 1;
+}
+
+message InvisibleCustomerRequest
+{
+  int64 customer_id = 1;
+}
+
+message FindSortedValidClientsRequest
+{
+  bool only_valid_customers = 1;
+}
+
+message FindSortedValidClientsResponse
+{
+  CustomerList customers = 1;
+}
+
+message FindClientsWithOpenBillsResponse
+{
+  CustomerList customers = 1;
+}
+
+message GetCustomerFromIdRequest
+{
+  int64 customer_id = 1;
+}
+
+message GetCustomerFromIdResponse
+{
+  Customer customer = 1;
+}
+
+message GetClientIdFromPhoneNumberRequest
+{
+  string phone = 1;
+}
+
+message GetClientIdFromPhoneNumberResponse
+{
+  int64 client_id = 1;
+}
+
+message DuplicateCustomerRequest
+{
+  int64 id = 1;
+}
+
+message DuplicateCustomerResponse
+{
+  int64 new_id = 1;
+}
+
+message AddBuyOnAccountPaymentsRequest
+{
+  int32 transaction_id = 1;
+}
+
+message AddCustomerPayedRequest
+{
+  int64 customer_id = 1;
+  int32 total = 2;
+}
+
+message FindCustomerOrAddRequest
+{
+  string phone_number = 1;
+  string zip_code = 2;
+  string house_number = 3;
+  string name = 4;
+  string company = 5;
+  string street_name = 6;
+  string city = 7;
+}
+
+message FindCustomerOrAddResponse
+{
+  int64 id = 1;
+}
+
+message AddCustomerRequest
+{
+  string phone_number = 1;
+  string zip_code = 2;
+  string house_number = 3;
+  string name = 4;
+  string company = 5;
+  string street_name = 6;
+  string city = 7;
+}
+
+message AddCustomerResponse
+{
+  int64 id = 1;
+}
+
+message UpdateOrAddCustomerRequest
+{
+  Customer customer = 1;
+}
+
+message UpdateOrAddCustomerResponse
+{
+  int32 customer_id= 1;
+}
+
+message GetCustomerTextRequest
+{
+  int64 customer_id = 1;
+}
+
+message GetCustomerTextResponse
+{
+  string text = 1;
+}
+
+message FindCustomerByNameRequest
+{
+  string name = 1;
+}
+
+message FindCustomerByNameResponse
+{
+  CustomerList customers = 1;
+}
+
+message UpdateTotalsOpenBillsRequest
+{
+  int64 customer_id = 1;
+}
+
+message FindIdByAddressRequest
+{
+  string street = 1;
+  string house_number = 2;
+  string city = 3;
+}
+
+message FindIdByAddressResponse
+{
+  int64 customer_id = 1;
+}
+
+message FindIdByPhoneRequest
+{
+  string phone_number = 1;
+}
+
+message FindIdByPhoneResponse
+{
+  int64 customer_id = 1;
+}
+

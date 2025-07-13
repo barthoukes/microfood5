@@ -1,0 +1,112 @@
+
+syntax = "proto3";
+
+package spp;
+
+import "common_types.proto";
+
+// Add these Kotlin-specific options
+option java_multiple_files = true;
+option java_package = "com.hha.special.prices";
+
+service SpecialPricesService
+{
+    rpc BackupSpecialPrices(common.Empty)  returns (common.Empty) {}
+    rpc ExchangeSpecialPrices(ExchangePricesRequest)  returns (common.Empty) {}
+    rpc RemoveMenuCard(common.MenuCardId)  returns (common.Empty) {}
+    rpc RestoreSpecialPrices(common.Empty)  returns (common.Empty) {}
+    rpc SaveAllSpecialPrices(SaveSpecialPricesRequest)  returns (common.Empty) {}
+    rpc SpecialPricExists(SpecialPriceIndex)  returns (ExistsReply) {}
+    rpc UpdateSpecialPrice(SpecialPriceOption)  returns (UpdateReply) {}
+    rpc DuplicateSpecialPrice(DuplicateSpecialPriceRequest)  returns (SpecialPriceId) {}
+    rpc EraseSpecialPrice(SpecialPriceIndex)  returns (common.Empty) {}
+    rpc DuplicateMenuCard(DuplicateMenuCardRequest)  returns (common.Empty) {}
+    rpc GetSize(common.MenuCardId)  returns (GetSizeResponse) {}
+    rpc GetSpecialPriceName(SpecialPriceNameRequest)  returns (SpecialPriceName) {}
+    rpc FindAllSpecialPrices(common.MenuCardId)  returns (SpecialPriceOptionList) {}
+}
+
+message SpecialPriceNameRequest
+{
+    int32 id = 1;
+    bool is_chinese = 2;
+}
+
+message SpecialPriceName
+{
+    string name = 1;
+}
+
+message GetSizeResponse
+{
+    int32 size = 1;
+}
+
+message DuplicateMenuCardRequest
+{
+    int32 menu_card_id = 1;
+    int32 destination_id = 2;
+}
+
+message DuplicateSpecialPriceRequest
+{
+    int32 menu_card_id = 1;
+    int32 special_price_index = 2;
+    int32 new_special_price_index = 3;
+}
+
+message SpecialPriceId
+{
+    int32 special_price_id = 1;
+}
+
+message SpecialPriceIndex
+{
+    int32 menu_card_id = 1;
+    int32 special_price_index = 2;
+}
+
+message ExistsReply
+{
+    bool result = 1;
+}
+
+message UpdateReply
+{
+    bool result = 1;
+}
+
+message ExchangePricesRequest
+{
+    int32 menu_card_id = 1;
+    int32 src_special_price_index = 2;
+    int32 dst_special_price_index = 3;
+}
+
+message SaveSpecialPricesRequest
+{
+    int32 menu_card_id = 1;
+    repeated SpecialPriceOption special_price = 2;
+}
+
+message SpecialPriceOption
+{
+    int32 menu_card_id = 1;              // What menu card.
+    int32 status = 2;                    // Status for this option
+    int32 special_price_index = 3;       // Which special price index 1..32
+    string local_name = 4;               // Name for the cluster.
+    string chinese_name = 5;             // Name for the cluster.
+    common.Money new_restaurant_amount = 6;     // New price.
+    common.Money new_takeaway_amount = 7;       // New takeaway price.
+    common.Money new_restaurant_half_amount = 8;// New half price.
+    common.Money new_takeaway_half_amount = 9;  // New half price takeaway.
+    common.Money statiegeld = 10;               // New statiegeld.
+    int32 weekdays = 11;                 // Weekdays
+    string start_time = 12;              // Start time.
+    string end_time = 13;                // End time.
+}
+
+message SpecialPriceOptionList
+{
+    repeated SpecialPriceOption special_price_option = 1;
+}

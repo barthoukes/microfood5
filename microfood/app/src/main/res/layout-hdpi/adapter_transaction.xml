@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout android:id="@+id/lineItem"
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent" 
+	android:layout_height="wrap_content"
+	android:gravity="center_vertical"
+	android:background ="#ffc0c0c0"
+	android:orientation="horizontal">
+
+	<ImageView android:id="@+id/icon_kindof" 
+	    android:contentDescription="@drawable/sitin"
+	    android:layout_width="wrap_content"
+		android:layout_height="fill_parent" 
+		android:src="@drawable/sitin"
+		/>
+	<LinearLayout
+	    android:layout_height="fill_parent"
+	   	android:layout_width="fill_parent"
+	    android:orientation="vertical">
+	    <FrameLayout
+	        android:layout_width="fill_parent"
+	        android:layout_height="wrap_content"
+	        android:layout_marginTop="8dp"
+	        android:layout_marginBottom="2dp">
+		<TextView android:id="@+id/table_id" 
+		    android:layout_width="fill_parent"
+		    android:layout_height="wrap_content"
+			android:textSize="24sp"
+			android:textColor="@color/COLOUR_ITEM_TEXT" 
+			android:text="TAFEL: 15"/>
+		<TextView android:id="@+id/price_id"
+		    android:layout_width="fill_parent"
+		    android:layout_height="wrap_content"
+		    android:layout_marginTop="8dp"
+		    android:layout_marginRight="1dp"
+		    android:gravity="right"
+		    android:text="€ 5,75"
+		    android:textColor="@color/COLOUR_ITEM_TEXT"
+		    android:textSize="18sp"/>
+		</FrameLayout>
+	<ProgressBar android:id="@+id/table_duration" 
+		    android:layout_width="fill_parent" 
+		    android:layout_marginBottom="0dp"
+		    android:layout_height="5dp"
+		    android:max="180" 
+		    android:progress="20" 
+		    android:indeterminateDrawable="@android:drawable/progress_indeterminate_horizontal"
+		    android:progressDrawable="@android:drawable/progress_horizontal"
+		    android:indeterminateOnly="false"
+		    android:scrollbarStyle="outsideOverlay"/>		
+	</LinearLayout>
+</LinearLayout>

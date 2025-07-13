@@ -1,0 +1,57 @@
+
+syntax = "proto3";
+
+package wallet;
+
+import "common_types.proto";
+
+// Add these Kotlin-specific options
+option java_multiple_files = true;
+option java_package = "com.hha.daily.wallet";
+
+service WalletService
+{
+    rpc AddMoney(AddMoneyRequest)  returns (common.Empty);
+    rpc GetAllWallet(common.Empty)  returns (WalletLineList);
+    rpc GetWalletTotal(common.Empty)  returns (WalletTotal);
+    rpc RemoveLine(RemoveLineRequest)  returns (common.Empty);
+}
+
+message RemoveLineRequest
+{
+   int32 line_id = 1;
+}
+ 
+message WalletTotal
+{
+    int32 total = 1;
+}
+
+message AddMoneyRequest
+{
+    int32 wallet_type = 1;
+    int32 personnel_id = 2;
+    string description = 3;
+    double tax_percentage = 4;
+    int32 amount = 5;
+}
+
+message WalletLine
+{
+    int32 wallet_type = 1;
+    string time = 2;
+    string rfid_key_name = 3;
+    string description = 4;
+    bool show_total = 5;
+    int32 total = 6;
+    double tax_percentage = 7;
+    int32 location_type = 8;
+    common.TaxType tax_type = 9;
+    common.TransType trans_type = 10;
+}
+
+message WalletLineList
+{
+    repeated WalletLine line = 1;
+}
+

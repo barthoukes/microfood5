@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="sharedpref" path="grpc_credentials.xml"/>
+        <exclude domain="database" path="sensitive_cache.db"/>
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="sharedpref" path="grpc_credentials.xml"/>
+    </device-transfer>
+</data-extraction-rules>

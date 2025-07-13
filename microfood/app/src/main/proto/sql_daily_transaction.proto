@@ -1,0 +1,350 @@
+//==============================================================================
+//  @file       sql_daily_transaction.proto
+//  @ingroup    proto database interface
+//  @brief		Operations on transactions
+//
+//  Messages for daily transactions
+//
+//  @author     Bart Houkes
+//
+//------------------------------------------------------------------------------
+//  Copyright (c) Bart Houkes, 25-12-2023
+//
+//  Copyright notice:
+//  This software is property of Bart Houkes.
+//  Unauthorized duplication and disclosure to third parties is forbidden.
+//============================================================================*/
+
+syntax = "proto3";
+
+option csharp_namespace = "GrpcService";
+
+package dt;
+
+import "common_types.proto";
+
+// Add these Kotlin-specific options
+option java_multiple_files = true;
+option java_package = "com.hha.daily.transaction";
+
+service DailyTransactionService
+{
+    rpc CleanTransaction(TransactionId)  returns (common.Empty) {}
+    rpc CloseTransaction(CloseTransactionRequest)  returns (common.Empty) {}
+    rpc CloseWokTablesAfterEndTime(CloseWokRequest)  returns (common.Empty) {}
+    rpc CopyEndTimeFromFloorplan(TransactionMinutes)  returns (common.Empty) {}
+    rpc CopyNegativeTransaction(TransactionId)  returns (TransactionId) {}
+    rpc DeleteTransaction(TransactionId)  returns (common.Empty) {}
+    rpc DuplicateTransaction(DuplicationRequest)  returns (TransactionId) {}
+    rpc FindArchivedTransactions(FindArchivedTransactionsRequest)  returns (FindArchivedTransactionsResponse) {}
+    rpc FindCashOrderTotal(common.Empty)  returns (common.Money) {}
+    rpc FindClosedOrderFromKey(FindClosedOrderRequest)  returns (TransactionId) {}
+    rpc FindDays(FindDaysRequest)  returns (DaysList) {}
+    rpc FindLatestTransaction(LatestTransactionRequest)  returns (LatestTransactionNumber) {}
+    rpc FindMinutes(TransactionId)  returns (MinutesResponse) {}
+    rpc FindNewPrepareTransactions(common.Empty)  returns (TimeFramesPerTransactionList) {}
+    rpc FindOpenTable(FindOpenTableRequest)  returns (TransactionId) {}
+    rpc FindOpenTransactionWithCustomer(CustomerId)  returns (TransactionId) {}
+    rpc FindSortedTransactions(FindSortedTransactionsRequest)  returns (TransactionIdList) {}
+    rpc FindTransactions(FindTransactionsRequest)  returns (TransactionIdList) {}
+    rpc GetElapsedMinutes(TimeFrameIndex)  returns (MinutesResponse) {}
+    rpc GetStatus(TransactionId)  returns (GetStatusResponse) {}
+    rpc GetTotal(TransactionId)  returns (common.Money) {}
+    rpc GetWaiterTotal(PersonId)  returns (common.Money) {}
+    rpc IsTakeaway(TransactionId)  returns (IsTakeawayResponse) {}
+    rpc IsRechaud(TransactionId)  returns (IsRechaudResponse) {}
+    rpc IsTakeawayBag(TransactionId)  returns (IsTakeawayBagResponse) {}
+    rpc IsTakeawaySitin(TransactionId)  returns (IsTakeawaySitinResponse) {}
+    rpc IsTakeawayPrice(TransactionId)  returns (IsTakeawayPriceResponse) {}
+    rpc IsTelephone(TransactionId)  returns (IsTelephoneResponse) {}
+    rpc IsTakeawayPhone(TransactionId)  returns (IsTakeawayPhoneResponse) {}
+    rpc IsShop(TransactionId)  returns (IsShopResponse) {}
+    rpc InsertTransaction(InsertTransactionRequest)  returns (TransactionId) {}
+    rpc ListOpen(common.Empty)  returns (TransactionList) {}
+    rpc ListAll(SortOnTime)  returns (TransactionList) {}
+    rpc RenameTableName(RenameTableRequest)  returns (common.Empty) {}
+    rpc SelectTransactionId(TransactionId)  returns (common.TransactionData) {}
+    rpc SetArchived(TransactionId)  returns (common.Empty) {}
+    rpc SetCustomer(SetCustomerRequest)  returns (common.Empty) {}
+    rpc SetCustomerTime(TransactionTime)  returns (common.Empty) {}
+    rpc SetDiscount(SetDiscountRequest)  returns (common.Empty) {}
+    rpc SetMessage(SetMessageRequest)  returns (common.Empty) {}
+    rpc SetName(SetNameRequest)  returns (common.Empty) {}
+    rpc SetRfidKeyId(SetRfidKeyIdRequest)  returns (common.Empty) {}
+    rpc SetStatus(SetStatusRequest)  returns (common.Empty) {}
+    rpc SetTime(TransactionTime)  returns (common.Empty) {}
+    rpc SetTips(SetTipsRequest)  returns (common.Empty) {}
+    rpc SetTransType(TransTypeRequest)  returns (common.Empty) {}
+    rpc UpdateTotal(TransactionId)  returns (common.Empty) {}
+    rpc UpdateWokOpenOrOpenPaid(common.Empty)  returns (common.Empty) {}    
+}
+
+message TransTypeRequest
+{
+    int32 transaction_id = 1;
+    common.TransType trans_type = 2;
+}
+
+message RenameTableRequest
+{
+    string old_name = 1;
+    string new_name = 2;
+}
+
+message FindDaysRequest
+{
+    bool  all_rfid_key_ids = 1;
+    repeated int32 rfid_key_id = 2;
+}
+
+message FindTransactionsRequest
+{
+    bool  all_rfid_key_ids = 1;
+    repeated int32 rfid_key_id = 2;
+    string day = 3;
+    common.SortOrders sort_orders = 4;
+}
+
+message FindSortedTransactionsRequest
+{
+    common.SortOrders sort_orders = 4;
+}
+
+message DaysList
+{
+    repeated string day = 1;
+}
+
+message TransactionIdList
+{
+    repeated int32 transaction_id = 1;
+}
+
+message FindClosedOrderRequest
+{
+    int32 rfid_key_id = 1;
+    int32 only_old = 2;
+}
+
+message SetRfidKeyIdRequest
+{
+    int32 transaction_id = 1;
+    int32 new_rfid_key_id = 2;
+}
+
+message TimeFrameIndex
+{
+    int32 transaction_id = 1;
+    int32 time_frame_index = 2;
+}
+
+message MinutesResponse
+{
+    int32 minutes = 1;
+}
+
+message SetDiscountRequest
+{
+    int32 transaction_id = 1;
+    int32 discount_high = 2;
+    int32 discount_low = 3;
+    int32 discount_tax_free = 4;
+    double factor_high = 5;
+    double factor_low = 6;
+}
+
+message SetStatusRequest
+{
+    int32 transaction_id = 1;
+    common.ClientOrdersType status = 2;
+}
+ 
+message LatestTransactionRequest
+{
+    common.TransType trans_type = 1;
+    bool separate_numbers = 2;
+    int32 max_range = 3;
+}
+
+message LatestTransactionNumber
+{
+    int32 number = 1;
+}
+
+message FindOpenTableRequest
+{
+    string name = 1;
+}
+
+message GetStatusResponse
+{
+    common.ClientOrdersType type = 1;
+}
+
+message TransactionMinutes
+{
+    int32 transaction_id = 1;
+    int32 minutes = 2;
+}
+
+message SetMessageRequest
+{
+    int32 transaction_id = 1;
+    string message = 2;
+}
+
+message CloseTransactionRequest
+{
+    int32 transaction_id = 1;
+    common.ClientOrdersType why = 2;
+}
+
+message SetNameRequest
+{
+    int32 transaction_id = 1;
+    string name = 2;
+}
+
+message CustomerId
+{
+    int32 customer_id = 1;
+}
+
+message CloseWokRequest
+{
+    int32 remove_time = 1;
+}
+
+message SetCustomerRequest
+{
+    int32 transaction_id = 1;
+    int32 customer_id = 2;
+}
+
+message TimeFramesPerTransactionList
+{
+    repeated TimeFramesPerTransaction transactions = 1;
+}
+
+message TimeFramesPerTransaction
+{
+    int32 transaction_id = 1;
+    repeated int32 time_frames = 2;
+}
+
+message SetTipsRequest
+{
+    int32 transaction_id = 1;
+    common.Money tips_high = 2;
+    common.Money tips_low = 3;
+    common.Money tips_tax_free = 4;
+}
+
+message FindArchivedTransactionsRequest
+{
+    int32 rfid_key_id = 1;
+    bool only_old = 2;
+}
+
+message FindArchivedTransactionsResponse
+{
+    repeated int32 archived_transactions = 1;
+    int32 size = 2;
+}
+
+message SortOnTime
+{
+    bool sort_on_time = 1;
+}
+
+message PersonId
+{
+    int32 person_id = 1;
+}
+
+message InsertTransactionRequest
+{
+    string   table_name = 1;
+    int32    rfid_key_id  = 2;
+    common.TransType trans_type = 3;
+    int32    customer_id = 4;
+}
+
+message IsTakeawayResponse
+{
+    bool is_takeaway = 1;
+}
+
+message DuplicationRequest
+{
+    int32 transaction_id = 1;
+    int32 person_id = 2;
+    common.ClientOrdersType order_type = 3;
+}
+	
+message IsRechaudResponse
+{
+    bool is_rechaud = 1;
+}
+    
+message IsTakeawayBagResponse
+{
+    bool is_takeawayBag = 1;
+}
+
+message IsTakeawaySitinResponse
+{
+    bool is_takeaway_sitin = 1;
+}
+	
+message IsTakeawayPriceResponse
+{
+    bool is_takeaway_price = 1;
+}
+
+message IsTelephoneResponse
+{
+    bool is_telephone = 1;
+}
+
+message IsTakeawayPhoneResponse
+{
+    bool is_takeaway_phone = 1;
+}
+
+message IsShopResponse
+{
+    bool is_shop = 1;
+}
+
+message TransactionId
+{
+    int32 transaction_id = 1;
+}
+
+message TransactionListItem
+{
+     int32 minutes = 1;
+     int32 transaction_id = 2;
+     string name = 3;
+     common.TransType trans_type = 4;
+     common.ClientOrdersType status = 5;
+     string time_start = 6;
+     int32 customer_id = 7;
+     bool archived = 8;
+     string message = 9;
+     int32 total = 10;
+     string time_customer = 11;
+}
+
+message TransactionList
+{
+    repeated TransactionListItem transactions = 1;
+}
+
+message TransactionTime
+{
+    int32 transaction_id = 1;
+    string timestamp = 2;
+}
+

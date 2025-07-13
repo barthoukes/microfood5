@@ -1,0 +1,82 @@
+//==============================================================================
+//  @file       sql_archive_time_frame.proto
+//  @ingroup    proto database interface
+//  @brief		Operations on archive database
+//
+//  Messages for 7 year accounting
+//
+//  @author     Bart Houkes
+//
+//------------------------------------------------------------------------------
+//  Copyright (c) Bart Houkes, 2-2-2024
+//
+//  Copyright notice:
+//  This software is property of Bart Houkes.
+//  Unauthorized duplication and disclosure to third parties is forbidden.
+//============================================================================*/
+
+syntax = "proto3";
+
+option csharp_namespace = "GrpcService";
+
+package atf;
+
+import "common_types.proto";
+
+// Add these Kotlin-specific options
+option java_multiple_files = true;
+option java_package = "com.hha.archive";
+
+service ArchiveTimeFrameService
+{
+    rpc SelectTransactionId(TransactionSort)  returns (TimeFrameList) {}
+    rpc CopyTimeFramesFromDaily(TransactionId)  returns (common.Empty) {}
+    rpc InsertTimeFrame(InsertTimeFrameRequest)  returns (common.Empty) {}
+}
+
+message TransactionSort
+{
+    int32 transaction_id = 1;
+    bool sort_descending = 2;
+}
+
+message InsertTimeFrameRequest
+{
+    int32 transaction_id = 1;
+    int32 rfid_key_id = 2;
+    string start_time = 3;
+    string end_time = 4;
+    common.CookingState state = 5;
+    int32 type = 6;
+    int32 device_id = 7;
+    string deliver_time = 8;
+    int32 prints = 9;
+}
+
+message TimeFrame
+{
+    int32 transaction_id = 1;
+    int32 time_frame_index = 2;
+    string name = 3;
+    string start_time = 11;
+    string end_time = 4;
+    int32 type = 5;
+    int32 status = 6;
+    int32 minutes = 7;
+    int32 days = 8;
+    int32 total = 9;
+    common.TransType trans_type = 10;
+    int32 kitchen_prints = 12;
+    string deliver_time = 13;
+}
+
+message TimeFrameList
+{
+    repeated TimeFrame time_frame = 1;
+}
+
+message TransactionId
+{
+    int32 transaction_id = 1;
+}
+

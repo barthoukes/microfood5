@@ -1,0 +1,70 @@
+syntax = "proto3";
+
+package si;
+ 
+//import "common_types.proto";
+
+// Add these Kotlin-specific options
+option java_multiple_files = true;
+option java_package = "com.hha.store.supplier";
+
+service SupplierService
+{
+  rpc SetSearchString(SetSearchStringRequest) returns (SupplierList);
+  rpc AddOrGetSupplier(AddOrGetSupplierRequest) returns (AddOrGetSupplierResponse);
+}
+
+message GetNameRequest
+{
+  int32 index = 1;
+}
+
+message GetNameResponse
+{
+  string name = 1;
+}
+
+message SetSearchStringRequest
+{
+  string name = 1;
+}
+
+message SetSearchStringResponse
+{
+  int32 result = 1;
+}
+
+message GetSupplierRequest
+{
+  int32 n = 1;
+}
+
+message GetSupplierResponse
+{
+    int32 supplier_id = 1;
+    string name = 2;
+    bool result = 3;
+}
+
+message AddOrGetSupplierRequest
+{
+    string local_name = 2;
+}
+
+message AddOrGetSupplierResponse
+{
+  int32 result = 1;
+}
+
+message Supplier
+{
+    int32 supplier_id = 1;
+    string local_name = 2;
+    string chinese_name = 3;
+}
+
+message SupplierList
+{
+    repeated Supplier supplier = 1;
+}
+

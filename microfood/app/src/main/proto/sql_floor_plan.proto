@@ -1,0 +1,68 @@
+//==============================================================================
+//  @file       sql_floor_plan.proto
+//  @ingroup    proto database interface
+//  @brief		Operations on restaurant map
+//
+//  Messages for floor_plan
+//
+//  @author     Bart Houkes
+//
+//------------------------------------------------------------------------------
+//  Copyright (c) Bart Houkes, 25-12-2024
+//
+//  Copyright notice:
+//  This software is property of Bart Houkes.
+//  Unauthorized duplication and disclosure to third parties is forbidden.
+//============================================================================*/
+
+// add proto from sql_floor_plan.h
+
+syntax = "proto3";
+
+option csharp_namespace = "GrpcService";
+
+package fp;
+
+import "common_types.proto";
+
+// Add these Kotlin-specific options
+option java_multiple_files = true;
+option java_package = "com.hha.floor";
+
+service FloorPlanService
+{
+    rpc CreateFloorPlan(FloorPlanName)  returns (FloorPlanId) {}
+    rpc GetFloorPlans(GetFloorPlanRequest)  returns (FloorPlanList) {}
+    rpc MysqlDump(common.Empty) returns (common.TextDump);
+    rpc RemoveFloorPlan(FloorPlanId)  returns (common.Empty) {} 
+    rpc UpdateRoom(FloorPlan)  returns (common.Empty) {}
+}
+
+message GetFloorPlanRequest
+{
+    int32 floor_plan_id = 1;
+    bool  disabled_floors = 2;
+}
+
+message FloorPlan
+{
+    int32 floor_plan_id = 1;
+    string floor_name = 3;
+    bool enabled = 4;
+}
+
+message FloorPlanList
+{
+    repeated FloorPlan floor_plans = 1;
+}
+
+message FloorPlanName
+{
+    string name = 1;
+}
+
+message FloorPlanId
+{
+    int32 floor_plan_id = 1;
+}
+

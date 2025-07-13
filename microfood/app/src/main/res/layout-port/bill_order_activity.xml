@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:orientation="vertical"
+	android:background="@android:color/white"
+	android:padding="8dp">
+
+	<FrameLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:orientation="horizontal">
+		<!-- Table Header -->
+		<TextView
+			android:id="@+id/tableName"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="Table 5"
+			android:textSize="24sp"
+			android:textColor="@android:color/black"
+			android:textAlignment="center"
+			android:layout_marginBottom="8dp"/>
+		<!-- Back button -->
+		<ImageButton
+			android:id="@+id/btn_back"
+			android:layout_width="wrap_content"
+			android:layout_height="48dp"
+			android:layout_gravity="right"
+			android:src="@drawable/back_yellow"
+			android:contentDescription="back button"
+			android:background="?attr/selectableItemBackgroundBorderless" />
+	</FrameLayout>
+	<!-- Order + Payments Side-by-Side -->
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="0dp"
+		android:layout_weight="1"
+		android:orientation="horizontal"
+		android:layout_marginBottom="8dp">
+
+		<!-- Left: Order Items (60%) -->
+		<LinearLayout
+			android:layout_width="0dp"
+			android:layout_height="match_parent"
+			android:layout_weight="0.6"
+			android:orientation="vertical">
+
+			<androidx.recyclerview.widget.RecyclerView
+				android:id="@+id/layout_billing_items"
+				android:layout_width="match_parent"
+				android:layout_height="match_parent"
+				android:choiceMode="singleChoice"
+				android:scrollingCache="true"
+				android:scrollbars="none"
+				android:fadingEdge="none"
+				android:background="@color/COLOUR_ORDER_BACKGROUND_EMPTY"
+				android:layout_marginBottom="60dip"/>
+
+			<TextView
+				android:id="@+id/totalPrice"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:text="Total: €0.00"
+				android:textSize="18sp"
+				android:textColor="@android:color/black"
+				android:textAlignment="center"
+				android:layout_marginTop="8dp"/>
+		</LinearLayout>
+
+		<!-- Right: Payments (40%) -->
+		<LinearLayout
+			android:layout_width="0dp"
+			android:layout_height="match_parent"
+			android:layout_weight="0.4"
+			android:orientation="vertical"
+			android:layout_marginStart="8dp">
+
+			<TextView
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:text="Payments:"
+				android:textColor="@android:color/black"
+				android:layout_marginBottom="4dp"/>
+
+			<androidx.recyclerview.widget.RecyclerView
+				android:id="@+id/layout_billing_payments"
+				android:layout_width="match_parent"
+				android:layout_height="match_parent"
+				android:choiceMode="singleChoice"
+				android:scrollingCache="true"
+				android:scrollbars="none"
+				android:fadingEdge="none"
+				android:background="@color/COLOUR_ORDER_BACKGROUND_EMPTY"
+				android:layout_marginBottom="60dip"/>
+		</LinearLayout>
+	</LinearLayout>
+
+	<!-- Payment Methods -->
+	<TextView
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:text="Quick Pay:"
+		android:textColor="@android:color/black"
+		android:layout_marginBottom="4dp"/>
+
+	<GridLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:columnCount="3"
+		android:rowCount="2"
+		android:layout_marginBottom="8dp">
+
+		<ImageButton
+			android:id="@+id/euro5"
+			android:layout_width="0dp"
+			android:layout_height="80dp"
+			android:layout_columnWeight="1"
+			android:layout_rowWeight="1"
+			android:layout_margin="4dp"
+			android:background="@color/ANDROID_BUTTON_BACKGROUND"
+			android:src="@drawable/icon_5euro40"/>
+
+		<ImageButton
+			android:id="@+id/euro10"
+			android:layout_width="0dp"
+			android:layout_height="80dp"
+			android:layout_columnWeight="1"
+			android:layout_rowWeight="1"
+			android:layout_margin="4dp"
+			android:background="@color/ANDROID_BUTTON_BACKGROUND"
+			android:src="@drawable/icon_10euro40"/>
+
+		<ImageButton
+			android:id="@+id/euro20"
+			android:layout_width="0dp"
+			android:layout_height="80dp"
+			android:layout_columnWeight="1"
+			android:layout_rowWeight="1"
+			android:layout_margin="4dp"
+			android:background="@color/ANDROID_BUTTON_BACKGROUND"
+			android:src="@drawable/icon_20euro40"/>
+
+		<ImageButton
+			android:id="@+id/euro50"
+			android:layout_width="0dp"
+			android:layout_height="80dp"
+			android:layout_columnWeight="1"
+			android:layout_rowWeight="1"
+			android:layout_margin="4dp"
+			android:background="@color/ANDROID_BUTTON_BACKGROUND"
+			android:src="@drawable/icon_50euro40"/>
+
+		<ImageButton
+			android:id="@+id/cash"
+			android:layout_width="0dp"
+			android:layout_height="80dp"
+			android:layout_columnWeight="1"
+			android:layout_rowWeight="1"
+			android:layout_margin="4dp"
+			android:background="@color/ANDROID_BUTTON_BACKGROUND"
+			android:src="@drawable/pay_cash40"/>
+
+		<ImageButton
+			android:id="@+id/pin"
+			android:layout_width="0dp"
+			android:layout_height="80dp"
+			android:layout_columnWeight="1"
+			android:layout_rowWeight="1"
+			android:layout_margin="4dp"
+			android:background="@color/ANDROID_BUTTON_BACKGROUND"
+			android:src="@drawable/pay_pin40"/>
+	</GridLayout>
+
+	<!-- Print Options -->
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:orientation="horizontal"
+		android:layout_marginBottom="8dp">
+
+		<!-- Kitchen Prints -->
+		<LinearLayout
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_weight="1"
+			android:orientation="vertical">
+
+			<TextView
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:text="Kitchen Prints:"
+				android:textColor="@android:color/black"/>
+
+			<Button
+				android:id="@+id/btnKitchen1"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:text="1x"/>
+		</LinearLayout>
+
+		<!-- Bill Prints -->
+		<LinearLayout
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_weight="1"
+			android:orientation="vertical"
+			android:layout_marginStart="8dp">
+
+			<TextView
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:text="Bill Prints:"
+				android:textColor="@android:color/black"/>
+
+			<Button
+				android:id="@+id/btnBillQuantity"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:text="1x"/>
+		</LinearLayout>
+	</LinearLayout>
+
+	<!-- Bottom Action Buttons -->
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:orientation="horizontal">
+
+		<Button
+			android:id="@+id/btnOrderMore"
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_weight="1"
+			android:text="ORDER MORE"
+			android:backgroundTint="#FF9800"
+			android:textColor="@android:color/white"
+			android:layout_marginEnd="4dp"/>
+
+		<Button
+			android:id="@+id/btnConfirmOrder"
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_weight="1"
+			android:text="CONFIRM ORDER"
+			android:backgroundTint="#4CAF50"
+			android:textColor="@android:color/white"
+			android:layout_marginStart="4dp"/>
+	</LinearLayout>
+</LinearLayout>
