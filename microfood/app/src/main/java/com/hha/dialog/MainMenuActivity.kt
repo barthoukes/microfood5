@@ -10,24 +10,23 @@ import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import com.hha.dialog.SplashLayout
-import com.hha.activities.AboutActivity
-import com.hha.framework.CMenuCards
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import tech.hha.microfood.R
-import tech.hha.microfood.databinding.DialogMainMenuBinding
 
-import com.hha.service.AddressService
-import com.hha.grpc.GrpcServiceFactory
-import com.hha.framework.COpenClientsHandler
+import tech.hha.microfood.R
+import tech.hha.microfood.databinding.DialogMainActivityBinding
+
+import com.hha.activities.AboutActivity
+import com.hha.framework.CMenuCards
 import com.hha.framework.COpenClientsHandler.createNewTakeawayTransaction
-import com.hha.framework.CTimeFrame
+import com.hha.grpc.GrpcServiceFactory
 import com.hha.resources.Global
+import com.hha.service.AddressService
+
 
 class MainMenuActivity : AppCompatActivity() {
     // View binding
-    private lateinit var binding: DialogMainMenuBinding
+    private lateinit var binding: DialogMainActivityBinding
 
     // Connection status colors
     private val connectionColors = listOf(
@@ -38,7 +37,7 @@ class MainMenuActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = DialogMainMenuBinding.inflate(layoutInflater)
+        binding = DialogMainActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         setupActivity()
@@ -150,6 +149,9 @@ class MainMenuActivity : AppCompatActivity() {
         Log.i("FirstFragment", "Response: $response")
 
         // You could also update UI here with the response
+        startActivity(Intent(this, AskTransactionActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        })
 
         //startActivity(Intent(this, TableOverviewActivity::class.java))
     }

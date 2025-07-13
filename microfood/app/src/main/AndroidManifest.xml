@@ -39,6 +39,8 @@
         <activity android:name="com.hha.activities.AboutActivity" />
         <activity android:name="com.hha.dialog.StopDialog" />
         <activity android:name="com.hha.dialog.PageOrderActivity" />
+        <activity android:name="com.hha.dialog.BillOrderActivity" />
+        <activity android:name="com.hha.dialog.AskTransactionActivity" />
     </application>
 
 </manifest>

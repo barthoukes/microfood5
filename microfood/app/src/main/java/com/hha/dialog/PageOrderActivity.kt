@@ -1,5 +1,6 @@
 package com.hha.dialog
 
+import android.content.Intent
 import android.graphics.Rect
 import android.os.Bundle
 import android.view.View
@@ -11,9 +12,9 @@ import tech.hha.microfood.databinding.PageOrderActivityBinding
 import androidx.recyclerview.widget.RecyclerView
 import com.hha.adapter.MenuItemsAdapter
 import com.hha.adapter.MenuPagesAdapter
-import com.hha.adapter.TransactionItemAdapter
+import com.hha.adapter.TransactionItemsAdapter
 import com.hha.common.SkipInvisible.SKIP_INVISIBLE_TRUE
-import com.hha.framework.CTransactionItems
+import com.hha.framework.CItem
 import com.hha.framework.CMenuCards
 import com.hha.framework.CMenuItem
 import com.hha.framework.CMenuItems
@@ -38,7 +39,7 @@ class PageOrderActivity : AppCompatActivity() {
     val rows = (groups + columns-1) / columns
     private lateinit var menuPagesAdapter: MenuPagesAdapter
     private lateinit var menuItemsAdapter: MenuItemsAdapter
-    private lateinit var transactionItemsAdapter: TransactionItemAdapter
+    private lateinit var transactionItemsAdapter: TransactionItemsAdapter
     private lateinit var transaction: CTransaction
     val clusterId : Short = -1
     val cursor = 0
@@ -69,6 +70,13 @@ class PageOrderActivity : AppCompatActivity() {
         refreshAllData()
     }
 
+    // Add this new function to handle language changes
+    fun on_button_enter(view: View) {
+        startActivity(Intent(this, BillOrderActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        })
+    }
+
     private fun refreshAllData() {
         menuPagesAdapter.notifyDataSetChanged()
         menuItemsAdapter.notifyDataSetChanged()
@@ -83,7 +91,6 @@ class PageOrderActivity : AppCompatActivity() {
         createMenuItemsAdapter()
         createGridLayoutTransactionItems()
         createTransactionItemsAdapter()
-
 
         // 3. Add spacing between items
         binding.layoutMenuPages.addItemDecoration(
@@ -154,7 +161,9 @@ class PageOrderActivity : AppCompatActivity() {
 
     private fun createTransactionItemsAdapter() {
         // 2. Initialize adapter
-        transactionItemsAdapter = TransactionItemAdapter().apply {
+        transactionItemsAdapter = TransactionItemsAdapter() {
+            selectedTransactionItem -> handleTransactionItem(selectedTransactionItem)
+        } .apply {
             // Set dynamic height based on screen size
             binding.layoutMenuPages.setItemViewCacheSize(18)
         }
@@ -170,6 +179,10 @@ class PageOrderActivity : AppCompatActivity() {
         {
             loadPageItems(selectedPage)
         }
+    }
+
+    private fun handleTransactionItem(selectedTransactionItem: CItem) {
+        // todo
     }
 
     private fun handleMenuItem(selectedMenuItem: CMenuItem) {

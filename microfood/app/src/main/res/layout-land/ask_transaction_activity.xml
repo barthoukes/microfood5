@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal">
+
+    <!-- Main Content Area -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <!-- Toolbar (Title Only) -->
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            android:elevation="4dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Restaurant POS"
+                android:textColor="@android:color/white"
+                android:textSize="20sp" />
+            <!-- Back button -->
+            <ImageButton
+                android:id="@+id/btn_back"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:layout_gravity="right"
+                android:src="@drawable/back_yellow"
+                android:contentDescription="back button"
+                android:background="?attr/selectableItemBackgroundBorderless" />
+        </androidx.appcompat.widget.Toolbar>
+
+        <!-- Split Layout for Transactions & Tables -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:weightSum="2">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/layout_transaction_list"
+                android:background="@color/BLACK"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="1dp"
+                android:layout_marginTop="1dp"
+                android:layout_marginRight="1dp"
+                android:layout_marginBottom="1dp"
+                android:orientation="horizontal"
+                android:paddingHorizontal="2dp">
+            </androidx.recyclerview.widget.RecyclerView>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/layout_floor_tables"
+                android:background="@color/BLACK"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="1dp"
+                android:layout_marginTop="1dp"
+                android:layout_marginRight="1dp"
+                android:layout_marginBottom="1dp"
+                android:orientation="horizontal"
+                android:paddingHorizontal="2dp">
+            </androidx.recyclerview.widget.RecyclerView>
+
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Vertical Button Bar (Right Side) -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:background="@android:color/darker_gray"
+        android:orientation="vertical"
+        android:padding="8dp">
+
+        <!-- Floor Plan -->
+        <ImageButton
+            android:id="@+id/btn_floor_plan"
+            android:layout_width="48dp"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:src="@drawable/floorplan_yellow"
+            android:contentDescription="Floor Plan"
+            android:background="?attr/selectableItemBackgroundBorderless" />
+
+        <!-- Calculator -->
+        <ImageButton
+            android:id="@+id/btn_calculator"
+            android:layout_width="48dp"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:src="@drawable/icon_calculator_yellow"
+            android:contentDescription="Calculator"
+            android:background="?attr/selectableItemBackgroundBorderless" />
+
+        <!-- Change Language -->
+        <ImageButton
+            android:id="@+id/btn_language"
+            android:layout_width="48dp"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:src="@drawable/languages_yellow"
+            android:contentDescription="Change Language"
+            android:background="?attr/selectableItemBackgroundBorderless" />
+
+        <!-- Takeaway Bag -->
+        <ImageButton
+            android:id="@+id/btn_takeaway"
+            android:layout_width="48dp"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:src="@drawable/bag_yellow"
+            android:contentDescription="Takeaway"
+            android:background="?attr/selectableItemBackgroundBorderless" />
+
+        <!-- Phone Takeaway -->
+        <ImageButton
+            android:id="@+id/btn_phone_order"
+            android:layout_width="48dp"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:src="@drawable/icon_takephone_yellow"
+            android:contentDescription="Phone Order"
+            android:background="?attr/selectableItemBackgroundBorderless" />
+
+        <!-- Open Drawer -->
+        <ImageButton
+            android:id="@+id/btn_open_drawer"
+            android:layout_width="48dp"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:src="@drawable/drawer_yellow"
+            android:contentDescription="Open Drawer"
+            android:background="?attr/selectableItemBackgroundBorderless" />
+    </LinearLayout>
+</LinearLayout>

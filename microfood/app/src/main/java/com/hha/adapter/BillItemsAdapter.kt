@@ -10,23 +10,23 @@ import com.hha.framework.CTransaction
 import com.hha.resources.Global
 import tech.hha.microfood.databinding.AdapterTransactionItemBinding
 
-class TransactionItemsAdapter(
-    private val onTransactionItemSelected: (CItem) -> Unit
-) : RecyclerView.Adapter<TransactionItemsAdapter.TransactionItemViewHolder>() {
+class BillItemsAdapter(
+    private val onBillItemSelected: (CItem) -> Unit
+) : RecyclerView.Adapter<BillItemsAdapter.BillItemViewHolder>() {
     val global = Global.getInstance()
     val CFG = global.CFG
     val colourCFG = global.colourCFG
 
-    inner class TransactionItemViewHolder(val binding: AdapterTransactionItemBinding) :
+    inner class BillItemViewHolder(val binding: AdapterTransactionItemBinding) :
         RecyclerView.ViewHolder(binding.root)
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TransactionItemViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BillItemViewHolder {
         val binding = AdapterTransactionItemBinding.inflate(
             LayoutInflater.from(parent.context),
             parent,
             false
         )
-        return TransactionItemViewHolder(binding)
+        return BillItemViewHolder(binding)
     }
 
     override fun getItemCount() : Int {
@@ -36,7 +36,7 @@ class TransactionItemsAdapter(
         return 1
     }
 
-    override fun onBindViewHolder(holder: TransactionItemViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: BillItemViewHolder, position: Int) {
         //holder.binding.transactionOrder.isSelected = true
         val transaction: CTransaction = global.transaction!!
         val item: CItem? = transaction[position]
@@ -60,7 +60,6 @@ class TransactionItemsAdapter(
         val context = holder.itemView.context
         holder.binding.root.setOnClickListener {
             Log.i("TIA", "onBindViewHolder $position")
-            onTransactionItemSelected(item)
         }
     }
 

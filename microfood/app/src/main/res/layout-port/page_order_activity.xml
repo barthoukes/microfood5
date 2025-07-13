@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     android:baselineAligned="false"
     android:orientation="vertical">
-	<LinearLayout 
+	<LinearLayout
 	    android:layout_width="match_parent"
 	    android:layout_height="match_parent"
 	    android:layout_marginBottom="60dip"
@@ -32,21 +32,21 @@
 				android:fadingEdge="none"
 				android:scrollbars="none"
 				android:scrollingCache="true" />
-			<LinearLayout 
+			<LinearLayout
 			    android:layout_width="match_parent"
 			    android:layout_height="60dp"
 			    android:layout_marginTop="-60dip"
 			    android:background="@color/COLOUR_TOTAL_BACKGROUND">
 			   	<!-- TextView android:id="@+id/total_price_text"
 		    		    android:layout_width="0dp"
-		    		    android:layout_weight="1" 
+		    		    android:layout_weight="1"
 		    		    android:layout_margin="1dp"
 			            android:layout_height="60dp"
 						android:text="TOTAL"
 						android:gravity="left|center_vertical"
 						android:background="@color/COLOUR_TOTAL_BACKGROUND"
 		            	android:textColor="@color/COLOUR_TOTAL_TEXT"
-			            / -->   
+			            / -->
 		    	<TextView android:id="@+id/total_price"
 		    		    android:layout_margin="1dp"
 			            android:layout_height="60dp"
@@ -55,8 +55,8 @@
 						android:gravity="center"
 						android:background="@color/COLOUR_TOTAL_BACKGROUND"
 		            	android:textColor="@color/COLOUR_TOTAL_TEXT"
-			            />    
-			</LinearLayout>    
+			            />
+			</LinearLayout>
 		</LinearLayout>
 		<LinearLayout
 		    android:layout_width="0dp"
@@ -64,6 +64,14 @@
 		    android:layout_weight="60"
 		    android:background="@color/ANDROID_BUTTON_BACKGROUND"
 		    android:orientation="vertical">
+			<ImageButton
+				android:id="@+id/btn_back"
+				android:layout_width="wrap_content"
+				android:layout_height="48dp"
+				android:layout_gravity="right"
+				android:src="@drawable/back_yellow"
+				android:contentDescription="back button"
+				android:background="?attr/selectableItemBackgroundBorderless" />
 			<LinearLayout
 				android:layout_width="match_parent"
                 android:layout_weight="80"
@@ -95,7 +103,7 @@
 				</androidx.recyclerview.widget.RecyclerView>
 			</LinearLayout>
 	    </LinearLayout>
-	</LinearLayout>    
+	</LinearLayout>
 	<LinearLayout
 	    android:layout_width="match_parent"
 	    android:layout_height="60dp"
@@ -152,7 +160,7 @@
 		<ImageButton
 	        android:id="@+id/OK"
 	        style="?android:attr/buttonStyleSmall"
-            android:lines="2"				            
+            android:lines="2"
 	      	android:layout_weight="15"
 	       	android:layout_margin="4dp"
 	       	android:layout_width="0dp"
@@ -163,4 +171,4 @@
 		    android:onClick="on_button_enter"
 	        android:src="@drawable/enter_yellow" />
 	</LinearLayout>
-</LinearLayout>	
+</LinearLayout>

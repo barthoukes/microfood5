@@ -14,6 +14,8 @@ import com.hha.service.DailyTransactionPaymentService
 import com.hha.service.DailyTransactionPrintService
 import com.hha.service.DailyTransactionService
 import com.hha.service.DatabaseService
+import com.hha.service.FloorPlanService
+import com.hha.service.FloorTableService
 import com.hha.service.MenuCardService
 import com.hha.service.MenuClusterItemService
 import com.hha.service.MenuClusterService
@@ -91,6 +93,16 @@ object GrpcServiceFactory {
     fun createDailyTransactionService(): DailyTransactionService {
         val channel = getChannel()
         return DailyTransactionService(channel)
+    }
+
+    fun createFloorPlanService(): FloorPlanService {
+        val channel = getChannel()
+        return FloorPlanService(channel)
+    }
+
+    fun createFloorTableService(): FloorTableService {
+        val channel = getChannel()
+        return FloorTableService(channel)
     }
 
     fun createMenuCardService(): MenuCardService {
