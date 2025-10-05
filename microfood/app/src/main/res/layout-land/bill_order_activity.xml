@@ -73,7 +73,6 @@
 					android:textAllCaps="false"
 					android:layout_marginBottom="8dp"/>
 
-
 				<!-- Quick Pay -->
 				<TextView
 					android:layout_width="match_parent"
@@ -89,7 +88,7 @@
 					android:layout_marginBottom="4dp">
 
 					<ImageButton
-						android:id="@+id/euro5"
+						android:id="@+id/btnEuro5"
 						style="?android:attr/buttonStyleSmall"
 						android:layout_columnWeight="1"
 						android:layout_rowWeight="1"
@@ -97,10 +96,9 @@
 						android:layout_width="0dp"
 						android:layout_height="wrap_content"
 						android:background="@color/ANDROID_BUTTON_BACKGROUND"
-						android:onClick="on_button_5"
 						android:src="@drawable/icon_5euro40"/>
 					<ImageButton
-						android:id="@+id/euro10"
+						android:id="@+id/btnEuro10"
 						style="?android:attr/buttonStyleSmall"
 						android:layout_columnWeight="1"
 						android:layout_rowWeight="1"
@@ -108,10 +106,9 @@
 						android:layout_width="0dp"
 						android:layout_height="wrap_content"
 						android:background="@color/ANDROID_BUTTON_BACKGROUND"
-						android:onClick="on_button_10"
 						android:src="@drawable/icon_10euro40"/>
 					<ImageButton
-						android:id="@+id/euro20"
+						android:id="@+id/btnEuro20"
 						style="?android:attr/buttonStyleSmall"
 						android:layout_columnWeight="1"
 						android:layout_rowWeight="1"
@@ -119,10 +116,9 @@
 						android:layout_width="0dp"
 						android:layout_height="wrap_content"
 						android:background="@color/ANDROID_BUTTON_BACKGROUND"
-						android:onClick="on_button_20"
 						android:src="@drawable/icon_20euro40"/>
 					<ImageButton
-						android:id="@+id/euro50"
+						android:id="@+id/btnEuro50"
 						style="?android:attr/buttonStyleSmall"
 						android:layout_columnWeight="1"
 						android:layout_rowWeight="1"
@@ -130,10 +126,9 @@
 						android:layout_width="0dp"
 						android:layout_height="wrap_content"
 						android:background="@color/ANDROID_BUTTON_BACKGROUND"
-						android:onClick="on_button_50"
 						android:src="@drawable/icon_50euro40"/>
 					<ImageButton
-						android:id="@+id/cash"
+						android:id="@+id/btnCash"
 						style="?android:attr/buttonStyleSmall"
 						android:layout_columnWeight="1"
 						android:layout_rowWeight="1"
@@ -141,10 +136,9 @@
 						android:layout_width="0dp"
 						android:layout_height="wrap_content"
 						android:background="@color/ANDROID_BUTTON_BACKGROUND"
-						android:onClick="on_add_cash"
 						android:src="@drawable/pay_cash40"/>
 					<ImageButton
-						android:id="@+id/card"
+						android:id="@+id/btnPin"
 						style="?android:attr/buttonStyleSmall"
 						android:layout_columnWeight="1"
 						android:layout_rowWeight="1"
@@ -152,7 +146,6 @@
 						android:layout_width="0dp"
 						android:layout_height="wrap_content"
 						android:background="@color/ANDROID_BUTTON_BACKGROUND"
-						android:onClick="on_add_pin"
 						android:src="@drawable/pay_pin40"/>
 				</GridLayout>
 
@@ -164,6 +157,7 @@
 					android:layout_marginBottom="4dp">
 
 					<TextView
+						android:id="@+id/txtKitchenPrints"
 						android:layout_height="wrap_content"
 						android:layout_width="0dp"
 						android:layout_weight="1"
@@ -171,7 +165,7 @@
 						android:textColor="@android:color/black"/>
 
 					<Button
-						android:id="@+id/btnKitchen1"
+						android:id="@+id/btnKitchenPrints"
 						android:layout_weight="1"
 						android:layout_width="0dp"
 						android:layout_height="wrap_content"
@@ -186,6 +180,7 @@
 					android:layout_marginBottom="4dp">
 
 					<TextView
+						android:id="@+id/txtBillPrints"
 						android:layout_width="0dp"
 						android:layout_height="wrap_content"
 						android:layout_weight="1"
@@ -193,7 +188,7 @@
 						android:textColor="@android:color/black"/>
 
 					<Button
-						android:id="@+id/btnBillQuantity"
+						android:id="@+id/btnBillPrints"
 						android:layout_width="0dp"
 						android:layout_height="wrap_content"
 						android:layout_weight="1"
@@ -255,7 +250,7 @@
 			android:layout_marginEnd="4dp"/>
 
 		<ImageButton
-			android:id="@+id/next_language"
+			android:id="@+id/btnLanguage"
 			style="?android:attr/buttonStyleSmall"
 			android:layout_margin="4dp"
 			android:layout_width="0dp"

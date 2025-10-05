@@ -205,14 +205,14 @@ class DailyTransactionPaymentService(channel: ManagedChannel) : BaseGrpcService<
         }
     }
 
-    fun getNewPaymentIndex(transactionId: Int): Int? = runBlocking {
+    fun getNewPaymentIndex(transactionId: Int): Int = runBlocking {
         try {
             val request = TransactionId.newBuilder()
                 .setTransactionId(transactionId)
                 .build()
             stub.getNewPaymentIndex(request).partialIndex
         } catch (e: Exception) {
-            null
+            1
         }
     }
 

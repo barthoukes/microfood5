@@ -4,9 +4,11 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.TextView
+
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+
 import com.hha.adapter.BillItemsAdapter
 import com.hha.adapter.PaymentsAdapter
 import com.hha.framework.CItem
@@ -14,6 +16,11 @@ import com.hha.framework.CPayment
 import com.hha.framework.CTransaction
 import com.hha.resources.Global
 import com.hha.types.ETaal
+import com.hha.types.CMoney
+import com.hha.types.EPaymentMethod
+import com.hha.types.EPaymentStatus
+
+
 import tech.hha.microfood.databinding.BillOrderActivityBinding
 
 class BillOrderActivity : AppCompatActivity() {
@@ -26,13 +33,13 @@ class BillOrderActivity : AppCompatActivity() {
     private lateinit var totalPrice: TextView
     private lateinit var paymentMethodsLabel: TextView
     private lateinit var paymentHistoryLabel: TextView
-    private lateinit var kitchenPrintsLabel: TextView
-    private lateinit var billPrintsLabel: TextView
+    private lateinit var txtKitchenPrints: TextView
+    private lateinit var txtBillPrints: TextView
     private lateinit var btnDiscount: Button
     private lateinit var btnOrderMore: Button
     private lateinit var btnConfirmOrder: Button
     private lateinit var btnKitchen1: Button
-    private lateinit var btnBillQuantity: Button
+    private lateinit var btnBillPrints: Button
     private lateinit var btnLanguage: ImageButton
     private lateinit var btnEuro5: ImageButton
     private lateinit var btnEuro10: ImageButton
@@ -42,19 +49,48 @@ class BillOrderActivity : AppCompatActivity() {
     private lateinit var btnPin: ImageButton
     private lateinit var billItemsRecyclerView: RecyclerView
     private lateinit var paymentsRecyclerView: RecyclerView
-
-
     private lateinit var billItemsAdapter: BillItemsAdapter
     private lateinit var paymentsAdapter: PaymentsAdapter
+    private var m_alreadyPayed = false
+    private var m_customerTotal = CMoney(0)
+    private var m_cashTotal = CMoney(0)
+    private var m_cardTotal = CMoney(0)
 
 
-    private lateinit var transaction: CTransaction
+    private lateinit var m_transaction: CTransaction
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = BillOrderActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setupRecyclerView()
+        initializeViews()
+    }
+
+
+
+    // Optional but clean: Create a helper function for initialization
+    private fun initializeViews() {
+        tableName = binding.tableName
+        totalPrice = binding.totalPrice
+        //paymentMethodsLabel = binding.paymentMethodsLabel
+        //paymentHistoryLabel = binding.paymentHistoryLabel
+        txtKitchenPrints = binding.txtKitchenPrints
+        txtBillPrints = binding.txtBillPrints
+        btnDiscount = binding.btnDiscount
+        btnOrderMore = binding.btnOrderMore
+        btnConfirmOrder = binding.btnConfirmOrder
+        btnKitchen1 = binding.btnKitchenPrints // Initialization happens here
+        btnBillPrints = binding.btnBillPrints
+        btnLanguage = binding.btnLanguage
+        btnEuro5 = binding.btnEuro5
+        btnEuro10 = binding.btnEuro10
+        btnEuro20 = binding.btnEuro20
+        btnEuro50 = binding.btnEuro50
+        btnCash = binding.btnCash
+        btnPin = binding.btnPin
+        billItemsRecyclerView = binding.layoutBillingItems
+        paymentsRecyclerView = binding.layoutBillingPayments
     }
 
     private fun setupRecyclerView() {
@@ -71,7 +107,7 @@ class BillOrderActivity : AppCompatActivity() {
 //            if (global.transactionId <1E6) assert(false)
 //            transaction = CTransaction(global.transactionId)
 //        }
-        transaction = global.transaction!!
+        m_transaction = global.transaction!!
     }
 
     fun createGridLayoutPayments() {
@@ -137,41 +173,41 @@ class BillOrderActivity : AppCompatActivity() {
             ETaal.LANG_ENGLISH -> {
                 tableName.text = "Table 5"
                 totalPrice.text = "Total: €0.00"
-                paymentMethodsLabel.text = "Payment Methods:"
-                paymentHistoryLabel.text = "Payment History:"
-                kitchenPrintsLabel.text = "Kitchen Prints:"
-                billPrintsLabel.text = "Bill Prints:"
+                //paymentMethodsLabel.text = "Payment Methods:"
+                //paymentHistoryLabel.text = "Payment History:"
+                txtKitchenPrints.text = "Kitchen Prints:"
+                txtBillPrints.text = "Bill Prints:"
                 btnDiscount.text = "Discount"
                 btnOrderMore.text = "ORDER MORE"
                 btnConfirmOrder.text = "CONFIRM ORDER"
                 btnKitchen1.text = "1x"
-                btnBillQuantity.text = "1x"
+                btnBillPrints.text = "1x"
             }
             ETaal.LANG_SIMPLIFIED, ETaal.LANG_TRADITIONAL -> {
                 tableName.text = "桌子 5"
                 totalPrice.text = "总计: €0.00"
-                paymentMethodsLabel.text = "支付方式:"
-                paymentHistoryLabel.text = "支付记录:"
-                kitchenPrintsLabel.text = "厨房打印:"
-                billPrintsLabel.text = "账单打印:"
+                //paymentMethodsLabel.text = "支付方式:"
+                //paymentHistoryLabel.text = "支付记录:"
+                txtKitchenPrints.text = "厨房打印:"
+                txtBillPrints.text = "账单打印:"
                 btnDiscount.text = "折扣"
                 btnOrderMore.text = "继续点餐"
                 btnConfirmOrder.text = "确认订单"
                 btnKitchen1.text = "1次"
-                btnBillQuantity.text = "1次"
+                btnBillPrints.text = "1次"
             }
             else -> {
                 tableName.text = "Tafel 5"
                 totalPrice.text = "Totaal: €0.00"
-                paymentMethodsLabel.text = "Betaalmethoden:"
-                paymentHistoryLabel.text = "Betalingsgeschiedenis:"
-                kitchenPrintsLabel.text = "Keuken afdrukken:"
-                billPrintsLabel.text = "Rekening afdrukken:"
+                //paymentMethodsLabel.text = "Betaalmethoden:"
+                //paymentHistoryLabel.text = "Betalingsgeschiedenis:"
+                txtKitchenPrints.text = "Keuken afdrukken:"
+                txtBillPrints.text = "Rekening afdrukken:"
                 btnDiscount.text = "Korting"
                 btnOrderMore.text = "MEER BESTELLEN"
                 btnConfirmOrder.text = "BEVESTIGEN"
                 btnKitchen1.text = "1x"
-                btnBillQuantity.text = "1x"
+                btnBillPrints.text = "1x"
             }
         }
     }
@@ -182,7 +218,7 @@ class BillOrderActivity : AppCompatActivity() {
         btnOrderMore.setOnClickListener { onOrderMoreClicked() }
         btnConfirmOrder.setOnClickListener { onConfirmOrderClicked() }
         btnKitchen1.setOnClickListener { onKitchenPrintClicked() }
-        btnBillQuantity.setOnClickListener { onBillPrintClicked() }
+        btnBillPrints.setOnClickListener { onBillPrintClicked() }
         btnEuro5.setOnClickListener { onEuro5Clicked() }
         btnEuro10.setOnClickListener { onEuro10Clicked() }
         btnEuro20.setOnClickListener { onEuro20Clicked() }
@@ -216,20 +252,52 @@ class BillOrderActivity : AppCompatActivity() {
         // Implement bill print logic
     }
 
-    private fun onEuro5Clicked() {
+    private fun payEuroButton(amount: CMoney)
+    {
+        if ( m_alreadyPayed)
+        {
+            //ERROR_SOUND();
+        }
+        else
+        {
+            if (m_customerTotal <= m_cashTotal + m_cardTotal || m_customerTotal < amount)
+            {
+                m_transaction.cancelPayment( -1, EPaymentStatus.PAY_STATUS_UNPAID);
+            }
+            m_transaction.addPayment(EPaymentMethod.PAYMENT_CASH, amount)
+        }
+    }
+
+    public fun payAllUsingPin()
+    {
+        m_transaction.cancelPayment(-1, EPaymentStatus.PAY_STATUS_UNPAID)
+        if (!m_customerTotal.empty())
+        {
+            m_transaction.addPayment(EPaymentMethod.PAYMENT_CASH, m_customerTotal)
+        }
+    }
+
+    private fun onEuro5Clicked()
+    {
         // Implement €5 payment logic
+        payEuroButton(CMoney(500))
     }
 
-    private fun onEuro10Clicked() {
+    private fun onEuro10Clicked()
+    {
         // Implement €10 payment logic
+        payEuroButton(CMoney(1000))
     }
 
-    private fun onEuro20Clicked() {
+    private fun onEuro20Clicked()
+    {
         // Implement €20 payment logic
+        payEuroButton(CMoney(2000))
     }
 
     private fun onEuro50Clicked() {
         // Implement €50 payment logic
+        payEuroButton(CMoney(5000))
     }
 
     private fun onCashClicked() {
@@ -237,7 +305,7 @@ class BillOrderActivity : AppCompatActivity() {
     }
 
     private fun onPinClicked() {
-        // Implement PIN payment logic
+        payAllUsingPin()
     }
 
     // Public methods to update data

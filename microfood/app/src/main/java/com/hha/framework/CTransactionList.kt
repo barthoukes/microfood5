@@ -62,7 +62,7 @@ class CTransactionList() : Iterable<CTransaction> {
      * Gets a transaction by ID
      */
     fun getTransactionById(id: Int): CTransaction? {
-        return transactions.firstOrNull { it.transactionId == id }
+        return transactions.firstOrNull { it.m_transactionId == id }
     }
 
     /**

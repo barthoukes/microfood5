@@ -7,12 +7,14 @@ import com.hha.resources.Global
 import com.hha.types.CMoney
 import com.hha.types.EClientOrdersType
 import com.hha.types.EDeletedStatus
+import com.hha.types.EPaymentMethod
 import com.hha.types.ETransType
+import com.hha.types.EPaymentStatus
 import java.text.SimpleDateFormat
 import java.util.*
 
 class CTransaction : Iterable<CSortedItem> {
-    var transactionId: Int = 0
+    public var m_transactionId: Int = 0
     lateinit var name: String
     lateinit var transType: ETransType
     var rfidKeyId: Int = 0
@@ -45,15 +47,16 @@ class CTransaction : Iterable<CSortedItem> {
         private const val TAG = "TRANS"
     }
 
-
     var global = Global.getInstance()
 
     var status: EClientOrdersType = EClientOrdersType.OPEN
-    var total = CMoney(0)
+    var total: CMoney = CMoney(0)
     var hasOrders: Boolean = false
     private val m_global: Global = Global.getInstance()
 
     private val m_items = CTransactionItems()
+    //private val m_timeFrames = CTimeFrameList()
+    private val m_payments = CPaymentList()
     private lateinit var timeFrame: CTimeFrame
 
     // Add this iterator implementation
@@ -66,7 +69,9 @@ class CTransaction : Iterable<CSortedItem> {
         this.status = status
         this.total = total
 
-        this.transactionId = transactionId
+        this.m_transactionId = transactionId
+        m_payments.setTransactionId(transactionId)
+
         this.name = name
         transType = ETransType.TRANS_TYPE_TAKEAWAY
         rfidKeyId = -1
@@ -106,14 +111,14 @@ class CTransaction : Iterable<CSortedItem> {
     constructor(source: CTransaction) {
         customerId = source.customerId
         name = source.name
-        transactionId = source.transactionId
+        m_transactionId = source.m_transactionId
         transType = source.transType;
         rfidKeyId = source.rfidKeyId;
         deposit = source.deposit
         timeStart = source.timeStart
         timeCustomer = source.timeCustomer
         status = source.status;
-        total = source.total;
+        total = source.total
         hasOrders = false;
         subTotalLow = source.subTotalLow
         subTotalHigh = source.subTotalHigh
@@ -141,12 +146,12 @@ class CTransaction : Iterable<CSortedItem> {
 
     constructor(source: TransactionData?) {
         if (source == null) {
-            transactionId = -1
+            m_transactionId = -1
             name = "-"
             status = EClientOrdersType.OPEN
             return
         }
-        transactionId = source.transactionId
+        m_transactionId = source.transactionId
         customerId = source.customerId
         name = source.name
         transType = ETransType.fromTransType(source.transType)
@@ -178,6 +183,8 @@ class CTransaction : Iterable<CSortedItem> {
         totalTaxFree = CMoney(source.totalTaxFree.cents)
         discountTaxFree = CMoney(source.discountTaxFree.cents)
         tipsTaxFree = CMoney(source.tipsTaxFree.cents)
+
+        m_payments.setTransactionId(m_transactionId)
     }
 
     fun getMinutes(): Int {
@@ -280,8 +287,30 @@ class CTransaction : Iterable<CSortedItem> {
 
     fun startNextTimeFrame(): CTimeFrame {
         Log.i("Ctransaction", "Start next TimeFrame")
-        timeFrame = CTimeFrame(transactionId)
+        timeFrame = CTimeFrame(m_transactionId)
         global.timeFrame = timeFrame
         return timeFrame
+    }
+
+    fun getCashTotal(): CMoney {
+        return m_payments.getCashTotal();
+    }
+
+    fun getCardTotal(): CMoney {
+        return m_payments.getCardTotal();
+    }
+
+    fun getPaymentTotal(): CMoney {
+        return m_payments.getTotal();
+    }
+
+    fun cancelPayment(index : Int, paymentStatus : EPaymentStatus)
+    {
+        m_payments.cancelPayment(index, paymentStatus)
+    }
+
+    fun addPayment(payment: EPaymentMethod, amount: CMoney)
+    {
+        m_payments.addPayment(payment, customerId, amount)
     }
 }

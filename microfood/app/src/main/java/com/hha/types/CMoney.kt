@@ -39,6 +39,8 @@ class CMoney(private var cents: Int = 0) {
         return cents == 0
     }
 
+    fun add(amount: CMoney): CMoney = CMoney(cents + amount.cents)
+
     fun str(): String {
         val euros = cents / 100.0
         return String.format("€%.2f", euros)
@@ -80,7 +82,10 @@ class CMoney(private var cents: Int = 0) {
             cents = -cents
         }
     }
-
+    operator fun plusAssign(other: CMoney)
+    {
+        cents += other.cents
+    }
     // Basic operations
     operator fun plus(other: CMoney): CMoney = CMoney(cents + other.cents)
     operator fun minus(other: CMoney): CMoney = CMoney(cents - other.cents)
@@ -91,7 +96,6 @@ class CMoney(private var cents: Int = 0) {
     operator fun div(divisor: Int): CMoney = CMoney(cents / divisor)
 
     // Compound assignments
-    operator fun plusAssign(other: CMoney) { cents += other.cents }
     operator fun minusAssign(other: CMoney) { cents -= other.cents }
     operator fun timesAssign(multiplier: Int) { cents *= multiplier }
     operator fun timesAssign(multiplier: Double) { cents = (cents * multiplier).toInt() }

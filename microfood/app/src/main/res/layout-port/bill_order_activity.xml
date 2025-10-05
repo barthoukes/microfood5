@@ -6,14 +6,15 @@
 	android:background="@android:color/white"
 	android:padding="8dp">
 
-	<FrameLayout
+	<LinearLayout
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		android:orientation="horizontal">
 		<!-- Table Header -->
 		<TextView
 			android:id="@+id/tableName"
-			android:layout_width="wrap_content"
+			android:layout_width="0dp"
+			android:layout_weight="10"
 			android:layout_height="wrap_content"
 			android:text="Table 5"
 			android:textSize="24sp"
@@ -23,13 +24,14 @@
 		<!-- Back button -->
 		<ImageButton
 			android:id="@+id/btn_back"
-			android:layout_width="wrap_content"
+			android:layout_width="0dp"
+			android:layout_weight="5"
 			android:layout_height="48dp"
 			android:layout_gravity="right"
 			android:src="@drawable/back_yellow"
 			android:contentDescription="back button"
 			android:background="?attr/selectableItemBackgroundBorderless" />
-	</FrameLayout>
+	</LinearLayout>
 	<!-- Order + Payments Side-by-Side -->
 	<LinearLayout
 		android:layout_width="match_parent"
@@ -95,6 +97,33 @@
 		</LinearLayout>
 	</LinearLayout>
 
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:orientation="horizontal">
+
+		<ImageButton
+			android:id="@+id/btnLanguage"
+			style="?android:attr/buttonStyleSmall"
+			android:layout_margin="4dp"
+			android:layout_weight="5"
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:gravity="center"
+			android:background="@color/ANDROID_BUTTON_BACKGROUND"
+			android:onClick="on_button_language"
+			android:src="@drawable/languages_yellow"/>
+
+		<Button
+			android:id="@+id/btnDiscount"
+			android:layout_height="wrap_content"
+			android:layout_weight="5"
+			android:layout_width="0dp"
+			android:text="Discount"
+			android:textAllCaps="false"
+			android:layout_marginBottom="8dp"/>
+	</LinearLayout>
+
 	<!-- Payment Methods -->
 	<TextView
 		android:layout_width="match_parent"
@@ -111,7 +140,7 @@
 		android:layout_marginBottom="8dp">
 
 		<ImageButton
-			android:id="@+id/euro5"
+			android:id="@+id/btnEuro5"
 			android:layout_width="0dp"
 			android:layout_height="80dp"
 			android:layout_columnWeight="1"
@@ -121,7 +150,7 @@
 			android:src="@drawable/icon_5euro40"/>
 
 		<ImageButton
-			android:id="@+id/euro10"
+			android:id="@+id/btnEuro10"
 			android:layout_width="0dp"
 			android:layout_height="80dp"
 			android:layout_columnWeight="1"
@@ -131,7 +160,7 @@
 			android:src="@drawable/icon_10euro40"/>
 
 		<ImageButton
-			android:id="@+id/euro20"
+			android:id="@+id/btnEuro20"
 			android:layout_width="0dp"
 			android:layout_height="80dp"
 			android:layout_columnWeight="1"
@@ -141,7 +170,7 @@
 			android:src="@drawable/icon_20euro40"/>
 
 		<ImageButton
-			android:id="@+id/euro50"
+			android:id="@+id/btnEuro50"
 			android:layout_width="0dp"
 			android:layout_height="80dp"
 			android:layout_columnWeight="1"
@@ -151,7 +180,7 @@
 			android:src="@drawable/icon_50euro40"/>
 
 		<ImageButton
-			android:id="@+id/cash"
+			android:id="@+id/btnCash"
 			android:layout_width="0dp"
 			android:layout_height="80dp"
 			android:layout_columnWeight="1"
@@ -161,7 +190,7 @@
 			android:src="@drawable/pay_cash40"/>
 
 		<ImageButton
-			android:id="@+id/pin"
+			android:id="@+id/btnPin"
 			android:layout_width="0dp"
 			android:layout_height="80dp"
 			android:layout_columnWeight="1"
@@ -186,13 +215,14 @@
 			android:orientation="vertical">
 
 			<TextView
+				android:id="@+id/txtKitchenPrints"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
 				android:text="Kitchen Prints:"
 				android:textColor="@android:color/black"/>
 
 			<Button
-				android:id="@+id/btnKitchen1"
+				android:id="@+id/btnKitchenPrints"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
 				android:text="1x"/>
@@ -207,13 +237,14 @@
 			android:layout_marginStart="8dp">
 
 			<TextView
+				android:id="@+id/txtBillPrints"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
 				android:text="Bill Prints:"
 				android:textColor="@android:color/black"/>
 
 			<Button
-				android:id="@+id/btnBillQuantity"
+				android:id="@+id/btnBillPrints"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
 				android:text="1x"/>

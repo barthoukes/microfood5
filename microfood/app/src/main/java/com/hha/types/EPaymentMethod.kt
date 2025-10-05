@@ -1,6 +1,7 @@
 package com.hha.types
 
 import android.R
+import com.hha.common.PaymentMethod
 
 /**
  * Enum representing different payment methods.
@@ -81,6 +82,48 @@ enum class EPaymentMethod(val value: Int) {
 //                PAYMENT_DISCOUNT -> R.drawable.ic_discount
 //                PAYMENT_TIPS -> R.drawable.ic_tips
                 else -> R.drawable.star_on
+            }
+        }
+
+        fun toPaymentMethod(paymentMethod: EPaymentMethod): PaymentMethod  {
+            return when(paymentMethod) {
+                PAYMENT_CASH -> PaymentMethod.PAYMENT_CASH
+                PAYMENT_PIN -> PaymentMethod.PAYMENT_PIN
+                PAYMENT_CREDIT_CARD -> PaymentMethod.PAYMENT_CREDIT_CARD
+                PAYMENT_VISA_CARD -> PaymentMethod.PAYMENT_VISA_CARD
+                PAYMENT_PAY_PAL -> PaymentMethod.PAYMENT_PAY_PAL
+                PAYMENT_MASTERCARD -> PaymentMethod.PAYMENT_MASTERCARD
+                PAYMENT_AMERICAN_EXPRESS -> PaymentMethod.PAYMENT_AMERICAN_EXPRESS
+                PAYMENT_DEBIT -> PaymentMethod.PAYMENT_DEBIT
+                PAYMENT_ZETTLE -> PaymentMethod.PAYMENT_ZETTLE
+                PAYMENT_SEND_BILL -> PaymentMethod.PAYMENT_SEND_BILL
+                PAYMENT_RETURN -> PaymentMethod.PAYMENT_RETURN
+                PAYMENT_SEND_BILL_WAIT -> PaymentMethod.PAYMENT_SEND_BILL_WAIT
+                PAYMENT_SEND_BILL_DONE -> PaymentMethod.PAYMENT_SEND_BILL_DONE
+                PAYMENT_DISCOUNT -> PaymentMethod.PAYMENT_DISCOUNT
+                PAYMENT_TIPS -> PaymentMethod.PAYMENT_TIPS
+                else -> PaymentMethod.PAYMENT_NONE
+            }
+        }
+
+        fun fromPaymentMethod(paymentMethod: PaymentMethod): EPaymentMethod {
+            return when (paymentMethod) {
+                PaymentMethod.PAYMENT_CASH -> PAYMENT_CASH
+                PaymentMethod.PAYMENT_PIN -> PAYMENT_PIN
+                PaymentMethod.PAYMENT_CREDIT_CARD -> PAYMENT_CREDIT_CARD
+                PaymentMethod.PAYMENT_VISA_CARD -> PAYMENT_VISA_CARD
+                PaymentMethod.PAYMENT_PAY_PAL -> PAYMENT_PAY_PAL
+                PaymentMethod.PAYMENT_MASTERCARD -> PAYMENT_MASTERCARD
+                PaymentMethod.PAYMENT_AMERICAN_EXPRESS -> PAYMENT_AMERICAN_EXPRESS
+                PaymentMethod.PAYMENT_DEBIT -> PAYMENT_DEBIT
+                PaymentMethod.PAYMENT_ZETTLE -> PAYMENT_ZETTLE
+                PaymentMethod.PAYMENT_SEND_BILL -> PAYMENT_SEND_BILL
+                PaymentMethod.PAYMENT_RETURN -> PAYMENT_RETURN
+                PaymentMethod.PAYMENT_SEND_BILL_WAIT -> PAYMENT_SEND_BILL_WAIT
+                PaymentMethod.PAYMENT_SEND_BILL_DONE -> PAYMENT_SEND_BILL_DONE
+                PaymentMethod.PAYMENT_DISCOUNT -> PAYMENT_DISCOUNT
+                PaymentMethod.PAYMENT_TIPS -> PAYMENT_TIPS
+                else -> PAYMENT_NONE
             }
         }
     }

@@ -1,157 +1,148 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:id="@+id/main_layout_menu"
     android:background="@drawable/backrepeat"
-    android:layout_height="match_parent" >
-	<TableRow
-	     android:layout_height="0dp"
-    	 android:layout_width="fill_parent"
-	     android:layout_weight="3">
-   		<TextView 
-	    	android:id="@+id/new_table"
-	    	android:text="@string/app_name"
-	    	android:textSize="24sp"
-	    	android:layout_weight="1"
-	    	android:layout_width="0dp"
-	    	android:gravity="center"
-	    	android:background="@color/COLOUR_HEADER_BACKGROUND"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+		android:orientation="horizontal">
+        <TextView
+            android:id="@+id/new_table"
+            android:text="@string/app_name"
+            android:textSize="24sp"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:gravity="center"
+            android:background="@color/COLOUR_HEADER_BACKGROUND"
             android:textColor="#ffeeeeee"
             android:layout_marginBottom="4dp"
-    		android:layout_height="fill_parent" />
-	</TableRow>
-	<TableRow
+            android:layout_height="fill_parent" />
+        </LinearLayout>
+        <LinearLayout
+            android:layout_height="0dp"
+            android:layout_width="fill_parent"
+            android:layout_weight="5">
+            <Button
+				android:id="@+id/tafel_overzicht"
+				android:layout_weight="14"
+				android:textSize="24sp"
+				android:background="@color/ANDROID_BUTTON_BACKGROUND"
+				android:textColor="@color/ANDROID_BUTTON_TEXT"
+				android:layout_margin="4dp"
+				android:layout_height="fill_parent"
+				android:layout_width ="fill_parent"
+				android:drawableBottom="@drawable/sitin_yellow"
+				android:tint="#FFFF00"
+				android:onClick="button_tafel_overzicht"
+				android:text ="@string/table_overview"/>
+		   <Button
+				android:id="@+id/button_takeaway"
+				android:layout_weight="14"
+				android:textSize="24sp"
+				android:background="@color/ANDROID_BUTTON_BACKGROUND"
+				android:textColor="@color/ANDROID_BUTTON_TEXT"
+				android:layout_margin="4dp"
+				android:layout_height="fill_parent"
+				android:layout_width ="fill_parent"
+				android:onClick="button_takeaway"
+				android:drawableBottom="@drawable/bag_yellow"/>
+		</LinearLayout>
+		<LinearLayout
+	     	android:layout_height="0dp"
+    	 	android:layout_width="fill_parent"
+			android:layout_weight="5">
+			<Button
+				android:id="@+id/button_settings"
+				android:layout_weight="14"
+				android:textSize="24sp"
+				android:background="@color/ANDROID_BUTTON_BACKGROUND"
+				android:textColor="@color/ANDROID_BUTTON_TEXT"
+				android:layout_margin="4dp"
+				android:layout_height="fill_parent"
+				android:layout_width ="fill_parent"
+				android:onClick="button_settings"
+				android:drawableBottom="@drawable/settings_yellow"
+				android:text ="@string/configuration"/>
+			<Button
+				android:id="@+id/button_update"
+				android:layout_height="fill_parent"
+				android:layout_width ="fill_parent"
+				android:layout_weight="14"
+				android:textSize="24sp"
+				android:background="@color/ANDROID_BUTTON_BACKGROUND"
+				android:textColor="@color/ANDROID_BUTTON_TEXT"
+				android:layout_margin="4dp"
+				android:onClick="button_update_tablet"
+				android:drawableBottom="@drawable/menu_yellow"
+				android:text ="@string/update_name_card"/>
+		</LinearLayout>
+		<LinearLayout
+			android:layout_height="0dp"
+			android:layout_width="fill_parent"
+			android:orientation="horizontal"
+			android:layout_weight="5">
+			<Button
+				android:id="@+id/button_calculator"
+				android:layout_height="fill_parent"
+				android:layout_width ="fill_parent"
+				android:drawableBottom="@drawable/icon_calculator_yellow"
+				android:layout_weight="14"
+				android:textSize="24sp"
+				android:background="@color/ANDROID_BUTTON_BACKGROUND"
+				android:textColor="@color/ANDROID_BUTTON_TEXT"
+				android:layout_margin="4dp"
+				android:onClick="button_calculator_yellow"
+				android:text ="Rekenmachine"/>
+			<Button
+				android:id="@+id/button_change_language"
+				android:layout_weight="14"
+				android:textSize="24sp"
+				android:background="@color/ANDROID_BUTTON_BACKGROUND"
+				android:textColor="@color/ANDROID_BUTTON_TEXT"
+				android:layout_margin="4dp"
+				android:layout_height="fill_parent"
+				android:layout_width ="fill_parent"
+				android:onClick="button_change_language"
+				android:drawableBottom="@drawable/languages_yellow"
+				android:text ="language"/>
+		</LinearLayout>
+		<LinearLayout
+			 android:layout_height="0dp"
+			 android:layout_width="fill_parent"
+			 android:orientation="horizontal"
+			 android:layout_weight="5">
+			<Button
+				android:id="@+id/button_stop"
+				android:layout_height="fill_parent"
+				android:layout_width ="fill_parent"
+				android:layout_weight="14"
+				android:textSize="24sp"
+				android:background="@color/ANDROID_BUTTON_BACKGROUND"
+				android:textColor="@color/ANDROID_BUTTON_TEXT"
+				android:layout_margin="4dp"
+				android:onClick="button_stop"
+				android:drawableBottom="@drawable/shutdown_yellow"
+				android:text ="@string/stop"/>
+			<Button
+				android:id="@+id/about_us"
+				android:layout_weight="14"
+				android:textSize="24sp"
+				android:background="@color/ANDROID_BUTTON_BACKGROUND"
+				android:textColor="@color/ANDROID_BUTTON_TEXT"
+				android:layout_margin="4dp"
+				android:layout_height="fill_parent"
+				android:layout_width ="fill_parent"
+				android:drawableBottom="@drawable/info_icon_yellow"
+				android:onClick="button_about_us"
+				android:text ="@string/about_us"/>
+		</LinearLayout>
+	<LinearLayout
 	     android:layout_height="0dp"
-    	 android:layout_width="fill_parent"
-	     android:layout_weight="5">      
-	    <Button 
-	        android:id="@+id/tafel_overzicht"
-	        android:layout_weight="14"
-	        android:textSize="24sp"
-			android:background="@color/ANDROID_BUTTON_BACKGROUND"
-          	android:textColor="@color/ANDROID_BUTTON_TEXT"
-            android:layout_margin="4dp"
-	        android:layout_height="fill_parent"
-	        android:layout_width ="fill_parent"
-	        android:drawableBottom="@drawable/sitin_yellow"
-			android:tint="#FFFF00"
-	        android:onClick="button_tafel_overzicht"
-	        android:text ="@string/table_overview"/>
-	   <Button 
-	        android:id="@+id/button_takeaway"
-	        android:layout_weight="14"
-	        android:textSize="24sp"
-			android:background="@color/ANDROID_BUTTON_BACKGROUND"
-          	android:textColor="@color/ANDROID_BUTTON_TEXT"
-            android:layout_margin="4dp"
-	        android:layout_height="fill_parent"
-	        android:layout_width ="fill_parent"
-	        android:onClick="button_takeaway"
- 	        android:drawableBottom="@drawable/bag_yellow"
-	        android:text ="send"/>	    
-	</TableRow>
-	
-	<TableRow
-	     android:layout_height="0dp"
-    	 android:layout_width="fill_parent"
-	     android:layout_weight="5">     
-	    <Button 
-	        android:id="@+id/button_settings"
-	        android:layout_weight="14"
-	        android:textSize="24sp"
-			android:background="@color/ANDROID_BUTTON_BACKGROUND"
-       		android:textColor="@color/ANDROID_BUTTON_TEXT"
-            android:layout_margin="4dp"
-	        android:layout_height="fill_parent"
-	        android:layout_width ="fill_parent"
-	        android:onClick="button_settings"
-	        android:drawableBottom="@drawable/settings_yellow"
-	        android:text ="@string/configuration"/>
-	    
-	    <Button 
-	        android:id="@+id/button_update"
-	        android:layout_height="fill_parent"
-	        android:layout_width ="fill_parent"
-	        android:layout_weight="14"
-	        android:textSize="24sp"
-			android:background="@color/ANDROID_BUTTON_BACKGROUND"
-          	android:textColor="@color/ANDROID_BUTTON_TEXT"
-            android:layout_margin="4dp"
-	        android:onClick="button_update_tablet"
-	        android:drawableBottom="@drawable/menu_yellow"
-	        android:text ="@string/update_name_card"/>
-	</TableRow>
-	
-	<TableRow
-	     android:layout_height="0dp"
-    	 android:layout_width="fill_parent"
-	     android:layout_weight="5">
-	    	    	        
-<Button 
-	        android:id="@+id/button_calculator"
-	        android:layout_height="fill_parent"
-	        android:layout_width ="fill_parent"
-	        android:drawableBottom="@drawable/icon_calculator"
-	        android:layout_weight="14"
-	        android:textSize="24sp"
-			android:background="@color/ANDROID_BUTTON_BACKGROUND"
-          	android:textColor="@color/ANDROID_BUTTON_TEXT"
-            android:layout_margin="4dp"
-		    android:onClick="button_calculator_yellow"
-	        android:text ="Rekenmachine"/>
-	  
-		<Button 
-	        android:id="@+id/button_change_language"
-	        android:layout_weight="14"
-	        android:textSize="24sp"
-			android:background="@color/ANDROID_BUTTON_BACKGROUND"
-          	android:textColor="@color/ANDROID_BUTTON_TEXT"
-            android:layout_margin="4dp"
-	        android:layout_height="fill_parent"
-	        android:layout_width ="fill_parent"
-	        android:onClick="button_change_language"
-	        android:drawableBottom="@drawable/languages_yellow"
-	        android:text ="language"/>
-	    
-	</TableRow>
-	
-	<TableRow
-	     android:layout_height="0dp"
-    	 android:layout_width="fill_parent"
-	     android:layout_weight="5">
-	 
-	    <Button 
-	        android:id="@+id/button_stop"
-	        android:layout_height="fill_parent"
-	        android:layout_width ="fill_parent"
-	        android:layout_weight="14"
-	        android:textSize="24sp"
-			android:background="@color/ANDROID_BUTTON_BACKGROUND"
-          	android:textColor="@color/ANDROID_BUTTON_TEXT"
-            android:layout_margin="4dp"
-	        android:onClick="button_stop"
-	        android:drawableBottom="@drawable/shutdown_yellow"
-	        android:text ="@string/stop"/>
-	    	        
-
-	    <Button 
-	        android:id="@+id/about_us"
-	        android:layout_weight="14"
-	        android:textSize="24sp"
-			android:background="@color/ANDROID_BUTTON_BACKGROUND"
-          	android:textColor="@color/ANDROID_BUTTON_TEXT"
-            android:layout_margin="4dp"
-	        android:layout_height="fill_parent"
-	        android:layout_width ="fill_parent"
-	        android:drawableBottom="@drawable/info_icon_yellow"
-	        android:onClick="button_about_us"
-	        android:text ="@string/about_us"/>
-	</TableRow>
-	
-	<TableRow
-	     android:layout_height="0dp"
-    	 android:layout_width="fill_parent"
-	     android:layout_weight="3">
+		 android:layout_weight="1"
+    	 android:layout_width="fill_parent">
 		<TextView 
 	    	android:id="@+id/text_info"
 	    	android:text=""
@@ -162,7 +153,7 @@
 	    	android:background="#ff404080"
             android:textColor="#ff808080"
            	android:layout_margin="4dp"
-    		android:layout_height="fill_parent" />
+    		android:layout_height="match_parent" />
 		<TextView 
 	    	android:id="@+id/buffer_colour"
 	    	android:text=""
@@ -172,7 +163,7 @@
 	    	android:background="#ffffffff"
             android:textColor="#00FFFFFF"
            	android:layout_margin="4dp"
-    		android:layout_height="fill_parent" />
+    		android:layout_height="match_parent" />
 		<TextView 
 	    	android:id="@+id/connection_colour"
 	    	android:text=""
@@ -182,7 +173,7 @@
 	    	android:background="#ffffffff"
             android:textColor="#00FFFFFF"
            	android:layout_margin="4dp"
-    		android:layout_height="fill_parent" />
-	</TableRow>
+    		android:layout_height="match_parent" />
+	</LinearLayout>
 
-</TableLayout>
+</LinearLayout>

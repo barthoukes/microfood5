@@ -40,7 +40,7 @@ class MenuItemsAdapter(
 
     override fun onBindViewHolder(holder: MenuItemViewHolder, position: Int) {
         var value = holder.itemView.context.resources.displayMetrics.widthPixels
-        value = value * itemWidth /60
+        value = value * itemWidth /120
         holder.itemView.layoutParams.width = value
 
         val item = menuItems.findItemByPosition(position)

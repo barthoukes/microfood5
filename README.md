@@ -1,2 +1,2 @@
-gRPC Python Server & Android Kotlin Client App
-===
+# microfood5
+POS solution for a tablet in a GRPC network
