@@ -62,6 +62,19 @@ class PageOrderActivity : AppCompatActivity() {
         setupRecyclerView()
     }
 
+    override fun dispatchTouchEvent(ev: MotionEvent?): Boolean
+    {
+        // We only care about when the user lifts their finger (ACTION_UP)
+        if (ev?.action == MotionEvent.ACTION_UP)
+        {
+            // Check if the tap was on a transaction item in the left column
+            findClickedItem(ev.rawX, ev.rawY)
+        }
+
+        // IMPORTANT: Let the system continue handling the event as usual for other views
+        return super.dispatchTouchEvent(ev)
+    }
+
     private fun findClickedItem(x: Float, y: Float) {
         val recyclerView = binding.layoutTransactionItems
         val layoutManager = recyclerView.layoutManager as LinearLayoutManager
@@ -79,7 +92,7 @@ class PageOrderActivity : AppCompatActivity() {
                 // Manually trigger the click
                 val item = global.transaction?.get(position)
                 if (item != null) {
-                    handleTransactionItem(item)
+                    onClickTransactionItem(item)
                 }
                 break
             }
@@ -94,6 +107,7 @@ class PageOrderActivity : AppCompatActivity() {
             m_transaction = CTransaction(global.transactionId)
         }
         m_transaction = global.transaction!!
+        m_transactionItemsAdapter.updateData(m_transaction)
         m_transaction.startNextTimeFrame()
         //menuItemsAdapter.notifyDataSetChanged()
         //transactionItemsAdapter.notifyDataSetChanged()
@@ -101,6 +115,8 @@ class PageOrderActivity : AppCompatActivity() {
 
     // Add this new function to handle language changes
     @Suppress("UNUSED_PARAMETER")
+
+
     fun on_button_language(view: View)
     {
         Translation.nextLanguage()
@@ -245,11 +261,20 @@ class PageOrderActivity : AppCompatActivity() {
         }
     }
 
-    private fun handleTransactionItem(selectedTransactionItem: CItem)
+    private fun onClickTransactionItem(selectedTransactionItem: CItem)
     {
-        val cursor = m_transaction.getCursor(selectedTransactionItem)
-        global.cursor.set(cursor)
+        val oldPosition = global.cursor.position
+
+        // Update the state
+        val newCursor = m_transaction.getCursor(selectedTransactionItem)
+        global.cursor.set(newCursor)
         m_transactionItemsAdapter.setCursor(global.cursor)
+
+        // Also, scroll to the newly added item so the user can see it
+        binding.layoutTransactionItems.scrollToPosition(newCursor)
+        // Update UI minimum
+        //m_transactionItemsAdapter.notifyItemChanged(oldPosition) // Redraw the old selected item
+        //m_transactionItemsAdapter.notifyItemChanged(newCursor) // Redraw the new one
     }
 
     private fun handleMenuItem(selectedMenuItem: CMenuItem)
@@ -257,10 +282,10 @@ class PageOrderActivity : AppCompatActivity() {
         Log.d("CLICK", "MenuItem clicked: ${selectedMenuItem.localName}")
         if (m_transaction.addTransactionItem(selectedMenuItem, clusterId))
         {
-            m_menuItemsAdapter.notifyDataSetChanged()
+            //m_menuItemsAdapter.notifyDataSetChanged()
             m_transactionItemsAdapter.notifyDataSetChanged()
             /// binding.totalPrice.text = m_transaction.getTotalAmount().str()
-            m_transactionItemsAdapter.setCursor(global.cursor)
+            //m_transactionItemsAdapter.setCursor(global.cursor)
         }
     // Update selection state
 //        menuItems.menuItems.values.forEach { item ->

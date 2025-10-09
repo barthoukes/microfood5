@@ -87,7 +87,7 @@ enum class EOrderLevel(val value: Int) {
                 LEVEL_PERSON -> OrderLevel.LEVEL_PERSON
                 LEVEL_NOTHING -> OrderLevel.LEVEL_NOTHING
                 LEVEL_ZERO -> OrderLevel.LEVEL_ZERO
-                else -> OrderLevel.LEVEL_ITEM
+                // else -> OrderLevel.LEVEL_ITEM
             }
         }
     }

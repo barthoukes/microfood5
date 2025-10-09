@@ -5,6 +5,30 @@
 	android:layout_height="match_parent"
 	android:background="@color/ANDROID_TABLE_BACKGROUND">
 
+	<!-- FIX 1: Add a stable Guideline -->
+	<androidx.constraintlayout.widget.Guideline
+		android:id="@+id/guideline_left"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:orientation="vertical"
+		app:layout_constraintGuide_percent="0.33" />
+
+	<!-- ADDITION: Second Guideline at 90% -->
+	<androidx.constraintlayout.widget.Guideline
+		android:id="@+id/guideline_right"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:orientation="vertical"
+		app:layout_constraintGuide_percent="0.90" />
+
+	<!-- ADDITION: Second Guideline at 90% -->
+	<androidx.constraintlayout.widget.Guideline
+		android:id="@+id/guideline_middle"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:orientation="horizontal"
+		app:layout_constraintGuide_percent="0.60" />
+
 	<!-- Left Column (Order List) - 33% -->
 	<androidx.constraintlayout.widget.ConstraintLayout
 		android:id="@+id/left_column"
@@ -15,7 +39,7 @@
 		app:layout_constraintStart_toStartOf="parent"
 		app:layout_constraintTop_toTopOf="parent"
 		app:layout_constraintBottom_toBottomOf="parent"
-		app:layout_constraintWidth_percent="0.33">
+		app:layout_constraintEnd_toStartOf="@id/guideline_left">
 
 		<!-- Table Name Header -->
 		<TextView
@@ -73,10 +97,10 @@
 		android:layout_height="0dp"
 		android:background="@color/ANDROID_BUTTON_BACKGROUND"
 		android:orientation="vertical"
-		app:layout_constraintStart_toEndOf="@id/left_column"
+		app:layout_constraintStart_toEndOf="@id/guideline_left"
+		app:layout_constraintEnd_toStartOf="@id/guideline_right"
 		app:layout_constraintTop_toTopOf="parent"
-		app:layout_constraintBottom_toBottomOf="parent"
-		app:layout_constraintWidth_percent="0.57">
+		app:layout_constraintBottom_toBottomOf="parent">
 
 		<ImageButton
 			android:id="@+id/btn_back"
@@ -110,11 +134,10 @@
 		android:layout_height="0dp"
 		android:background="@color/ANDROID_TABLE_BACKGROUND"
 		android:orientation="vertical"
-		app:layout_constraintStart_toEndOf="@id/middle_column"
+		app:layout_constraintStart_toEndOf="@id/guideline_right"
 		app:layout_constraintEnd_toEndOf="parent"
 		app:layout_constraintTop_toTopOf="parent"
-		app:layout_constraintBottom_toBottomOf="parent"
-		app:layout_constraintWidth_percent="0.10">
+		app:layout_constraintBottom_toBottomOf="parent">
 
 		<ImageButton
 			android:id="@+id/remove_item"

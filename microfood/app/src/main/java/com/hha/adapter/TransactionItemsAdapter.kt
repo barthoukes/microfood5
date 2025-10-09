@@ -41,6 +41,14 @@ class TransactionItemsAdapter(
         return TransactionItemViewHolder(binding)
     }
 
+    // Add this new function to your adapter
+    fun updateData(newTransaction: CTransaction) {
+        // The adapter now knows about the new data.
+        // We don't need to store it, as we can rely on the global,
+        // but we MUST tell the RecyclerView to redraw itself completely.
+        notifyDataSetChanged()
+    }
+
     fun setCursor(cursor: CCursor)
     {
         Log.i("TIA", "setCursor: $cursor")
@@ -64,86 +72,32 @@ class TransactionItemsAdapter(
         return global.transaction?.size?.plus(1) ?: 1
     }
 
-    override fun onBindViewHolder(holder: TransactionItemViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: TransactionItemViewHolder, position: Int)
+    {
         // ... (Your existing setup code for clearing listeners, getting items, setting backgrounds)
 
         val item: CItem? = global.transaction?.get(position)
         holder.binding.transactionOrder.setBackgroundColor(getBackgroundColour(position))
         // ... other setup ...
-        if (item == null) {
+        if (item == null)
+        {
             setupEmptyItem(holder, position)
-        } else {
+        } else
+        {
             setupItemContent(holder, item, m_colourOrderText)
         }
-
-        // SMART TOUCH LISTENER
-        val touchSlop = ViewConfiguration.get(holder.itemView.context).scaledTouchSlop
-        var startX = 0f
-        var startY = 0f
-        var isClick = true
-
-        holder.binding.root.setOnTouchListener { v, event ->
-            when (event.action) {
-                MotionEvent.ACTION_DOWN -> {
-                    startX = event.x
-                    startY = event.y
-                    isClick = true
-                    // Request the touch event for this view.
-                    v.parent.requestDisallowInterceptTouchEvent(true)
-                    // Return true to indicate we are handling subsequent events.
-                    true
-                }
-                MotionEvent.ACTION_MOVE -> {
-                    val dx = Math.abs(event.x - startX)
-                    val dy = Math.abs(event.y - startY)
-
-                    if (dx > touchSlop || dy > touchSlop) {
-                        // This is a scroll.
-                        isClick = false
-                        // Release the lock so the parent RecyclerView can scroll.
-                        v.parent.requestDisallowInterceptTouchEvent(false)
-                        // *** THE FIX ***
-                        // Return false to pass the event to the parent.
-                        return@setOnTouchListener false
-                    }
-                    // If it's not a scroll yet, continue consuming the event.
-                    true
-                }
-                MotionEvent.ACTION_UP -> {
-                    // Give back the touch control unconditionally on UP.
-                    v.parent.requestDisallowInterceptTouchEvent(false)
-                    if (isClick) {
-                        // Perform the click action.
-                        Log.i("TIA", "Item clicked at position: $position")
-                        if (item != null) {
-                            onTransactionItemSelected(item)
-                        } else {
-                            Log.i("TIA", "Empty item clicked at position: $position")
-                        }
-                        v.performClick() // Important for accessibility.
-                    }
-                    true
-                }
-                MotionEvent.ACTION_CANCEL -> {
-                    // Action was canceled (e.g., by the parent scrolling).
-                    v.parent.requestDisallowInterceptTouchEvent(false)
-                    isClick = false
-                    true
-                }
-                else -> false
+        // Set click listener
+        holder.binding.root.setOnClickListener {
+            Log.i("TIA", "Item clicked at position: $position")
+            if (item != null)
+            {
+                onTransactionItemSelected(item)
+            } else
+            {
+                Log.i("TIA", "Empty item clicked at position: $position")
+                // You might want to handle empty item clicks differently
             }
         }
-
-        // Set the OnClickListener. It will be called by v.performClick().
-        holder.binding.root.setOnClickListener {
-            // The logic is now in ACTION_UP, but this listener is still required
-            // for accessibility and for `performClick()` to work.
-            // You can leave the body empty or add a backup log.
-            Log.v("TIA", "OnClickListener triggered for position $position")
-        }
-
-        // Ensure the view is marked as clickable.
-        holder.binding.root.isClickable = true
     }
 
 
