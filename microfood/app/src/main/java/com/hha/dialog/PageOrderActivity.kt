@@ -1,13 +1,17 @@
 package com.hha.dialog
 
+import android.R
 import android.content.Intent
 import android.graphics.Rect
 import android.os.Bundle
 import android.view.View
 import android.content.res.Resources
 import android.util.Log
+import android.view.MotionEvent
+import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
 import tech.hha.microfood.databinding.PageOrderActivityBinding
 import androidx.recyclerview.widget.RecyclerView
 import com.hha.adapter.MenuItemsAdapter
@@ -28,21 +32,27 @@ class PageOrderActivity : AppCompatActivity() {
     val global = Global.getInstance()
     val menuCardId = global.menuCardId
     val menuCard = CMenuCards.getInstance().getMenuCard(menuCardId)
-    val menuPages = menuCard.getOrderedPages()
-    var menuPage: CMenuPage = menuCard.getMenuPage(global.menuPageId)
-    var menuItems : CMenuItems =
-        menuPage.loadItems(SKIP_INVISIBLE_TRUE)
-    val CFG : Configuration = global.CFG
+    val m_menuPages = menuCard.getOrderedPages()
+    var m_menuPage: CMenuPage = menuCard.getMenuPage(global.menuPageId)
+    var m_menuItems : CMenuItems =
+        m_menuPage.loadItems(SKIP_INVISIBLE_TRUE)
+    private val CFG : Configuration = global.CFG
+    private val colourCFG = global.colourCFG
+    private val m_colourOrderText = colourCFG.getTextColour("COLOUR_ORDER_TEXT")
+    private val m_colourOrderBackgroundSelected =
+        colourCFG.getBackgroundColour("COLOUR_ORDER_BACKGROUND_SELECTED")
+    private val m_colourOrderBackgroundOdd = colourCFG.getBackgroundColour("COLOUR_ORDER_BACKGROUND_ODD")
+    private val m_colourOrderBackgroundEven = colourCFG.getBackgroundColour("COLOUR_ORDER_BACKGROUND_EVEN")
+
     var itemWidth = 24
     val groups = CFG.getValue("display_groups")
     val columns = CFG.getValue("display_groups_horizontal")
     val rows = (groups + columns-1) / columns
-    private lateinit var menuPagesAdapter: MenuPagesAdapter
-    private lateinit var menuItemsAdapter: MenuItemsAdapter
-    private lateinit var transactionItemsAdapter: TransactionItemsAdapter
-    private lateinit var transaction: CTransaction
+    private lateinit var m_menuPagesAdapter: MenuPagesAdapter
+    private lateinit var m_menuItemsAdapter: MenuItemsAdapter
+    private lateinit var m_transactionItemsAdapter: TransactionItemsAdapter
+    private lateinit var m_transaction: CTransaction
     val clusterId : Short = -1
-    val cursor = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,15 +61,39 @@ class PageOrderActivity : AppCompatActivity() {
         setupRecyclerView()
     }
 
+    private fun findClickedItem(x: Float, y: Float) {
+        val recyclerView = binding.layoutTransactionItems
+        val layoutManager = recyclerView.layoutManager as LinearLayoutManager
+
+        // Find which item position was clicked
+        for (i in 0 until recyclerView.childCount) {
+            val child = recyclerView.getChildAt(i)
+            val rect = Rect()
+            child.getGlobalVisibleRect(rect)
+
+            if (rect.contains(x.toInt(), y.toInt())) {
+                val position = layoutManager.getPosition(child)
+                Log.d("TOUCH_DEBUG", "Clicked item at position: $position")
+
+                // Manually trigger the click
+                val item = global.transaction?.get(position)
+                if (item != null) {
+                    handleTransactionItem(item)
+                }
+                break
+            }
+        }
+    }
+
     override fun onResume() {
         super.onResume()
         // Refresh data when activity resumes
         if (global.transaction == null) {
             if (global.transactionId <1E6) assert(false)
-            transaction = CTransaction(global.transactionId)
+            m_transaction = CTransaction(global.transactionId)
         }
-        transaction = global.transaction!!
-        transaction.startNextTimeFrame()
+        m_transaction = global.transaction!!
+        m_transaction.startNextTimeFrame()
         //menuItemsAdapter.notifyDataSetChanged()
         //transactionItemsAdapter.notifyDataSetChanged()
     }
@@ -71,26 +105,31 @@ class PageOrderActivity : AppCompatActivity() {
     }
 
     // Add this new function to handle language changes
-    fun on_button_enter(view: View) {
+    fun onButtonEnter(view: View) {
         startActivity(Intent(this, BillOrderActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         })
     }
 
+    fun onButtonPlus1(view: View)
+    {
+        m_transaction.plus1();
+    }
+
     private fun refreshAllData() {
-        menuPagesAdapter.notifyDataSetChanged()
-        menuItemsAdapter.notifyDataSetChanged()
-        transactionItemsAdapter.notifyDataSetChanged()
+        //m_transactionItemsAdapter.notifyDataSetChanged()
+        //m_menuPagesAdapter.notifyDataSetChanged()
+        //m_menuItemsAdapter.notifyDataSetChanged()
     }
 
     private fun setupRecyclerView() {
         // 1. GridLayoutManager for pages with 3 rows (vertical span) and horizontal scrolling
+        createLinearLayoutTransactionItems()
+        createTransactionItemsAdapter()
         createGridLayoutMenuPages()
         createMenuPagesAdapter()
         createGridLayoutMenuItems()
         createMenuItemsAdapter()
-        createGridLayoutTransactionItems()
-        createTransactionItemsAdapter()
 
         // 3. Add spacing between items
         binding.layoutMenuPages.addItemDecoration(
@@ -103,30 +142,39 @@ class PageOrderActivity : AppCompatActivity() {
         )
     }
 
-    private fun createMenuPagesAdapter() {
+    private fun createMenuPagesAdapter()
+    {
         // 2. Initialize adapter
-        menuPagesAdapter = MenuPagesAdapter(menuPages, columns, rows) {
-                selectedPage -> handlePageSelection(selectedPage)
+        m_menuPagesAdapter = MenuPagesAdapter(m_menuPages, columns, rows) { selectedPage ->
+            handlePageSelection(selectedPage)
         }.apply {
             // Set dynamic height based on screen size
             binding.layoutMenuPages.setItemViewCacheSize(18)
         }
-        binding.layoutMenuPages.adapter = menuPagesAdapter
+        binding.layoutMenuPages.adapter = m_menuPagesAdapter
     }
 
-    private fun createGridLayoutTransactionItems() {
-        // 1. GridLayoutManager for pages with 3 rows (vertical span) and horizontal scrolling
-        val gridLayoutManagerTransactionItems = GridLayoutManager(
+    private fun createLinearLayoutTransactionItems()
+    {
+        // Use LinearLayoutManager for the transaction items (left column)
+        val linearLayoutManager = LinearLayoutManager(
             this@PageOrderActivity,
-            1, // Span count = number of columns (horizontal)
-            GridLayoutManager.VERTICAL, // Vertical scrolling
-            false
+            LinearLayoutManager.VERTICAL, // Vertical scrolling
+            false // Don't reverse layout
         )
-        binding.layoutTransactionItems.layoutManager =
-            gridLayoutManagerTransactionItems
+        binding.layoutTransactionItems.layoutManager = linearLayoutManager
+
+        // Optional: Add the touch delay fix we discussed
+        binding.layoutTransactionItems.postDelayed({
+            binding.layoutTransactionItems.isClickable = true
+            binding.layoutTransactionItems.isFocusable = true
+            binding.layoutTransactionItems.isFocusableInTouchMode = true
+            Log.d("TOUCH_FIX", "Transaction items RecyclerView touch enabled")
+        }, 1000)
     }
 
-    private fun createGridLayoutMenuPages() {
+    private fun createGridLayoutMenuPages()
+    {
         val gridLayoutManagerMenuPages = GridLayoutManager(
             this@PageOrderActivity,
             rows,
@@ -136,60 +184,76 @@ class PageOrderActivity : AppCompatActivity() {
         binding.layoutMenuPages.layoutManager = gridLayoutManagerMenuPages
     }
 
-    private fun createMenuItemsAdapter() {
+    private fun createMenuItemsAdapter()
+    {
         // 2. Initialize adapter
-        menuItemsAdapter =
-            MenuItemsAdapter(menuItems, itemWidth) {
-                selectedMenuItem -> handleMenuItem(selectedMenuItem)
+        m_menuItemsAdapter =
+            MenuItemsAdapter(m_menuItems, itemWidth) { selectedMenuItem ->
+                handleMenuItem(selectedMenuItem)
             }.apply {
                 // Set dynamic height based on screen size
                 binding.layoutMenuItems.setItemViewCacheSize(28)
             }
-        binding.layoutMenuItems.adapter = menuItemsAdapter
+        binding.layoutMenuItems.adapter = m_menuItemsAdapter
     }
 
-    private fun createGridLayoutMenuItems() {
+    private fun createGridLayoutMenuItems()
+    {
         // 1b. GridLayoutManager for menu items with 8 rows (vertical span) and horizontal scrolling
         val gridLayoutManagerMenuItems = GridLayoutManager(
             this@PageOrderActivity,
-            menuItems.verticalSize, // Span count = number of rows (vertical)
+            m_menuItems.verticalSize, // Span count = number of rows (vertical)
             GridLayoutManager.HORIZONTAL, // Horizontal scrolling
             false
         )
         binding.layoutMenuItems.layoutManager = gridLayoutManagerMenuItems
     }
 
-    private fun createTransactionItemsAdapter() {
+    private fun createTransactionItemsAdapter()
+    {
         // 2. Initialize adapter
-        transactionItemsAdapter = TransactionItemsAdapter() {
-            selectedTransactionItem -> handleTransactionItem(selectedTransactionItem)
-        } .apply {
+        m_transactionItemsAdapter = TransactionItemsAdapter(
+        {  selectedTransactionItem -> handleTransactionItem(selectedTransactionItem) },
+           m_colourOrderText,
+            m_colourOrderBackgroundSelected,
+            m_colourOrderBackgroundOdd,
+            m_colourOrderBackgroundEven
+            )
+            .apply {
             // Set dynamic height based on screen size
-            binding.layoutMenuPages.setItemViewCacheSize(18)
+            binding.layoutMenuPages.setItemViewCacheSize(25)
         }
-        binding.layoutTransactionItems.adapter = transactionItemsAdapter
+        binding.layoutTransactionItems.adapter = m_transactionItemsAdapter
     }
 
     // DP-to-pixel conversion extension
     fun Int.dpToPx(): Int = (this * Resources.getSystem()
         .displayMetrics.density).toInt()
 
-    private fun handlePageSelection(selectedPage: Int) {
+    private fun handlePageSelection(selectedPage: Int)
+    {
         if (selectedPage != global.menuPageId)
         {
             loadPageItems(selectedPage)
         }
     }
 
-    private fun handleTransactionItem(selectedTransactionItem: CItem) {
-        // todo
+    private fun handleTransactionItem(selectedTransactionItem: CItem)
+    {
+        val cursor = m_transaction.getCursor(selectedTransactionItem)
+        global.cursor.set(cursor)
+        m_transactionItemsAdapter.setCursor(global.cursor)
     }
 
-    private fun handleMenuItem(selectedMenuItem: CMenuItem) {
+    private fun handleMenuItem(selectedMenuItem: CMenuItem)
+    {
         Log.d("CLICK", "MenuItem clicked: ${selectedMenuItem.localName}")
-        if (transaction.addTransactionItem(selectedMenuItem, clusterId)) {
-            menuItemsAdapter.notifyDataSetChanged()
-            transactionItemsAdapter.notifyDataSetChanged()
+        if (m_transaction.addTransactionItem(selectedMenuItem, clusterId))
+        {
+            m_menuItemsAdapter.notifyDataSetChanged()
+            m_transactionItemsAdapter.notifyDataSetChanged()
+            /// binding.totalPrice.text = m_transaction.getTotalAmount().str()
+            m_transactionItemsAdapter.setCursor(global.cursor)
         }
     // Update selection state
 //        menuItems.menuItems.values.forEach { item ->
@@ -205,12 +269,12 @@ class PageOrderActivity : AppCompatActivity() {
         // Implement your logic to load items for the selected page
         // This might involve another RecyclerView for the items in layout_items
         global.menuPageId = pageId
-        val previousRows = menuItems.verticalSize
-        menuPage = menuCard.getMenuPage(global.menuPageId)
-        itemWidth = menuPage.pageWidth
-        menuItems = menuPage.loadItems(SKIP_INVISIBLE_TRUE)
-        menuItemsAdapter.setNewItems(menuItems)
-        if (menuItems.verticalSize != previousRows) {
+        val previousRows = m_menuItems.verticalSize
+        m_menuPage = menuCard.getMenuPage(global.menuPageId)
+        itemWidth = m_menuPage.pageWidth
+        m_menuItems = m_menuPage.loadItems(SKIP_INVISIBLE_TRUE)
+        m_menuItemsAdapter.setNewItems(m_menuItems)
+        if (m_menuItems.verticalSize != previousRows) {
             createGridLayoutMenuItems()
         }
     }

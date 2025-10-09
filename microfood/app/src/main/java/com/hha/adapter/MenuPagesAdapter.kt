@@ -16,7 +16,8 @@ class MenuPagesAdapter(
     private val rows: Int,
     private val onPageSelected: (Int) -> Unit
 ) : RecyclerView.Adapter<MenuPagesAdapter.MenuPageViewHolder>() {
-    val global = Global.getInstance()
+    val m_global = Global.getInstance()
+    var m_widthPages = 1000
 
     inner class MenuPageViewHolder(val binding: AdapterMenuPageBinding) :
         RecyclerView.ViewHolder(binding.root)
@@ -27,6 +28,7 @@ class MenuPagesAdapter(
             parent,
             false
         )
+        m_widthPages = parent.width
         return MenuPageViewHolder(binding)
     }
 
@@ -51,18 +53,18 @@ class MenuPagesAdapter(
             }
         }
 
-        var value = holder.itemView.context.resources.displayMetrics.widthPixels/7
+        var value = m_widthPages/columns
         holder.itemView.layoutParams.width = value
         val page = getPage(position)
         var text = "-"
         if (page != null) {
-            if (global.isChinese()) {
+            if (m_global.isChinese()) {
                 text = page.chineseName
             }
             else {
                 text = page.localName
             }
-            if (position == global.menuPageId)
+            if (position == m_global.menuPageId)
             {
                 text += "**"
             }

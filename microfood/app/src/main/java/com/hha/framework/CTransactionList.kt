@@ -109,7 +109,8 @@ class CTransactionList() : Iterable<CTransaction> {
     /**
      * Checks if the list is empty
      */
-    fun isEmpty(): Boolean = transactions.isEmpty()
+    val isEmpty : Boolean
+        get() = transactions.isEmpty()
 
     /**
      * Checks if the list is not empty

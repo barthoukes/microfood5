@@ -40,11 +40,11 @@ class CSortedItemList : Iterable<CSortedItem> {
         m_sortedItems.add(item)
     }
 
-    fun cursor2index(cursor: Int): Int {
+    fun cursor2index(cursor: CCursor): Int {
         var index = 0
         var sortedIndex = 0
         for (item in m_sortedItems) {
-            if (index + item.size > cursor) {
+            if (index + item.size > cursor.position) {
                 break
             }
             index += item.size
@@ -53,7 +53,7 @@ class CSortedItemList : Iterable<CSortedItem> {
         return sortedIndex
     }
 
-    fun add(cursor: Int, item: CItem) {
+    fun add(cursor: CCursor, item: CItem) {
         val c2i = cursor2index(cursor)
         val cItem = CSortedItem(item)
         m_sortedItems.add(c2i, cItem)
@@ -83,10 +83,10 @@ class CSortedItemList : Iterable<CSortedItem> {
     val empty: Boolean
         get() = m_sortedItems.isEmpty()
 
-    fun mainItem(cursor: Int): CSortedItem? {
+    fun mainItem(cursor: CCursor): CSortedItem? {
         var offset = 0
         for (item in m_sortedItems) {
-            if (offset + item.size > cursor) {
+            if (offset + item.size > cursor.position) {
                 return item
             }
             offset += item.size

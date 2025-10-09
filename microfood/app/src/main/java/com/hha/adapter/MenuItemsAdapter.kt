@@ -22,7 +22,8 @@ class MenuItemsAdapter(
     inner class MenuItemViewHolder(val binding: AdapterMenuItemBinding) :
         RecyclerView.ViewHolder(binding.root)
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MenuItemViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MenuItemViewHolder
+    {
         val binding = AdapterMenuItemBinding.inflate(
             LayoutInflater.from(parent.context),
             parent,
@@ -39,6 +40,7 @@ class MenuItemsAdapter(
     }
 
     override fun onBindViewHolder(holder: MenuItemViewHolder, position: Int) {
+        // Decide the width of an item for a page.
         var value = holder.itemView.context.resources.displayMetrics.widthPixels
         value = value * itemWidth /120
         holder.itemView.layoutParams.width = value
@@ -57,6 +59,7 @@ class MenuItemsAdapter(
             else {
                 holder.binding.itemName.text = item.localName
             }
+            // Gradient for item buttons.
             val gradientDrawable = GradientDrawable(
                 GradientDrawable.Orientation.BOTTOM_TOP,
                 intArrayOf(item.colourBack, item.colourBack2)

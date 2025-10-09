@@ -66,7 +66,7 @@ class BillItemsAdapter(
     private fun getBackgroundColour(position: Int): Int {
         return when {
             // cursor colour when cursor, or odd/even colour when even/odd
-            global.cursor == position -> colourCFG.getBackgroundColour("COLOUR_ORDER_BACKGROUND_SELECTED")
+            global.cursor.position == position -> colourCFG.getBackgroundColour("COLOUR_ORDER_BACKGROUND_SELECTED")
             (position and 1) == 0 -> colourCFG.getBackgroundColour("COLOUR_ORDER_BACKGROUND_ODD")
             else -> colourCFG.getBackgroundColour("COLOUR_ORDER_BACKGROUND_EVEN")
         }

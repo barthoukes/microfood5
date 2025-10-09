@@ -1,5 +1,7 @@
 package com.hha.framework
 
+import EViewMode
+import android.R
 import android.util.Log
 import com.hha.common.ItemVisible
 import com.hha.common.OrderLevel
@@ -25,9 +27,13 @@ class CTransactionItems : Iterable<CSortedItem> {
     var change2spice = false
     var m_clusterId: Short = -1
     var m_twinItemId = -1
+    var m_allowChanges = true
     var m_changed = false
+    var m_internalSize = 0
     var m_newChanged = false
     val m_clusterIsRunning = false
+    val m_viewMode: EViewMode = EViewMode.VIEW_MODE_TRANSACTION ///< Are we in split or preview mode?
+
 
     constructor() {
         m_state = EEnterState.ENTER_ITEM_STATE
@@ -51,9 +57,12 @@ class CTransactionItems : Iterable<CSortedItem> {
     }
 
     val empty: Boolean
-        get() = m_items.empty
+        get() = m_internalSize == 0
 
     val size: Int
+        get() = m_internalSize
+
+    private val internalSize: Int
         get() {
             var sz = 0
             for (item in m_items) {
@@ -99,6 +108,7 @@ class CTransactionItems : Iterable<CSortedItem> {
 //        }
         val twinItem: CMenuItem? = null
         val retVal = touchItem(menuItem, clusterId, twinItem);
+        m_internalSize = internalSize
 //        LOG_FUNC_EXIT << Endl;
         return retVal
     }
@@ -150,9 +160,10 @@ class CTransactionItems : Iterable<CSortedItem> {
             }
 
             // Check if the item is at the end.
-            if (global.cursor >= m_items.size) {
+            if (global.cursor.position >= m_items.size) {
                 // If so: Call another function.
                 retVal = touchEnd(menuItem, 1, prices, clusterId, twinItem)
+                m_internalSize = internalSize
                 return retVal
             }
             assert(false)
@@ -168,7 +179,56 @@ class CTransactionItems : Iterable<CSortedItem> {
 //            return true
 //        // Just insert this one at the cursor.
 //        retVal = touchEnd(item_id, 1, prices, cluster_id, twin_item_id)
+        m_internalSize = internalSize
         return retVal
+    }
+
+    /*============================================================================*/
+    ///  @brief     Plus button pressed, to increase the quantity.
+    ///  @post      Quantity increased.
+    ///  @return    Cursor
+    /*============================================================================*/
+    fun addOneToCursorPosition(cursor: CCursor)
+    {
+        if (addOne(cursor))
+        {
+            val size = getNrItemsAndSubItems()
+            if (cursor.position > size)
+            {
+                cursor.position = size
+            }
+//            if ( m_transactionItemControl.hasClustersEnabled() && !CFG( "entry_cluster_dialog"))
+//            {
+//                CitemPtr item =(*m_clientOrdersHandler)[getValidCursorPosition(m_transactionItemControl.getCursor())];
+//                m_transactionItemControl.showCluster(item->id);
+//            }
+        }
+//        else
+//        {
+//            m_transactionItemControl.errorSound();
+//        }
+    }
+
+    /*============================================================================*/
+///  @brief     Plus button pressed, to increase the quantity.
+///  @post      Quantity increased.
+    /*============================================================================*/
+    private fun addOne(cursor: CCursor): Boolean
+    {
+        if (m_allowChanges ==false || m_viewMode !=EViewMode.VIEW_MODE_TRANSACTION)
+        {
+            return false;
+        }
+        if (empty)
+        {
+            return false;
+        }
+        val y = getValidCursorPosition(cursor);
+        if (y.position < 0)
+        {
+            return false;
+        }
+        return addQuantity(y, 1);
     }
 
     fun touchExtraOrSpice(
@@ -233,7 +293,7 @@ class CTransactionItems : Iterable<CSortedItem> {
 
 
     private fun insertItem(
-        cursor: Int, menuItem: CMenuItem, quantity: Int, prices: CPriceAndHalfPrice,
+        cursor: CCursor, menuItem: CMenuItem, quantity: Int, prices: CPriceAndHalfPrice,
         clusterId: Short, twinItem: CMenuItem?
     ): Boolean {
         Log.i("CTransactionItems", "insertItem item_id=${menuItem.menuItemId}")
@@ -348,12 +408,14 @@ class CTransactionItems : Iterable<CSortedItem> {
                 // m_clientOrdersHandler ->
                 //    insertTwinItem(twin_item_id, cursor, quantity, 2, taxPercentage);
             }
-            global.cursor = m_items.size
+            global.cursor.set(m_items.size)
         }
         if (m_state == EEnterState.ENTER_ITEM_STATE) {
             //assert(false)
             //m_transactionItemControl.askOrDisplayClusters(clusters, item_id);
         }
+        m_internalSize = internalSize
+
         return true;
     }
 
@@ -369,13 +431,13 @@ class CTransactionItems : Iterable<CSortedItem> {
         if (menuItem.isOutOfStock() || (twinItem != null && twinItem.isOutOfStock())) {
             return false
         }
-        val cursor = m_items.size;
         retVal = true
-        global.cursor = cursor
+        global.cursor.set(m_items.size)
 
         // No items yet, then add the food?
-        if (cursor == 0) {
-            retVal = insertItem(0, menuItem, quantity, prices, clusterId, twinItem);
+        if (global.cursor.position == 0)
+        {
+            retVal = insertItem(global.cursor, menuItem, quantity, prices, clusterId, twinItem);
             invalidateDisplayAndSetOrderChanged();
             Log.i("CTransactionItems", "First item added");
             return retVal
@@ -397,7 +459,7 @@ class CTransactionItems : Iterable<CSortedItem> {
 //            return true;
 //        }
 //        // Just add the item at the end.
-        retVal = addItem(cursor, menuItem, prices, clusterId, twinItem)
+        retVal = addItem(global.cursor, menuItem, prices, clusterId, twinItem)
         Log.i("CTransactionItems", "Item added")
         //assert(false)
         return retVal
@@ -413,13 +475,13 @@ class CTransactionItems : Iterable<CSortedItem> {
      *  @post  Cursor at the end.
      *  @return true on succes.
      */
-    fun addItem(cursor: Int, menuItem: CMenuItem, prices: CPriceAndHalfPrice,
+    fun addItem(cursor: CCursor, menuItem: CMenuItem, prices: CPriceAndHalfPrice,
                 clusterId: Short, twinItem: CMenuItem?): Boolean {
         var retVal = false
         Log.i("CTransactionItems", "addItem ${menuItem.localName}")
-        if (insertItem( cursor+1, menuItem, 1, prices,
+        if (insertItem( cursor.next(), menuItem, 1, prices,
                 clusterId, twinItem)) {
-            global.cursor = m_items.size
+            global.cursor.set(m_items.size)
             retVal = true
         }
         return retVal
@@ -565,7 +627,7 @@ class CTransactionItems : Iterable<CSortedItem> {
 
 // bool CclientItemsHandler::insertItem( long itemId,...)
     fun insertItem(
-        menuItem: CMenuItem, cursr: Int,
+        menuItem: CMenuItem, cursr: CCursor,
         quantity: Int, level: EOrderLevel, group: Int, page: Int, parts: Int,
         unitPrice: CMoney, originalPrice: CMoney, originalHalfPrice: CMoney,
         taxPercentage: Double, locations: Int,
@@ -578,7 +640,7 @@ class CTransactionItems : Iterable<CSortedItem> {
         val subSubSequence = 0 // NORMAL_ITEM_SUB_SEQUENCE;
 
         val itemsDb = GrpcServiceFactory.createDailyTransactionItemService()
-        if (cursor >= 0 && cursor < m_items.size) {
+        if (cursor.position >= 0 && cursor.position < m_items.size) {
             // Same as below cursor?
             val mi = m_items.mainItem(cursor)
             if (mi != null) {
@@ -607,11 +669,11 @@ class CTransactionItems : Iterable<CSortedItem> {
                 Log.i("CTransactionItems", "insertItem should not happen anymore!!")
             }
             else {
-                cursor = m_items.size
+                cursor.set(m_items.size)
                 sequence = getNewSequence()
             }
         } else {
-            cursor = m_items.size;
+            cursor.set(m_items.size);
             sequence = getNewSequence()
         }
 
@@ -663,7 +725,7 @@ class CTransactionItems : Iterable<CSortedItem> {
             statiegeld
         )
         i.setQuantityPrice(quantity, unitPrice, statiegeld);
-        if (cursor >= m_items.size) {
+        if (cursor.position >= m_items.size) {
             val cs = CSortedItem(i)
             m_items.add(cs);
         } else {
@@ -686,8 +748,16 @@ class CTransactionItems : Iterable<CSortedItem> {
         m_newChanged = true;
     }
 
-    fun addQuantity( cursor: Int, timeFrameId : CTimeFrameIndex, quantity: Int): Boolean {
-        if (cursor < 0 || cursor >= m_items.size) {
+    fun addQuantity(cursor: CCursor, quantity: Int): Boolean
+    {
+        val tfi = global.timeFrame!!.time_frame_index
+        return addQuantity( cursor, tfi, quantity);
+    }
+
+    fun addQuantity( cursor: CCursor, timeFrameId : CTimeFrameIndex, quantity: Int): Boolean
+    {
+        if (cursor.position < 0 || cursor.position >= m_items.size)
+        {
             Log.i("CTransactionItems", "addQuantity  Cursor overflow!!")
             return false;
         }
@@ -789,5 +859,35 @@ class CTransactionItems : Iterable<CSortedItem> {
 //        return true;
 //    }
 //
-//
+
+    fun getTotalAmount(): CMoney
+    {
+        var m = CMoney(0)
+        for (item in m_items)
+        {
+            m = m + item.getTotal()
+        }
+        return m
+    }
+
+    fun getNrItemsAndSubItems(): Int
+    {
+        var m = 0
+        for (item in m_items)
+        {
+            m = m + item.size
+        }
+        return m
+    }
+
+    fun getValidCursorPosition(cursor: CCursor): CCursor
+    {
+        var y = cursor.position
+        val sz = getNrItemsAndSubItems()
+        if (y >= sz)
+        {
+            y = sz - 1
+        }
+        return CCursor(y)
+    }
 }

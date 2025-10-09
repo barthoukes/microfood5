@@ -207,9 +207,10 @@ class CTransaction : Iterable<CSortedItem> {
         return ETransType.useTakeawayPrices(transType)
     }
 
-    fun plus1() {
+    fun plus1()
+    {
         if (size == 0) return
-        var y = m_global.cursor
+        var y = m_global.cursor.position
         var item = get(y) ?: get(--y) ?: return
         if (item.deletedStatus != EDeletedStatus.DELETE_NOT) return
         add(y, 1)
@@ -225,10 +226,37 @@ class CTransaction : Iterable<CSortedItem> {
     val empty : Boolean
         get() = m_items.empty
 
-    fun portion() {
+//    fun addOne()
+//    {
+//        if (size == 0) return
+//        var y = m_global.cursor
+//        var item = get(y) ?: get(--y) ?: return
+//        m_items.addQuantity(y, 1)
+//    }
+
+    fun getCursor(findItem : CItem): Int
+    {
+        var offset = 0
+        for (sortedItem : CSortedItem in m_items)
+        {
+            for (item : CItem in sortedItem)
+            {
+                if (findItem.sequence == item.sequence && findItem.subSequence == item.subSequence)
+                {
+                    return offset
+                }
+                offset = offset+1
+            }
+        }
+        return offset
+    }
+
+    fun portion()
+    {
         if (size == 0) return
-        var y = m_global.cursor
+        var y = m_global.cursor.position
         var item = get(y) ?: get(--y) ?: return
+
         //if (item.deleted != CItem.DELETE_NOT) return
 
         //m_global.transactionItemDB.deleteSequence(id, CTimeFrameIndex(), item.sequence, CItem.DELETE_CAUSE_CHANGE_PORTION)
@@ -285,7 +313,13 @@ class CTransaction : Iterable<CSortedItem> {
         return m_items.touchItem( selectedMenuItem, clusterId)
     }
 
-    fun startNextTimeFrame(): CTimeFrame {
+    fun getTotalAmount(): CMoney
+    {
+         return m_items.getTotalAmount()
+    }
+
+    fun startNextTimeFrame(): CTimeFrame
+    {
         Log.i("Ctransaction", "Start next TimeFrame")
         timeFrame = CTimeFrame(m_transactionId)
         global.timeFrame = timeFrame

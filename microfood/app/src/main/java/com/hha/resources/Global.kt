@@ -2,6 +2,7 @@ package com.hha.resources
 
 import android.database.sqlite.SQLiteDatabase
 import android.os.Handler
+import com.hha.framework.CCursor
 import com.hha.framework.CMenuCards
 import java.io.File
 
@@ -19,7 +20,7 @@ class Global private constructor() {
     var menuCardId = 1
     var menuPageId = 1
     var currentKeyIndex = 2
-    var cursor = 0
+    var cursor = CCursor(0)
     var language: ETaal = ETaal.LANG_SIMPLIFIED
     var pageOffset = 0
     var transactionId = 0

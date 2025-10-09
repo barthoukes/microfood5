@@ -2,6 +2,7 @@ package com.hha.framework
 
 import androidx.recyclerview.widget.SortedList
 import com.hha.framework.CMenuItem
+import com.hha.types.CMoney
 
 data class CMenuItems(
     private var columns: List<Int> = emptyList(),
