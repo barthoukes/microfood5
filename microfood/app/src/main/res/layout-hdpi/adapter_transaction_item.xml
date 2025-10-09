@@ -9,6 +9,7 @@
 	android:paddingStart="2dp"
 	android:paddingEnd="2dp"
 	android:orientation="vertical"
+	android:background="?attr/selectableItemBackground"
 	android:gravity="center">
 	<TextView
 		android:id="@+id/transaction_item"

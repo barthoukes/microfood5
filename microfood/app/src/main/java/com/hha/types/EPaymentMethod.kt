@@ -67,7 +67,7 @@ enum class EPaymentMethod(val value: Int) {
          */
         fun getIconResource(paymentMethod: EPaymentMethod): Int {
             return when (paymentMethod) {
-//                PAYMENT_CASH -> R.drawable.ic_cash
+                PAYMENT_CASH -> R.drawable.ic_menu_add
 //                PAYMENT_PIN -> R.drawable.ic_pin
 //                PAYMENT_CREDIT_CARD,
 //                PAYMENT_VISA_CARD,

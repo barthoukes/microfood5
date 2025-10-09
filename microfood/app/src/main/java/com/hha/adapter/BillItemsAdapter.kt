@@ -57,7 +57,6 @@ class BillItemsAdapter(
         holder.binding.transactionPrice.text = item.getTotal().str()
         holder.binding.transactionPrice.setTextColor(tc)
 
-        val context = holder.itemView.context
         holder.binding.root.setOnClickListener {
             Log.i("TIA", "onBindViewHolder $position")
         }

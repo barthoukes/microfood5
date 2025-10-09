@@ -9,6 +9,7 @@ import android.content.res.Resources
 import android.util.Log
 import android.view.MotionEvent
 import android.view.ViewGroup
+import android.view.WindowInsetsController
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -99,18 +100,22 @@ class PageOrderActivity : AppCompatActivity() {
     }
 
     // Add this new function to handle language changes
-    fun on_button_language(view: View) {
+    @Suppress("UNUSED_PARAMETER")
+    fun on_button_language(view: View)
+    {
         Translation.nextLanguage()
         refreshAllData()
     }
 
     // Add this new function to handle language changes
+    @Suppress("UNUSED_PARAMETER")
     fun onButtonEnter(view: View) {
         startActivity(Intent(this, BillOrderActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         })
     }
 
+    @Suppress("UNUSED_PARAMETER")
     fun onButtonPlus1(view: View)
     {
         m_transaction.plus1();
@@ -134,8 +139,10 @@ class PageOrderActivity : AppCompatActivity() {
         // 3. Add spacing between items
         binding.layoutMenuPages.addItemDecoration(
             object : RecyclerView.ItemDecoration() {
-                override fun getItemOffsets(outRect: Rect, view: View,
-                                            parent: RecyclerView, state: RecyclerView.State) {
+                override fun getItemOffsets(
+                    outRect: Rect, view: View,
+                    parent: RecyclerView, state: RecyclerView.State,
+                ) {
                     outRect.set(8.dpToPx(), 8.dpToPx(), 8.dpToPx(), 8.dpToPx()) // 8dp spacing
                 }
             }

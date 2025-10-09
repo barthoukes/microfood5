@@ -3,6 +3,7 @@
 	xmlns:app="http://schemas.android.com/apk/res-auto"
 	android:layout_width="match_parent"
 	android:layout_height="match_parent"
+	android:fitsSystemWindows="true"
 	android:background="@color/ANDROID_TABLE_BACKGROUND">
 
 	<!-- Bottom Button Bar: Anchored to the bottom -->
@@ -98,7 +99,7 @@
 			android:id="@+id/left_column"
 			android:layout_width="0dp"
 			android:layout_height="0dp"
-			android:background="@color/ANDROID_BUTTON_BACKGROUND"
+			android:background="@color/COLOUR_ORDER_BACKGROUND_EMPTY"
 			app:layout_constraintStart_toStartOf="parent"
 			app:layout_constraintTop_toTopOf="parent"
 			app:layout_constraintBottom_toBottomOf="parent"
@@ -143,7 +144,6 @@
 				android:id="@+id/layout_transaction_items"
 				android:layout_width="0dp"
 				android:layout_height="0dp"
-				android:background="@android:color/holo_orange_dark"
 				android:choiceMode="singleChoice"
 				android:fadingEdge="none"
 				android:scrollbars="none"

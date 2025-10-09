@@ -13,10 +13,12 @@ class Configuration {
      * Sets the entire configuration list
      * @param configurations List of ConfigurationItems to set
      */
-    fun setConfigurations(configurations: ConfigurationItemList) {
+    fun setConfigurations(configurations: ConfigurationItemList)
+    {
         this.configurations = emptyList()
-        val size : Int = configurations.itemCount
-        for (item in range(0,size)) {
+        val size: Int = configurations.itemCount
+        for (item in range(0, size))
+        {
             val config = configurations.getItem(item)
             this.configurations += ConfigurationItem.newBuilder()
                 .setConfiguration(config.configuration)
@@ -30,7 +32,8 @@ class Configuration {
      * @param name The configuration key to search for
      * @return The ConfigurationItem if found, null otherwise
      */
-    fun findByName(name: String): ConfigurationItem? {
+    fun findByName(name: String): ConfigurationItem?
+    {
         return configurations.firstOrNull { it.configuration == name }
     }
 
@@ -39,17 +42,19 @@ class Configuration {
      * @param name The configuration key
      * @return The value if found, null otherwise
      */
-    fun getString(name: String): String {
+    fun getString(name: String): String
+    {
         return findByName(name)?.value?.toStringUtf8() ?: ""
     }
 
-    fun getOption(configuration: String): Boolean {
+    fun getOption(configuration: String): Boolean
+    {
         val stringValue = getString(configuration)
-            ?: throw IllegalArgumentException("Configuration '$configuration' not found")
-        return try {
+        try {
             val nr = stringValue.toInt()
             return nr != 0
-        } catch (e: NumberFormatException) {
+        } catch (e: NumberFormatException)
+        {
             return false
         }
     }
@@ -77,7 +82,8 @@ class Configuration {
      * @param name The configuration key
      * @return The value if found, null otherwise
      */
-    fun getValue(name: String): Int {
+    fun getValue(name: String): Int
+    {
         return findByName(name)?.value?.toStringUtf8()?.toIntOrNull() ?: 0
     }
 
@@ -85,7 +91,8 @@ class Configuration {
      * Gets all configurations as a protobuf ConfigurationItemList
      * @return ConfigurationItemList containing all items
      */
-    fun toConfigurationItemList(): ConfigurationItemList {
+    fun toConfigurationItemList(): ConfigurationItemList
+    {
         return ConfigurationItemList.newBuilder()
             .addAllItem(configurations)
             .build()
@@ -95,7 +102,8 @@ class Configuration {
      * Gets all configurations as a list
      * @return List of all ConfigurationItems
      */
-    fun getAll(): List<ConfigurationItem> {
+    fun getAll(): List<ConfigurationItem>
+    {
         return configurations.toList()
     }
 
@@ -104,7 +112,8 @@ class Configuration {
      * @param name The configuration key to check
      * @return true if exists, false otherwise
      */
-    fun contains(name: String): Boolean {
+    fun contains(name: String): Boolean
+    {
         return configurations.any { it.configuration == name }
     }
 
@@ -112,7 +121,8 @@ class Configuration {
      * Gets the number of configurations
      * @return The count of configurations
      */
-    fun size(): Int {
+    fun size(): Int
+    {
         return configurations.size
     }
 
@@ -120,7 +130,8 @@ class Configuration {
      * Checks if there are no configurations
      * @return true if empty, false otherwise
      */
-    fun isEmpty(): Boolean {
+    fun isEmpty(): Boolean
+    {
         return configurations.isEmpty()
     }
 
@@ -128,23 +139,30 @@ class Configuration {
      * Updates or adds a configuration item
      * @param item The ConfigurationItem to update/add
      */
-    fun update(item: ConfigurationItem) {
+    fun update(item: ConfigurationItem)
+    {
         val existing = findByName(item.configuration)
-        configurations = if (existing != null) {
+        configurations = if (existing != null)
+        {
             configurations.map { if (it.configuration == item.configuration) item else it }
-        } else {
+        } else
+        {
             configurations + item
         }
     }
 
     fun getBackgroundColour(name: String): Int = getColour(name) or 0xff000000.toInt()
 
-    fun getColour(name: String): Int {
+    fun getColour(name: String): Int
+    {
         val str = getString(name)
-        return when {
-            str.startsWith("0x") || str.startsWith("0X") -> {
+        return when
+        {
+            str.startsWith("0x") || str.startsWith("0X") ->
+            {
                 str.substring(2).toIntOrNull(16) ?: 0
             }
+
             else -> str.toIntOrNull() ?: 0
         }
     }
@@ -156,14 +174,16 @@ class Configuration {
      * @param name The configuration key to remove
      * @return true if removed, false if not found
      */
-    fun remove(name: String): Boolean {
-        return if (contains(name)) {
+    fun remove(name: String): Boolean
+    {
+        return if (contains(name))
+        {
             configurations = configurations.filter { it.configuration != name }
             true
-        } else {
+        } else
+        {
             false
         }
     }
-
 
 }

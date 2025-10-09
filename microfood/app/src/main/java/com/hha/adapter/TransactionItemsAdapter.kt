@@ -67,7 +67,8 @@ class TransactionItemsAdapter(
     override fun onBindViewHolder(holder: TransactionItemViewHolder, position: Int) {
         // ... (Your existing setup code for clearing listeners, getting items, setting backgrounds)
 
-        val item: CItem? = global.transaction?.get(position)    holder.binding.transactionOrder.setBackgroundColor(getBackgroundColour(position))
+        val item: CItem? = global.transaction?.get(position)
+        holder.binding.transactionOrder.setBackgroundColor(getBackgroundColour(position))
         // ... other setup ...
         if (item == null) {
             setupEmptyItem(holder, position)
@@ -155,30 +156,31 @@ class TransactionItemsAdapter(
         // holder.binding.transactionOrder.isSelected = true
 
         // Safe transaction access
+        var item: CItem? = null
         val transaction = global.transaction
         if (transaction == null)
         {
             setupEmptyItem(holder, position)
-            return
         }
-
-        val item: CItem? = transaction[position]
-        val background = getBackgroundColour(position)
-
-        holder.binding.transactionOrder.setBackgroundColor(background)
-        holder.binding.transactionItem.isContextClickable = false
-
-        // Set selection state based on cursor position, not force all to true
-        holder.binding.transactionOrder.isSelected = false
-
-        if (item == null)
+        else
         {
-            setupEmptyItem(holder, position)
-        } else
-        {
-            setupItemContent(holder, item, m_colourOrderText)
+            item = transaction[position]
+            val background = getBackgroundColour(position)
+
+            holder.binding.transactionOrder.setBackgroundColor(background)
+            holder.binding.transactionItem.isContextClickable = false
+
+            // Set selection state based on cursor position, not force all to true
+            holder.binding.transactionOrder.isSelected = false
+
+            if (item == null)
+            {
+                setupEmptyItem(holder, position)
+            } else
+            {
+                setupItemContent(holder, item, m_colourOrderText)
+            }
         }
-
         // Set click listener
         holder.binding.root.setOnClickListener {
             Log.i("TIA", "Item clicked at position: $position")
