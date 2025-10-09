@@ -13,7 +13,7 @@ android {
     defaultConfig {
         applicationId = "tech.hha.microfood"
         minSdk = 26
-        targetSdk = 35
+        targetSdk = 34
         versionCode = 1
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -21,16 +21,16 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled = false
+            minifyEnabled = true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = '11'
+        jvmTarget = '17'
     }
     buildFeatures {
         viewBinding = true
@@ -47,44 +47,43 @@ android {
 }
 
 dependencies {
-    implementation(platform("org.jetbrains.kotlin:kotlin-bom:1.8.22"))
+    implementation(platform("org.jetbrains.kotlin:kotlin-bom:1.9.23"))
 
-    implementation 'com.google.android.material:material:1.11.0'
-    implementation 'com.google.protobuf:protobuf-kotlin:3.21.12'
-    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.12.0'
+    implementation 'com.google.protobuf:protobuf-kotlin:3.25.3'
+    implementation 'androidx.appcompat:appcompat:1.7.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
-    implementation 'androidx.coordinatorlayout:coordinatorlayout:1.2.0'
-    implementation 'androidx.core:core-ktx:1.12.0'
-    implementation 'androidx.navigation:navigation-fragment-ktx:2.5.3'
-    implementation 'androidx.navigation:navigation-ui-ktx:2.5.3'
-    // Consider using a more recent stable version like 1.3.2 if 1.4.0 causes issues.
+    implementation 'androidx.coordinatorlayout:coordinatorlayout:1.3.0'
+    implementation 'androidx.core:core-ktx:1.13.1'
+    implementation 'androidx.navigation:navigation-fragment-ktx:2.7.7'
+    implementation 'androidx.navigation:navigation-ui-ktx:2.7.7'
     implementation 'androidx.recyclerview:recyclerview:1.4.0'
 
-    implementation 'io.grpc:grpc-stub:1.52.1'
-    implementation 'io.grpc:grpc-protobuf:1.52.1'
-    implementation 'io.grpc:grpc-okhttp:1.52.1'
-    implementation 'io.grpc:grpc-kotlin-stub:1.3.0'
+    implementation 'io.grpc:grpc-stub:1.62.2'
+    implementation 'io.grpc:grpc-protobuf:1.62.2'
+    implementation 'io.grpc:grpc-okhttp:1.62.2'
+    implementation 'io.grpc:grpc-kotlin-stub:1.4.1'
 
     // STEP 3: Remove the redundant code generator dependency.
     // implementation 'io.grpc:protoc-gen-grpc-kotlin:1.3.0'
 
     // Testing
     testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+    androidTestImplementation 'androidx.test.ext:junit:1.2.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
 }
 
 // STEP 4: Replace the entire old protobuf block with the modern one.
 protobuf {
     protoc {
-        artifact = "com.google.protobuf:protoc:3.21.12"
+        artifact = "com.google.protobuf:protoc:3.25.3"
     }
     plugins {
         grpc {
-            artifact = 'io.grpc:protoc-gen-grpc-java:1.52.1'
+            artifact = 'io.grpc:protoc-gen-grpc-java:1.62.2'
         }
         grpckt {
-            artifact = 'io.grpc:protoc-gen-grpc-kotlin:1.3.0:jdk8@jar'
+            artifact = 'io.grpc:protoc-gen-grpc-kotlin:1.4.1:jdk8@jar'
         }
     }
     generateProtoTasks {
