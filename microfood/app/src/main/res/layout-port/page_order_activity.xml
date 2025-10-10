@@ -1,21 +1,133 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	xmlns:app="http://schemas.android.com/apk/res-auto"
-	android:layout_width="match_parent"
+	xmlns:app="http://schemas.android.com/apk/res-auto"	android:layout_width="match_parent"
 	android:layout_height="match_parent"
-	android:fitsSystemWindows="true"
-	android:background="@color/ANDROID_TABLE_BACKGROUND">
+	android:background="@color/ANDROID_TABLE_BACKGROUND"
+	android:fitsSystemWindows="true">
 
-	<!-- Bottom Button Bar: Anchored to the bottom -->
+	<androidx.constraintlayout.widget.Guideline
+		android:id="@+id/guideline_top"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:orientation="horizontal"
+		app:layout_constraintGuide_percent="0.083" />
+
+	<androidx.constraintlayout.widget.Guideline
+		android:id="@+id/guideline_vertical_main"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:orientation="vertical"
+		app:layout_constraintGuide_percent="0.40" />
+
+	<androidx.constraintlayout.widget.Guideline
+		android:id="@+id/guideline_horizontal_menu"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:orientation="horizontal"
+		app:layout_constraintGuide_percent="0.633" />
+
+	<!-- Guideline for the TOP of the Total Price footer -->
+	<androidx.constraintlayout.widget.Guideline
+		android:id="@+id/guideline_price_top"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:orientation="horizontal"
+		app:layout_constraintGuide_percent="0.833" />
+
+	<!-- Guideline for the TOP of the Bottom Button Bar -->
+	<androidx.constraintlayout.widget.Guideline
+		android:id="@+id/guideline_bottom_bar_top"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:orientation="horizontal"
+		app:layout_constraintGuide_percent="0.917" />
+
+	<TextView
+		android:id="@+id/page_order_table_name"
+		android:layout_width="0dp"
+		android:layout_height="0dp"
+		android:background="@color/COLOUR_SELECTED_BACKGROUND"
+		android:gravity="center"
+		android:text="TAFEL 15"
+		android:textColor="@color/COLOUR_SELECTED_TEXT"
+		app:layout_constraintBottom_toTopOf="@id/guideline_top"
+		app:layout_constraintEnd_toStartOf="@id/guideline_vertical_main"
+		app:layout_constraintStart_toStartOf="parent"
+		app:layout_constraintTop_toTopOf="parent" />
+
+	<TextView
+		android:id="@+id/total_price"
+		android:layout_width="0dp"
+		android:layout_height="0dp"
+		android:layout_margin="1dp"
+		android:background="@color/COLOUR_TOTAL_BACKGROUND"
+		android:gravity="center"
+		android:text="0,00"
+		android:textColor="@color/COLOUR_TOTAL_TEXT"
+		app:layout_constraintBottom_toTopOf="@id/guideline_bottom_bar_top"
+		app:layout_constraintEnd_toStartOf="@id/guideline_vertical_main"
+		app:layout_constraintStart_toStartOf="parent"
+		app:layout_constraintTop_toBottomOf="@id/guideline_price_top" />
+
+	<androidx.recyclerview.widget.RecyclerView
+		android:id="@+id/layout_transaction_items"
+		android:layout_width="0dp"
+		android:layout_height="0dp"
+		android:background="@color/COLOUR_ORDER_BACKGROUND_EMPTY"
+		app:layout_constraintBottom_toTopOf="@id/guideline_price_top"
+		app:layout_constraintEnd_toStartOf="@id/guideline_vertical_main"
+		app:layout_constraintStart_toStartOf="parent"
+		app:layout_constraintTop_toBottomOf="@id/guideline_top" />
+
+
+	<!-- RIGHT COLUMN VIEWS (Menu) -->
+
+	<ImageButton
+		android:id="@+id/btn_back"
+		android:layout_width="0dp"
+		android:layout_height="0dp"
+		android:background="?attr/selectableItemBackgroundBorderless"
+		android:contentDescription="back button"
+		android:src="@drawable/back_yellow"
+		app:layout_constraintDimensionRatio="1:1"
+		app:layout_constraintBottom_toTopOf="@id/guideline_top"
+		app:layout_constraintEnd_toEndOf="parent"
+		app:layout_constraintTop_toTopOf="parent" />
+
+	<androidx.recyclerview.widget.RecyclerView
+		android:id="@+id/layout_menu_items"
+		android:layout_width="0dp"
+		android:layout_height="0dp"
+		android:background="@color/ANDROID_BUTTON_BACKGROUND"
+		android:orientation="horizontal"
+		app:layout_constraintBottom_toTopOf="@id/guideline_horizontal_menu"
+		app:layout_constraintEnd_toEndOf="parent"
+		app:layout_constraintStart_toEndOf="@id/guideline_vertical_main"
+		app:layout_constraintTop_toBottomOf="@id/guideline_top" />
+
+	<androidx.recyclerview.widget.RecyclerView
+		android:id="@+id/layout_menu_pages"
+		android:layout_width="0dp"
+		android:layout_height="0dp"
+		android:background="@color/ANDROID_BUTTON_BACKGROUND"
+		android:orientation="horizontal"
+		app:layout_constraintBottom_toTopOf="@id/guideline_bottom_bar_top"
+		app:layout_constraintEnd_toEndOf="parent"
+		app:layout_constraintStart_toEndOf="@id/guideline_vertical_main"
+		app:layout_constraintTop_toBottomOf="@id/guideline_horizontal_menu" />
+
+
+	<!-- BOTTOM BAR BUTTONS (Reverted to LinearLayout for simplicity and reliability) -->
 	<LinearLayout
 		android:id="@+id/bottom_bar"
 		android:layout_width="0dp"
-		android:layout_height="60dp"
+		android:layout_height="0dp"
 		android:background="@color/ANDROID_TABLE_BACKGROUND"
 		android:orientation="horizontal"
-		app:layout_constraintStart_toStartOf="parent"
+		app:layout_constraintBottom_toBottomOf="parent"
 		app:layout_constraintEnd_toEndOf="parent"
-		app:layout_constraintBottom_toBottomOf="parent">
+		app:layout_constraintStart_toStartOf="parent"
+		app:layout_constraintTop_toTopOf="@id/guideline_bottom_bar_top">
 
 		<ImageButton
 			android:id="@+id/plus_one"
@@ -23,6 +135,7 @@
 			android:layout_height="match_parent"
 			android:layout_margin="4dp"
 			android:layout_weight="10"
+			app:layout_constraintDimensionRatio="1:1"
 			android:background="@color/ANDROID_BUTTON_BACKGROUND"
 			android:onClick="onButtonPlus1"
 			android:src="@drawable/plus_yellow" />
@@ -33,6 +146,7 @@
 			android:layout_height="match_parent"
 			android:layout_margin="4dp"
 			android:layout_weight="10"
+			app:layout_constraintDimensionRatio="1:1"
 			android:background="@color/ANDROID_BUTTON_BACKGROUND"
 			android:onClick="on_button_minus1"
 			android:src="@drawable/min_yellow" />
@@ -43,6 +157,7 @@
 			android:layout_height="match_parent"
 			android:layout_margin="4dp"
 			android:layout_weight="10"
+			app:layout_constraintDimensionRatio="1:1"
 			android:background="@color/ANDROID_BUTTON_BACKGROUND"
 			android:onClick="on_button_portion"
 			android:src="@drawable/half_circle_yellow" />
@@ -53,6 +168,7 @@
 			android:layout_height="match_parent"
 			android:layout_margin="4dp"
 			android:layout_weight="10"
+			app:layout_constraintDimensionRatio="1:1"
 			android:background="@color/ANDROID_BUTTON_BACKGROUND"
 			android:onClick="on_button_remove"
 			android:src="@drawable/eraser_yellow" />
@@ -66,6 +182,7 @@
 			android:layout_weight="10"
 			android:background="@color/ANDROID_BUTTON_BACKGROUND"
 			android:gravity="center"
+			app:layout_constraintDimensionRatio="1:1"
 			android:onClick="on_button_language"
 			android:src="@drawable/languages_yellow" />
 
@@ -78,118 +195,10 @@
 			android:layout_weight="15"
 			android:background="@color/ANDROID_BUTTON_BACKGROUND"
 			android:gravity="center"
-			android:lines="2"
+			app:layout_constraintDimensionRatio="1:1"
 			android:onClick="onButtonEnter"
 			android:src="@drawable/enter_yellow"
 			android:textColor="@color/ANDROID_BUTTON_TEXT" />
 	</LinearLayout>
-
-	<!-- Main Content Area: Above the bottom bar -->
-	<androidx.constraintlayout.widget.ConstraintLayout
-		android:id="@+id/main_content"
-		android:layout_width="0dp"
-		android:layout_height="0dp"
-		app:layout_constraintStart_toStartOf="parent"
-		app:layout_constraintEnd_toEndOf="parent"
-		app:layout_constraintTop_toTopOf="parent"
-		app:layout_constraintBottom_toTopOf="@id/bottom_bar">
-
-		<!-- Left Column (Order List) - 40% -->
-		<androidx.constraintlayout.widget.ConstraintLayout
-			android:id="@+id/left_column"
-			android:layout_width="0dp"
-			android:layout_height="0dp"
-			android:background="@color/COLOUR_ORDER_BACKGROUND_EMPTY"
-			app:layout_constraintStart_toStartOf="parent"
-			app:layout_constraintTop_toTopOf="parent"
-			app:layout_constraintBottom_toBottomOf="parent"
-			app:layout_constraintWidth_percent="0.40">
-
-			<!-- Table Name Header -->
-			<TextView
-				android:id="@+id/page_order_table_name"
-				android:layout_width="0dp"
-				android:layout_height="wrap_content"
-				android:background="@color/COLOUR_SELECTED_BACKGROUND"
-				android:text="TAFEL 15"
-				android:textColor="@color/COLOUR_SELECTED_TEXT"
-				app:layout_constraintStart_toStartOf="parent"
-				app:layout_constraintEnd_toEndOf="parent"
-				app:layout_constraintTop_toTopOf="parent" />
-
-			<!-- Total Price Footer -->
-			<LinearLayout
-				android:id="@+id/total_price_footer"
-				android:layout_width="0dp"
-				android:layout_height="60dp"
-				android:background="@color/COLOUR_TOTAL_BACKGROUND"
-				android:orientation="horizontal"
-				app:layout_constraintStart_toStartOf="parent"
-				app:layout_constraintEnd_toEndOf="parent"
-				app:layout_constraintBottom_toBottomOf="parent">
-
-				<TextView
-					android:id="@+id/total_price"
-					android:layout_width="match_parent"
-					android:layout_height="60dp"
-					android:layout_margin="1dp"
-					android:background="@color/COLOUR_TOTAL_BACKGROUND"
-					android:gravity="center"
-					android:text="0,00"
-					android:textColor="@color/COLOUR_TOTAL_TEXT" />
-			</LinearLayout>
-
-			<!-- Transaction Items List -->
-			<androidx.recyclerview.widget.RecyclerView
-				android:id="@+id/layout_transaction_items"
-				android:layout_width="0dp"
-				android:layout_height="0dp"
-				app:layout_constraintStart_toStartOf="parent"
-				app:layout_constraintEnd_toEndOf="parent"
-				app:layout_constraintTop_toBottomOf="@id/page_order_table_name"
-				app:layout_constraintBottom_toTopOf="@id/total_price_footer" />
-
-		</androidx.constraintlayout.widget.ConstraintLayout>
-
-		<!-- Right Column (Menu Items) - 60% -->
-		<LinearLayout
-			android:id="@+id/right_column"
-			android:layout_width="0dp"
-			android:layout_height="0dp"
-			android:background="@color/ANDROID_BUTTON_BACKGROUND"
-			android:orientation="vertical"
-			app:layout_constraintStart_toEndOf="@id/left_column"
-			app:layout_constraintEnd_toEndOf="parent"
-			app:layout_constraintTop_toTopOf="parent"
-			app:layout_constraintBottom_toBottomOf="parent"
-			app:layout_constraintWidth_percent="0.60">
-
-			<ImageButton
-				android:id="@+id/btn_back"
-				android:layout_width="wrap_content"
-				android:layout_height="48dp"
-				android:layout_gravity="right"
-				android:clickable="false"
-				android:background="?attr/selectableItemBackgroundBorderless"
-				android:contentDescription="back button"
-				android:src="@drawable/back_yellow" />
-
-			<androidx.recyclerview.widget.RecyclerView
-				android:id="@+id/layout_menu_items"
-				android:layout_width="match_parent"
-				android:layout_height="0dp"
-				android:layout_weight="1"
-				android:orientation="horizontal" />
-
-			<androidx.recyclerview.widget.RecyclerView
-				android:id="@+id/layout_menu_pages"
-				android:layout_width="match_parent"
-				android:layout_height="0dp"
-				android:layout_weight="1"
-				android:orientation="horizontal" />
-
-		</LinearLayout>
-
-	</androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

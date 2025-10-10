@@ -16,6 +16,7 @@ import tech.hha.microfood.databinding.AdapterTransactionItemBinding
 class TransactionItemsAdapter(
     private val onTransactionItemSelected: (CItem) -> Unit,
     colourOrderText : Int,
+    colourOrderSelectedText : Int,
     colourOrderBackgroundSelected : Int,
     colourOrderBackgroundOdd : Int,
     colourOrderBackgroundEven : Int
@@ -24,6 +25,7 @@ class TransactionItemsAdapter(
     private val global = Global.getInstance()
     private val m_cursor = CCursor(global.cursor.position)
     private val m_colourOrderText = colourOrderText
+    private val m_colourOrderSelectedText = colourOrderSelectedText
     private val m_colourOrderBackgroundSelected = colourOrderBackgroundSelected
     private val m_colourOrderBackgroundOdd = colourOrderBackgroundOdd
     private val m_colourOrderBackgroundEven = colourOrderBackgroundEven
@@ -78,62 +80,16 @@ class TransactionItemsAdapter(
 
         val item: CItem? = global.transaction?.get(position)
         holder.binding.transactionOrder.setBackgroundColor(getBackgroundColour(position))
+        val colour = getTextColour(position)
+        holder.binding.transactionItem.setTextColor(colour)
+        holder.binding.transactionPrice.setTextColor(colour)
         // ... other setup ...
         if (item == null)
         {
             setupEmptyItem(holder, position)
         } else
         {
-            setupItemContent(holder, item, m_colourOrderText)
-        }
-        // Set click listener
-        holder.binding.root.setOnClickListener {
-            Log.i("TIA", "Item clicked at position: $position")
-            if (item != null)
-            {
-                onTransactionItemSelected(item)
-            } else
-            {
-                Log.i("TIA", "Empty item clicked at position: $position")
-                // You might want to handle empty item clicks differently
-            }
-        }
-    }
-
-
-    fun onBindViewHolder2(holder: TransactionItemViewHolder, position: Int)
-    {
-        // Clear previous click listener to avoid duplicates
-        holder.binding.root.setOnClickListener(null)
-
-        // Remove this line - it's causing all items to appear "selected"
-        // holder.binding.transactionOrder.isSelected = true
-
-        // Safe transaction access
-        var item: CItem? = null
-        val transaction = global.transaction
-        if (transaction == null)
-        {
-            setupEmptyItem(holder, position)
-        }
-        else
-        {
-            item = transaction[position]
-            val background = getBackgroundColour(position)
-
-            holder.binding.transactionOrder.setBackgroundColor(background)
-            holder.binding.transactionItem.isContextClickable = false
-
-            // Set selection state based on cursor position, not force all to true
-            holder.binding.transactionOrder.isSelected = false
-
-            if (item == null)
-            {
-                setupEmptyItem(holder, position)
-            } else
-            {
-                setupItemContent(holder, item, m_colourOrderText)
-            }
+            setupItemContent(holder, item)
         }
         // Set click listener
         holder.binding.root.setOnClickListener {
@@ -154,12 +110,8 @@ class TransactionItemsAdapter(
         holder.binding.transactionPrice.text = ""
     }
 
-    private fun setupItemContent(holder: TransactionItemViewHolder, item: CItem,
-                                 colourOrderText : Int)
+    private fun setupItemContent(holder: TransactionItemViewHolder, item: CItem)
     {
-        val tc = colourOrderText //  colourCFG.getTextColour("COLOUR_ORDER_TEXT")
-        holder.binding.transactionItem.setTextColor(tc)
-
         val quantityStr = "\n${item.getQuantity()}x "
         holder.binding.transactionItem.text = if (global.isChinese())
         {
@@ -170,7 +122,15 @@ class TransactionItemsAdapter(
         }
 
         holder.binding.transactionPrice.text = item.getTotal().str()
-        holder.binding.transactionPrice.setTextColor(tc)
+    }
+
+    private fun getTextColour(position: Int): Int
+    {
+        return when
+        {
+            m_cursor.position == position -> m_colourOrderSelectedText
+            else -> m_colourOrderText
+        }
     }
 
     private fun getBackgroundColour(position: Int): Int

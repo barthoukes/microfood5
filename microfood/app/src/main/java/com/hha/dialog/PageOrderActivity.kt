@@ -45,6 +45,10 @@ class PageOrderActivity : AppCompatActivity() {
     private val m_colourOrderBackgroundOdd = colourCFG.getBackgroundColour("COLOUR_ORDER_BACKGROUND_ODD")
     private val m_colourOrderBackgroundEven = colourCFG.getBackgroundColour("COLOUR_ORDER_BACKGROUND_EVEN")
 
+    private val m_colourOrderSelectedText = colourCFG.getBackgroundColour("COLOUR_ORDER_SELECTED_TEXT")
+
+    private val m_colourPage = colourCFG.getBackgroundColour("COLOUR_GROUP_BACKGROUND")
+    private val m_colourSelectedPage = colourCFG.getBackgroundColour("SELECTED_GROUP_BACKGROUND")
     var itemWidth = 24
     val groups = CFG.getValue("display_groups")
     val columns = CFG.getValue("display_groups_horizontal")
@@ -168,7 +172,10 @@ class PageOrderActivity : AppCompatActivity() {
     private fun createMenuPagesAdapter()
     {
         // 2. Initialize adapter
-        m_menuPagesAdapter = MenuPagesAdapter(m_menuPages, columns, rows) { selectedPage ->
+        m_menuPagesAdapter = MenuPagesAdapter(
+            m_menuPages, columns, rows, m_colourPage, m_colourSelectedPage)
+        {
+            selectedPage ->
             handlePageSelection(selectedPage)
         }.apply {
             // Set dynamic height based on screen size
@@ -236,8 +243,9 @@ class PageOrderActivity : AppCompatActivity() {
     {
         // 2. Initialize adapter
         m_transactionItemsAdapter = TransactionItemsAdapter(
-        {  selectedTransactionItem -> handleTransactionItem(selectedTransactionItem) },
+        {  selectedTransactionItem -> onClickTransactionItem(selectedTransactionItem) },
            m_colourOrderText,
+            m_colourOrderSelectedText,
             m_colourOrderBackgroundSelected,
             m_colourOrderBackgroundOdd,
             m_colourOrderBackgroundEven
@@ -257,6 +265,7 @@ class PageOrderActivity : AppCompatActivity() {
     {
         if (selectedPage != global.menuPageId)
         {
+            m_menuPagesAdapter.selectPage(selectedPage)
             loadPageItems(selectedPage)
         }
     }

@@ -2,12 +2,12 @@
 <LinearLayout
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	android:id="@+id/menuPageButton"
-	android:layout_width="20dp"
+	android:layout_width="match_parent"
 	android:layout_height="match_parent"
 	android:orientation="vertical"
-	android:background="@drawable/border_shadow"
+	android:background="@color/SELECTED_GROUP_BACKGROUND_BORDER"
 	android:gravity="center"
-	android:padding="2dp">
+	android:padding="0dp">
 	<TextView
 		android:id="@+id/item_name"
 		android:layout_width="wrap_content"
