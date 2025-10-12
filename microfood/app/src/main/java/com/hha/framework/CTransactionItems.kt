@@ -8,6 +8,7 @@ import com.hha.common.OrderLevel
 import com.hha.grpc.GrpcServiceFactory
 import com.hha.resources.Global
 import com.hha.types.CMoney
+import com.hha.types.EAccess
 import com.hha.types.EDeletedStatus
 import com.hha.types.EEnterState
 import com.hha.types.EItemLocation
@@ -23,6 +24,7 @@ import kotlin.math.max
 class CTransactionItems : Iterable<CSortedItem> {
     var m_state: EEnterState = EEnterState.ENTER_ITEM_STATE
     val global = Global.getInstance()
+    val CFG = global.CFG
     var m_items = CSortedItemList()
     var change2spice = false
     var m_clusterId: Short = -1
@@ -302,6 +304,10 @@ class CTransactionItems : Iterable<CSortedItem> {
         var page = 0
         var clusters = 0
         //CsqlTaxRateIterator itax
+        if (m_allowChanges ==false || m_viewMode !=EViewMode.VIEW_MODE_TRANSACTION)
+        {
+            return false;
+        }
 
         val menuCardId = global.menuCardId
         if (menuItem.isVisible == ItemVisible.ITEM_INVISIBLE && !m_clusterIsRunning) {
@@ -756,109 +762,235 @@ class CTransactionItems : Iterable<CSortedItem> {
 
     fun addQuantity( cursor: CCursor, timeFrameId : CTimeFrameIndex, quantity: Int): Boolean
     {
-        if (cursor.position < 0 || cursor.position >= m_items.size)
+        // Increase in items.
+        var mutableQuantity = quantity
+        val item = m_items.get(cursor.position) ?: return false
+
+        var why = EDeletedStatus.DELETE_NOT
+        var oldTimeFrame = ETimeFrameIndex.TIME_FRAME_UNDEFINED
+
+        if ( mutableQuantity<0)
         {
-            Log.i("CTransactionItems", "addQuantity  Cursor overflow!!")
-            return false;
+            why = when {
+                timeFrameId.value == item.getTimeFrameIndex() -> EDeletedStatus.DELETE_REMOVE_IMMEDIATE
+                else -> EDeletedStatus.DELETE_REMOVE_AFTER_PRINTING
+            }
+            oldTimeFrame = item.getTimeFrameIndex()
+        }
+        else if (item.getItemLevel() == EOrderLevel.LEVEL_SEPARATOR)
+        {
+            return false
+        }
+        val maxq =9999
+        if ( item.getQuantity() + mutableQuantity > maxq)
+        {
+            mutableQuantity =maxq - item.getQuantity()
+        }
+        if ( item.getQuantity() + mutableQuantity <- maxq)
+        {
+            mutableQuantity =-maxq - item.getQuantity()
+        }
+        if ( item.getQuantity() + mutableQuantity ==0)
+        {
+            val level = CFG.getValue("entry_negative_quantity")
+            if ( level==0  || (level==1 && global.access == EAccess.ACCESS_EMPLOYEE_KEY)
+                || (item.getLevel() != EOrderLevel.LEVEL_ITEM
+                   && item.getLevel() != EOrderLevel.LEVEL_COMBINE_ALL
+            && item.getLevel() != EOrderLevel.LEVEL_FREE
+            && item.getLevel() != EOrderLevel.LEVEL_MINUTES_PRICE
+            && item.getLevel() != EOrderLevel.LEVEL_PERSON))
+            {
+                return deleteItem( cursor, timeFrameId, why);
+            }
         }
 
-        // Increase in items.
-        assert(false)
-        return false
+        item->addQuantity(quantity);
+
+        // Increase in database.
+        int unitPrice = item->getUnitPrice().Long();
+        int statiegeld = item->getStatiegeldPerPiece();
+
+        m_pItemsDb->createItem( item->menuItemId, m_transactionId, item->sequence,
+        item->subSequence, item->subSubSequence, quantity, item->level,
+        item->group, item->page, item->parts,
+        unitPrice, item->originalAmount, item->originalHalfAmount, item->tax,
+        item->locations, timeFrameId, item->deviceId,
+        item->clusterId, PAID_NO, statiegeld, why, oldTimeFrame);
+        if (item->twinItemId >0)
+        {
+            int quantity = item->getQuantity();
+            m_pItemsDb->setTwinQuantity(m_transactionId, item->sequence,
+            item->subSequence, item->subSubSequence, quantity, item->parts);
+        }
+
+        // Remove extras and spices for normal items, except when we remove a spice.
+        if ( (item->level ==LEVEL_ITEM || item->level ==LEVEL_FREE)
+        && CFG("transaction_item_tree")==0 && CFG("entry_extra_main_quantity"))
+        {
+            // Add all the Spices and Extras also the same amount, remove them if 0!
+            int i;
+            for ( i=0; i<(int)m_itemList.size();)
+            {
+                CitemPtr subItem =m_itemList[i];
+                if ( subItem->sequence ==item->sequence &&
+                (subItem->level ==LEVEL_EXTRA || subItem->level ==LEVEL_SPICES))
+                {
+                    if ( why !=DELETE_REMOVE_IMMEDIATE)
+                    {
+                        oldTimeFrame =subItem->timeFrameId;
+                    }
+                    subItem->addQuantity(quantity);
+                    if ( subItem->getQuantity() ==0)
+                    {
+                        deleteItem( i, timeFrameId, why);
+                        continue;
+                    }
+                    statiegeld = subItem->getStatiegeldPerPiece();
+                    unitPrice = subItem->getUnitPrice().Long();
+                    m_pItemsDb->createItem( subItem->menuItemId, m_transactionId, subItem->sequence,
+                    subItem->subSequence, subItem->subSubSequence, quantity, subItem->level,
+                    subItem->group, subItem->page, subItem->parts,
+                    unitPrice, subItem->originalAmount, subItem->originalHalfAmount, subItem->tax,
+                    subItem->locations, timeFrameId, subItem->deviceId, subItem->clusterId, PAID_NO,
+                    statiegeld, why, oldTimeFrame);
+                }
+                i++;
+            }
+        }
+        return true;
     }
-        //        CitemPtr item=m_itemList[cursor];
-//        EdeletedStatus why =DELETE_NOT;
-//        EtimeFrameIndex oldTimeFrame =TIME_FRAME_UNDEFINED;
-//
-//        if ( quantity<0)
-//        {
-//            why =(timeFrameId==item->timeFrameId) ?
-//            DELETE_REMOVE_IMMEDIATE:DELETE_QUANTITY_AFTER_PRINTING;
-//            oldTimeFrame =item->timeFrameId;
-//        }
-//        else if (item->level ==LEVEL_SEPARATOR)
-//        {
-//            return false;
-//        }
-//        int maxq =9999;
-//        if ( item->getQuantity()+quantity >maxq)
-//        {
-//            quantity =maxq-item->getQuantity();
-//        }
-//        if ( item->getQuantity()+quantity <-maxq)
-//        {
-//            quantity =-maxq-item->getQuantity();
-//        }
-//        if ( item->getQuantity()+quantity ==0)
-//        {
-//            int level =CFG("entry_negative_quantity");
-//            Eaccess access =personnel.getAccess(-1);
-//            if ( level==0 || access ==NO_KEY || (level==1 && access==EMPLOYEE_KEY)
-//                || (item->level !=LEVEL_ITEM && item->level !=LEVEL_COMBINE_ALL
-//            && item->level !=LEVEL_FREE
-//            && item->level !=LEVEL_MINUTES_PRICE && item->level !=LEVEL_PERSON))
-//            {
-//                return deleteItem( cursor, timeFrameId, why);
-//            }
-//        }
-//
-//        item->addQuantity(quantity);
-//        customerDisplay( cursor);
-//
-//        // Increase in database.
-//        int unitPrice = item->getUnitPrice().Long();
-//        int statiegeld = item->getStatiegeldPerPiece();
-//
-//        m_pItemsDb->createItem( item->menuItemId, m_transactionId, item->sequence,
-//        item->subSequence, item->subSubSequence, quantity, item->level,
-//        item->group, item->page, item->parts,
-//        unitPrice, item->originalAmount, item->originalHalfAmount, item->tax,
-//        item->locations, timeFrameId, item->deviceId,
-//        item->clusterId, PAID_NO, statiegeld, why, oldTimeFrame);
-//        if (item->twinItemId >0)
-//        {
-//            int quantity = item->getQuantity();
-//            m_pItemsDb->setTwinQuantity(m_transactionId, item->sequence,
-//            item->subSequence, item->subSubSequence, quantity, item->parts);
-//        }
-//
-//        // Remove extras and spices for normal items, except when we remove a spice.
-//        if ( (item->level ==LEVEL_ITEM || item->level ==LEVEL_FREE)
-//        && CFG("transaction_item_tree")==0 && CFG("entry_extra_main_quantity"))
-//        {
-//            // Add all the Spices and Extras also the same amount, remove them if 0!
-//            int i;
-//            for ( i=0; i<(int)m_itemList.size();)
-//            {
-//                CitemPtr subItem =m_itemList[i];
-//                if ( subItem->sequence ==item->sequence &&
-//                (subItem->level ==LEVEL_EXTRA || subItem->level ==LEVEL_SPICES))
-//                {
-//                    if ( why !=DELETE_REMOVE_IMMEDIATE)
-//                    {
-//                        oldTimeFrame =subItem->timeFrameId;
-//                    }
-//                    subItem->addQuantity(quantity);
-//                    if ( subItem->getQuantity() ==0)
-//                    {
-//                        deleteItem( i, timeFrameId, why);
-//                        continue;
-//                    }
-//                    statiegeld = subItem->getStatiegeldPerPiece();
-//                    unitPrice = subItem->getUnitPrice().Long();
-//                    m_pItemsDb->createItem( subItem->menuItemId, m_transactionId, subItem->sequence,
-//                    subItem->subSequence, subItem->subSubSequence, quantity, subItem->level,
-//                    subItem->group, subItem->page, subItem->parts,
-//                    unitPrice, subItem->originalAmount, subItem->originalHalfAmount, subItem->tax,
-//                    subItem->locations, timeFrameId, subItem->deviceId, subItem->clusterId, PAID_NO,
-//                    statiegeld, why, oldTimeFrame);
-//                }
-//                i++;
-//            }
-//        }
-//        return true;
-//    }
-//
+
+    /*----------------------------------------------------------------------------*/
+    /** @brief Remove one item.
+     *  @param cursor Where on screen?
+     *  @param timeFrameId What time?
+     *  @param why Reason to delete.
+     */
+    fun deleteItem( cursor : Int, timeFrameId: ETimeFrameIndex, why: EDeletedStatus): Boolean
+    {
+        if ( cursor<0 || cursor >= m_items.size())
+        {
+            Log.e( "CTI", "DeleteItem  Cursor overflow!!")
+            return false
+        }
+        val item : CItem = m_items.getItem(cursor) ?: return false
+        val statiegeld = item.getStatiegeldPerPiece()
+        val unitPrice = item.getUnitPrice()
+        val quantity = item.getQuantity()
+        deleteTwinItem(item, why)
+        switch (item->level)
+        {
+            // Remove item with sub-items and sub-sub-items
+            case LEVEL_INFO:
+            case LEVEL_SYSTEM:
+            case LEVEL_ITEMGROUP:
+            case LEVEL_NOTHING:
+            case LEVEL_SEPARATOR:
+            case LEVEL_ZERO:
+            case LEVEL_ITEM:
+            case LEVEL_FREE:
+            case LEVEL_TWIN_ITEM: // Twin item should not happen.
+            case LEVEL_MINUTES_PRICE:
+            case LEVEL_PERSON:
+            case LEVEL_CHARITY:
+            case LEVEL_COMBINE_ALL:
+            // Remove in database.
+            m_pItemsDb->createItem( item->menuItemId, m_transactionId, item->sequence,
+            item->subSequence, item->subSubSequence, -quantity,
+            item->level, item->group, item->page, item->parts,
+            unitPrice, item->originalAmount, item->originalHalfAmount, item->tax,
+            item->locations, timeFrameId, item->deviceId,
+            item->clusterId, PAID_NO, statiegeld, why, item->timeFrameId);
+            m_itemList.erase( m_itemList.begin()+cursor);
+            while ( cursor<(int)m_itemList.size())
+            {
+                item =m_itemList[cursor];
+                unitPrice = item->getUnitPrice().Long();
+                quantity = item->getQuantity();
+                statiegeld = item->getStatiegeldPerPiece();
+                if ( item->level ==LEVEL_SPICES || item->level ==LEVEL_EXTRA || item->level==LEVEL_SUB_EXTRA || item->level==LEVEL_SUB_ITEM || item->level==LEVEL_SUB_SPICES)
+                {
+                    deleteTwinItem(item, why);
+                    m_pItemsDb->createItem( item->menuItemId, m_transactionId, item->sequence,
+                    item->subSequence, item->subSubSequence, -quantity,
+                    item->level, item->group, item->page, item->parts,
+                    unitPrice, item->originalAmount, item->originalHalfAmount, item->tax,
+                    item->locations, timeFrameId, item->deviceId,
+                    item->clusterId, PAID_NO, statiegeld, why, item->timeFrameId);
+                    m_itemList.erase( m_itemList.begin()+cursor);
+                }
+                else break;
+            }
+            break;
+
+            // Remove item with sub-items
+            case LEVEL_EXTRA:
+            case LEVEL_SPICES:
+            m_pItemsDb->createItem( item->menuItemId, m_transactionId, item->sequence,
+            item->subSequence, item->subSubSequence, -quantity,
+            item->level, item->group, item->page, item->parts,
+            unitPrice, item->originalAmount, item->originalHalfAmount, item->tax,
+            item->locations, timeFrameId, item->deviceId,
+            item->clusterId, PAID_NO, statiegeld, why, item->timeFrameId);
+            m_itemList.erase( m_itemList.begin()+cursor);
+            while ( cursor<(int)m_itemList.size())
+            {
+                item = m_itemList[cursor];
+                statiegeld = item->getStatiegeldPerPiece();
+                unitPrice = item->getUnitPrice().Long();
+                quantity = item->getQuantity();
+
+                deleteTwinItem(item, why);
+                if ( item->level ==LEVEL_SUB_EXTRA || item->level==LEVEL_SUB_ITEM || item->level==LEVEL_SUB_SPICES)
+                {
+                        m_pItemsDb->createItem( item->menuItemId, m_transactionId, item->sequence,
+                    item->subSequence, item->subSubSequence, -quantity, item->level,
+                    item->group, item->page, item->parts,
+                    unitPrice, item->originalAmount, item->originalHalfAmount, item->tax,
+                    item->locations, timeFrameId, item->deviceId,
+                    item->clusterId, PAID_NO, statiegeld, why, item->timeFrameId);
+                    m_itemList.erase( m_itemList.begin()+cursor);
+                }
+                else break;
+            }
+            break;
+
+            // Remove item
+            case LEVEL_SUB_EXTRA:
+            case LEVEL_SUB_ITEM:
+            case LEVEL_SUB_SPICES:
+            case LEVEL_OUTOFSTOCK:
+            m_pItemsDb->createItem( item->menuItemId, m_transactionId, item->sequence,
+            item->subSequence, item->subSubSequence, -quantity,
+            item->level, item->group, item->page, item->parts,
+            unitPrice, item->originalAmount, item->originalHalfAmount, item->tax,
+            item->locations, timeFrameId, item->deviceId,
+            item->clusterId, PAID_NO, statiegeld,
+            why, (EtimeFrameIndex)item->timeFrameId);
+            m_itemList.erase( m_itemList.begin()+cursor);
+            break;
+
+            case LEVEL_ASK_CLUSTER:
+            break;
+        }
+        return true;
+    }
+
+    /*----------------------------------------------------------------------------*/
+    /** @brief Delete the twin item if any.
+     */
+    private fun deleteTwinItem(item : CItem, why: EDeletedStatus)
+    {
+        if (item.twinItemId >0)
+        {
+            val itemsDb = GrpcServiceFactory.createDailyTransactionItemService()
+            val whys = EDeletedStatus.toDeletedStatus(why)
+            itemsDb.deleteTwinItem(item.twinItemId.toLong(),
+                global.transactionId.toLong(),
+                item.sequence, item.subSequence,
+                item.subSubSequence, whys)
+        }
+    }
 
     fun getTotalAmount(): CMoney
     {

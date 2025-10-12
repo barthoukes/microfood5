@@ -75,7 +75,7 @@ class CSortedItem : Iterable<CItem> {
         return items[0].locations
     }
 
-    fun merge(new_item : CSortedItem) : Boolean
+   fun merge(new_item : CSortedItem) : Boolean
     {
         // Merge items for same sequence!
         items[0].merge( new_item.items[0]);
@@ -191,6 +191,7 @@ class CSortedItem : Iterable<CItem> {
         return total
     }
 
+    fun getItemLevel(): EOrderLevel = items[0].level
     fun getQuantity(): Int = items[0].getQuantity()
     fun getSign(): Int = when {
         items[0].getQuantity() < 0 -> -1

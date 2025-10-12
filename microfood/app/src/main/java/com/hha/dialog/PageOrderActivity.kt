@@ -138,7 +138,7 @@ class PageOrderActivity : AppCompatActivity() {
     @Suppress("UNUSED_PARAMETER")
     fun onButtonPlus1(view: View)
     {
-        m_transaction.plus1();
+        m_transaction.addOneToCursorPosition();
     }
 
     private fun refreshAllData() {
@@ -276,8 +276,18 @@ class PageOrderActivity : AppCompatActivity() {
 
         // Update the state
         val newCursor = m_transaction.getCursor(selectedTransactionItem)
-        global.cursor.set(newCursor)
-        m_transactionItemsAdapter.setCursor(global.cursor)
+        if (newCursor == global.cursor.position)
+        {
+            // Add one item
+            m_transaction.addOneToCursorPosition()
+        }
+        else
+        {
+            // Set cursor
+            global.cursor.set(newCursor)
+            m_transactionItemsAdapter.setCursor(global.cursor)
+        }
+
 
         // Also, scroll to the newly added item so the user can see it
         binding.layoutTransactionItems.scrollToPosition(newCursor)
@@ -291,6 +301,7 @@ class PageOrderActivity : AppCompatActivity() {
         Log.d("CLICK", "MenuItem clicked: ${selectedMenuItem.localName}")
         if (m_transaction.addTransactionItem(selectedMenuItem, clusterId))
         {
+            m_transactionItemsAdapter.setCursor(global.cursor)
             //m_menuItemsAdapter.notifyDataSetChanged()
             m_transactionItemsAdapter.notifyDataSetChanged()
             /// binding.totalPrice.text = m_transaction.getTotalAmount().str()

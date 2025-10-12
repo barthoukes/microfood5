@@ -11,6 +11,7 @@ import com.hha.framework.CTimeFrameIndex
 import com.hha.framework.CTransaction
 import com.hha.grpc.GrpcServiceFactory
 import com.hha.resources.Configuration
+import com.hha.types.EAccess
 import com.hha.types.ETaal
 
 class Global private constructor() {
@@ -34,6 +35,7 @@ class Global private constructor() {
     var clusterNoItems = false
     var showAllprices = false
     var showAllTimes = false
+    var access = EAccess.ACCESS_EMPLOYEE_KEY
     public val CFG: Configuration = Configuration()
     val userCFG: Configuration = Configuration()
     val fontCFG: Configuration = Configuration()

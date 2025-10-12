@@ -67,6 +67,20 @@ class CSortedItemList : Iterable<CSortedItem> {
     // Override the [] operator for read access
     operator fun get(index: Int): CSortedItem = m_sortedItems[index]
 
+    fun getItem(index: Int): CItem?
+    {
+        var mutableIndex = index
+        for (item in m_sortedItems)
+        {
+            if (item.size < mutableIndex)
+            {
+                return item.get(mutableIndex)
+            }
+            mutableIndex -= item.size
+        }
+        return null
+    }
+
     // Override size property
     val size: Int
         get() {

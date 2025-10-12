@@ -207,21 +207,23 @@ class CTransaction : Iterable<CSortedItem> {
         return ETransType.useTakeawayPrices(transType)
     }
 
-    fun plus1()
+    fun addOneToCursorPosition()
     {
         if (size == 0) return
         var y = m_global.cursor.position
         var item = get(y) ?: get(--y) ?: return
         if (item.deletedStatus != EDeletedStatus.DELETE_NOT) return
-        add(y, 1)
-    }
-
-    fun add(cursor: Int, quantity: Int) {
-
+        m_items.addQuantity(CCursor(y), -1)
     }
 
     fun minus1()
-    {}
+    {
+        if (size == 0) return
+        var y = m_global.cursor.position
+        var item = get(y) ?: get(--y) ?: return
+        if (item.deletedStatus != EDeletedStatus.DELETE_NOT) return
+        m_items.addQuantity(CCursor(y), -1)
+    }
 
     val empty : Boolean
         get() = m_items.empty
