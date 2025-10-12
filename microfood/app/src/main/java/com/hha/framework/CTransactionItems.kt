@@ -1,24 +1,21 @@
 package com.hha.framework
 
 import EViewMode
-import android.R
 import android.util.Log
 import com.hha.common.ItemVisible
-import com.hha.common.OrderLevel
+import com.hha.common.Payed
 import com.hha.grpc.GrpcServiceFactory
 import com.hha.resources.Global
 import com.hha.types.CMoney
 import com.hha.types.EAccess
 import com.hha.types.EDeletedStatus
 import com.hha.types.EEnterState
-import com.hha.types.EItemLocation
 import com.hha.types.ENameType
 import com.hha.types.EOrderLevel
 import com.hha.types.EPayed
 import com.hha.types.ETaal
 import com.hha.types.ETimeFrameIndex
 import com.hha.types.ETreeRow
-import kotlin.math.max
 
 @Suppress("VariableNaming")
 class CTransactionItems : Iterable<CSortedItem> {
@@ -43,8 +40,8 @@ class CTransactionItems : Iterable<CSortedItem> {
 
     // Add this iterator implementation
     //override fun iterator(): Iterator<CSortedItem> = m_items.iterator()
-    operator fun get(index: Int): CSortedItem {
-        return m_items[index]
+    fun getSortedItem(index: Int): CSortedItem {
+        return m_items.getSortedItem(index)
     }
 
     fun getCItem(position: Int): CItem? {
@@ -637,7 +634,7 @@ class CTransactionItems : Iterable<CSortedItem> {
         quantity: Int, level: EOrderLevel, group: Int, page: Int, parts: Int,
         unitPrice: CMoney, originalPrice: CMoney, originalHalfPrice: CMoney,
         taxPercentage: Double, locations: Int,
-        timeFrameId: CTimeFrameIndex, deviceId: Short, clusterId: Short,
+        timeFrameId: ETimeFrameIndex, deviceId: Short, clusterId: Short,
         isPaid: EPayed, statiegeld: CMoney
     ): Boolean {
         var cursor = cursr
@@ -684,7 +681,7 @@ class CTransactionItems : Iterable<CSortedItem> {
         }
 
         val orderLevel = EOrderLevel.toOrderLevel(level)
-        val timeFrame = timeFrameId.value.toInt()
+        val timeFrame = timeFrameId.toInt()
         val paid = EPayed.toPayed(isPaid)
         itemsDb.createItem(menuItem.menuItemId, global.transactionId.toLong(),
             sequence, subSequence, subSubSequence, quantity, orderLevel, group, page,
@@ -760,24 +757,24 @@ class CTransactionItems : Iterable<CSortedItem> {
         return addQuantity( cursor, tfi, quantity);
     }
 
-    fun addQuantity( cursor: CCursor, timeFrameId : CTimeFrameIndex, quantity: Int): Boolean
+    fun addQuantity( cursor: CCursor, timeFrameId : ETimeFrameIndex, quantity: Int): Boolean
     {
         // Increase in items.
         var mutableQuantity = quantity
-        val item = m_items.get(cursor.position) ?: return false
+        val item: CItem = m_items.getItem(cursor) ?: return false
 
         var why = EDeletedStatus.DELETE_NOT
-        var oldTimeFrame = ETimeFrameIndex.TIME_FRAME_UNDEFINED
+        var oldTimeFrame = ETimeFrameIndex(ETimeFrameIndex.TIME_FRAME_UNDEFINED)
 
         if ( mutableQuantity<0)
         {
             why = when {
-                timeFrameId.value == item.getTimeFrameIndex() -> EDeletedStatus.DELETE_REMOVE_IMMEDIATE
+                timeFrameId == item.timeFrameId -> EDeletedStatus.DELETE_REMOVE_IMMEDIATE
                 else -> EDeletedStatus.DELETE_REMOVE_AFTER_PRINTING
             }
-            oldTimeFrame = item.getTimeFrameIndex()
+            oldTimeFrame = item.timeFrameId
         }
-        else if (item.getItemLevel() == EOrderLevel.LEVEL_SEPARATOR)
+        else if (item.level == EOrderLevel.LEVEL_SEPARATOR)
         {
             return false
         }
@@ -794,67 +791,85 @@ class CTransactionItems : Iterable<CSortedItem> {
         {
             val level = CFG.getValue("entry_negative_quantity")
             if ( level==0  || (level==1 && global.access == EAccess.ACCESS_EMPLOYEE_KEY)
-                || (item.getLevel() != EOrderLevel.LEVEL_ITEM
-                   && item.getLevel() != EOrderLevel.LEVEL_COMBINE_ALL
-            && item.getLevel() != EOrderLevel.LEVEL_FREE
-            && item.getLevel() != EOrderLevel.LEVEL_MINUTES_PRICE
-            && item.getLevel() != EOrderLevel.LEVEL_PERSON))
+                || (item.level != EOrderLevel.LEVEL_ITEM
+                   && item.level != EOrderLevel.LEVEL_COMBINE_ALL
+            && item.level != EOrderLevel.LEVEL_FREE
+            && item.level != EOrderLevel.LEVEL_MINUTES_PRICE
+            && item.level != EOrderLevel.LEVEL_PERSON))
             {
                 return deleteItem( cursor, timeFrameId, why);
             }
         }
 
-        item->addQuantity(quantity);
+        item.addQuantity(quantity);
 
         // Increase in database.
-        int unitPrice = item->getUnitPrice().Long();
-        int statiegeld = item->getStatiegeldPerPiece();
+        var unitPrice = item.getUnitPrice()
+        var statiegeld = item.getStatiegeldPerPiece();
 
-        m_pItemsDb->createItem( item->menuItemId, m_transactionId, item->sequence,
-        item->subSequence, item->subSubSequence, quantity, item->level,
-        item->group, item->page, item->parts,
-        unitPrice, item->originalAmount, item->originalHalfAmount, item->tax,
-        item->locations, timeFrameId, item->deviceId,
-        item->clusterId, PAID_NO, statiegeld, why, oldTimeFrame);
-        if (item->twinItemId >0)
+        val itemsDb = GrpcServiceFactory.createDailyTransactionItemService()
+        val whys = EDeletedStatus.toDeletedStatus(why)
+        var level = EOrderLevel.toOrderLevel(item.level)
+        itemsDb.createItem( item.menuItemId,
+            global.transactionId.toLong(), item.sequence,
+        item.subSequence, item.subSubSequence,
+            quantity, level,
+        item.group, item.page, item.parts,
+        unitPrice.cents(), item.originalAmount.cents(),
+            item.originalHalfAmount.cents(), item.tax,
+        item.locations, timeFrameId.toInt(), item.deviceId,
+        item.clusterId, Payed.PAID_NO, statiegeld,
+            whys, oldTimeFrame.toInt());
+        if (item.twinItemId >0)
         {
-            int quantity = item->getQuantity();
-            m_pItemsDb->setTwinQuantity(m_transactionId, item->sequence,
-            item->subSequence, item->subSubSequence, quantity, item->parts);
+            val quantity = item.getQuantity()
+            itemsDb.setTwinQuantity(global.transactionId.toLong(),
+                item.sequence, item.subSequence,
+                item.subSubSequence,
+                 quantity, item.parts);
         }
 
         // Remove extras and spices for normal items, except when we remove a spice.
-        if ( (item->level ==LEVEL_ITEM || item->level ==LEVEL_FREE)
-        && CFG("transaction_item_tree")==0 && CFG("entry_extra_main_quantity"))
+        if ( (item.level == EOrderLevel.LEVEL_ITEM
+               || item.level == EOrderLevel.LEVEL_FREE)
+        && CFG.getValue("transaction_item_tree")==0
+       && CFG.getValue("entry_extra_main_quantity")>0)
         {
+            var idx = CCursor(0)
             // Add all the Spices and Extras also the same amount, remove them if 0!
-            int i;
-            for ( i=0; i<(int)m_itemList.size();)
+            for (subItem : CItem in m_items.flatMap { it.items })
             {
-                CitemPtr subItem =m_itemList[i];
-                if ( subItem->sequence ==item->sequence &&
-                (subItem->level ==LEVEL_EXTRA || subItem->level ==LEVEL_SPICES))
+                if ( subItem.sequence ==item.sequence &&
+                (subItem.level == EOrderLevel.LEVEL_EXTRA
+                   || subItem.level == EOrderLevel.LEVEL_SPICES))
                 {
-                    if ( why !=DELETE_REMOVE_IMMEDIATE)
+                    if ( why != EDeletedStatus.DELETE_REMOVE_IMMEDIATE)
                     {
-                        oldTimeFrame =subItem->timeFrameId;
+                        oldTimeFrame =subItem.timeFrameId
                     }
-                    subItem->addQuantity(quantity);
-                    if ( subItem->getQuantity() ==0)
+                    subItem.addQuantity(quantity);
+                    if ( subItem.getQuantity() ==0)
                     {
-                        deleteItem( i, timeFrameId, why);
+                        deleteItem( idx, timeFrameId, why);
                         continue;
                     }
-                    statiegeld = subItem->getStatiegeldPerPiece();
-                    unitPrice = subItem->getUnitPrice().Long();
-                    m_pItemsDb->createItem( subItem->menuItemId, m_transactionId, subItem->sequence,
-                    subItem->subSequence, subItem->subSubSequence, quantity, subItem->level,
-                    subItem->group, subItem->page, subItem->parts,
-                    unitPrice, subItem->originalAmount, subItem->originalHalfAmount, subItem->tax,
-                    subItem->locations, timeFrameId, subItem->deviceId, subItem->clusterId, PAID_NO,
-                    statiegeld, why, oldTimeFrame);
+                    statiegeld = subItem.getStatiegeldPerPiece()
+                    unitPrice = subItem.getUnitPrice()
+                    level = EOrderLevel.toOrderLevel(subItem.level)
+                    itemsDb.createItem( subItem.menuItemId,
+                        global.transactionId.toLong(),
+                        subItem.sequence, subItem.subSequence,
+                        subItem.subSubSequence,
+                        quantity, level, subItem.group, subItem.page,
+                        subItem.parts, unitPrice.cents(),
+                        subItem.originalAmount.cents(),
+                        subItem.originalHalfAmount.cents(), subItem.tax,
+                        subItem.locations, timeFrameId.toInt(),
+                        subItem.deviceId, subItem.clusterId,
+                        Payed.PAID_NO, statiegeld,
+                        whys, oldTimeFrame.toInt());
                 }
-                i++;
+                idx.position++;
             }
         }
         return true;
@@ -866,114 +881,150 @@ class CTransactionItems : Iterable<CSortedItem> {
      *  @param timeFrameId What time?
      *  @param why Reason to delete.
      */
-    fun deleteItem( cursor : Int, timeFrameId: ETimeFrameIndex, why: EDeletedStatus): Boolean
+    fun deleteItem( cursor : CCursor, timeFrameId: ETimeFrameIndex, why: EDeletedStatus): Boolean
     {
-        if ( cursor<0 || cursor >= m_items.size())
+        val size = m_items.size
+        if ( cursor.position<0 || cursor.position >= size)
         {
             Log.e( "CTI", "DeleteItem  Cursor overflow!!")
             return false
         }
-        val item : CItem = m_items.getItem(cursor) ?: return false
-        val statiegeld = item.getStatiegeldPerPiece()
-        val unitPrice = item.getUnitPrice()
-        val quantity = item.getQuantity()
+        var item : CItem = m_items.getItem(cursor) ?: return false
+        var statiegeld = item.getStatiegeldPerPiece()
+        var unitPrice = item.getUnitPrice()
+        var quantity = item.getQuantity()
         deleteTwinItem(item, why)
-        switch (item->level)
+        val itemsDb = GrpcServiceFactory.createDailyTransactionItemService()
+        val whys = EDeletedStatus.toDeletedStatus(why)
+        when (item.level)
         {
             // Remove item with sub-items and sub-sub-items
-            case LEVEL_INFO:
-            case LEVEL_SYSTEM:
-            case LEVEL_ITEMGROUP:
-            case LEVEL_NOTHING:
-            case LEVEL_SEPARATOR:
-            case LEVEL_ZERO:
-            case LEVEL_ITEM:
-            case LEVEL_FREE:
-            case LEVEL_TWIN_ITEM: // Twin item should not happen.
-            case LEVEL_MINUTES_PRICE:
-            case LEVEL_PERSON:
-            case LEVEL_CHARITY:
-            case LEVEL_COMBINE_ALL:
-            // Remove in database.
-            m_pItemsDb->createItem( item->menuItemId, m_transactionId, item->sequence,
-            item->subSequence, item->subSubSequence, -quantity,
-            item->level, item->group, item->page, item->parts,
-            unitPrice, item->originalAmount, item->originalHalfAmount, item->tax,
-            item->locations, timeFrameId, item->deviceId,
-            item->clusterId, PAID_NO, statiegeld, why, item->timeFrameId);
-            m_itemList.erase( m_itemList.begin()+cursor);
-            while ( cursor<(int)m_itemList.size())
+            EOrderLevel.LEVEL_INFO, EOrderLevel.LEVEL_SYSTEM, EOrderLevel.LEVEL_ITEMGROUP,
+                EOrderLevel.LEVEL_NOTHING, EOrderLevel.LEVEL_SEPARATOR, EOrderLevel.LEVEL_ZERO,
+                EOrderLevel.LEVEL_ITEM, EOrderLevel.LEVEL_FREE, EOrderLevel.LEVEL_TWIN_ITEM,
+                EOrderLevel.LEVEL_MINUTES_PRICE, EOrderLevel.LEVEL_PERSON, EOrderLevel.LEVEL_CHARITY,
+                EOrderLevel.LEVEL_COMBINE_ALL ->
             {
-                item =m_itemList[cursor];
-                unitPrice = item->getUnitPrice().Long();
-                quantity = item->getQuantity();
-                statiegeld = item->getStatiegeldPerPiece();
-                if ( item->level ==LEVEL_SPICES || item->level ==LEVEL_EXTRA || item->level==LEVEL_SUB_EXTRA || item->level==LEVEL_SUB_ITEM || item->level==LEVEL_SUB_SPICES)
+                // Remove in database.
+                itemsDb.createItem(
+                    item.menuItemId,
+                    global.transactionId.toLong(),
+                    item.sequence,
+                    item.subSequence,
+                    item.subSubSequence,
+                    -quantity,
+                    EOrderLevel.toOrderLevel(item.level),
+                    item.group,
+                    item.page,
+                    item.parts,
+                    unitPrice.cents(),
+                    item.originalAmount.cents(),
+                    item.originalHalfAmount.cents(),
+                    item.tax,
+                    item.locations,
+                    timeFrameId.toInt(),
+                    item.deviceId,
+                    item.clusterId,
+                    Payed.PAID_NO,
+                    statiegeld,
+                    whys,
+                    item.timeFrameId.toInt()
+                )
+                m_items.eraseItem(cursor)
+                m_items.eraseSortedItem(cursor.position)
+                while (cursor.position < size)
                 {
-                    deleteTwinItem(item, why);
-                    m_pItemsDb->createItem( item->menuItemId, m_transactionId, item->sequence,
-                    item->subSequence, item->subSubSequence, -quantity,
-                    item->level, item->group, item->page, item->parts,
-                    unitPrice, item->originalAmount, item->originalHalfAmount, item->tax,
-                    item->locations, timeFrameId, item->deviceId,
-                    item->clusterId, PAID_NO, statiegeld, why, item->timeFrameId);
-                    m_itemList.erase( m_itemList.begin()+cursor);
+                    item = m_items.getItem(cursor) ?: break
+                    unitPrice = item.getUnitPrice();
+                    quantity = item.getQuantity();
+                    statiegeld = item.getStatiegeldPerPiece();
+                    if (item.level == EOrderLevel.LEVEL_SPICES
+                        || item.level == EOrderLevel.LEVEL_EXTRA ||
+                        item.level == EOrderLevel.LEVEL_SUB_EXTRA ||
+                        item.level == EOrderLevel.LEVEL_SUB_ITEM ||
+                        item.level == EOrderLevel.LEVEL_SUB_SPICES
+                    )
+                    {
+                        val level = EOrderLevel.toOrderLevel(item.level)
+                        deleteTwinItem(item, why)
+                        itemsDb.createItem(
+                            item.menuItemId, global.transactionId.toLong(),
+                            item.sequence, item.subSequence, item.subSubSequence, -quantity,
+                            level, item.group, item.page, item.parts,
+                            unitPrice.cents(), item.originalAmount.cents(),
+                            item.originalHalfAmount.cents(), item.tax,
+                            item.locations, timeFrameId.toInt(),
+                            item.deviceId, item.clusterId, Payed.PAID_NO,
+                            statiegeld, whys, item.timeFrameId.toInt()
+                        )
+                        m_items.eraseItem(cursor)
+                    }
                 }
-                else break;
             }
-            break;
-
-            // Remove item with sub-items
-            case LEVEL_EXTRA:
-            case LEVEL_SPICES:
-            m_pItemsDb->createItem( item->menuItemId, m_transactionId, item->sequence,
-            item->subSequence, item->subSubSequence, -quantity,
-            item->level, item->group, item->page, item->parts,
-            unitPrice, item->originalAmount, item->originalHalfAmount, item->tax,
-            item->locations, timeFrameId, item->deviceId,
-            item->clusterId, PAID_NO, statiegeld, why, item->timeFrameId);
-            m_itemList.erase( m_itemList.begin()+cursor);
-            while ( cursor<(int)m_itemList.size())
+                // Remove item with sub-items
+            EOrderLevel.LEVEL_EXTRA, EOrderLevel.LEVEL_SPICES ->
             {
-                item = m_itemList[cursor];
-                statiegeld = item->getStatiegeldPerPiece();
-                unitPrice = item->getUnitPrice().Long();
-                quantity = item->getQuantity();
-
-                deleteTwinItem(item, why);
-                if ( item->level ==LEVEL_SUB_EXTRA || item->level==LEVEL_SUB_ITEM || item->level==LEVEL_SUB_SPICES)
+                val level = EOrderLevel.toOrderLevel(item.level)
+                itemsDb.createItem(
+                    item.menuItemId, global.transactionId.toLong(),
+                    item.sequence,
+                    item.subSequence, item.subSubSequence, -quantity,
+                    level, item.group, item.page, item.parts,
+                    unitPrice.cents(), item.originalAmount.cents(),
+                    item.originalHalfAmount.cents(),
+                    item.tax, item.locations,
+                    timeFrameId.toInt(), item.deviceId,
+                    item.clusterId, Payed.PAID_NO, statiegeld, whys,
+                    item.timeFrameId.toInt()
+                )
+                m_items.eraseItem(cursor)
+                while (cursor.position < size)
                 {
-                        m_pItemsDb->createItem( item->menuItemId, m_transactionId, item->sequence,
-                    item->subSequence, item->subSubSequence, -quantity, item->level,
-                    item->group, item->page, item->parts,
-                    unitPrice, item->originalAmount, item->originalHalfAmount, item->tax,
-                    item->locations, timeFrameId, item->deviceId,
-                    item->clusterId, PAID_NO, statiegeld, why, item->timeFrameId);
-                    m_itemList.erase( m_itemList.begin()+cursor);
-                }
-                else break;
-            }
-            break;
+                    item = m_items.getItem(cursor) ?: break
+                    statiegeld = item.getStatiegeldPerPiece()
+                    unitPrice = item.getUnitPrice()
+                    quantity = item.getQuantity()
 
+                    deleteTwinItem(item, why)
+                    if (item.level == EOrderLevel.LEVEL_SUB_EXTRA
+                        || item.level == EOrderLevel.LEVEL_SUB_ITEM
+                        || item.level == EOrderLevel.LEVEL_SUB_SPICES
+                    )
+                    {
+                        val level = EOrderLevel.toOrderLevel(item.level)
+                        itemsDb.createItem(
+                            item.menuItemId, global.transactionId.toLong(),
+                            item.sequence, item.subSequence, item.subSubSequence, -quantity,
+                            level, item.group, item.page, item.parts,
+                            unitPrice.cents(), item.originalAmount.cents(),
+                            item.originalHalfAmount.cents(), item.tax,
+                            item.locations, timeFrameId.toInt(), item.deviceId,
+                            item.clusterId, Payed.PAID_NO, statiegeld,
+                            whys, item.timeFrameId.toInt()
+                        )
+                        m_items.eraseItem(cursor)
+                    } else break
+                }
+            }
             // Remove item
-            case LEVEL_SUB_EXTRA:
-            case LEVEL_SUB_ITEM:
-            case LEVEL_SUB_SPICES:
-            case LEVEL_OUTOFSTOCK:
-            m_pItemsDb->createItem( item->menuItemId, m_transactionId, item->sequence,
-            item->subSequence, item->subSubSequence, -quantity,
-            item->level, item->group, item->page, item->parts,
-            unitPrice, item->originalAmount, item->originalHalfAmount, item->tax,
-            item->locations, timeFrameId, item->deviceId,
-            item->clusterId, PAID_NO, statiegeld,
-            why, (EtimeFrameIndex)item->timeFrameId);
-            m_itemList.erase( m_itemList.begin()+cursor);
-            break;
-
-            case LEVEL_ASK_CLUSTER:
-            break;
+            EOrderLevel.LEVEL_SUB_EXTRA, EOrderLevel.LEVEL_SUB_ITEM,
+                EOrderLevel.LEVEL_SUB_SPICES, EOrderLevel.LEVEL_OUTOFSTOCK -> {
+                val level = EOrderLevel.toOrderLevel(item.level)
+                itemsDb.createItem(item.menuItemId, global.transactionId.toLong(),
+                    item.sequence,
+                    item.subSequence, item.subSubSequence, -quantity,
+                    level, item.group, item.page, item.parts,
+                    unitPrice.cents(), item.originalAmount.cents(),
+                    item.originalHalfAmount.cents(), item.tax,
+                    item.locations, timeFrameId.toInt(),
+                    item.deviceId, item.clusterId,
+                    Payed.PAID_NO, statiegeld,
+                whys, item.timeFrameId.toInt())
+                m_items.eraseItem(cursor)
+            }
+            EOrderLevel.LEVEL_ASK_CLUSTER -> {}
         }
-        return true;
+        return true
     }
 
     /*----------------------------------------------------------------------------*/

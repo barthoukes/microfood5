@@ -1,16 +1,12 @@
 package com.hha.resources
 
-import android.database.sqlite.SQLiteDatabase
 import android.os.Handler
 import com.hha.framework.CCursor
-import com.hha.framework.CMenuCards
 import java.io.File
 
 import com.hha.framework.CTimeFrame
-import com.hha.framework.CTimeFrameIndex
 import com.hha.framework.CTransaction
 import com.hha.grpc.GrpcServiceFactory
-import com.hha.resources.Configuration
 import com.hha.types.EAccess
 import com.hha.types.ETaal
 

@@ -98,17 +98,19 @@ class MenuPagesAdapter(
         notifyItemChanged(getPageIndex(newPage))
     }
 
-    fun getPage(position: Int): CMenuPage? {
+    fun getPage(position: Int): CMenuPage?
+    {
         val col = position / rows
         val row = position % rows
-        val page = 1 + row*columns + col
+        val page = 1 + row * columns + col
         return pages[page]
     }
 
-    fun getPageIndex(position: Int): Int {
-        val row = (position-1) / columns
-        val col = (position-1) % columns
-        val page = row + col*rows
+    fun getPageIndex(position: Int): Int
+    {
+        val row = (position - 1) / columns
+        val col = (position - 1) % columns
+        val page = row + col * rows
         return page
     }
 

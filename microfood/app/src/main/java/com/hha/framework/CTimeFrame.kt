@@ -8,10 +8,11 @@ import com.hha.resources.Global
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import com.hha.common.CookingState
+import com.hha.types.ETimeFrameIndex
 
 class CTimeFrame {
     var id: Int = 0
-    var time_frame_index = CTimeFrameIndex(1)
+    var time_frame_index = ETimeFrameIndex(1)
     var transaction_id: Int = 0
     var waiter: Int = 0
     var start_time: String = ""
@@ -40,7 +41,7 @@ class CTimeFrame {
         start_time = current.format(formatter)
         var x = service.insertNewTimeFrame()
         if (x == null) id=1 else id=x
-        time_frame_index = CTimeFrameIndex(timeFrameId.toShort())
+        time_frame_index = ETimeFrameIndex(timeFrameId.toShort())
         waiter = 0
         end_time = "1980-01-01 00:00:00"
         transaction_id = global.transactionId
@@ -54,13 +55,13 @@ class CTimeFrame {
 
         val service = GrpcServiceFactory.createDailyTimeFrameService()
         service.endTimeFrame(transaction_id,
-            time_frame_index.value.toInt(),
+            time_frame_index.index.toInt(),
             device_id, "", false,
             CookingState.COOKING_DONE)
     }
 
     /// @brief create a new time frame.
-    constructor(idd: Int, tfi: CTimeFrameIndex, transactionId: Int) {
+    constructor(idd: Int, tfi: ETimeFrameIndex, transactionId: Int) {
         id = idd
         time_frame_index = tfi
         try {

@@ -8,6 +8,7 @@ import com.hha.types.ENameType
 import com.hha.types.EOrderLevel
 import com.hha.types.EPayed
 import com.hha.types.ETaal
+import com.hha.types.ETimeFrameIndex
 import com.hha.types.ETreeRow
 
 class CItem(
@@ -26,7 +27,7 @@ class CItem(
     var parts: Int = 2,
     var group: Int = 0,
     var page: Int = 0,
-    var timeFrameId: CTimeFrameIndex = CTimeFrameIndex(1),
+    var timeFrameId: ETimeFrameIndex = ETimeFrameIndex(1),
     var level: EOrderLevel = EOrderLevel.LEVEL_OUTOFSTOCK,
     var tax: Double = 0.0,
     var id: Int = -1,
@@ -60,7 +61,7 @@ class CItem(
         parts = 2,
         group = 0,
         page = 0,
-        timeFrameId = CTimeFrameIndex(1),
+        timeFrameId = ETimeFrameIndex(1),
         level = EOrderLevel.LEVEL_OUTOFSTOCK,
         tax = 0.0,
         id = -1,
@@ -134,7 +135,7 @@ class CItem(
         print_locations: Int,
         item_group: Int,
         item_page: Int,
-        time_frame: CTimeFrameIndex,
+        time_frame: ETimeFrameIndex,
         tax_percentage: Double,
         item_level: EOrderLevel,
         sql_id: Int,
@@ -193,7 +194,7 @@ class CItem(
         parts = item.parts,
         group = item.itemGroup,
         page = item.itemPage,
-        timeFrameId = CTimeFrameIndex(item.timeFrame.toShort()),
+        timeFrameId = ETimeFrameIndex(item.timeFrame.toShort()),
         level = EOrderLevel.fromOrderLevel(item.orderLevel),
         tax = item.taxPercentage,
         id = -1,

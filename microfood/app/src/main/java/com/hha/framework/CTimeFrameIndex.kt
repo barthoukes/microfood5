@@ -6,7 +6,7 @@ import com.hha.types.ETimeFrameIndex
 /**
  * Represents a time frame index with validation and undefined state handling
  */
-class CTimeFrameIndex(val value: Short) {
+data class OBSOLETE_CTimeFrameIndex(val value: Short) {
     companion object {
         const val TIME_FRAME_UNDEFINED :Short = 0
         const val TIME_FRAME1 :Short = 1
@@ -16,19 +16,19 @@ class CTimeFrameIndex(val value: Short) {
          * @param index The time frame index value
          * @return Valid CTimeFrameIndex or UNDEFINED if input is invalid
          */
-        fun create(index: Short?): CTimeFrameIndex {
+        fun create(index: Short?): OBSOLETE_CTimeFrameIndex {
             return when {
-                index == null || index < 0 -> CTimeFrameIndex(TIME_FRAME_UNDEFINED)
-                else -> CTimeFrameIndex(index)
+                index == null || index < 0 -> OBSOLETE_CTimeFrameIndex(TIME_FRAME_UNDEFINED)
+                else -> OBSOLETE_CTimeFrameIndex(index)
             }
         }
 
-        fun create(index: ETimeFrameIndex): CTimeFrameIndex {
-            return CTimeFrameIndex(index.index.toShort())
+        fun create(index: ETimeFrameIndex): OBSOLETE_CTimeFrameIndex {
+            return OBSOLETE_CTimeFrameIndex(index.index.toShort())
         }
     }
 
-    fun isBetween(lowest: CTimeFrameIndex, highest: CTimeFrameIndex) : Boolean
+    fun isBetween(lowest: OBSOLETE_CTimeFrameIndex, highest: OBSOLETE_CTimeFrameIndex) : Boolean
     {
         return value >= lowest.value && value <= highest.value
     }
@@ -48,10 +48,16 @@ class CTimeFrameIndex(val value: Short) {
     val isValid: Boolean
         get() = value > TIME_FRAME_UNDEFINED
 
-    override fun equals(other: Any?): Boolean {
+    fun toInt(): Int
+    {
+        return value.toInt()
+    }
+
+    override fun equals(other: Any?): Boolean
+    {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
-        other as CTimeFrameIndex
+        other as OBSOLETE_CTimeFrameIndex
         return value == other.value
     }
 

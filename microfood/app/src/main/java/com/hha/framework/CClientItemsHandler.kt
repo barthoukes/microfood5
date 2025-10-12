@@ -113,7 +113,7 @@ class CclientItemsHandler {
         val subSubSequence = item.subSubSequence
         val statiegeld : CMoney = item.getStatiegeld()
         var quantity = item.getQuantity()
-        val why = if (item.timeFrameId.value.toShort() != timeFrameId.index)
+        val why = if (item.timeFrameId != timeFrameId)
             EDeletedStatus.DELETE_PORTION_AFTER_PRINTING
         else EDeletedStatus.DELETE_PORTION_IMMEDIATE
         var unitPrice : CMoney = item.getUnitPrice()
@@ -129,7 +129,7 @@ class CclientItemsHandler {
             item.deviceId, item.clusterId,
             Payed.PAID_NO, item.getStatiegeldPerPiece(),
             EDeletedStatus.toDeletedStatus(why),
-            item.timeFrameId.value.toInt()
+            item.timeFrameId.toInt()
         )
 
         item.parts = nextPortion
@@ -184,16 +184,18 @@ class CclientItemsHandler {
         }
     }
 
-    fun move2List(source: CSortedItemList,
-                  destination: CSortedItemList, locations: Int) {
-        var nextIndex = destination.size + 1
-        while (!source.empty) {
-            if (source[0].getLocations() and locations != 0) {
-                source[0].row = nextIndex++
-                destination.add(source[0])
-            }
-            source.erase(0)
-        }
-    }
-
+//    fun move2List(source: CSortedItemList,
+//                  destination: CSortedItemList, locations: Int)
+//    {
+//        var nextIndex = destination.size + 1
+//        while (!source.empty)
+//        {
+//            if (source.getSortedItem(0).getLocations() and locations != 0)
+//            {
+//                source[0].row = nextIndex++
+//                destination.add(source[0])
+//            }
+//            source.erase(0)
+//        }
+//    }
 }

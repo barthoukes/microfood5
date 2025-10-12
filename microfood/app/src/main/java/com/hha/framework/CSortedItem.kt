@@ -173,7 +173,7 @@ class CSortedItem : Iterable<CItem> {
         while (iterator.hasNext()) {
             val item = iterator.next()
             if (item.getQuantity() == 0) {
-                if (items[0].timeFrameId.index() < item.timeFrameId.index()) {
+                if (items[0].timeFrameId.index < item.timeFrameId.index) {
                     items[0].timeFrameId = item.timeFrameId
                 }
                 iterator.remove()
@@ -209,7 +209,7 @@ class CSortedItem : Iterable<CItem> {
         for (item in items) item.sequence += 1
     }
     fun getOrder(): Int = items[0].subSequence
-    fun getTimeFrameIndex(): Short = items[0].timeFrameId.value
+    fun getTimeFrameIndex(): Short = items[0].timeFrameId.index
     fun isItemGroup(): Boolean = items[0].level == EOrderLevel.LEVEL_ITEMGROUP
 
     fun isSameTimeFrame(other: CSortedItem): Boolean {

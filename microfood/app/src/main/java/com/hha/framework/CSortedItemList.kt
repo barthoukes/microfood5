@@ -53,6 +53,32 @@ class CSortedItemList : Iterable<CSortedItem> {
         return sortedIndex
     }
 
+    /** Erase one CItem from a certain index */
+    fun eraseItem(cursor: CCursor)
+    {
+        var index = 0
+        var sortedIndex = 0
+        for (item in m_sortedItems) {
+            if (index < cursor.position)
+            {
+                index += item.size
+                sortedIndex++
+            }
+            if (index == cursor.position)
+            {
+                // Delete item + subitems
+                m_sortedItems.removeAt(sortedIndex)
+                return
+            }
+            else
+            {
+                // Delete subitem
+                m_sortedItems[sortedIndex].items.removeAt(cursor.position - index)
+                return
+            }
+        }
+    }
+
     fun add(cursor: CCursor, item: CItem) {
         val c2i = cursor2index(cursor)
         val cItem = CSortedItem(item)
@@ -60,16 +86,16 @@ class CSortedItemList : Iterable<CSortedItem> {
     }
 
     // Same as removeIt
-    fun erase(index: Int) {
+    fun eraseSortedItem(index: Int) {
         m_sortedItems.removeAt(index)
     }
 
     // Override the [] operator for read access
-    operator fun get(index: Int): CSortedItem = m_sortedItems[index]
+    fun getSortedItem(index: Int): CSortedItem = m_sortedItems[index]
 
-    fun getItem(index: Int): CItem?
+    fun getItem(index: CCursor): CItem?
     {
-        var mutableIndex = index
+        var mutableIndex = index.position
         for (item in m_sortedItems)
         {
             if (item.size < mutableIndex)

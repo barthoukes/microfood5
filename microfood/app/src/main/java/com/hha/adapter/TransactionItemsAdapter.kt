@@ -44,7 +44,8 @@ class TransactionItemsAdapter(
     }
 
     // Add this new function to your adapter
-    fun updateData(newTransaction: CTransaction) {
+    fun updateData(newTransaction: CTransaction)
+    {
         // The adapter now knows about the new data.
         // We don't need to store it, as we can rely on the global,
         // but we MUST tell the RecyclerView to redraw itself completely.
@@ -70,7 +71,8 @@ class TransactionItemsAdapter(
         }
     }
 
-    override fun getItemCount(): Int {
+    override fun getItemCount(): Int
+    {
         return global.transaction?.size?.plus(1) ?: 1
     }
 
@@ -105,7 +107,8 @@ class TransactionItemsAdapter(
         }
     }
 
-    private fun setupEmptyItem(holder: TransactionItemViewHolder, position: Int) {
+    private fun setupEmptyItem(holder: TransactionItemViewHolder, position: Int)
+    {
         holder.binding.transactionItem.text = ""
         holder.binding.transactionPrice.text = ""
     }
