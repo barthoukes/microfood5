@@ -1,0 +1,483 @@
+Suppose I have a restaurant app for Android, 12 RecyclerViews called MenuPage with each a GridLayoutManager of 8 rows with up to 20 items scrolling in horizontal direction. Each item shows a Name (food) and price. GridLayoutManager is just an idea, not a requirement.
+
+Each MenuPage has a height, which is the same as minimum(tablet resolution-X, tablet resolution-Y). The PageName is 1/8 of this height. The Width of a MenuItem is decided by the user per MenuPage, this is received over GRPC from the server (already working).
+
+Above each menuPage I want a button with the name, called PageName. The PageNames are always visible, the MenuPages can be hidden (or deleted, later rendered again).
+
+Since MenuPages and PageNames don't fit on one screen, this is a very high LinearLayout (or other) with vertically the MenuPages and PageNames. All the MenuPages are hidden at start. So we only see 12 PageNames above each other with hidden MenuPages below each PageName. 
+
+When I click the PageName, the MenuPage appears below the PageName in a fluent animation. When I click the PageName again, the MenuPage will hide again.
+
+When I click another PageName the other MenuPage will appear below its PageName. When we have too many MenuPages open, we should consider closing some MenuPages. In that case,  they will hide gracefully and one MenuPage becomes visible quickly.
+
+In the end, the waiter should be able to quickly place an order and select the items required for the customer. Also, the phone or tablet has limited space to show all the items, so we should optimize close and open the MenuPages.
+
+How to do this in Kotlin?
+
+
+
+How to mix the above things with following classes:
+
+Here is the CMenuPage adapter, that handles the MenuPage:
+
+package com.hha.framework
+
+import com.hha.common.SkipInvisible
+import com.hha.framework.CMenuItems
+import com.hha.grpc.GrpcServiceFactory
+import com.hha.menu.item.MenuItemList
+
+data class CMenuPage(
+    var menuCardId: Int,
+    var menuPageId: Int,
+    var pageWidth: Int,
+    var chineseName: String,
+    var localName: String,
+    var isSelected: Boolean,
+    var menuItem: CMenuItems
+) {
+    // Secondary constructor should properly delegate to primary constructor
+    constructor(
+        cardId: Int,
+        pageId: Int,
+        width: Int,
+        chinese: String,
+        local: String
+    ) : this (
+        menuCardId = cardId,
+        menuPageId = pageId,
+        chineseName = chinese,
+        localName = local,
+        pageWidth = width,
+        isSelected = false,
+        menuItem = CMenuItems()
+    )
+
+    fun loadItems(skip : SkipInvisible) : CMenuItems {
+        val menuItemService = GrpcServiceFactory.createMenuItemService()
+        val items: MenuItemList = menuItemService.findMenuItemsByPage(
+            menuCardId, menuPageId, skip)
+        val menuItems : MutableMap<Int, CMenuItem> = mutableMapOf()
+
+        for (item in items.itemsList) {
+            val newItem = CMenuItem(item)
+            menuItems[newItem.menuItemId] = newItem
+        }
+        val mapItems = CMenuItems()
+        mapItems.setItems(menuItems)
+        return mapItems
+    }
+}
+
+For each MenuPage there is a CMenuItems class:
+package com.hha.framework
+
+import androidx.recyclerview.widget.SortedList
+import com.hha.framework.CMenuItem
+import com.hha.types.CMoney
+
+data class CMenuItems(
+    private var columns: List<Int> = emptyList(),
+    private var rows: List<Int> = emptyList(),
+    var menuItems: MutableMap<Int, CMenuItem> = mutableMapOf(),
+    var itemPerPosition: MutableMap<Int, CMenuItem> = mutableMapOf(),
+    var verticalSize: Int = 8
+
+)
+{
+    fun setItems(items: MutableMap<Int, CMenuItem>)
+    {
+        menuItems = items
+        itemPerPosition.clear()
+        findColumnsAndRows()
+        fillInSequenceIds()
+    }
+
+    fun fillInSequenceIds() {
+        for (item in menuItems) {
+            val x = columns.binarySearch(item.value.positionX)
+            val y = rows.binarySearch(item.value.positionY)
+            item.value.sequence = x*verticalSize +y
+        }
+        for (item in menuItems) {
+            itemPerPosition[item.value.sequence] = item.value
+        }
+    }
+
+    fun findColumnsAndRows() {
+        val uniqueX = menuItems.map { it.value.positionX }.toSet()
+        val uniqueY = menuItems.map { it.value.positionY }.toSet()
+        columns = uniqueX.sorted()
+        rows = uniqueY.sorted()
+        if (rows.size>4) {
+            verticalSize = 8
+        }
+        else if (rows.size>2) {
+            verticalSize = 4
+        }
+        else if (rows.size>1) {
+            verticalSize = 2
+        }
+        else verticalSize = 1
+    }
+
+    fun addMenuItem(menuItem: CMenuItem) {
+        menuItems[menuItem.menuItemId] = menuItem
+    }
+
+    fun getItemCount() : Int {
+        return verticalSize*columns.size
+    }
+
+    fun findItemByPosition(position: Int) : CMenuItem? {
+        if (itemPerPosition.containsKey(position)) {
+            return itemPerPosition[position]
+        }
+        else {
+            return null
+        }
+    }
+
+}
+
+I have the MenuItemsAdapter, for each MenuPage a new instance:
+package com.hha.adapter
+
+import android.content.res.ColorStateList
+import android.graphics.drawable.GradientDrawable
+import android.util.Log
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.recyclerview.widget.RecyclerView
+import com.hha.framework.CMenuItem
+import com.hha.framework.CMenuItems
+import com.hha.resources.Global
+import tech.hha.microfood.databinding.AdapterMenuItemBinding
+
+class MenuItemsAdapter(
+    private var menuItems: CMenuItems,
+    private var itemWidth: Int,
+    private val onItemSelected: (CMenuItem) -> Unit
+) : RecyclerView.Adapter<MenuItemsAdapter.MenuItemViewHolder>() {
+    val global = Global.getInstance()
+
+    inner class MenuItemViewHolder(val binding: AdapterMenuItemBinding) :
+        RecyclerView.ViewHolder(binding.root)
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MenuItemViewHolder
+    {
+        val binding = AdapterMenuItemBinding.inflate(
+            LayoutInflater.from(parent.context),
+            parent,
+            false
+        )
+        return MenuItemViewHolder(binding)
+    }
+
+    fun setNewItems(newItems: CMenuItems) {
+        menuItems = newItems
+        //if (newItems.verticalSize !=
+
+        notifyDataSetChanged()
+    }
+
+    override fun onBindViewHolder(holder: MenuItemViewHolder, position: Int) {
+        // Decide the width of an item for a page.
+        var value = holder.itemView.context.resources.displayMetrics.widthPixels
+        value = value * itemWidth /120
+        holder.itemView.layoutParams.width = value
+
+        val item = menuItems.findItemByPosition(position)
+
+        // Update selected state
+        holder.binding.menuItemButton.visibility = View.VISIBLE
+        holder.binding.menuItemButton.isSelected = false // item.isSelected
+        if (item != null) {
+            holder.binding.itemName.setTextColor(item.colourText)
+
+            if (global.isChinese()) {
+                holder.binding.itemName.text = item.chineseName
+            }
+            else {
+                holder.binding.itemName.text = item.localName
+            }
+            // Gradient for item buttons.
+            val gradientDrawable = GradientDrawable(
+                GradientDrawable.Orientation.BOTTOM_TOP,
+                intArrayOf(item.colourBack, item.colourBack2)
+            )
+            holder.binding.itemBackground.background = gradientDrawable
+
+            holder.binding.itemBackground.setOnClickListener {
+                Log.d("CLICK_TEST", "Item touched ${item.localName}")
+                onItemSelected(item)
+            }
+            holder.binding.itemName.setOnClickListener {
+                Log.d("CLICK_TEST", "Item touched ${item.localName}")
+                onItemSelected(item)
+            }
+        }
+        else
+        {
+            val gradientDrawable = GradientDrawable(
+                GradientDrawable.Orientation.BOTTOM_TOP,
+                intArrayOf(0xFFcccccc.toInt(), 0xFF999999.toInt()))
+            holder.binding.itemBackground.background = gradientDrawable
+            holder.binding.itemName.text = ""
+       }
+        holder.binding.root.setOnClickListener {
+        }
+    }
+    override fun getItemCount() = menuItems.getItemCount()
+}
+
+
+I have a MenuPage adapter with details for one MenuPage:
+package com.hha.adapter
+
+import android.util.Log
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.recyclerview.widget.RecyclerView
+import com.hha.common.textDump
+import com.hha.framework.CMenuPage
+import com.hha.resources.Global
+import tech.hha.microfood.databinding.AdapterMenuPageBinding
+
+class MenuPagesAdapter(
+    private val pages: MutableMap<Int, CMenuPage>,
+    private val columns: Int,
+    private val rows: Int,
+    private val colourPage: Int,
+    private val colourSelectedPage: Int,
+    private val onPageSelected: (Int) -> Unit
+) : RecyclerView.Adapter<MenuPagesAdapter.MenuPageViewHolder>() {
+    val m_global = Global.getInstance()
+    var m_widthPages = 1000
+    var m_page = 0
+
+    inner class MenuPageViewHolder(val binding: AdapterMenuPageBinding) :
+        RecyclerView.ViewHolder(binding.root)
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MenuPageViewHolder {
+        val binding = AdapterMenuPageBinding.inflate(
+            LayoutInflater.from(parent.context),
+            parent,
+            false
+        )
+        m_widthPages = parent.width
+        return MenuPageViewHolder(binding)
+    }
+
+    override fun onBindViewHolder(holder: MenuPageViewHolder, position: Int) {
+
+        // Set click listener on the BUTTON (not just root view)
+//        holder.binding.menuPageButton.setOnClickListener {
+//            onPageSelected(position)
+//        }
+        holder.binding.itemName.setOnClickListener {
+            Log.d("CLICK_TEST", "Name clicked at position $position") // Add this for testing
+            val page = getPage(position)
+            if (page != null) {
+                onPageSelected(page.menuPageId)
+            }
+        }
+        holder.binding.menuPageButton.setOnClickListener {
+            Log.d("CLICK_TEST", "Button clicked at position $position") // Add this for testing
+            val page = getPage(position)
+            if (page !=null) {
+                onPageSelected(page.menuPageId)
+            }
+        }
+
+        var value = m_widthPages/columns
+        holder.itemView.layoutParams.width = value
+        val page = getPage(position)
+        var text = "-"
+        var colour = colourPage
+        if (page != null) {
+            if (m_global.isChinese()) {
+                text = page.chineseName
+            }
+            else {
+                text = page.localName
+            }
+            if (position == m_global.menuPageId)
+            {
+                text += "**"
+            }
+            colour = getPageColour(page.menuPageId)
+        }
+        // Update selected state
+        holder.binding.itemName.text = text
+        holder.binding.menuPageButton.setBackgroundColor(colour)
+        holder.binding.menuPageButton.visibility = View.VISIBLE
+        holder.binding.menuPageButton.isSelected = false // page.isSelected
+    }
+
+    fun getPageColour(pageId: Int): Int
+    {
+        return when
+        {
+            pageId == m_page -> colourSelectedPage
+            else -> colourPage
+        }
+    }
+
+    fun selectPage(newPage: Int)
+    {
+        val previousPage = m_page
+        m_page = newPage
+        notifyItemChanged(getPageIndex(previousPage))
+        notifyItemChanged(getPageIndex(newPage))
+    }
+
+    fun getPage(position: Int): CMenuPage? {
+        val col = position / rows
+        val row = position % rows
+        val page = 1 + row*columns + col
+        return pages[page]
+    }
+
+    fun getPageIndex(position: Int): Int {
+        val row = (position-1) / columns
+        val col = (position-1) % columns
+        val page = row + col*rows
+        return page
+    }
+
+    override fun getItemCount() = rows*columns
+}
+
+Here the CMenuItem, but only a little is used for the User Interface:
+package com.hha.framework
+
+import android.util.Log
+import com.hha.common.ItemSort
+import com.hha.common.ItemVisible
+import com.hha.common.MenuItem
+import com.hha.common.OrderLevel
+import com.hha.common.TaxType
+import com.hha.types.CMoney
+import com.hha.types.ENameType
+import com.hha.types.EOrderLevel
+import com.hha.types.ETaal
+import com.hha.types.ETaxType
+
+data class CMenuItem(
+    val menuItemId: Int = 0,
+    val alias: String = "",
+    val localName: String = "",
+    val chineseName: String = "",
+    val restaurantPrice: CMoney = CMoney(0),
+    val takeawayPrice : CMoney = CMoney(0),
+    val restaurantHalfPrice: CMoney = CMoney(0),
+    val takeawayHalfPrice: CMoney = CMoney(0),
+    val restaurantTax: TaxType = TaxType.BTW_INVALID,
+    val takeawayTax: TaxType = TaxType.BTW_INVALID,
+    var level: EOrderLevel = EOrderLevel.LEVEL_NOTHING,
+    val taxClusterId: Int = 0,
+    val page: Int = 0,
+    val locations: Int = 0,
+    val paperCutPerItem: Boolean = false,
+    val isVisible: ItemVisible = ItemVisible.ITEM_UNDEFINED,
+    val sort: ItemSort = ItemSort.SORT_NONE,
+    val isTwin: Boolean = false,
+    val positionX: Int = 0,
+    val positionY: Int = 0,
+    val positionWidth: Int = 0,
+    val positionHeight: Int = 0,
+    val clusters: Int = 0,
+    val specialPrices: Int = 0,
+    val colourText: Int = 0,
+    val colourBack: Int = 0,
+    val colourSelectedText: Int = 0,
+    val colourSelectedBack: Int = 0,
+    val image: String = "",
+    val colourBack2: Int = 0,
+    val colourSelectedBack2: Int = 0,
+    val menuCardId: Int = 0,
+    val statiegeld: CMoney = CMoney(0),
+    var sequence: Int = 0,
+    var isSelected: Boolean = false
+    ) {
+    // Constructor that copies from XMenuItem
+    constructor(xItem: MenuItem) : this(
+        menuItemId = xItem.menuItemId,
+        alias = xItem.alias,
+        localName = xItem.localName,
+        chineseName = xItem.chineseName,
+        restaurantPrice = CMoney(xItem.restaurantPrice),
+        takeawayPrice = CMoney(xItem.takeawayPrice),
+        restaurantHalfPrice = CMoney(xItem.restaurantHalfPrice),
+        takeawayHalfPrice = CMoney(xItem.takeawayHalfPrice),
+        restaurantTax = xItem.restaurantTax,
+        takeawayTax = xItem.takeawayTax,
+        level = EOrderLevel.fromOrderLevel(xItem.level),
+        taxClusterId = xItem.taxClusterId,
+        page = xItem.page,
+        locations = xItem.locations,
+        paperCutPerItem = xItem.paperCutPerItem,
+        isVisible = xItem.isVisible,
+        sort = xItem.sort,
+        isTwin = xItem.isTwin,
+        positionX = xItem.positionX,
+        positionY = xItem.positionY,
+        positionWidth = xItem.positionWidth,
+        positionHeight = xItem.positionHeight,
+        clusters = xItem.clusters,
+        specialPrices = xItem.specialPrices,
+        colourText = toTabletColour(xItem.colourText),
+        colourBack = toTabletColour(xItem.colourBack),
+        colourSelectedText = toTabletColour(xItem.colourSelectedText),
+        colourSelectedBack = toTabletColour(xItem.colourSelectedBack),
+        image = xItem.image,
+        colourBack2 = toTabletColour(xItem.colourBack2),
+        colourSelectedBack2 = toTabletColour(xItem.colourSelectedBack2),
+        menuCardId = xItem.menuCardId,
+        statiegeld = CMoney(xItem.statiegeld),
+        sequence = xItem.sequence,
+        isSelected = false
+    )
+
+    // Optional: Add extension function to XMenuItem for more fluent conversion
+    companion object {
+        fun MenuItem.toCMenuItem(): CMenuItem {
+            return CMenuItem(this)
+        }
+
+        fun toTabletColour(colour: Int): Int {
+            return colour or 0xFF000000.toInt()
+        }
+    }
+
+    fun getPriceAndHalfPrice(cluster_id: Int, isTakeawayPrice: Boolean): CPriceAndHalfPrice {
+        if (!isTakeawayPrice) {
+            return CPriceAndHalfPrice(restaurantPrice, restaurantHalfPrice)
+        }
+        return CPriceAndHalfPrice(takeawayPrice, takeawayHalfPrice)
+    }
+
+    fun isOutOfStock(): Boolean = menuItemId<0 || level == EOrderLevel.LEVEL_NOTHING
+                || level == EOrderLevel.LEVEL_OUTOFSTOCK
+
+    fun getTaxPercentage(isTakeawayPrice: Boolean) : Double {
+        val perc : TaxType = when (isTakeawayPrice) {
+            false -> restaurantTax
+            else -> takeawayTax
+        }
+        val percentage = CTaxProvider.getTax(perc)
+        Log.i("CMenuItem", "getTaxPercentage: $percentage")
+        return percentage
+    }
+
+    fun Name(language: ETaal, portion: Int, type: ENameType, trim: Boolean): String
+    {
+        var resultString: String
+        val portionString = duoShao(portion, language, type == ENameType.NAME_PRINTER)
+        return Name(language, portionString, this.localName,
+            this.chineseName, type, trim)
+    }
+}
