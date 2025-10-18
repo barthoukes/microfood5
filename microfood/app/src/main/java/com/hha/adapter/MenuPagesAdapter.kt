@@ -1,11 +1,8 @@
 package com.hha.adapter
-
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.hha.common.textDump
 import com.hha.framework.CMenuPage
 import com.hha.resources.Global
 import tech.hha.microfood.databinding.AdapterMenuPageBinding
@@ -18,101 +15,145 @@ class MenuPagesAdapter(
     private val colourSelectedPage: Int,
     private val onPageSelected: (Int) -> Unit
 ) : RecyclerView.Adapter<MenuPagesAdapter.MenuPageViewHolder>() {
-    val m_global = Global.getInstance()
-    var m_widthPages = 1000
-    var m_page = 0
+
+    private val m_global = Global.getInstance()
+    private var m_widthPages = 1000
+    private var m_page = 0
+
+    // Cache for page lookup to avoid recalculating
+    private val pageCache = mutableMapOf<Int, CMenuPage?>()
+
+    // Cache for page indices
+    private val pageIndexCache = mutableMapOf<Int, Int>()
 
     inner class MenuPageViewHolder(val binding: AdapterMenuPageBinding) :
         RecyclerView.ViewHolder(binding.root)
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MenuPageViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MenuPageViewHolder
+    {
         val binding = AdapterMenuPageBinding.inflate(
             LayoutInflater.from(parent.context),
             parent,
             false
         )
         m_widthPages = parent.width
-        return MenuPageViewHolder(binding)
+
+        val holder = MenuPageViewHolder(binding)
+
+        // Set click listeners once
+        binding.itemName.setOnClickListener {
+            val position = holder.adapterPosition
+            if (position != RecyclerView.NO_POSITION)
+            {
+                val page = getPage(position)
+                page?.menuPageId?.let { onPageSelected(it) }
+            }
+        }
+
+        binding.menuPageButton.setOnClickListener {
+            val position = holder.adapterPosition
+            if (position != RecyclerView.NO_POSITION)
+            {
+                val page = getPage(position)
+                page?.menuPageId?.let { onPageSelected(it) }
+            }
+        }
+
+        return holder
     }
 
-    override fun onBindViewHolder(holder: MenuPageViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: MenuPageViewHolder, position: Int)
+    {
+        // Set click listeners once in onCreateViewHolder instead of every bind
+        // Move this to onCreateViewHolder if the listeners don't change
 
-        // Set click listener on the BUTTON (not just root view)
-//        holder.binding.menuPageButton.setOnClickListener {
-//            onPageSelected(position)
-//        }
-        holder.binding.itemName.setOnClickListener {
-            Log.d("CLICK_TEST", "Name clicked at position $position") // Add this for testing
-            val page = getPage(position)
-            if (page != null) {
-                onPageSelected(page.menuPageId)
-            }
-        }
-        holder.binding.menuPageButton.setOnClickListener {
-            Log.d("CLICK_TEST", "Button clicked at position $position") // Add this for testing
-            val page = getPage(position)
-            if (page !=null) {
-                onPageSelected(page.menuPageId)
-            }
-        }
-
-        var value = m_widthPages/columns
-        holder.itemView.layoutParams.width = value
         val page = getPage(position)
-        var text = "-"
-        var colour = colourPage
-        if (page != null) {
-            if (m_global.isChinese()) {
-                text = page.chineseName
-            }
-            else {
-                text = page.localName
-            }
-            if (position == m_global.menuPageId)
-            {
-                text += "**"
-            }
-            colour = getPageColour(page.menuPageId)
-        }
-        // Update selected state
+        val text = getPageText(page, position)
+        val colour = getPageColour(page?.menuPageId ?: -1)
+
+        // Calculate width only when needed
+        val value = (m_widthPages - (columns + 1) * 2) / columns
+        holder.itemView.layoutParams.width = value
+
+        // Update views
         holder.binding.itemName.text = text
         holder.binding.menuPageButton.setBackgroundColor(colour)
         holder.binding.menuPageButton.visibility = View.VISIBLE
-        holder.binding.menuPageButton.isSelected = false // page.isSelected
+        holder.binding.menuPageButton.isSelected = false
+    }
+
+    override fun onViewRecycled(holder: MenuPageViewHolder) {
+        // Clear any heavy resources if needed
+        super.onViewRecycled(holder)
+    }
+
+    private fun getPageText(page: CMenuPage?, position: Int): String
+    {
+        if (page == null) return "-"
+
+        return buildString {
+            if (m_global.isChinese())
+            {
+                append(page.chineseName)
+            } else
+            {
+                append(page.localName)
+            }
+            if (position == m_global.menuPageId)
+            {
+                append("**")
+            }
+        }
     }
 
     fun getPageColour(pageId: Int): Int
     {
-        return when
-        {
-            pageId == m_page -> colourSelectedPage
-            else -> colourPage
-        }
+        return if (pageId == m_page) colourSelectedPage else colourPage
     }
 
     fun selectPage(newPage: Int)
     {
         val previousPage = m_page
         m_page = newPage
-        notifyItemChanged(getPageIndex(previousPage))
-        notifyItemChanged(getPageIndex(newPage))
+
+        // Only update if the page actually changed
+        if (previousPage != newPage)
+        {
+            val previousIndex = getPageIndex(previousPage)
+            val newIndex = getPageIndex(newPage)
+
+            if (previousIndex != -1) notifyItemChanged(previousIndex)
+            if (newIndex != -1) notifyItemChanged(newIndex)
+        }
     }
 
     fun getPage(position: Int): CMenuPage?
     {
-        val col = position / rows
-        val row = position % rows
-        val page = 1 + row * columns + col
-        return pages[page]
+        // Use cache to avoid recalculating
+        return pageCache.getOrPut(position) {
+            val col = position / rows
+            val row = position % rows
+            val page = 1 + row * columns + col
+            pages[page]
+        }
     }
 
-    fun getPageIndex(position: Int): Int
+    fun getPageIndex(pageId: Int): Int
     {
-        val row = (position - 1) / columns
-        val col = (position - 1) % columns
-        val page = row + col * rows
-        return page
+        // Use cache to avoid recalculating
+        return pageIndexCache.getOrPut(pageId) {
+            val row = (pageId - 1) / columns
+            val col = (pageId - 1) % columns
+            row + col * rows
+        }
     }
 
-    override fun getItemCount() = rows*columns
+    override fun getItemCount() = rows * columns
+
+    // Call this when the data changes significantly to clear caches
+    fun clearCaches()
+    {
+        pageCache.clear()
+        pageIndexCache.clear()
+    }
 }

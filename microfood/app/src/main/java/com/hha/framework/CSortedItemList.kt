@@ -98,9 +98,9 @@ class CSortedItemList : Iterable<CSortedItem> {
         var mutableIndex = index.position
         for (item in m_sortedItems)
         {
-            if (item.size < mutableIndex)
+            if (mutableIndex < item.size)
             {
-                return item.get(mutableIndex)
+                return item[mutableIndex]
             }
             mutableIndex -= item.size
         }

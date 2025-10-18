@@ -2,15 +2,13 @@ package com.hha.adapter
 
 import android.util.Log
 import android.view.LayoutInflater
-import android.view.MotionEvent
-import android.view.ViewConfiguration
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.hha.callback.TransactionListener
 import com.hha.framework.CCursor
 import com.hha.framework.CItem
 import com.hha.framework.CTransaction
 import com.hha.resources.Global
-import tech.hha.microfood.databinding.AdapterTransactionItem2Binding
 import tech.hha.microfood.databinding.AdapterTransactionItemBinding
 
 class TransactionItemsAdapter(
@@ -20,8 +18,9 @@ class TransactionItemsAdapter(
     colourOrderBackgroundSelected : Int,
     colourOrderBackgroundOdd : Int,
     colourOrderBackgroundEven : Int
-) : RecyclerView.Adapter<TransactionItemsAdapter.TransactionItemViewHolder>() {
-
+) : RecyclerView.Adapter<TransactionItemsAdapter.TransactionItemViewHolder>(),
+    TransactionListener
+{
     private val global = Global.getInstance()
     private val m_cursor = CCursor(global.cursor.position)
     private val m_colourOrderText = colourOrderText
@@ -60,16 +59,19 @@ class TransactionItemsAdapter(
 
         if (oldPosition != m_cursor.position)
         {
-            if (oldPosition in 0 until itemCount)
+            if (oldPosition in 0 until getItemCount())
             {
                 notifyItemChanged(oldPosition)
             }
-            if (m_cursor.position in 0 until itemCount)
+            if (m_cursor.position in 0 until getItemCount())
             {
                 notifyItemChanged(m_cursor.position)
             }
         }
     }
+
+    val getItemSize: Int
+        get() = global.transaction?.size ?: 0
 
     override fun getItemCount(): Int
     {
@@ -144,5 +146,46 @@ class TransactionItemsAdapter(
             (position and 1) == 0 -> m_colourOrderBackgroundOdd
             else -> m_colourOrderBackgroundEven
         }
+    }
+
+    fun invalidate(position: Int)
+    {
+        if (position >= getItemCount())
+        {
+            if (position>0)
+            {
+                notifyItemRemoved(position-1)
+            }
+        }
+        if (position >= 0)
+        {
+            notifyItemChanged(position)
+        }
+    }
+
+    override fun onItemAdded(position: Int, item: CItem)
+    {
+        Log.d("TIA", "Listener: Item added at $position")
+        notifyItemInserted(position)
+        // You might need to update the "empty" item row as well
+        notifyItemChanged(position + 1)
+    }
+
+    override fun onItemRemoved(position: Int)
+    {
+        Log.d("TIA", "Listener: Item removed at $position")
+        notifyItemRemoved(position)
+    }
+
+    override fun onItemUpdated(position: Int, item: CItem)
+    {
+        Log.d("TIA", "Listener: Item updated at $position")
+        notifyItemChanged(position)
+    }
+
+    override fun onTransactionCleared()
+    {
+        Log.d("TIA", "Listener: Transaction cleared")
+        notifyDataSetChanged()
     }
 }

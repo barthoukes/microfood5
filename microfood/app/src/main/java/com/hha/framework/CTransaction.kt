@@ -1,6 +1,7 @@
 package com.hha.framework
 
 import android.util.Log
+import com.hha.callback.TransactionListener
 import com.hha.common.TransactionData
 import com.hha.grpc.GrpcServiceFactory
 import com.hha.resources.Global
@@ -187,6 +188,16 @@ class CTransaction : Iterable<CSortedItem> {
         m_payments.setTransactionId(m_transactionId)
     }
 
+    fun addListener(listener: TransactionListener)
+    {
+        m_items.addListener(listener)
+    }
+
+    fun removeListener(listener: TransactionListener)
+    {
+        m_items.removeListener(listener)
+    }
+
     fun getMinutes(): Int {
         return try {
             val inputFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US)
@@ -213,7 +224,7 @@ class CTransaction : Iterable<CSortedItem> {
         var y = m_global.cursor.position
         var item = get(y) ?: get(--y) ?: return
         if (item.deletedStatus != EDeletedStatus.DELETE_NOT) return
-        m_items.addQuantity(CCursor(y), -1)
+        m_items.addQuantity(CCursor(y), 1)
     }
 
     fun minus1()

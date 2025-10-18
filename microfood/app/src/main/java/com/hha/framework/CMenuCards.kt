@@ -11,8 +11,9 @@ class CMenuCards private constructor() {
 
     val menuCard: MutableMap<Int,
             CMenuCard> = mutableMapOf()
-    val userCFG = Global.getInstance().userCFG
+    var isTakeawayPreloaded = false
     val CFG = Global.getInstance().CFG
+    val userCFG = Global.getInstance().userCFG
 
     // Add a menu card to the structure
     fun addMenuCard(newCard: CMenuCard) {
@@ -40,7 +41,12 @@ class CMenuCards private constructor() {
         }
     }
 
-    fun loadTakeaway() {
+    fun loadTakeaway()
+    {
+        if (isTakeawayPreloaded)
+        {
+            return
+        }
         val global = Global.getInstance()
         global.menuPageId = 1
         global.menuCardId = userCFG.getValue("menu_card_takeaway")
@@ -52,6 +58,7 @@ class CMenuCards private constructor() {
         val currentCard = getMenuCard(global.menuCardId)
         currentCard.loadPages()
         currentCard.getMenuPage(global.menuPageId).loadItems(SKIP_INVISIBLE_TRUE)
+        isTakeawayPreloaded = true
     }
 
     fun getMenuCard(menuCardId: Int) : CMenuCard {

@@ -111,6 +111,8 @@
 		android:layout_height="0dp"
 		android:background="@color/ANDROID_BUTTON_BACKGROUND"
 		android:orientation="horizontal"
+		android:layout_margin="0dp"
+		android:padding="0dp"
 		app:layout_constraintBottom_toTopOf="@id/guideline_bottom_bar_top"
 		app:layout_constraintEnd_toEndOf="parent"
 		app:layout_constraintStart_toEndOf="@id/guideline_vertical_main"
@@ -148,7 +150,7 @@
 			android:layout_weight="10"
 			app:layout_constraintDimensionRatio="1:1"
 			android:background="@color/ANDROID_BUTTON_BACKGROUND"
-			android:onClick="on_button_minus1"
+			android:onClick="onButtonMin1"
 			android:src="@drawable/min_yellow" />
 
 		<ImageButton

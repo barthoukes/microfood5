@@ -1,6 +1,6 @@
 package com.hha.dialog
 
-import android.R
+import MenuItemsAdapter
 import android.content.Intent
 import android.graphics.Rect
 import android.os.Bundle
@@ -15,7 +15,6 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import tech.hha.microfood.databinding.PageOrderActivityBinding
 import androidx.recyclerview.widget.RecyclerView
-import com.hha.adapter.MenuItemsAdapter
 import com.hha.adapter.MenuPagesAdapter
 import com.hha.adapter.TransactionItemsAdapter
 import com.hha.common.SkipInvisible.SKIP_INVISIBLE_TRUE
@@ -66,6 +65,21 @@ class PageOrderActivity : AppCompatActivity() {
         setupRecyclerView()
     }
 
+    override fun onDestroy()
+    {
+        super.onDestroy() // Always call the superclass method first
+
+        // Get the current transaction object
+        val transaction = global.transaction
+
+        // Remove the adapter as a listener from the transaction object
+        if (transaction != null)
+        {
+            transaction.removeListener(m_transactionItemsAdapter)
+            Log.d("PageOrderActivity", "TransactionItemsAdapter listener removed.")
+        }
+    }
+
     override fun dispatchTouchEvent(ev: MotionEvent?): Boolean
     {
         // We only care about when the user lifts their finger (ACTION_UP)
@@ -112,6 +126,7 @@ class PageOrderActivity : AppCompatActivity() {
         }
         m_transaction = global.transaction!!
         m_transactionItemsAdapter.updateData(m_transaction)
+        m_transaction.addListener(m_transactionItemsAdapter)
         m_transaction.startNextTimeFrame()
         //menuItemsAdapter.notifyDataSetChanged()
         //transactionItemsAdapter.notifyDataSetChanged()
@@ -138,10 +153,18 @@ class PageOrderActivity : AppCompatActivity() {
     @Suppress("UNUSED_PARAMETER")
     fun onButtonPlus1(view: View)
     {
-        m_transaction.addOneToCursorPosition();
+        m_transaction.addOneToCursorPosition()
     }
 
-    private fun refreshAllData() {
+    @Suppress("UNUSED_PARAMETER")
+    fun onButtonMin1(view: View)
+    {
+        m_transaction.minus1()
+        m_transactionItemsAdapter.invalidate(global.cursor.position)
+    }
+
+    private fun refreshAllData()
+    {
         //m_transactionItemsAdapter.notifyDataSetChanged()
         //m_menuPagesAdapter.notifyDataSetChanged()
         //m_menuItemsAdapter.notifyDataSetChanged()
@@ -163,7 +186,7 @@ class PageOrderActivity : AppCompatActivity() {
                     outRect: Rect, view: View,
                     parent: RecyclerView, state: RecyclerView.State,
                 ) {
-                    outRect.set(8.dpToPx(), 8.dpToPx(), 8.dpToPx(), 8.dpToPx()) // 8dp spacing
+                    outRect.set(1.dpToPx(), 1.dpToPx(), 1.dpToPx(), 1.dpToPx()) // 8dp spacing
                 }
             }
         )
@@ -257,6 +280,33 @@ class PageOrderActivity : AppCompatActivity() {
         binding.layoutTransactionItems.adapter = m_transactionItemsAdapter
     }
 
+    // Add this new function to PageOrderActivity
+    private fun setupTransaction()
+    {
+        // 1. Remove the listener from any old transaction to prevent leaks
+        global.transaction?.removeListener(m_transactionItemsAdapter)
+
+        // 2. Check if a transaction exists or create a new one
+        if (global.transaction == null) {
+            if (global.transactionId > 0) { // Basic check
+                global.transaction = CTransaction(global.transactionId)
+            } else {
+                // Handle case where there is no valid transaction ID
+                Log.e("PageOrderActivity", "No valid transactionId to load.")
+                // You might want to show an error or finish the activity here
+                return
+            }
+        }
+
+        // 3. Assign the transaction to the local variable and add the listener
+        m_transaction = global.transaction!!
+        m_transaction.addListener(m_transactionItemsAdapter)
+
+        // 4. Update the adapter with the fresh transaction data
+        m_transactionItemsAdapter.updateData(m_transaction)
+        m_transaction.startNextTimeFrame()
+    }
+
     // DP-to-pixel conversion extension
     fun Int.dpToPx(): Int = (this * Resources.getSystem()
         .displayMetrics.density).toInt()
@@ -280,6 +330,7 @@ class PageOrderActivity : AppCompatActivity() {
         {
             // Add one item
             m_transaction.addOneToCursorPosition()
+            m_transactionItemsAdapter.invalidate(newCursor)
         }
         else
         {

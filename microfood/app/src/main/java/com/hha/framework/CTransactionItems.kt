@@ -2,6 +2,8 @@ package com.hha.framework
 
 import EViewMode
 import android.util.Log
+import androidx.collection.emptyLongSet
+import com.hha.callback.TransactionListener
 import com.hha.common.ItemVisible
 import com.hha.common.Payed
 import com.hha.grpc.GrpcServiceFactory
@@ -32,10 +34,29 @@ class CTransactionItems : Iterable<CSortedItem> {
     var m_newChanged = false
     val m_clusterIsRunning = false
     val m_viewMode: EViewMode = EViewMode.VIEW_MODE_TRANSACTION ///< Are we in split or preview mode?
+    private val m_listeners = mutableListOf<TransactionListener>()
 
 
     constructor() {
         m_state = EEnterState.ENTER_ITEM_STATE
+    }
+
+    fun addListener(listener: TransactionListener)
+    {
+        if (!m_listeners.contains(listener))
+        {
+            m_listeners.add(listener)
+        }
+        // Use following to notify:
+        // listeners.forEach { it.onItemAdded(newPosition, item) }
+        // listeners.forEach { it.onItemRemoved(position) }
+        // listeners.forEach { it.onTransactionCleared() }
+        // listeners.forEach { it.onItemUpdated(position, updatedItem) }
+    }
+
+    fun removeListener(listener: TransactionListener)
+    {
+        m_listeners.remove(listener)
     }
 
     // Add this iterator implementation
@@ -801,7 +822,10 @@ class CTransactionItems : Iterable<CSortedItem> {
             }
         }
 
-        item.addQuantity(quantity);
+        item.addQuantity(quantity)
+        if (item.getQuantity() >quantity)
+            m_listeners.forEach { it.onItemUpdated(cursor.position, item) }
+        else m_listeners.forEach { it.onItemAdded(cursor.position, item) }
 
         // Increase in database.
         var unitPrice = item.getUnitPrice()
@@ -883,7 +907,7 @@ class CTransactionItems : Iterable<CSortedItem> {
      */
     fun deleteItem( cursor : CCursor, timeFrameId: ETimeFrameIndex, why: EDeletedStatus): Boolean
     {
-        val size = m_items.size
+        var size = m_items.size
         if ( cursor.position<0 || cursor.position >= size)
         {
             Log.e( "CTI", "DeleteItem  Cursor overflow!!")
@@ -931,7 +955,9 @@ class CTransactionItems : Iterable<CSortedItem> {
                     item.timeFrameId.toInt()
                 )
                 m_items.eraseItem(cursor)
-                m_items.eraseSortedItem(cursor.position)
+                m_listeners.forEach { it.onItemRemoved(cursor.position) }
+                size = size - 1
+
                 while (cursor.position < size)
                 {
                     item = m_items.getItem(cursor) ?: break
@@ -958,6 +984,8 @@ class CTransactionItems : Iterable<CSortedItem> {
                             statiegeld, whys, item.timeFrameId.toInt()
                         )
                         m_items.eraseItem(cursor)
+                        m_listeners.forEach { it.onItemRemoved(cursor.position) }
+                        size = size-1
                     }
                 }
             }
@@ -978,6 +1006,8 @@ class CTransactionItems : Iterable<CSortedItem> {
                     item.timeFrameId.toInt()
                 )
                 m_items.eraseItem(cursor)
+                size = size-1
+                m_listeners.forEach { it.onItemRemoved(cursor.position) }
                 while (cursor.position < size)
                 {
                     item = m_items.getItem(cursor) ?: break
@@ -1003,6 +1033,8 @@ class CTransactionItems : Iterable<CSortedItem> {
                             whys, item.timeFrameId.toInt()
                         )
                         m_items.eraseItem(cursor)
+                        size = size-1
+                        m_listeners.forEach { it.onItemRemoved(cursor.position) }
                     } else break
                 }
             }
@@ -1021,6 +1053,8 @@ class CTransactionItems : Iterable<CSortedItem> {
                     Payed.PAID_NO, statiegeld,
                 whys, item.timeFrameId.toInt())
                 m_items.eraseItem(cursor)
+                size = size-1
+                m_listeners.forEach { it.onItemRemoved(cursor.position) }
             }
             EOrderLevel.LEVEL_ASK_CLUSTER -> {}
         }
