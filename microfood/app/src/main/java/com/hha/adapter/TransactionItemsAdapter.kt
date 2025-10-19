@@ -22,7 +22,6 @@ class TransactionItemsAdapter(
     TransactionListener
 {
     private val global = Global.getInstance()
-    private val m_cursor = CCursor(global.cursor.position)
     private val m_colourOrderText = colourOrderText
     private val m_colourOrderSelectedText = colourOrderSelectedText
     private val m_colourOrderBackgroundSelected = colourOrderBackgroundSelected
@@ -54,18 +53,18 @@ class TransactionItemsAdapter(
     fun setCursor(cursor: CCursor)
     {
         Log.i("TIA", "setCursor: $cursor")
-        val oldPosition = m_cursor.position
-        m_cursor.set(cursor.position)
+        val oldPosition = global.cursor
+        global.cursor.set(cursor.position)
 
-        if (oldPosition != m_cursor.position)
+        if (oldPosition != global.cursor)
         {
-            if (oldPosition in 0 until getItemCount())
+            if (oldPosition.position in 0 until getItemCount())
             {
-                notifyItemChanged(oldPosition)
+                notifyItemChanged(oldPosition.position)
             }
-            if (m_cursor.position in 0 until getItemCount())
+            if (global.cursor.position in 0 until itemCount)
             {
-                notifyItemChanged(m_cursor.position)
+                notifyItemChanged(global.cursor.position)
             }
         }
     }
@@ -75,7 +74,7 @@ class TransactionItemsAdapter(
 
     override fun getItemCount(): Int
     {
-        return global.transaction?.size?.plus(1) ?: 1
+        return global.transaction?.itemSize?.plus(1) ?: 1
     }
 
     override fun onBindViewHolder(holder: TransactionItemViewHolder, position: Int)
@@ -133,7 +132,7 @@ class TransactionItemsAdapter(
     {
         return when
         {
-            m_cursor.position == position -> m_colourOrderSelectedText
+            global.cursor.position == position -> m_colourOrderSelectedText
             else -> m_colourOrderText
         }
     }
@@ -142,7 +141,7 @@ class TransactionItemsAdapter(
     {
         return when
         {
-            m_cursor.position == position -> m_colourOrderBackgroundSelected
+            global.cursor.position == position -> m_colourOrderBackgroundSelected
             (position and 1) == 0 -> m_colourOrderBackgroundOdd
             else -> m_colourOrderBackgroundEven
         }
@@ -171,10 +170,21 @@ class TransactionItemsAdapter(
         notifyItemChanged(position + 1)
     }
 
-    override fun onItemRemoved(position: Int)
+    override fun onItemRemoved(position: Int, newSize: Int)
     {
         Log.d("TIA", "Listener: Item removed at $position")
-        notifyItemRemoved(position)
+        while (global.cursor.position > newSize)
+        {
+            notifyItemRemoved(global.cursor.position)
+            setCursor(global.cursor.previous())
+        }
+        // USE THIS: It tells the RecyclerView to animate the removal of the item at 'position'.
+        notifyItemChanged(position)
+        //notifyItemRemoved(position)
+        // And then you might need to update the items that are now in different positions.
+        // This tells the adapter to re-bind all items from the removed position to the end of the list.
+        notifyDataSetChanged()
+        //notifyItemRangeChanged(position, newSize - position)
     }
 
     override fun onItemUpdated(position: Int, item: CItem)

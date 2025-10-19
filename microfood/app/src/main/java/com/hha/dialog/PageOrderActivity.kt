@@ -55,7 +55,6 @@ class PageOrderActivity : AppCompatActivity() {
     private lateinit var m_menuPagesAdapter: MenuPagesAdapter
     private lateinit var m_menuItemsAdapter: MenuItemsAdapter
     private lateinit var m_transactionItemsAdapter: TransactionItemsAdapter
-    private lateinit var m_transaction: CTransaction
     val clusterId : Short = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -120,14 +119,14 @@ class PageOrderActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         // Refresh data when activity resumes
-        if (global.transaction == null) {
+        if (global.transaction == null)
+        {
             if (global.transactionId <1E6) assert(false)
-            m_transaction = CTransaction(global.transactionId)
+            global.transaction = CTransaction(global.transactionId)
         }
-        m_transaction = global.transaction!!
-        m_transactionItemsAdapter.updateData(m_transaction)
-        m_transaction.addListener(m_transactionItemsAdapter)
-        m_transaction.startNextTimeFrame()
+        m_transactionItemsAdapter.updateData(global.transaction!!)
+        global.transaction!!.addListener(m_transactionItemsAdapter)
+        global.transaction!!.startNextTimeFrame()
         //menuItemsAdapter.notifyDataSetChanged()
         //transactionItemsAdapter.notifyDataSetChanged()
     }
@@ -153,13 +152,13 @@ class PageOrderActivity : AppCompatActivity() {
     @Suppress("UNUSED_PARAMETER")
     fun onButtonPlus1(view: View)
     {
-        m_transaction.addOneToCursorPosition()
+        global.transaction?.addOneToCursorPosition()
     }
 
     @Suppress("UNUSED_PARAMETER")
     fun onButtonMin1(view: View)
     {
-        m_transaction.minus1()
+        global.transaction?.minus1()
         m_transactionItemsAdapter.invalidate(global.cursor.position)
     }
 
@@ -299,12 +298,11 @@ class PageOrderActivity : AppCompatActivity() {
         }
 
         // 3. Assign the transaction to the local variable and add the listener
-        m_transaction = global.transaction!!
-        m_transaction.addListener(m_transactionItemsAdapter)
+        global.transaction!!.addListener(m_transactionItemsAdapter)
 
         // 4. Update the adapter with the fresh transaction data
-        m_transactionItemsAdapter.updateData(m_transaction)
-        m_transaction.startNextTimeFrame()
+        m_transactionItemsAdapter.updateData(global.transaction!!)
+        global.transaction?.startNextTimeFrame()
     }
 
     // DP-to-pixel conversion extension
@@ -325,11 +323,11 @@ class PageOrderActivity : AppCompatActivity() {
         val oldPosition = global.cursor.position
 
         // Update the state
-        val newCursor = m_transaction.getCursor(selectedTransactionItem)
+        val newCursor = global.transaction?.getCursor(selectedTransactionItem) ?:0
         if (newCursor == global.cursor.position)
         {
             // Add one item
-            m_transaction.addOneToCursorPosition()
+            global.transaction?.addOneToCursorPosition()
             m_transactionItemsAdapter.invalidate(newCursor)
         }
         else
@@ -349,8 +347,12 @@ class PageOrderActivity : AppCompatActivity() {
 
     private fun handleMenuItem(selectedMenuItem: CMenuItem)
     {
+        if (global.transaction ==null)
+        {
+            return
+        }
         Log.d("CLICK", "MenuItem clicked: ${selectedMenuItem.localName}")
-        if (m_transaction.addTransactionItem(selectedMenuItem, clusterId))
+        if (global.transaction!!.addTransactionItem(selectedMenuItem, clusterId))
         {
             m_transactionItemsAdapter.setCursor(global.cursor)
             //m_menuItemsAdapter.notifyDataSetChanged()

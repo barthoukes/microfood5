@@ -212,7 +212,13 @@ class CTransaction : Iterable<CSortedItem> {
     }
 
     val size : Int
-        get() = m_items.size
+        get() = m_items.itemSize()
+
+    val itemSize : Int
+        get() = m_items.itemSize()
+
+    var transactionId : Int = 0
+       get() = m_transactionId
 
     fun useTakeawayPrices() : Boolean {
         return ETransType.useTakeawayPrices(transType)

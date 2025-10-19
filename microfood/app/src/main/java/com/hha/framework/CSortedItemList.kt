@@ -15,7 +15,8 @@ import kotlin.collections.mutableListOf
 const val FIRST_SEQUENCE_ID = 1
 private val log = Logger.getLogger("CsortedItemList")
 
-class CSortedItemList : Iterable<CSortedItem> {
+class CSortedItemList : Iterable<CSortedItem>
+{
     val global = Global.getInstance()
     val CFG = global.CFG
     var freeItems = CFG.getOption("bill_print_free_items")
@@ -36,19 +37,24 @@ class CSortedItemList : Iterable<CSortedItem> {
     // Add this iterator implementation
     override fun iterator(): Iterator<CSortedItem> = m_sortedItems.iterator()
 
-    fun add(item: CSortedItem) {
+    fun add(item: CSortedItem)
+    {
         m_sortedItems.add(item)
+        recalculateInternalSize()
     }
 
-    fun cursor2index(cursor: CCursor): Int {
+    fun cursor2index(cursor: CCursor): Int
+    {
         var index = 0
         var sortedIndex = 0
-        for (item in m_sortedItems) {
-            if (index + item.size > cursor.position) {
+        for (item in m_sortedItems)
+        {
+            if (index + item.size > cursor.position)
+            {
                 break
             }
             index += item.size
-            sortedIndex +=1
+            sortedIndex += 1
         }
         return sortedIndex
     }
@@ -58,36 +64,41 @@ class CSortedItemList : Iterable<CSortedItem> {
     {
         var index = 0
         var sortedIndex = 0
-        for (item in m_sortedItems) {
+        for (item in m_sortedItems)
+        {
             if (index < cursor.position)
             {
                 index += item.size
                 sortedIndex++
-            }
-            if (index == cursor.position)
+            } else if (index == cursor.position)
             {
                 // Delete item + subitems
                 m_sortedItems.removeAt(sortedIndex)
+                recalculateInternalSize()
                 return
-            }
-            else
+            } else
             {
                 // Delete subitem
                 m_sortedItems[sortedIndex].items.removeAt(cursor.position - index)
+                recalculateInternalSize()
                 return
             }
         }
     }
 
-    fun add(cursor: CCursor, item: CItem) {
+    fun add(cursor: CCursor, item: CItem)
+    {
         val c2i = cursor2index(cursor)
         val cItem = CSortedItem(item)
         m_sortedItems.add(c2i, cItem)
+        recalculateInternalSize()
     }
 
     // Same as removeIt
-    fun eraseSortedItem(index: Int) {
+    fun eraseSortedItem(index: Int)
+    {
         m_sortedItems.removeAt(index)
+        recalculateInternalSize()
     }
 
     // Override the [] operator for read access
@@ -108,25 +119,33 @@ class CSortedItemList : Iterable<CSortedItem> {
     }
 
     // Override size property
-    val size: Int
-        get() {
-            var sz = 0
-            for (item in m_sortedItems) {
-                sz += item.size
-            }
-            return sz
-        }
+    var itemSize: Int = 0
+        private set
 
-    val itemSize : Int
+    private fun recalculateInternalSize(): Int
+    {
+        var sz = 0
+        for (item in m_sortedItems)
+        {
+            sz += item.size
+        }
+        itemSize = sz
+        return sz
+    }
+
+    val size: Int
         get() = m_sortedItems.size
 
     val empty: Boolean
         get() = m_sortedItems.isEmpty()
 
-    fun mainItem(cursor: CCursor): CSortedItem? {
+    fun mainItem(cursor: CCursor): CSortedItem?
+    {
         var offset = 0
-        for (item in m_sortedItems) {
-            if (offset + item.size > cursor.position) {
+        for (item in m_sortedItems)
+        {
+            if (offset + item.size > cursor.position)
+            {
                 return item
             }
             offset += item.size
@@ -134,15 +153,18 @@ class CSortedItemList : Iterable<CSortedItem> {
         return null
     }
 
-    fun convert(sort: EItemSort, itemsDb: ItemList): CItemList {
+    fun convert(sort: EItemSort, itemsDb: ItemList): CItemList
+    {
         val lst = mutableListOf<CItem>()
-        for (item in itemsDb.entryList) {
+        for (item in itemsDb.entryList)
+        {
             lst.add(CItem(item))
         }
         val list_items = CItemList(lst)
         val sortedItems = createList(list_items, true)
 
-        return when (sort) {
+        return when (sort)
+        {
             EItemSort.SORT_BILL -> convertSortBill(sortedItems)
             EItemSort.SORT_SPLIT -> convertSortSplit(sortedItems)
             EItemSort.SORT_PRINTER_SORTED, EItemSort.SORT_PRINTER_SORTED_ALL ->
@@ -152,7 +174,8 @@ class CSortedItemList : Iterable<CSortedItem> {
         }
     }
 
-    private fun createList(itemsDb: CItemList, cleanList: Boolean) : MutableList<CSortedItem> {
+    private fun createList(itemsDb: CItemList, cleanList: Boolean): MutableList<CSortedItem>
+    {
         val items: MutableList<CSortedItem> = mutableListOf()
         if (cleanList) this.clean()
         var highestSequence = FIRST_SEQUENCE_ID - 1
@@ -160,37 +183,46 @@ class CSortedItemList : Iterable<CSortedItem> {
         val twinItems: MutableList<CItem> = mutableListOf()
         val listItems: MutableList<CItem> = mutableListOf()
 
-        for (item in itemsDb) {
+        for (item in itemsDb)
+        {
             if (item.level == EOrderLevel.LEVEL_TWIN_ITEM)
                 twinItems.add(item) else listItems.add(item)
         }
         sequencer.setSortedItemList(listItems)
         mergeTwinItemsToListItems(twinItems, listItems)
 
-        for (item in listItems) {
-            if (item.sequence > highestSequence) {
+        for (item in listItems)
+        {
+            if (item.sequence > highestSequence)
+            {
                 highestSequence = item.sequence
             }
 
-            when (item.level) {
+            when (item.level)
+            {
                 EOrderLevel.LEVEL_ITEM, EOrderLevel.LEVEL_FREE,
                 EOrderLevel.LEVEL_MINUTES_PRICE, EOrderLevel.LEVEL_PERSON
-                    -> {
+                    ->
+                {
                     val newItem = CSortedItem()
                     newItem.row = row++
                     newItem.add(item)
                     items.add(newItem)
                 }
 
-                else -> {
+                else ->
+                {
                     // Handle sub-items (spices, extras, etc.)
                     var p = items.size
-                    while (p > 0) {
+                    while (p > 0)
+                    {
                         p--
-                        if (items[p][0].sequence == item.sequence) {
+                        if (items[p][0].sequence == item.sequence)
+                        {
                             var found = false
                             var q = 0
-                            while (q < items[p].items.size) {
+                            while (q < items[p].items.size)
+                            {
                                 val ip = items[p].items[q]
                                 if (ip.menuItemId == item.menuItemId
                                     && ip.twinItemId == item.twinItemId
@@ -200,7 +232,8 @@ class CSortedItemList : Iterable<CSortedItem> {
                                     && ip.level == item.level
                                     && ip.originalAmount == item.originalAmount
                                     && ip.originalHalfAmount == item.originalHalfAmount
-                                ) {
+                                )
+                                {
                                     ip.addQuantity(item.getQuantity())
                                     ip.chineseName = item.chineseName
                                     ip.localName = item.localName
@@ -214,7 +247,8 @@ class CSortedItemList : Iterable<CSortedItem> {
                                 }
                                 q = q + 1
                             }
-                            if (!found) {
+                            if (!found)
+                            {
                                 items[p].add(item)
                             }
                             break
@@ -227,12 +261,17 @@ class CSortedItemList : Iterable<CSortedItem> {
         return items
     }
 
-    private fun mergeTwinItemsToListItems(twinItems: CItemList, listItems: CItemList) {
-        for (twinItem in twinItems) {
-            for (listItem in listItems) {
+    private fun mergeTwinItemsToListItems(twinItems: CItemList, listItems: CItemList)
+    {
+        for (twinItem in twinItems)
+        {
+            for (listItem in listItems)
+            {
                 if (listItem.sequence == twinItem.sequence &&
                     listItem.subSequence == twinItem.subSequence &&
-                    listItem.subSubSequence == twinItem.subSubSequence) {
+                    listItem.subSubSequence == twinItem.subSubSequence
+                )
+                {
                     listItem.twinItemId = twinItem.menuItemId
                     listItem.updateName()
                 }
@@ -240,16 +279,19 @@ class CSortedItemList : Iterable<CSortedItem> {
         }
     }
 
-    fun setTransaction(transactionId: Int): Boolean {
+    fun setTransaction(transactionId: Int): Boolean
+    {
         val dti = GrpcServiceFactory.createDailyTransactionItemService()
-        val itemsDb : ItemList? = dti.selectTransaction(transactionId)
+        val itemsDb: ItemList? = dti.selectTransaction(transactionId)
         val list_items = CItemList(false, itemsDb)
         m_sortedItems = createList(list_items, true)
         sortAndTry2Merge(0, m_sortedItems.size, false)
+        recalculateInternalSize()
         return true
     }
 
-    fun getTransactionSequencer(): CTransactionSequencer {
+    fun getTransactionSequencer(): CTransactionSequencer
+    {
         return sequencer
     }
 
@@ -259,7 +301,8 @@ class CSortedItemList : Iterable<CSortedItem> {
         timeFrameHigh: ETimeFrameIndex,
         location: EItemLocation,
         is_kitchen_printout: Boolean
-    ): Boolean {
+    ): Boolean
+    {
         highestSequence = 0
         this.transactionId = transactionId
         lowestTimeFrame = timeFrameLow
@@ -269,30 +312,38 @@ class CSortedItemList : Iterable<CSortedItem> {
         val transactionItems = GrpcServiceFactory.createDailyTransactionItemService()
         val locations = EItemLocation.location2Locations(location)
 
-        val sequence = transactionItems.findSequences(transactionId, timeFrameLow.index.toInt(),
-            timeFrameHigh.index.toInt(), locations)
+        val sequence = transactionItems.findSequences(
+            transactionId, timeFrameLow.index.toInt(),
+            timeFrameHigh.index.toInt(), locations
+        )
 
         var sequenceChanges = mutableListOf<Int>()
-        if (timeFrameLow.index > 1) {
-            val sc = transactionItems.findSequences(transactionId, 1,
-                timeFrameLow.index - 1, locations)
+        if (timeFrameLow.index > 1)
+        {
+            val sc = transactionItems.findSequences(
+                transactionId, 1,
+                timeFrameLow.index - 1, locations
+            )
             sequenceChanges = sc.toMutableList()
             filterUnchangedSequences(sequenceChanges, sequence)
         }
-        val idx : ETimeFrameIndex = timeFrameLow
+        val idx: ETimeFrameIndex = timeFrameLow
 
         val itemsDb = transactionItems.findSequenceItems(
             transactionId.toInt(), sequenceChanges,
             idx.previous(), true
         )
-        val list_items = CItemList(false,itemsDb)
+        val list_items = CItemList(false, itemsDb)
         m_sortedItems = createList(list_items, true)
         renumber(m_sortedItems)
-        if (m_sortedItems.isNotEmpty()) {
+        if (m_sortedItems.isNotEmpty())
+        {
             splitPoint = m_sortedItems.size
         }
-        val listDb = transactionItems.findSequenceItems(transactionId.toInt(),
-            sequence, timeFrameHigh, false)
+        val listDb = transactionItems.findSequenceItems(
+            transactionId.toInt(),
+            sequence, timeFrameHigh, false
+        )
         val list_items2 = CItemList(false, listDb)
 
         val list2 = createList(list_items2, false)
@@ -300,72 +351,87 @@ class CSortedItemList : Iterable<CSortedItem> {
         return m_sortedItems.isNotEmpty()
     }
 
-    public fun move2List( source: MutableList<CSortedItem>, destination: MutableList<CSortedItem>,
-                          locations : Int) {
-        var nextIndex = destination.size+1;
+    public fun move2List(
+        source: MutableList<CSortedItem>, destination: MutableList<CSortedItem>,
+        locations: Int
+    )
+    {
+        var nextIndex = destination.size + 1;
 
-        for (item in source) {
-            if (item.getLocations() and locations !=0) {
-                item.row =nextIndex++
+        for (item in source)
+        {
+            if (item.getLocations() and locations != 0)
+            {
+                item.row = nextIndex++
                 destination.add(item)
             }
         }
         source.clear()
     }
 
-    private fun renumber( list: MutableList<CSortedItem>) {
-        var n =1
-        for ( item in list)
+    private fun renumber(list: MutableList<CSortedItem>)
+    {
+        var n = 1
+        for (item in list)
         {
             item.row = n++
         }
     }
 
-    fun filterUnchangedSequences(sequenceBefore :MutableList<Int> , sequence: List<Int> ) {
-        var n=0
-        while ( n<sequenceBefore.size)
+    fun filterUnchangedSequences(sequenceBefore: MutableList<Int>, sequence: List<Int>)
+    {
+        var n = 0
+        while (n < sequenceBefore.size)
         {
-            val seq =sequenceBefore[n]
-            var found =false;
-            for ( p in sequence)
+            val seq = sequenceBefore[n]
+            var found = false;
+            for (p in sequence)
             {
-                if ( p ==seq)
+                if (p == seq)
                 {
-                    found =true;
+                    found = true;
                     break;
                 }
             }
-            if ( found)
+            if (found)
             {
                 n++;
-            }
-            else
+            } else
             {
                 sequenceBefore.removeAt(n);
             }
         }
     }
 
-    fun convertSortedPrinter(items: MutableList<CSortedItem>) : CItemList {
+    fun convertSortedPrinter(items: MutableList<CSortedItem>): CItemList
+    {
         // Merge similar items.
         var list_items = CItemList()
 
         var p = 0
         var q: Int
-        while (p < items.size) {
-            if (items[p].done) {
+        while (p < items.size)
+        {
+            if (items[p].done)
+            {
                 p++
                 continue
             }
             q = p + 1
-            while (q < items.size) {
-                if (items[q].done) {
+            while (q < items.size)
+            {
+                if (items[q].done)
+                {
                     q++
                     continue
                 }
-                if (items[p].mergeSame(items[q], true,
+                if (items[p].mergeSame(
+                        items[q], true,
                         isKitchenPrintout, lowestTimeFrame,
-                        highestTimeFrame)) {
+                        highestTimeFrame
+                    )
+                )
+                {
                     // Continue, maybe the next one can also merge.
                 }
                 q++
@@ -374,16 +440,22 @@ class CSortedItemList : Iterable<CSortedItem> {
         }
         // Erase spices and extras with a zero quantity.
         p = 0
-        while (p < items.size) {
-            if (items[p].items[0].getQuantity() == 0 || items[p].done) {
+        while (p < items.size)
+        {
+            if (items[p].items[0].getQuantity() == 0 || items[p].done)
+            {
                 items.removeAt(p)
-            } else {
+            } else
+            {
                 // Erase extra with quantity 0
                 q = 1
-                while (q < items[p].items.size) {
-                    if (items[p].items[q].getQuantity() == 0) {
+                while (q < items[p].items.size)
+                {
+                    if (items[p].items[q].getQuantity() == 0)
+                    {
                         items[p].items.removeAt(q)
-                    } else {
+                    } else
+                    {
                         q++
                     }
                 }
@@ -391,16 +463,20 @@ class CSortedItemList : Iterable<CSortedItem> {
             }
         }
         // Decide who is first...
-        while (items.isNotEmpty()) {
+        while (items.isNotEmpty())
+        {
             p = 0
             var page = -1
-            for (q in items.indices) {
-                if (items[q].items[0].page < page || page == -1) {
+            for (q in items.indices)
+            {
+                if (items[q].items[0].page < page || page == -1)
+                {
                     page = items[q].items[0].page
                     p = q
                 }
             }
-            for (q in items[p].items.indices) {
+            for (q in items[p].items.indices)
+            {
                 list_items.add(items[p].items[q])
             }
             items.removeAt(p)
@@ -408,26 +484,35 @@ class CSortedItemList : Iterable<CSortedItem> {
         return list_items
     }
 
-    fun convertUnsortedPrinter(items: MutableList<CSortedItem>) : CItemList {
+    fun convertUnsortedPrinter(items: MutableList<CSortedItem>): CItemList
+    {
         // Merge similar items.
         var list_items = CItemList()
 
         var p = 0
         var q: Int
-        while (p < items.size) {
-            if (items[p].done) {
+        while (p < items.size)
+        {
+            if (items[p].done)
+            {
                 p++
                 continue
             }
             q = p + 1
-            while (q < items.size) {
-                if (items[q].done) {
+            while (q < items.size)
+            {
+                if (items[q].done)
+                {
                     q++
                     continue
                 }
-                if (items[p].mergeSame(items[q], false,
+                if (items[p].mergeSame(
+                        items[q], false,
                         isKitchenPrintout, lowestTimeFrame,
-                        highestTimeFrame)) {
+                        highestTimeFrame
+                    )
+                )
+                {
                     // Continue, maybe the next one can also merge.
                 }
                 q++
@@ -436,50 +521,67 @@ class CSortedItemList : Iterable<CSortedItem> {
         }
         // Erase spices and extras with a zero quantity.
         p = 0
-        while (p < items.size) {
-            if (items[p].items[0].getQuantity() == 0 || items[p].done) {
+        while (p < items.size)
+        {
+            if (items[p].items[0].getQuantity() == 0 || items[p].done)
+            {
                 items.removeAt(p)
-            } else {
+            } else
+            {
                 // Erase extra with quantity 0
                 q = 1
-                while (q < items[p].items.size) {
-                    if (items[p].items[q].getQuantity() == 0) {
+                while (q < items[p].items.size)
+                {
+                    if (items[p].items[q].getQuantity() == 0)
+                    {
                         items[p].items.removeAt(q)
-                    } else {
+                    } else
+                    {
                         q++
                     }
                 }
                 p++
             }
         }
-        for (item in items) {
-            for (subItem in item.items) {
+        for (item in items)
+        {
+            for (subItem in item.items)
+            {
                 list_items.add(subItem)
             }
         }
         return list_items
     }
 
-    fun convertOrder(items: MutableList<CSortedItem>) : CItemList {
+    fun convertOrder(items: MutableList<CSortedItem>): CItemList
+    {
         // Merge similar items.
         var list_items = CItemList()
 
         var p = 0
         var q: Int
-        while (p < items.size) {
-            if (items[p].done) {
+        while (p < items.size)
+        {
+            if (items[p].done)
+            {
                 p++
                 continue
             }
             q = p + 1
-            while (q < items.size) {
-                if (items[q].done) {
+            while (q < items.size)
+            {
+                if (items[q].done)
+                {
                     q++
                     continue
                 }
-                if (items[p].mergeSame(items[q], false,
+                if (items[p].mergeSame(
+                        items[q], false,
                         isKitchenPrintout, lowestTimeFrame,
-                        highestTimeFrame)) {
+                        highestTimeFrame
+                    )
+                )
+                {
                     // Continue, maybe the next one can also merge.
                 }
                 q++
@@ -488,16 +590,22 @@ class CSortedItemList : Iterable<CSortedItem> {
         }
         // Erase spices and extras with a zero quantity.
         p = 0
-        while (p < items.size) {
-            if (items[p].items[0].getQuantity() == 0 || items[p].done) {
+        while (p < items.size)
+        {
+            if (items[p].items[0].getQuantity() == 0 || items[p].done)
+            {
                 items.removeAt(p)
-            } else {
+            } else
+            {
                 // Erase extra with quantity 0
                 q = 1
-                while (q < items[p].items.size) {
-                    if (items[p].items[q].getQuantity() == 0) {
+                while (q < items[p].items.size)
+                {
+                    if (items[p].items[q].getQuantity() == 0)
+                    {
                         items[p].items.removeAt(q)
-                    } else {
+                    } else
+                    {
                         q++
                     }
                 }
@@ -509,36 +617,48 @@ class CSortedItemList : Iterable<CSortedItem> {
     }
 
 
-    fun serializeItems(source: List<CSortedItem>, destination: CItemList) {
-        for (a in source) {
-            for (b in a.items.indices) {
+    fun serializeItems(source: List<CSortedItem>, destination: CItemList)
+    {
+        for (a in source)
+        {
+            for (b in a.items.indices)
+            {
                 destination.add(a[b])
             }
         }
     }
 
-    fun eraseDoneAndFreeItems(items: MutableList<CSortedItem>): Int {
+    fun eraseDoneAndFreeItems(items: MutableList<CSortedItem>): Int
+    {
         // Erase spices and extras with a zero quantity or zero.
         var p = 0
         var erased = 0
-        while (p < items.size) {
-            if (items[p].items[0].getQuantity() == 0 || items[p].done) {
+        while (p < items.size)
+        {
+            if (items[p].items[0].getQuantity() == 0 || items[p].done)
+            {
                 items.removeAt(p)
                 erased++
-            } else {
+            } else
+            {
                 // Erase extra without price or quantity 0 if free item and not gift
                 var q = 1
-                while (q < items[p].items.size) {
+                while (q < items[p].items.size)
+                {
                     var free = items[p].items[q].getQuantity() == 0
-                    if (!freeItems && items[p].items[q].getTotal().empty()) {
-                        if (!giftItems || items[p].items[q].originalAmount.empty()) {
+                    if (!freeItems && items[p].items[q].getTotal().empty())
+                    {
+                        if (!giftItems || items[p].items[q].originalAmount.empty())
+                        {
                             free = true
                         }
                     }
-                    if (free) {
+                    if (free)
+                    {
                         items[p].items.removeAt(q)
                         erased++
-                    } else {
+                    } else
+                    {
                         q++
                     }
                 }
@@ -549,22 +669,29 @@ class CSortedItemList : Iterable<CSortedItem> {
     }
 
 
-    fun eraseDoneItems(items: MutableList<CSortedItem>): Int {
+    fun eraseDoneItems(items: MutableList<CSortedItem>): Int
+    {
         // Erase spices and extras with a zero quantity or zero.
         var p = 0
         var erased = 0
-        while (p < items.size) {
-            if (items[p].items[0].getQuantity() == 0 || items[p].done) {
+        while (p < items.size)
+        {
+            if (items[p].items[0].getQuantity() == 0 || items[p].done)
+            {
                 items.removeAt(p)
                 erased++
-            } else {
+            } else
+            {
                 // Erase extra without price or quantity 0 if free item and not gift
                 var q = 1
-                while (q < items[p].items.size) {
-                    if (items[p].items[q].getQuantity() == 0) {
+                while (q < items[p].items.size)
+                {
+                    if (items[p].items[q].getQuantity() == 0)
+                    {
                         items[p].items.removeAt(q)
                         erased++
-                    } else {
+                    } else
+                    {
                         q++
                     }
                 }
@@ -574,25 +701,30 @@ class CSortedItemList : Iterable<CSortedItem> {
         return erased
     }
 
-
-    fun convertSortBill(items: MutableList<CSortedItem>) : CItemList {
+    fun convertSortBill(items: MutableList<CSortedItem>): CItemList
+    {
         // Merge similar items.
         eraseDoneAndFreeItems(items)
         val mergeOnlySameSequence = false
         var p = 0
-        while (p < items.size) {
+        while (p < items.size)
+        {
             var q = p + 1
-            while (q < items.size) {
+            while (q < items.size)
+            {
                 if (!items[p].done && !items[q].done &&
                     items[q].isSimilarItemStructureAndOrder(
                         items[p], isKitchenPrintout,
                         mergeOnlySameSequence,
                         lowestTimeFrame, highestTimeFrame
                     )
-                ) {
-                    items[p].mergeSame(items[q], true,
+                )
+                {
+                    items[p].mergeSame(
+                        items[q], true,
                         isKitchenPrintout, lowestTimeFrame,
-                        highestTimeFrame)
+                        highestTimeFrame
+                    )
                     items[q].done = true
                 }
                 q++
@@ -606,24 +738,30 @@ class CSortedItemList : Iterable<CSortedItem> {
         return list_items
     }
 
-    fun convertSortSplit(items: MutableList<CSortedItem>) : CItemList {
+    fun convertSortSplit(items: MutableList<CSortedItem>): CItemList
+    {
         // Merge similar items.
         eraseDoneItems(items)
         val mergeOnlySameSequence = false
         var p = 0
-        while (p < items.size) {
+        while (p < items.size)
+        {
             var q = p + 1
-            while (q < items.size) {
+            while (q < items.size)
+            {
                 if (!items[p].done && !items[q].done &&
                     items[q].isSimilarItemStructureAndOrder(
                         items[p], isKitchenPrintout,
                         mergeOnlySameSequence,
                         lowestTimeFrame, highestTimeFrame
                     )
-                ) {
-                    items[p].mergeSame(items[q], true,
+                )
+                {
+                    items[p].mergeSame(
+                        items[q], true,
                         isKitchenPrintout, lowestTimeFrame,
-                        highestTimeFrame)
+                        highestTimeFrame
+                    )
                     items[q].done = true
                 }
                 q++
@@ -637,18 +775,23 @@ class CSortedItemList : Iterable<CSortedItem> {
         return list_items
     }
 
-    fun sortItems(items: MutableList<CSortedItem>) : CItemList {
+    fun sortItems(items: MutableList<CSortedItem>): CItemList
+    {
         var list_items = CItemList()
-        while (!items.isEmpty()) {
+        while (!items.isEmpty())
+        {
             var p = 0
             var page = -1
-            for (q in items.indices) {
-                if (items[q].items[0].page < page || page == -1) {
+            for (q in items.indices)
+            {
+                if (items[q].items[0].page < page || page == -1)
+                {
                     page = items[q].items[0].page
                     p = q
                 }
             }
-            for (q in items[p].items.indices) {
+            for (q in items[p].items.indices)
+            {
                 list_items.add(items[p].items[q])
             }
             items.removeAt(p)
@@ -656,19 +799,24 @@ class CSortedItemList : Iterable<CSortedItem> {
         return list_items
     }
 
-    fun clean() {
+    fun clean()
+    {
         m_sortedItems.clear()
     }
 
 
-    fun mergeTwinItemsToListItems(twinItems: List<CItem>, listItems: MutableList<CItem>) {
+    fun mergeTwinItemsToListItems(twinItems: List<CItem>, listItems: MutableList<CItem>)
+    {
         // Merge twinItems and listItems
-        for (twinItem in twinItems) {
-            for (listItem in listItems) {
+        for (twinItem in twinItems)
+        {
+            for (listItem in listItems)
+            {
                 if (listItem.sequence == twinItem.sequence &&
                     listItem.subSequence == twinItem.subSequence &&
                     listItem.subSubSequence == twinItem.subSubSequence
-                ) {
+                )
+                {
                     listItem.twinItemId = twinItem.menuItemId
                     listItem.updateName()
                 }
@@ -677,38 +825,49 @@ class CSortedItemList : Iterable<CSortedItem> {
     }
 
 
-    fun convert(sort: EItemSort, itemsDb: CItemList) : CItemList {
+    fun convert(sort: EItemSort, itemsDb: CItemList): CItemList
+    {
         /// Select all items and add to vector. Sorting is not needed anymore.
         val sortedItems = createList(itemsDb, true)
 
-        val listItems = when (sort) {
+        val listItems = when (sort)
+        {
             EItemSort.SORT_BILL -> convertSortBill(sortedItems)
             EItemSort.SORT_SPLIT -> convertSortSplit(sortedItems)
             EItemSort.SORT_PRINTER_SORTED, EItemSort.SORT_PRINTER_SORTED_ALL,
-                 EItemSort.SORT_COOKING ->
+            EItemSort.SORT_COOKING
+                ->
                 convertSortedPrinter(sortedItems)
+
             EItemSort.SORT_PRINTER_UNSORTED_ALL, EItemSort.SORT_PRINTER_UNSORTED,
-            EItemSort.SORT_NONE, EItemSort.SORT_DEFAULT -> convertUnsortedPrinter(sortedItems)
+            EItemSort.SORT_NONE, EItemSort.SORT_DEFAULT
+                -> convertUnsortedPrinter(sortedItems)
+
             EItemSort.SORT_ORDER -> convertOrder(sortedItems)
         }
         return listItems
     }
 
-    fun size(): Int {
+    fun size(): Int
+    {
         return m_sortedItems.size
     }
 
-    fun sortAndTryToMerge(sortEnabled: Boolean, splitPoint: Int): Int {
+    fun sortAndTryToMerge(sortEnabled: Boolean, splitPoint: Int): Int
+    {
         var lowest = 0
         var index = 0
         var splitPoint = splitPoint
-        while (index < size()) {
+        while (index < size())
+        {
             val c = m_sortedItems[index][0]
-            if (c.level == EOrderLevel.LEVEL_SEPARATOR && splitPoint <= 0) {
+            if (c.level == EOrderLevel.LEVEL_SEPARATOR && splitPoint <= 0)
+            {
                 lowest = sortAndTry2Merge(lowest, index, sortEnabled)
                 index = lowest
                 lowest++
-            } else if (splitPoint == index && splitPoint > 0) {
+            } else if (splitPoint == index && splitPoint > 0)
+            {
                 lowest = sortAndTry2Merge(lowest, index, sortEnabled)
                 index = lowest
                 splitPoint = -1
@@ -719,18 +878,22 @@ class CSortedItemList : Iterable<CSortedItem> {
         return m_sortedItems.size
     }
 
-    fun eraseEmpty(first: Int, last: Int): Boolean {
+    fun eraseEmpty(first: Int, last: Int): Boolean
+    {
         var change = false
         var x = first
         var last = last
-        while (x < last) {
+        while (x < last)
+        {
             val p = m_sortedItems[x]
-            if (p.getQuantity() == 0) {
+            if (p.getQuantity() == 0)
+            {
                 m_sortedItems.removeAt(x)
                 last--
                 change = true
                 continue
-            } else {
+            } else
+            {
                 change = change or p.eraseEmpty()
             }
             x++
@@ -738,19 +901,20 @@ class CSortedItemList : Iterable<CSortedItem> {
         return change
     }
 
-
-
-    fun sortByItemPage(first: Int, last: Int): Boolean {
+    fun sortByItemPage(first: Int, last: Int): Boolean
+    {
         var change = false
         var x = first
-        while (x <= last - 2) {
+        while (x <= last - 2)
+        {
             val p = m_sortedItems[x]
             val q = m_sortedItems[x + 1]
 
             val sign_p = p.getSign()
             val sign_q = q.getSign()
 
-            if (sign_q < sign_p || (sign_q == sign_p && p.getPositionFactor() > q.getPositionFactor())) {
+            if (sign_q < sign_p || (sign_q == sign_p && p.getPositionFactor() > q.getPositionFactor()))
+            {
                 // Exchange these
                 val i = p
                 m_sortedItems[x] = q
@@ -763,17 +927,20 @@ class CSortedItemList : Iterable<CSortedItem> {
         return change
     }
 
-    fun sortByItemSequence(first: Int, last: Int): Boolean {
+    fun sortByItemSequence(first: Int, last: Int): Boolean
+    {
         var change = false
         var x = first
-        while (x <= last - 2) {
+        while (x <= last - 2)
+        {
             val p = m_sortedItems[x]
             val q = m_sortedItems[x + 1]
 
             val sign_p = p.getSign()
             val sign_q = q.getSign()
 
-            if (sign_q < sign_p || (sign_q == sign_p && p.getSequence() > q.getSequence())) {
+            if (sign_q < sign_p || (sign_q == sign_p && p.getSequence() > q.getSequence()))
+            {
                 // Exchange these
                 val i = q
                 m_sortedItems[x + 1] = p
@@ -786,25 +953,33 @@ class CSortedItemList : Iterable<CSortedItem> {
         return change
     }
 
-    fun mergeItems(first: Int, last: Int, sortEnabled: Boolean): Boolean {
+    fun mergeItems(first: Int, last: Int, sortEnabled: Boolean): Boolean
+    {
         var change = false
         var index = first
         var last = last
-        while (index <= last - 2) {
+        while (index <= last - 2)
+        {
             var y = index + 1
-            while (y < last) {
+            while (y < last)
+            {
                 val sortOnlySameSequence = (y - index > 1) && (!sortEnabled)
-                val p : CSortedItem = m_sortedItems[index]
+                val p: CSortedItem = m_sortedItems[index]
                 val q = m_sortedItems[y]
                 if (p.isSimilarItemStructureAndOrder(
                         q, isKitchenPrintout,
                         sortOnlySameSequence,
                         lowestTimeFrame, highestTimeFrame
                     )
-                ) {
-                    if (p.mergeSame(q, true,
+                )
+                {
+                    if (p.mergeSame(
+                            q, true,
                             isKitchenPrintout, lowestTimeFrame,
-                            highestTimeFrame)) {
+                            highestTimeFrame
+                        )
+                    )
+                    {
                         change = true
                         m_sortedItems.removeAt(y)
                         last--
@@ -818,17 +993,22 @@ class CSortedItemList : Iterable<CSortedItem> {
         return change
     }
 
-    fun mergePortionChanges(first: Int, last: Int): Boolean {
+    fun mergePortionChanges(first: Int, last: Int): Boolean
+    {
         var change = false
         var x = first
         var last = last
-        while (x <= last - 2) {
+        while (x <= last - 2)
+        {
             var y = x + 1
-            while (y < last) {
+            while (y < last)
+            {
                 val p = m_sortedItems[x]
                 val q = m_sortedItems[y]
-                if (p.isPossibleToMerge(q, isKitchenPrintout)) {
-                    if (p.merge(q)) {
+                if (p.isPossibleToMerge(q, isKitchenPrintout))
+                {
+                    if (p.merge(q))
+                    {
                         change = true
                         m_sortedItems.removeAt(y)
                         last--
@@ -842,27 +1022,36 @@ class CSortedItemList : Iterable<CSortedItem> {
         return change
     }
 
-    fun mergeSameSequence(first: Int, last: Int): Boolean {
+    fun mergeSameSequence(first: Int, last: Int): Boolean
+    {
         var change = false
         val mergeOnlySameSequence = false
         var x = first
         var last = last
-        while (x <= last - 2) {
+        while (x <= last - 2)
+        {
             var y = x + 1
-            while (y < last) {
+            while (y < last)
+            {
                 val p = m_sortedItems[x]
                 val q = m_sortedItems[y]
-                if (q.getSequence() == p.getSequence()) {
+                if (q.getSequence() == p.getSequence())
+                {
                     if (p.isSimilarItemStructureAndOrder(
                             q, isKitchenPrintout,
                             mergeOnlySameSequence,
                             lowestTimeFrame, highestTimeFrame
                         )
-                    ) {
-                        if (p.mergeSame(q, true,
+                    )
+                    {
+                        if (p.mergeSame(
+                                q, true,
                                 isKitchenPrintout,
                                 lowestTimeFrame,
-                                highestTimeFrame)) {
+                                highestTimeFrame
+                            )
+                        )
+                        {
                             change = true
                             m_sortedItems.removeAt(y)
                             last--
@@ -877,25 +1066,34 @@ class CSortedItemList : Iterable<CSortedItem> {
         return change
     }
 
-    fun mergeItemsSameTimeFrame(first: Int, last: Int): Boolean {
+    fun mergeItemsSameTimeFrame(first: Int, last: Int): Boolean
+    {
         var change = false
         val mergeOnlySameSequence = false
         var x = first
         var last = last
-        while (x <= last - 2) {
+        while (x <= last - 2)
+        {
             var y = x + 1
-            while (y < last) {
+            while (y < last)
+            {
                 val p = m_sortedItems[x]
                 val q = m_sortedItems[y]
-                if (p.isSameTimeFrame(q)) {
+                if (p.isSameTimeFrame(q))
+                {
                     if (p.isSimilarItemStructureAndOrder(
                             q, isKitchenPrintout,
                             mergeOnlySameSequence,
                             lowestTimeFrame, highestTimeFrame
                         )
-                    ) {
-                        if (p.mergeSame(q, true,
-                                isKitchenPrintout, lowestTimeFrame,highestTimeFrame)) {
+                    )
+                    {
+                        if (p.mergeSame(
+                                q, true,
+                                isKitchenPrintout, lowestTimeFrame, highestTimeFrame
+                            )
+                        )
+                        {
                             change = true
                             m_sortedItems.removeAt(y)
                             last--
@@ -910,27 +1108,36 @@ class CSortedItemList : Iterable<CSortedItem> {
         return change
     }
 
-    fun mergeNegativeAndPositive(first: Int, last: Int): Boolean {
+    fun mergeNegativeAndPositive(first: Int, last: Int): Boolean
+    {
         var change = false
         var x = first
         var last = last
         val mergeOnlySameSequence = false
-        while (x <= last - 2) {
+        while (x <= last - 2)
+        {
             var y = x + 1
-            while (y < last) {
+            while (y < last)
+            {
                 val p = m_sortedItems[x]
                 val q = m_sortedItems[y]
-                if (p.getSign() == -1 && q.getSign() == 1) {
+                if (p.getSign() == -1 && q.getSign() == 1)
+                {
                     if (p.isSimilarItemStructureAndOrder(
                             q, isKitchenPrintout,
                             mergeOnlySameSequence,
                             lowestTimeFrame, highestTimeFrame
                         )
-                    ) {
-                        if (p.mergeSame(q, true,
+                    )
+                    {
+                        if (p.mergeSame(
+                                q, true,
                                 isKitchenPrintout,
                                 lowestTimeFrame,
-                                highestTimeFrame)) {
+                                highestTimeFrame
+                            )
+                        )
+                        {
                             change = true
                             m_sortedItems.removeAt(y)
                             last--
@@ -945,23 +1152,29 @@ class CSortedItemList : Iterable<CSortedItem> {
         return change
     }
 
-    fun sortAndTry2Merge(first: Int, last: Int, sortEnabled: Boolean): Int {
+    fun sortAndTry2Merge(first: Int, last: Int, sortEnabled: Boolean): Int
+    {
         var change = true
         var retry = 200
         var first = first
         var last = last
 
-        while (change) {
-            while (change && last - first > 1) {
+        while (change)
+        {
+            while (change && last - first > 1)
+            {
                 change = mergeItems(first, last, sortEnabled)
-                if (sortEnabled) {
+                if (sortEnabled)
+                {
                     change = change or sortByItemPage(first, last)
-                } else {
+                } else
+                {
                     change = change or sortByItemSequence(first, last)
                 }
                 change = change or mergeNegativeAndPositive(first, last)
                 change = change or mergeSameSequence(first, last)
-                if (--retry == 0) {
+                if (--retry == 0)
+                {
                     Log.e("CsortedItemList", "sortAndTry2Merge retries too many times")
                 }
             }
@@ -970,12 +1183,15 @@ class CSortedItemList : Iterable<CSortedItem> {
         return last
     }
 
-    fun getSplitPointValue(): Int {
+    fun getSplitPointValue(): Int
+    {
         return splitPoint
     }
 
-    fun tryToMerge(first: Int, last: Int) {
-        if (last <= first) {
+    fun tryToMerge(first: Int, last: Int)
+    {
+        if (last <= first)
+        {
             return
         }
         eraseDoneAndFreeItems(m_sortedItems)

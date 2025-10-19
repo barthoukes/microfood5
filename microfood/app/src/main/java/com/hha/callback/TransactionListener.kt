@@ -5,7 +5,7 @@ import com.hha.framework.CItem
 interface TransactionListener
 {
    fun onItemAdded(position: Int, item: CItem)
-   fun onItemRemoved(position: Int)
+   fun onItemRemoved(position: Int, newSize: Int)
    fun onItemUpdated(position: Int, item: CItem)
    fun onTransactionCleared()
 }
