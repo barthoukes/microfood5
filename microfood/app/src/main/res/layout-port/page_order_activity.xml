@@ -161,7 +161,7 @@
 			android:layout_weight="10"
 			app:layout_constraintDimensionRatio="1:1"
 			android:background="@color/ANDROID_BUTTON_BACKGROUND"
-			android:onClick="on_button_portion"
+			android:onClick="onButtonPortion"
 			android:src="@drawable/half_circle_yellow" />
 
 		<ImageButton
@@ -172,7 +172,7 @@
 			android:layout_weight="10"
 			app:layout_constraintDimensionRatio="1:1"
 			android:background="@color/ANDROID_BUTTON_BACKGROUND"
-			android:onClick="on_button_remove"
+			android:onClick="onButtonRemove"
 			android:src="@drawable/eraser_yellow" />
 
 		<ImageButton
@@ -185,7 +185,7 @@
 			android:background="@color/ANDROID_BUTTON_BACKGROUND"
 			android:gravity="center"
 			app:layout_constraintDimensionRatio="1:1"
-			android:onClick="on_button_language"
+			android:onClick="onButtonLanguage"
 			android:src="@drawable/languages_yellow" />
 
 		<ImageButton

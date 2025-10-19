@@ -133,16 +133,6 @@ class PageOrderActivity : AppCompatActivity() {
 
     // Add this new function to handle language changes
     @Suppress("UNUSED_PARAMETER")
-
-
-    fun on_button_language(view: View)
-    {
-        Translation.nextLanguage()
-        refreshAllData()
-    }
-
-    // Add this new function to handle language changes
-    @Suppress("UNUSED_PARAMETER")
     fun onButtonEnter(view: View) {
         startActivity(Intent(this, BillOrderActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -159,7 +149,20 @@ class PageOrderActivity : AppCompatActivity() {
     fun onButtonMin1(view: View)
     {
         global.transaction?.minus1()
-        m_transactionItemsAdapter.invalidate(global.cursor.position)
+        //m_transactionItemsAdapter.invalidate(global.cursor.position)
+    }
+
+    @Suppress("UNUSED_PARAMETER")
+    fun onButtonLanguage(view: View)
+    {
+        Translation.nextLanguage()
+        refreshAllData()
+    }
+
+    @Suppress("UNUSED_PARAMETER")
+    fun onButtonRemove(view: View)
+    {
+        global.transaction?.remove()
     }
 
     private fun refreshAllData()

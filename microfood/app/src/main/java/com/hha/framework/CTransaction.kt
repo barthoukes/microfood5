@@ -308,6 +308,15 @@ class CTransaction : Iterable<CSortedItem> {
        // )
     }
 
+    public fun remove()
+    {
+        if (size == 0) return
+        var y = m_global.cursor.position
+        var item = get(y) ?: get(--y) ?: return
+        if (item.deletedStatus != EDeletedStatus.DELETE_NOT) return
+        m_items.addQuantity(CCursor(y), -item.getQuantity())
+    }
+
     // ... [rest of the methods converted similarly] ...
 
     private fun isTakeaway(): Boolean = when(transType) {
