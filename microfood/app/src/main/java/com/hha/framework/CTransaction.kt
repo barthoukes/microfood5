@@ -270,13 +270,14 @@ class CTransaction : Iterable<CSortedItem> {
         return offset
     }
 
-    fun portion()
+    fun nextPortion()
     {
         if (size == 0) return
         var y = m_global.cursor.position
         var item = get(y) ?: get(--y) ?: return
+        if (item.deletedStatus != EDeletedStatus.DELETE_NOT) return
+        m_items.nextPortion(CCursor(y))
 
-        //if (item.deleted != CItem.DELETE_NOT) return
 
         //m_global.transactionItemDB.deleteSequence(id, CTimeFrameIndex(), item.sequence, CItem.DELETE_CAUSE_CHANGE_PORTION)
         //item.portion = if (item.portion == 2.toByte()) 1 else 2

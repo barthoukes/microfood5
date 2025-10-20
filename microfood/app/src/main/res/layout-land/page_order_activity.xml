@@ -164,7 +164,7 @@
 		android:layout_width="0dp"
 		android:layout_height="0dp"
 		android:background="@color/ANDROID_BUTTON_BACKGROUND"
-		android:onClick="on_button_portion"
+		android:onClick="onButtonPortion"
 		android:src="@drawable/half_circle_yellow"
 		app:layout_constraintDimensionRatio="1:1"
 		app:layout_constraintBottom_toTopOf="@+id/next_language"

@@ -87,6 +87,12 @@ class Configuration {
         return findByName(name)?.value?.toStringUtf8()?.toIntOrNull() ?: 0
     }
 
+    fun getBoolean(name: String): Boolean
+    {
+        val value = findByName(name)?.value?.toStringUtf8()?.toIntOrNull() ?: 0
+        return value != 0
+    }
+
     /**
      * Gets all configurations as a protobuf ConfigurationItemList
      * @return ConfigurationItemList containing all items

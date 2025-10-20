@@ -160,6 +160,12 @@ class PageOrderActivity : AppCompatActivity() {
     }
 
     @Suppress("UNUSED_PARAMETER")
+    fun onButtonPortion(view: View)
+    {
+        global.transaction?.nextPortion()
+    }
+
+    @Suppress("UNUSED_PARAMETER")
     fun onButtonRemove(view: View)
     {
         global.transaction?.remove()
@@ -167,9 +173,9 @@ class PageOrderActivity : AppCompatActivity() {
 
     private fun refreshAllData()
     {
-        //m_transactionItemsAdapter.notifyDataSetChanged()
-        //m_menuPagesAdapter.notifyDataSetChanged()
-        //m_menuItemsAdapter.notifyDataSetChanged()
+        m_transactionItemsAdapter.notifyDataSetChanged()
+        m_menuPagesAdapter.notifyDataSetChanged()
+        m_menuItemsAdapter.notifyDataSetChanged()
     }
 
     private fun setupRecyclerView() {
