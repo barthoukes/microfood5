@@ -48,6 +48,8 @@ Current Status & Roadmap
 
 # About Kassaku – Your POS Partner
 
+![Example working project](https://www.kassaku.nl/wp-content/uploads/2023/07/wok.jpg)
+
 Kassaku (Indonesian for Kassa Aku = "My Cash Register") is built on over 15 years of experience in the hospitality industry, founded by Bart Houkes.
 Our Story
 
