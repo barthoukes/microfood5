@@ -1,16 +1,15 @@
 package com.hha.resources
 
-import android.database.sqlite.SQLiteDatabase
 import android.os.Handler
-import com.hha.framework.CMenuCards
+import com.hha.framework.CCursor
 import java.io.File
 
 import com.hha.framework.CTimeFrame
-import com.hha.framework.CTimeFrameIndex
 import com.hha.framework.CTransaction
 import com.hha.grpc.GrpcServiceFactory
-import com.hha.resources.Configuration
+import com.hha.types.EAccess
 import com.hha.types.ETaal
+import com.hha.types.ETimeFrameIndex
 
 class Global private constructor() {
     // Properties
@@ -19,7 +18,7 @@ class Global private constructor() {
     var menuCardId = 1
     var menuPageId = 1
     var currentKeyIndex = 2
-    var cursor = 0
+    var cursor = CCursor(0)
     var language: ETaal = ETaal.LANG_SIMPLIFIED
     var pageOffset = 0
     var transactionId = 0
@@ -33,11 +32,12 @@ class Global private constructor() {
     var clusterNoItems = false
     var showAllprices = false
     var showAllTimes = false
+    var access = EAccess.ACCESS_EMPLOYEE_KEY
     public val CFG: Configuration = Configuration()
     val userCFG: Configuration = Configuration()
     val fontCFG: Configuration = Configuration()
     val colourCFG: Configuration = Configuration()
-    var timeFrame: CTimeFrame? = null
+    var timeFrame = CTimeFrame(-1)
     val pcNumber: Short = 33
 
     companion object {

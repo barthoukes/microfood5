@@ -16,6 +16,8 @@ import kotlinx.coroutines.launch
 import tech.hha.microfood.R
 import tech.hha.microfood.databinding.DialogMainActivityBinding
 
+import com.hha.dialog.Translation
+import com.hha.dialog.Translation.TextId
 import com.hha.activities.AboutActivity
 import com.hha.framework.CMenuCards
 import com.hha.framework.COpenClientsHandler.createNewTakeawayTransaction
@@ -44,6 +46,7 @@ class MainMenuActivity : AppCompatActivity() {
         setupClickListeners()
         setupObservers()
         startConnectionUpdates()
+        updateTexts()
     }
 
     private fun setupActivity() {
@@ -201,6 +204,7 @@ class MainMenuActivity : AppCompatActivity() {
 
     private fun changeLanguage() {
         //viewModel.rotateLanguage()
+        Translation.nextLanguage()
         updateTexts()
     }
 
@@ -227,12 +231,13 @@ class MainMenuActivity : AppCompatActivity() {
     }
 
     private fun updateTexts() {
-        binding.tafelOverzicht.text = getString(R.string.table_overview)
-        binding.buttonTakeaway.text = getString(R.string.takeaway)
-        binding.buttonSettings.text = getString(R.string.configuration)
-        binding.buttonUpdate.text = getString(R.string.update_name_card)
-        binding.buttonStop.text = getString(R.string.stop)
-        binding.aboutUs.text = getString(R.string.about_us)
+        binding.tafelOverzicht.text = Translation.get(TextId.TEXT_TABLE_OVERVIEW)
+        binding.buttonTakeaway.text = Translation.get(TextId.TEXT_TAKEAWAY)
+        binding.buttonSettings.text = Translation.get(TextId.TEXT_SETTINGS)
+        binding.buttonUpdate.text = Translation.get(TextId.TEXT_UPDATE)
+        binding.buttonStop.text = Translation.get(TextId.TEXT_STOP)
+        binding.aboutUs.text = Translation.get(TextId.TEXT_ABOUT_US)
+        binding.buttonCalculator.text = Translation.get(TextId.TEXT_CALCULATOR)
     }
 
     private fun showToast(@StringRes messageRes: Int) {

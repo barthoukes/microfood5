@@ -1,0 +1,81 @@
+syntax = "proto3";
+
+package cfg;
+
+option csharp_namespace = "GrpcService";
+
+import "common_types.proto";
+
+// Add these Kotlin-specific options
+option java_multiple_files = true;
+option java_package = "com.hha.config";
+
+service ConfigurationService
+{
+  rpc GetConfigString(GetConfigStringRequest) returns (GetConfigStringResponse);
+  rpc GetConfigValue(GetConfigValueRequest) returns (GetConfigValueResponse);
+  rpc SetConfigString(SetConfigStringRequest) returns (common.Empty);
+  rpc SetConfigInt(SetConfigIntRequest) returns (common.Empty);
+  rpc IncrementConfig(IncrementConfigRequest) returns (IncrementConfigResponse);
+  rpc DecrementConfig(DecrementConfigRequest) returns (DecrementConfigResponse);
+  rpc CheckConfig(CheckConfigRequest) returns (common.Empty);
+}
+
+message GetConfigStringRequest
+{
+  string name = 1;
+}
+
+message GetConfigStringResponse
+{
+  string value = 1;
+}
+
+message GetConfigValueRequest
+{
+  string name = 1;
+}
+
+message GetConfigValueResponse
+{
+  int32 value = 1;
+}
+
+message SetConfigStringRequest
+{
+  string name = 1;
+  string value = 2;
+}
+
+message SetConfigIntRequest
+{
+  string name = 1;
+  int32 value = 2;
+}
+
+message IncrementConfigRequest
+{
+  string name = 1;
+}
+
+message IncrementConfigResponse
+{
+  int32 value = 1;
+}
+
+message DecrementConfigRequest
+{
+  string name = 1;
+}
+
+message DecrementConfigResponse
+{
+  int32 value = 1;
+}
+
+message CheckConfigRequest
+{
+  string name = 1;
+  string value = 2;
+}
+

@@ -12,6 +12,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import com.hha.exceptions.ConfigNotFoundException
+import com.hha.framework.CMenuCards
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import com.hha.resources.Global
@@ -80,6 +81,7 @@ class SplashLayout : androidx.activity.ComponentActivity() {
             delay(100) // 2 seconds delay
 
             Global.getInstance().getOptions()
+            CMenuCards.getInstance().loadTakeaway()
             navigateToMainActivity()
         }
     }

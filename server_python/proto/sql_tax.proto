@@ -1,0 +1,56 @@
+
+syntax = "proto3";
+
+package tax;
+
+import "common_types.proto";
+
+// Add these Kotlin-specific options
+option java_multiple_files = true;
+option java_package = "com.hha.tax";
+
+service TaxService
+{
+  rpc SetRate(SetRateRequest)  returns (common.Empty);
+  rpc GetName(GetNameRequest)  returns (GetNameResponse);
+  rpc Verify(common.Empty)  returns (VerifyResponse);
+  rpc GetRate(GetRateRequest)  returns (GetRateResponse);
+  rpc Dump(common.Empty)  returns (DumpResponse);
+}
+
+message SetRateRequest
+{
+  common.TaxType tax_type = 1;
+  double percentage = 2;
+}
+
+message DumpResponse
+{
+  string file_name = 1;
+}
+
+message GetNameRequest
+{
+  common.TaxType tax_type = 1;
+}
+
+message GetNameResponse
+{
+  string name = 1;
+}
+
+message VerifyResponse
+{
+  bool result = 1;
+}
+
+message GetRateRequest
+{
+  common.TaxType tax_type = 1;
+}
+
+message GetRateResponse
+{
+  double percentage = 1;
+}
+

@@ -1,4 +1,9 @@
-.gradle
+.gradle/*
 build
 .idea
+*.bin
+.properties
+fileChanges
+*.swp
+.gradle
 

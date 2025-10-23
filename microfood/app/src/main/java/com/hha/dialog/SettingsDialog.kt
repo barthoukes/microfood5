@@ -24,7 +24,8 @@ class SettingsDialog : Activity() {
     private lateinit var mSettingsDemo: CheckBox
     val CFG = Global.getInstance().CFG
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+    override fun onCreate(savedInstanceState: Bundle?)
+    {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.settings_layout)
 
@@ -45,8 +46,10 @@ class SettingsDialog : Activity() {
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
     }
 
-    private fun setButtons() {
-        try {
+    private fun setButtons()
+    {
+        try
+        {
             mSettingsNaam.text = CFG.getString("name")
             mSettingsIP.text = CFG.getString("IP")
             mSettingsHandHeld.text = CFG.getString("handheld_id")
@@ -58,35 +61,42 @@ class SettingsDialog : Activity() {
             mSettingsDemo.isChecked = CFG.getOption("demo")
             mSettingsFontSplash.text = CFG.getString("font_splash")
             mSettingsFontButton.text = CFG.getString("font_button")
-        } catch (e: ConfigNotFoundException) {
+        } catch (e: ConfigNotFoundException)
+        {
             e.printStackTrace()
         }
     }
 
-    fun button_settings_cancel(view: View) {
+    fun button_settings_cancel(view: View)
+    {
         finish()
     }
 
-    fun button_settings_ok(view: View) {
-        try {
+    fun button_settings_ok(view: View)
+    {
+        try
+        {
             CFG.setString("name", mSettingsNaam.text.toString())
             CFG.setString("IP", mSettingsIP.text.toString())
             CFG.setString("handheld_id", mSettingsHandHeld.text.toString())
 
-            if (CFG.getValue("handheld_id") <= 0 || CFG.getValue("handheld_id") > 10) {
+            if (CFG.getValue("handheld_id") <= 0 || CFG.getValue("handheld_id") > 10)
+            {
                 CFG.setValue("handheld_id", 1)
             }
 
             CFG.setString("password", mSettingsPassword.text.toString())
             CFG.setString("font_item", mSettingsFontFood.text.toString())
 
-            if (CFG.getValue("font_item") < 10 || CFG.getValue("font_item") > 40) {
+            if (CFG.getValue("font_item") < 10 || CFG.getValue("font_item") > 40)
+            {
                 CFG.setValue("font_item", 15)
             }
 
             CFG.setString("font_text", mSettingsFontText.text.toString())
 
-            if (CFG.getValue("font_text") < 10 || CFG.getValue("font_text") > 40) {
+            if (CFG.getValue("font_text") < 10 || CFG.getValue("font_text") > 40)
+            {
                 CFG.setValue("font_text", 15)
             }
 
@@ -95,11 +105,12 @@ class SettingsDialog : Activity() {
             CFG.setString("font_splash", mSettingsFontSplash.text.toString())
             CFG.setString("font_button", mSettingsFontButton.text.toString())
             CFG.setValue("demo", if (mSettingsDemo.isChecked) 1 else 0)
-           // mConfig.Save(mConfig.fileName)
+            // mConfig.Save(mConfig.fileName)
 
             // Send update...
             // val msg = Cmessage.getInstance()
-        } catch (e: ConfigNotFoundException) {
+        } catch (e: ConfigNotFoundException)
+        {
             e.printStackTrace()
         }
         finish()

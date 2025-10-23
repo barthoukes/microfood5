@@ -39,7 +39,7 @@ enum class EItemSort(val value: Int) {
                 SORT_PRINTER_UNSORTED_ALL -> ItemSort.SORT_PRINTER_UNSORTED_ALL
                 SORT_COOKING -> ItemSort.SORT_COOKING
                 SORT_DEFAULT -> ItemSort.SORT_DEFAULT
-                else -> ItemSort.SORT_NONE
+                // else -> ItemSort.SORT_NONE
             }
         }
 

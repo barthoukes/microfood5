@@ -205,14 +205,14 @@ class DailyTransactionPaymentService(channel: ManagedChannel) : BaseGrpcService<
         }
     }
 
-    fun getNewPaymentIndex(transactionId: Int): Int? = runBlocking {
+    fun getNewPaymentIndex(transactionId: Int): Int = runBlocking {
         try {
             val request = TransactionId.newBuilder()
                 .setTransactionId(transactionId)
                 .build()
             stub.getNewPaymentIndex(request).partialIndex
         } catch (e: Exception) {
-            null
+            1
         }
     }
 
@@ -240,7 +240,8 @@ class DailyTransactionPaymentService(channel: ManagedChannel) : BaseGrpcService<
         }
     }
 
-    fun getTransactionPaymentTotals(transactionId: Int, includeCancelledPayments: Boolean): PaymentDetailsList? = runBlocking {
+    fun getTransactionPaymentTotals(transactionId: Int, includeCancelledPayments: Boolean)
+    : PaymentDetailsList? = runBlocking {
         try {
             val request = TransactionPaymentRequest.newBuilder()
                 .setTransactionId(transactionId)

@@ -1,0 +1,59 @@
+//==============================================================================
+//  @file       sql_address_iterator.proto
+//  @ingroup    proto database interface
+//  @brief      Operations on address lines
+//
+//  Messages for address lines
+//
+//  @author     Bart Houkes
+//
+//------------------------------------------------------------------------------
+//  Copyright (c) Bart Houkes, 11-11-2024
+//
+//  Copyright notice:
+//  This software is property of Bart Houkes.
+//  Unauthorized duplication and disclosure to third parties is forbidden.
+//============================================================================*/
+
+syntax = "proto3";
+
+package adr;
+
+import "common_types.proto";
+
+// Add these Kotlin-specific options
+option java_multiple_files = true;
+option java_package = "com.hha.address";
+
+service AddressService 
+{
+  rpc SetAddressLine(AddressLine) returns (SetAddressLineResponse) {}
+  rpc MysqlDump(common.Empty) returns (MysqlDumpResponse) {}
+  rpc GetAllLines(common.Empty)  returns (AddressLineList) {}
+  rpc BackupAddress(common.Empty)  returns (common.Empty) {}
+  rpc RestoreAddress(common.Empty)  returns (common.Empty) {}
+  rpc RemoveAddressLine(AddressLine)  returns (common.Empty) {}
+}
+
+message AddressLine 
+{
+  int32 line_id = 1;
+  string value = 2;
+  int32 features = 3;
+}
+
+message AddressLineList
+{
+    repeated AddressLine line = 1;
+}
+
+message SetAddressLineResponse 
+{
+  int32 result = 1;
+}
+
+message MysqlDumpResponse 
+{
+  string dump = 1;
+}
+

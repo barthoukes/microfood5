@@ -1,23 +1,29 @@
 package com.hha.framework
 
 import android.util.Log
+import com.hha.callback.TransactionListener
+import com.hha.common.CookingState
 import com.hha.common.TransactionData
 import com.hha.grpc.GrpcServiceFactory
 import com.hha.resources.Global
+import com.hha.resources.CTimestamp
 import com.hha.types.CMoney
 import com.hha.types.EClientOrdersType
 import com.hha.types.EDeletedStatus
+import com.hha.types.EPaymentMethod
 import com.hha.types.ETransType
+import com.hha.types.EPaymentStatus
 import java.text.SimpleDateFormat
 import java.util.*
 
-class CTransaction : Iterable<CSortedItem> {
-    var transactionId: Int = 0
+class CTransaction : Iterable<CSortedItem>
+{
+    public var m_transactionId: Int = 0
     lateinit var name: String
-    lateinit var transType: ETransType
+    lateinit var m_transType: ETransType
     var rfidKeyId: Int = 0
     lateinit var type: EClientOrdersType
-    var deposit: Int  = 0
+    var deposit: Int = 0
     lateinit var timeStart: String
     lateinit var timeEnd: String
     lateinit var timeCustomer: String
@@ -33,7 +39,7 @@ class CTransaction : Iterable<CSortedItem> {
     var totalHigh = CMoney(0)
     var taxTotalLow = CMoney(0)
     var taxTotalHigh = CMoney(0)
-    var customerId  = 0
+    var customerId = 0
     var archived = false
     var message = ""
     var subtotalTaxFree = CMoney(0)
@@ -41,34 +47,43 @@ class CTransaction : Iterable<CSortedItem> {
     var discountTaxFree = CMoney(0)
     var tipsTaxFree = CMoney(0)
 
-    companion object {
+    companion object
+    {
         private const val TAG = "TRANS"
     }
-
 
     var global = Global.getInstance()
 
     var status: EClientOrdersType = EClientOrdersType.OPEN
-    var total = CMoney(0)
+    var total: CMoney = CMoney(0)
     var hasOrders: Boolean = false
     private val m_global: Global = Global.getInstance()
 
     private val m_items = CTransactionItems()
+
+    //private val m_timeFrames = CTimeFrameList()
+    private val m_payments = CPaymentList()
     private lateinit var timeFrame: CTimeFrame
+    private var m_sizeAtStart : Int = 0
 
     // Add this iterator implementation
     override fun iterator(): Iterator<CSortedItem> = m_items.iterator()
 
-    constructor(transactionId: Int, name: String, time: String,
-                status: EClientOrdersType, customerId: Int,
-                total: CMoney) {
+    constructor(
+        transactionId: Int, name: String, time: String,
+        status: EClientOrdersType, customerId: Int,
+        total: CMoney
+    )
+    {
         this.name = name
         this.status = status
         this.total = total
 
-        this.transactionId = transactionId
+        this.m_transactionId = transactionId
+        m_payments.setTransactionId(transactionId)
+
         this.name = name
-        transType = ETransType.TRANS_TYPE_TAKEAWAY
+        m_transType = ETransType.TRANS_TYPE_TAKEAWAY
         rfidKeyId = -1
         type = EClientOrdersType.OPEN
         deposit = 0
@@ -79,7 +94,7 @@ class CTransaction : Iterable<CSortedItem> {
         subTotalHigh = CMoney(0)
         discountLow = CMoney(0)
         discountHigh = CMoney(0)
-        remainsLow  = 0.0F
+        remainsLow = 0.0F
         remainsHigh = 0.0F
         tipsLow = CMoney(0)
         tipsHigh = CMoney(0)
@@ -87,7 +102,7 @@ class CTransaction : Iterable<CSortedItem> {
         totalHigh = CMoney(0)
         taxTotalLow = CMoney(0)
         taxTotalHigh = CMoney(0)
-        this.customerId  = customerId
+        this.customerId = customerId
         archived = false
         message = ""
         subtotalTaxFree = CMoney(0)
@@ -96,24 +111,27 @@ class CTransaction : Iterable<CSortedItem> {
         tipsTaxFree = CMoney(0)
     }
 
-    constructor(transactionId : Int) {
+    constructor(transactionId: Int)
+    {
         val service = GrpcServiceFactory.createDailyTransactionService()
         val data: TransactionData? = service.selectTransactionId(transactionId.toInt())
 
         global.transaction = CTransaction(data)
+        m_sizeAtStart = m_items.itemLines()
     }
 
-    constructor(source: CTransaction) {
+    constructor(source: CTransaction)
+    {
         customerId = source.customerId
         name = source.name
-        transactionId = source.transactionId
-        transType = source.transType;
+        m_transactionId = source.m_transactionId
+        m_transType = source.m_transType;
         rfidKeyId = source.rfidKeyId;
         deposit = source.deposit
         timeStart = source.timeStart
         timeCustomer = source.timeCustomer
         status = source.status;
-        total = source.total;
+        total = source.total
         hasOrders = false;
         subTotalLow = source.subTotalLow
         subTotalHigh = source.subTotalHigh
@@ -139,17 +157,19 @@ class CTransaction : Iterable<CSortedItem> {
         tipsTaxFree = source.tipsTaxFree
     }
 
-    constructor(source: TransactionData?) {
-        if (source == null) {
-            transactionId = -1
+    constructor(source: TransactionData?)
+    {
+        if (source == null)
+        {
+            m_transactionId = -1
             name = "-"
             status = EClientOrdersType.OPEN
             return
         }
-        transactionId = source.transactionId
+        m_transactionId = source.transactionId
         customerId = source.customerId
         name = source.name
-        transType = ETransType.fromTransType(source.transType)
+        m_transType = ETransType.fromTransType(source.transType)
         rfidKeyId = source.rfidKeyId;
         deposit = source.deposit
         timeStart = source.timeStart
@@ -178,110 +198,228 @@ class CTransaction : Iterable<CSortedItem> {
         totalTaxFree = CMoney(source.totalTaxFree.cents)
         discountTaxFree = CMoney(source.discountTaxFree.cents)
         tipsTaxFree = CMoney(source.tipsTaxFree.cents)
+
+        m_payments.setTransactionId(m_transactionId)
+        m_sizeAtStart = m_items.itemLines()
     }
 
-    fun getMinutes(): Int {
-        return try {
+    fun getTotalTransaction(): CMoney
+    {
+        return totalHigh+totalLow+totalTaxFree
+    }
+
+    fun hasAnyChanges() : Boolean
+    {
+        return m_items.hasAnyChanges()
+    }
+
+    fun addListener(listener: TransactionListener)
+    {
+        m_items.addListener(listener)
+    }
+
+    fun removeListener(listener: TransactionListener)
+    {
+        m_items.removeListener(listener)
+    }
+
+    fun transactionEmptyAtStartAndAtEnd(): Boolean
+    {
+        return m_sizeAtStart == 0 && m_items.itemLines() == 0
+    }
+
+    fun getCursor(selectedTransactionItem: CItem): Int
+    {
+        return m_items.getCursor(selectedTransactionItem)
+    }
+
+    fun get(position: Int): CItem?
+    {
+        return m_items.get(position)
+    }
+
+    fun itemSize() = m_items.itemLines()
+
+    fun closeTimeFrame()
+    {
+        global.timeFrame.closeTimeFrame()
+        global.timeFrame.previous()
+    }
+
+    fun removeTimeFrame()
+    {
+        m_items.undoTimeFrame( global.timeFrame.time_frame_index,
+            global.CFG.getShort("pc_number"))
+        closeTimeFrame()
+    }
+
+    fun itemLines(): Int
+    {
+        return m_items.itemLines()
+    }
+
+    fun itemSum(): Int
+    {
+        return m_items.itemSum()
+    }
+
+    fun emptyTransaction(reason: String)
+    {
+        // No printing of kitchen, just go to billing...
+        if (global.transaction != null)
+        {
+            val itemSum = itemSum()
+            if (itemSum != 0)
+            {
+                removeTimeFrame()
+            } else
+            {
+                closeTimeFrame()
+            }
+            addReturnMoney()
+            if (reason.length() > 0)
+                { m_clientOrdersHandler ->
+                    setMessage(reason);
+                }
+            m_clientOrdersHandler->updateTotal()
+            m_clientOrdersHandler->cleanCurrentTransaction()
+        }
+    }
+
+    fun addReturnMoney(total: CMoney)
+    {
+        // Only close if all payments together are bigger or equal to the total.
+        val total = getTotalTransaction()
+        m_payments.addReturnMoney(total)
+    }
+
+    fun getMinutes(): Int
+    {
+        return try
+        {
             val inputFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US)
             val date = inputFormat.parse(timeStart)
             val millisecond = date?.time ?: 0
             val now = Date().time
             ((now - millisecond + 30000) / (1000 * 60)).toInt()
-        } catch (e: Exception) {
+        } catch (e: Exception)
+        {
             e.printStackTrace()
             10
         }
     }
 
-    val size : Int
-        get() = m_items.size
+    val size: Int
+        get() = m_items.itemLines()
 
-    fun useTakeawayPrices() : Boolean {
-        return ETransType.useTakeawayPrices(transType)
+    val itemSize: Int
+        get() = m_items.itemLines()
+
+    var transactionId: Int = 0
+        get() = m_transactionId
+
+    fun useTakeawayPrices(): Boolean
+    {
+        return ETransType.useTakeawayPrices(m_transType)
     }
 
-    fun plus1() {
+    fun addOneToCursorPosition()
+    {
         if (size == 0) return
-        var y = m_global.cursor
+        var y = m_global.cursor.position
         var item = get(y) ?: get(--y) ?: return
         if (item.deletedStatus != EDeletedStatus.DELETE_NOT) return
-        add(y, 1)
-    }
-
-    fun add(cursor: Int, quantity: Int) {
-
+        m_items.addQuantity(CCursor(y), 1)
     }
 
     fun minus1()
-    {}
+    {
+        if (size == 0) return
+        var y = m_global.cursor.position
+        var item = get(y) ?: get(--y) ?: return
+        if (item.deletedStatus != EDeletedStatus.DELETE_NOT) return
+        m_items.addQuantity(CCursor(y), -1)
+    }
 
-    val empty : Boolean
+    val empty: Boolean
         get() = m_items.empty
 
-    fun portion() {
+    fun nextPortion()
+    {
         if (size == 0) return
-        var y = m_global.cursor
+        var y = m_global.cursor.position
         var item = get(y) ?: get(--y) ?: return
-        //if (item.deleted != CItem.DELETE_NOT) return
-
-        //m_global.transactionItemDB.deleteSequence(id, CTimeFrameIndex(), item.sequence, CItem.DELETE_CAUSE_CHANGE_PORTION)
-        //item.portion = if (item.portion == 2.toByte()) 1 else 2
-        //val mi = m_global.itemDB.getItemFromIndex(item.menu_item_index)
-        //var price = if (isTakeaway()) mi.takeaway_price else mi.restaurant_price
-
-        //price = if (item.portion == 1.toByte()) {
-        //    (price * 60 / 100 + 49).let { it - (it % 50) }
-        //} else {
-        //    (item.portion * price) / 2
-       // }
-        //item.unit = price
-
-        //val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-        //val date = dateFormat.format(Date())
-
-        //m_global.transactionItemDB.createItem(
-        //    item.menu_item_id,
-        //    item.sequence,
-        //    timeFrameIndex(),
-        //    0,
-        //    id,
-        //    item.quantity,
-         //   item.level,
-        //    item.portion,
-        //    item.original,
-        //    item.unit,
-       //     date
-       // )
+        if (item.deletedStatus != EDeletedStatus.DELETE_NOT) return
+        m_items.nextPortion(CCursor(y))
     }
 
-    // ... [rest of the methods converted similarly] ...
+    public fun remove()
+    {
+        if (size == 0) return
+        var y = m_global.cursor.position
+        var item = get(y) ?: get(--y) ?: return
+        if (item.deletedStatus != EDeletedStatus.DELETE_NOT) return
+        m_items.addQuantity(CCursor(y), -item.getQuantity())
+    }
 
-    private fun isTakeaway(): Boolean = when(transType) {
+    fun isTakeaway(): Boolean = when (m_transType)
+    {
         ETransType.TRANS_TYPE_TAKEAWAY, ETransType.TRANS_TYPE_EAT_INSIDE,
-        ETransType.TRANS_TYPE_RECHAUD, ETransType.TRANS_TYPE_UNDEFINED -> true
-            else -> true
+        ETransType.TRANS_TYPE_RECHAUD, ETransType.TRANS_TYPE_UNDEFINED
+            -> true
+
+        else -> false
     }
 
-    operator fun get(position: Int): CItem? {
-        return m_items.getCItem(position)
-    }
-
-    fun stopTimeFrame() {
+    fun stopTimeFrame()
+    {
         timeFrame.end()
-     //   m_global.timeFrameDB.closeTimeFrame(id, tf.time_frame_index, tf.end_time, count)
-     //   m_global.transactionDB.updateTotal(m_global.transaction)
     }
 
-    fun addTransactionItem(selectedMenuItem: CMenuItem, clusterId: Short) : Boolean {
-        Log.d("CTransaction", "add transaction item: " +
-                "${selectedMenuItem.menuItemId} cursor ${global.cursor}")
-        return m_items.touchItem( selectedMenuItem, clusterId)
+    fun addTransactionItem(selectedMenuItem: CMenuItem, clusterId: Short): Boolean
+    {
+        Log.d(
+            "CTransaction", "add transaction item: " +
+               "${selectedMenuItem.menuItemId} cursor ${global.cursor}"
+        )
+        return m_items.touchItem(selectedMenuItem, clusterId)
     }
 
-    fun startNextTimeFrame(): CTimeFrame {
+    fun getTotalAmount(): CMoney
+    {
+        return m_items.getTotalAmount()
+    }
+
+    fun startNextTimeFrame(): CTimeFrame
+    {
         Log.i("Ctransaction", "Start next TimeFrame")
-        timeFrame = CTimeFrame(transactionId)
+        timeFrame = CTimeFrame(m_transactionId)
         global.timeFrame = timeFrame
         return timeFrame
+    }
+
+    fun getCashTotal(): CMoney
+    {
+        return m_payments.getCashTotal();
+    }
+
+    fun getCardTotal(): CMoney
+    {
+        return m_payments.getCardTotal();
+    }
+
+    fun getPaymentTotal(): CMoney
+    {
+        return m_payments.getTotal();
+    }
+
+    fun cancelPayment(index: Int, paymentStatus: EPaymentStatus)
+    {
+        m_payments.cancelPayment(index, paymentStatus)
+    }
+
+    fun addPayment(payment: EPaymentMethod, amount: CMoney)
+    {
+        m_payments.addPayment(payment, customerId, amount)
     }
 }

@@ -16,7 +16,7 @@ enum class EClientOrdersType(val value: Int) {
 
     companion object {
         fun fromValue(value: Int): EClientOrdersType? {
-            return values().firstOrNull { it.value == value }
+            return EClientOrdersType.entries.firstOrNull { it.value == value }
         }
 
         fun fromCLientOrdersType(value: ClientOrdersType): EClientOrdersType {

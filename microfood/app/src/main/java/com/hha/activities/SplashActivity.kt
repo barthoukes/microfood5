@@ -5,6 +5,8 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import com.hha.framework.CMenuCards
+import com.hha.resources.MenuRepository
 import kotlinx.coroutines.delay
 import tech.hha.microfood.databinding.ActivitySplashBinding
 import tech.hha.microfood.databinding.ActivityAboutBinding
@@ -56,7 +58,7 @@ class SplashActivity : AppCompatActivity() {
 
 
             }
-
+            CMenuCards.getInstance().loadTakeaway()
             navigateToMain()
         }
     }

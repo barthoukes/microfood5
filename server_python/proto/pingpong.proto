@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+option java_package = "tech.sikorski.pingpong";
+package pingpong;
+
+service PingPong {
+    rpc ping(PingPongMsg) returns (PingPongMsg);
+}
+
+message PingPongMsg {
+    string payload = 1;
+}

@@ -1,0 +1,194 @@
+//==============================================================================
+//  @file       sql_floor_table.proto
+//  @ingroup    proto database interface
+//  @brief	perations on restaurant map
+//
+//  Messages for floor_table
+//
+//  @author     Bart Houkes
+//
+//------------------------------------------------------------------------------
+//  Copyright (c) Bart Houkes, 25-12-2023
+//
+//  Copyright notice:
+//  This software is property of Bart Houkes.
+//  Unauthorized duplication and disclosure to third parties is forbidden.
+//============================================================================*/
+
+// add proto from sql_floor_table.h
+
+syntax = "proto3";
+
+option csharp_namespace = "GrpcService";
+
+package ft;
+
+import "common_types.proto";
+
+// Add these Kotlin-specific options
+option java_multiple_files = true;
+option java_package = "com.hha.floor";
+
+service FloorTableService
+{
+    rpc UpdateTable(Table)  returns (common.Empty) {}
+    rpc Smaller(TableIdParam)  returns (common.Empty) {}
+    rpc Lower(TableIdParam)  returns (common.Empty) {}
+    rpc Wider(TableIdDisplaySizeParam)  returns (common.Empty) {}
+    rpc Higher(TableIdDisplaySizeParam)  returns (common.Empty) {}
+    rpc SetPersons(PersonsParam)  returns (common.Empty) {}
+    rpc SetName(NameParam)  returns (common.Empty) {}
+    rpc GetName(TableIdParam)  returns (NameParam) {}
+    rpc GetFloorTables(FloorPlanOnlyOpen)  returns (TableList) {}
+    rpc CreateTable(CreateTableRequest)  returns (Table) {}
+    rpc FindAny(NameValueParam)  returns (TableIdParam) {}
+    rpc TableExists(NameValueParam)  returns (TableExist) {}
+    rpc FindNewTableNumber(common.Empty)  returns (NameValueParam) {}
+    rpc RemoveBeerDrinker(NameValueParam)  returns (common.Empty) {}
+    rpc ConnectTableToTransaction(ConnectFloorTable)  returns (common.Empty) {}
+    rpc CloseTransaction(TransactionIdParam)  returns (common.Empty) {}
+    rpc MoveTransactionAndName(MoveTableAndNameParam)  returns (common.Empty) {}
+    rpc MoveTransaction(TransactionToTableParam)  returns (common.Empty) {}
+    rpc AddTransaction(TransactionToTableParam)  returns (common.Empty) {}
+    rpc ExtendLatestTable(NameValueParam)  returns (common.Empty) {}
+    rpc GetFloorTableById(TableIdParam)  returns (Table) {}
+    rpc GetFloorTableByName(NameValueParam)  returns (Table) {}
+    rpc GetFloorTableFromKeybutton(KeybuttonParam)  returns (Table) {}
+    rpc AddMinutes(TableMinutesParam)  returns (common.Empty) {}
+    rpc UpdateData(common.Empty)  returns (common.Empty) {}
+    rpc Rename(NameParam)  returns (common.Empty) {}
+    rpc FindTable(NameValueParam)  returns (Table) {}
+    rpc SetStatus(TableIdStatusParam)  returns (common.Empty) {}
+    rpc UpdateDrinksMinutes(common.Empty)  returns (common.Empty) {}
+    rpc GetTableIdFromTransactionId(TransactionIdParam)  returns (TableIdParam) {}
+    rpc MysqlDump(common.Empty)  returns (common.TextDump);
+    rpc Destroy(TableIdParam)  returns (common.Empty) {}
+    rpc SetTransactionTableAvailable(TransactionIdParam)  returns (common.Empty) {}
+}
+
+message TableExist
+{
+    bool table_exists = 1;
+}
+
+message FloorPlanOnlyOpen
+{
+    int32 floor_plan_id = 1;
+    int32 first_key = 2;
+    bool only_open_tables = 3;
+}
+
+message CreateTableRequest
+{
+    int32 floor_plan_id = 1;
+}
+
+message NameParam
+{
+    int32 table_id = 1;
+    string name = 2;
+}
+
+message NameValueParam
+{
+    string name = 1;
+}
+
+message TableIdParam
+{
+    int32 table_id = 1;
+}
+
+message TransactionIdParam
+{
+    int32 transaction_id = 1;
+}
+
+message TableIdDisplaySizeParam
+{
+    int32 table_id = 1;
+    int32 squares_width = 2;
+    int32 squares_height = 3;
+}
+
+message TableIdStatusParam
+{
+    int32 table_id = 1;
+    common.TableStatus status = 2;
+}
+
+message TableMinutesParam
+{
+    int32 transaction_id = 1;
+    int32 minutes = 2;
+}
+
+message ConnectFloorTable
+{
+    int32 floor_table_id = 1;
+    int32 transaction_id = 2;
+    int32 minutes = 3;
+}
+
+message TransactionToTableParam
+{
+    int32 transaction_id = 1;
+    int32 table_id = 2;
+}
+
+message PersonsParam
+{
+    int32 table_id = 1;
+    int32 number_persons = 2;
+}
+
+message KeybuttonParam
+{
+    int32 floor_plan_id = 1;
+    int32 keybutton = 2;
+}
+
+message Table
+{
+    int32 table_id = 1;
+    int32 keybutton = 2;
+    string name = 3;
+    int32 amount = 4;
+    int32 minutes = 5;
+    string end_time = 6;
+    int32 days = 7;
+    common.TableStatus table_status = 8;
+    common.ClientOrdersType transaction_status = 9;
+    int32 left = 10;
+    int32 top = 11;
+    int32 width = 12;
+    int32 height = 13;
+    int32 shape = 14;
+    common.TableType table_type = 15;
+    int32 customer_id = 16;
+    int32 transaction_id = 17;
+    int32 days_left = 18;
+    int32 minutes_left = 19;
+    int32 actual_person_count = 20;
+    int32 max_person_count = 21;
+    int32 drinks_minutes = 22;
+    int32 floor_plan_id = 23;
+}
+
+message TableStatusParam
+{
+    common.TableStatus status = 1;
+}
+
+message MoveTableAndNameParam
+{
+    int32 transaction_id = 1;
+    string transaction_name = 2;
+    string new_table_name = 3;
+}
+
+message TableList
+{
+    repeated Table tables = 1;
+}
+

@@ -1,0 +1,115 @@
+//==============================================================================
+//  @file       sql_personnel.proto
+//  @ingroup    proto database interface
+//  @brief		Operations on personnel
+//
+//  Messages for personnel
+//
+//  @author     Bart Houkes
+//
+//------------------------------------------------------------------------------
+//  Copyright (c) Bart Houkes, 07-04-2024
+//
+//  Copyright notice:
+//  This software is property of Bart Houkes.
+//  Unauthorized duplication and disclosure to third parties is forbidden.
+//============================================================================*/
+
+syntax = "proto3";
+
+option csharp_namespace = "GrpcService";
+
+package prs;
+
+import "common_types.proto";
+
+// Add these Kotlin-specific options
+option java_multiple_files = true;
+option java_package = "com.hha.personnel";
+
+service PersonnelService
+{
+    rpc GetPersonById(PersonId)  returns(Person) {}
+    rpc GetPersonByDongle(DongleId)  returns(Person) {}
+    rpc GetAllPersons(common.Empty)  returns(PersonList) {}
+    rpc UpdatePerson(PersonComplete)  returns(common.Empty) {}
+    rpc GetNewKey(DongleRestaurantRequest)  returns(Person) {}
+    rpc ClearDatabaseKey(PersonId)  returns(common.Empty) {}
+    rpc IsValid(PersonId)  returns(IsValidKey) {}
+    rpc GetAccess(PersonId)  returns(AccessReply) {}
+}
+
+message PersonId
+{
+    int32 person_id = 1;
+}
+
+message DongleId
+{
+    int32 dongle_id = 1;
+}
+
+message PersonComplete
+{
+    Person person = 1;
+    bool complete = 2;
+}
+
+message AccessReply
+{
+    int32 person_id = 1;
+    Access access_level = 2;
+}
+
+message IsValidKey
+{
+    bool is_valid_key = 1;
+}
+
+message DongleRestaurantRequest
+{
+    int32 dongle = 1;
+    int32 restaurant_id = 2;
+}
+
+message Person
+{
+    int32     person_id = 1;          ///< from SQL_ID
+    int32     dongle = 2;             ///< from SQL_DONGLE
+    Access    access = 3;             ///< from SQL ACCESS
+    bool      valid = 4;              ///< from SQL_VALID
+    string    person_name = 5;        ///< from SQL_RFID_KEY_NAME
+    int32     total_drinks = 6;       ///< from SQL_TOTAL_DRINKS
+    int32     total_bar = 7;          ///< from SQL_TOTAL_BAR
+    int32     total_kitchen = 8;      ///< from SQL_TOTAL_KITCHEN
+    int32     total_kitchen2 = 9;     ///< from SQL_TOTAL_KITCHEN2
+    int32     total_sushi = 10;       ///< from SQL_TOTAL_SUSHI
+    int32     total_non_food = 11;    ///< from SQL_TOTAL_NONFOOD
+    int32     total_others = 12;      ///< from SQL_TOTAL_OTHERS
+    int32     total_cash = 13;        ///< from SQL_TOTAL_CASH
+    int32     total_card = 14;        ///< from SQL_TOTAL_CARD
+    int32     total_account = 15;     ///< from SQL_TOTAL_ACCOUNT
+    int32     total_exchange = 16;    ///< from SQL_TOTAL_EXCHANGE
+    int32     working_hours = 17;     ///< from SQL_WORKING_HOURS
+    string    start_time = 18;        ///< from SQL_START_TIME
+    string    end_time = 19;          ///< from SQL_END_TIME
+    int32     total_bills_ever = 20;  ///< from SQL_TOTAL_BILLS
+    int32     total_amount_ever = 21; ///< from SQL_TOTAL_AMOUNT
+    string    restaurant_id = 22;     ///< from SQL_RESTAURANT_ID
+}
+
+message PersonList
+{
+    repeated Person person = 1;
+}
+
+enum Access
+{
+    INVALID_KEY = 0;
+    NO_KEY = 78;  ///< 'N'o key.
+    EMPLOYEE_KEY = 87;  ///< 'Waiter key.
+    MANAGER_KEY =77;  ///< 'M'anager key.
+    SERVICE_KEY =83;  ///< 'S'ervice key.
+    UNDEFINED_KEY = 99; ///< We don't know what key
+}
+

@@ -127,7 +127,7 @@
 				android:layout_width="0dp"
 				android:background="@color/ANDROID_BUTTON_BACKGROUND"
 	        	android:textColor="@color/ANDROID_BUTTON_TEXT"
-	        	android:onClick="on_button_plus1"
+	        	android:onClick="onButtonPlus1"
 				android:layout_height="fill_parent" />
         
         <Button
@@ -165,7 +165,7 @@
 				android:background="@color/ANDROID_BUTTON_BACKGROUND"
           		android:textColor="@color/ANDROID_BUTTON_TEXT"
 	            android:gravity="center"
-	            android:onClick="on_button_enter"
+	            android:onClick="onButtonEnter"
                 android:text="OK" />
     </LinearLayout>
 </LinearLayout>	

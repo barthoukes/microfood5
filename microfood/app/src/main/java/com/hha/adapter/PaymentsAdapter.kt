@@ -1,3 +1,9 @@
+////////////////////////////////////////////////////////////////////////////////
+// @file PaymentsAdapter.kt
+// @author Bart
+// @brief Adapter for payments during billing
+////////////////////////////////////////////////////////////////////////////////
+
 package com.hha.adapter
 
 import android.util.Log
@@ -8,13 +14,22 @@ import androidx.recyclerview.widget.RecyclerView
 import com.hha.common.textDump
 import com.hha.framework.CMenuPage
 import com.hha.framework.CPayment
+import com.hha.framework.CPaymentList
 import com.hha.resources.Global
+import com.hha.types.CMoney
 import tech.hha.microfood.databinding.AdapterPaymentBinding
 
+
 class PaymentsAdapter(
+    //kitchenTotal: CMoney,
+    //barTotal: CMoney,
+    //nonFoodTotal: CMoney,
+    //statiegeld: CMoney,
+    // onPageSelected: (Int) -> Unit,
     private val onPaymentSelected: (CPayment) -> Unit
 ) : RecyclerView.Adapter<PaymentsAdapter.PaymentsViewHolder>() {
     val global = Global.getInstance()
+    var payments = CPaymentList()
 
     inner class PaymentsViewHolder(val binding: AdapterPaymentBinding) :
         RecyclerView.ViewHolder(binding.root)
@@ -73,7 +88,19 @@ class PaymentsAdapter(
     }
 
     fun getPayment(position: Int): CPayment? {
-        return CPayment()
+        if (position>=0 && position <payments.size)
+        {
+            return payments[position]
+        }
+        return null
+    }
+
+    fun getCardTotal(): CMoney {
+        return CMoney(0.0)
+    }
+
+    fun getCashTotal(): CMoney {
+        return CMoney(0.0)
     }
 
     override fun getItemCount() = 10

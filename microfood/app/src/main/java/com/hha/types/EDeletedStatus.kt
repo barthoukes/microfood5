@@ -84,7 +84,7 @@ enum class EDeletedStatus(val value: Int) {
                 DELETE_CAUSE_CHANGE_PRICE -> DeletedStatus.DELETE_CAUSE_CHANGE_PRICE
                 DELETE_CAUSE_CHANGE_PORTION_OLD -> DeletedStatus.DELETE_CAUSE_CHANGE_PORTION_OLD
                 DELETE_CAUSE_ESCAPE_ORDER -> DeletedStatus.DELETE_CAUSE_ESCAPE_ORDER
-                else -> DeletedStatus.DELETE_NOT
+                //else -> DeletedStatus.DELETE_NOT
             }
         }
 

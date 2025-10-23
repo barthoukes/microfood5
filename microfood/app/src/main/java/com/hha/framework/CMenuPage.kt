@@ -45,4 +45,12 @@ data class CMenuPage(
         mapItems.setItems(menuItems)
         return mapItems
     }
+
+    fun getDisplayName(isChinese: Boolean): String {
+        return if (isChinese) chineseName else localName
+    }
+
+    fun shouldLoadItems(): Boolean {
+        return menuItem.menuItems.isEmpty()
+    }
 }

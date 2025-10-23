@@ -62,7 +62,7 @@ class CTransactionList() : Iterable<CTransaction> {
      * Gets a transaction by ID
      */
     fun getTransactionById(id: Int): CTransaction? {
-        return transactions.firstOrNull { it.transactionId == id }
+        return transactions.firstOrNull { it.m_transactionId == id }
     }
 
     /**
@@ -109,7 +109,8 @@ class CTransactionList() : Iterable<CTransaction> {
     /**
      * Checks if the list is empty
      */
-    fun isEmpty(): Boolean = transactions.isEmpty()
+    val isEmpty : Boolean
+        get() = transactions.isEmpty()
 
     /**
      * Checks if the list is not empty

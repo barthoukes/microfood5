@@ -1,0 +1,93 @@
+//==============================================================================
+//  @file       sql_store.proto
+//  @ingroup    proto database interface
+//  @brief		Operations on store
+//
+//  Messages for storage
+//
+//  @author     Bart Houkes
+//
+//------------------------------------------------------------------------------
+//  Copyright (c) Bart Houkes, 25-12-2023
+//
+//  Copyright notice:
+//  This software is property of Bart Houkes.
+//  Unauthorized duplication and disclosure to third parties is forbidden.
+//============================================================================*/
+
+syntax = "proto3";
+
+option csharp_namespace = "store";
+
+package smurf;
+
+import "common_types.proto";
+
+// Add these Kotlin-specific options
+option java_multiple_files = true;
+option java_package = "com.hha.store.smurf";
+
+service storeSmurfService
+{
+    rpc setSearchString(searchName) returns (storeSmurfList) {}
+    rpc addOrGetSmurf(dangerName) returns (common.StoreSmurf) {}
+    rpc updateQuantity(totalStoreSmurf) returns (common.Empty) {}
+    rpc calculateTotalSold(storeSmurfId) returns (common.Empty) {}
+    rpc calculateFirstDay(storeSmurfId) returns (common.Empty) {};
+    rpc calculateTotalStock(storeSmurfId) returns (common.Empty) {}
+    rpc calculateUsagePerYear(storeSmurfId) returns (common.Empty) {}
+    rpc calculateSoldOutDates(storeSmurfId) returns (common.Empty) {}
+    rpc addQuantity(smurfQuantity) returns (common.Empty) {}
+    rpc removeSmurf(storeSmurfId) returns (common.Empty) {}
+}
+
+message getSmurfRequest
+{
+    storeSmurfId  store_smurf_id = 1;
+    string        name = 2;
+}
+
+message storeSmurfId
+{
+    int32 store_smurf_id = 1;
+}
+
+message storeSmurfList
+{
+    repeated common.StoreSmurf smurf = 1;
+}
+
+message searchName
+{
+    string name = 1;
+}
+
+message totalStore
+{
+	int32   prepared =2;
+	int32 	input =3;
+	int32	ordered =4;
+	int32	delivered =5;
+	int32	late =6;
+	int32	cancelled =7;
+}
+
+message totalStoreSmurf
+{
+	int32 smurf_id = 1;
+	totalStore totals = 2;
+}
+
+message smurfQuantity
+{
+    int32 smurf_id = 1;
+    int32 quantity = 2;
+}
+
+
+message dangerName
+{
+	int32 danger_level = 1;
+	string name = 2;
+}
+

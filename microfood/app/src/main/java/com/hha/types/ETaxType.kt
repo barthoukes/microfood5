@@ -17,21 +17,25 @@ enum class ETaxType(val value: Int) {
          * @param value The integer value to convert
          * @return The matching [ETaxType] or LOW if invalid
          */
-        fun fromInt(value: Int): ETaxType {
-            return when(value) {
+        fun fromInt(value: Int): ETaxType
+        {
+            return when (value)
+            {
                 2 -> BTW_TYPE_HIGH;
                 3 -> BTW_NONE;
                 4 -> BTW_MAX;
                 else -> BTW_TYPE_LOW
             }
+        }
 
-            fun fromTaxType(value: TaxType) : ETaxType {
-                return when(value) {
-                    TaxType.BTW_HIGH -> BTW_TYPE_HIGH;
-                    TaxType.BTW_NONE -> BTW_NONE;
-                    TaxType.BTW_MAX -> BTW_MAX;
-                    else -> BTW_TYPE_LOW
-                }
+        fun fromTaxType(value: TaxType) : ETaxType
+        {
+            return when (value)
+            {
+                TaxType.BTW_HIGH -> BTW_TYPE_HIGH;
+                TaxType.BTW_NONE -> BTW_NONE;
+                TaxType.BTW_MAX -> BTW_MAX;
+                else -> BTW_TYPE_LOW
             }
         }
 

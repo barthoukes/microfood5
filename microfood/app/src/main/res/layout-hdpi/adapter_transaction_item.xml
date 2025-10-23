@@ -9,12 +9,14 @@
 	android:paddingStart="2dp"
 	android:paddingEnd="2dp"
 	android:orientation="vertical"
+	android:background="?attr/selectableItemBackground"
 	android:gravity="center">
 	<TextView
 		android:id="@+id/transaction_item"
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
 		android:gravity="left|center_vertical"
+		android:textColor="@color/COLOUR_ORDER_TEXT"
 		android:textSize="18sp"
 		android:maxLines="4"
 		android:singleLine="false"
@@ -29,6 +31,7 @@
 		android:layout_marginTop="8dp"
 		android:layout_marginLeft="2dp"
 		android:layout_marginRight="2dp"
+		android:textColor="@color/COLOUR_ORDER_TEXT"
 		android:textSize="14sp"
 		android:maxLines="4"
 		android:singleLine="false"

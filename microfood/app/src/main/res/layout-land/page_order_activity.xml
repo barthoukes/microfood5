@@ -1,173 +1,208 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="match_parent"
-    android:orientation="horizontal"
-    android:baselineAligned="false">
-	<LinearLayout
-	    android:layout_width="0dp"
-	    android:layout_height="match_parent"
-	    android:layout_weight="33"
-	    android:background="@color/ANDROID_BUTTON_BACKGROUND"
-	    android:orientation="vertical" >
-        <TextView android:id="@+id/page_order_table_name"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/COLOUR_SELECTED_BACKGROUND"
-            android:textColor="@color/COLOUR_SELECTED_TEXT"
-            android:text="TAFEL 15"/>
-		<androidx.recyclerview.widget.RecyclerView
-			android:id="@+id/layout_transaction_items"
-		    android:layout_width="match_parent"
-		    android:layout_height="wrap_content"
-		    android:choiceMode="singleChoice"
-		    android:scrollingCache="true"
-		    android:scrollbars="none"
-		    android:fadingEdge="none"
-		    android:background="@color/COLOUR_ORDER_BACKGROUND_EMPTY"
-		    android:layout_marginBottom="60dip"/>
-		<LinearLayout
-		    android:layout_width="match_parent"
-		    android:layout_height="60dp"
-		    android:layout_marginTop="-60dip"
-		  	android:background="@color/COLOUR_TOTAL_BACKGROUND">
-		  	<!-- TextView android:id="@+id/total_price_text"
-	    	    android:layout_width="0dp"
-	    	    android:layout_weight="1" 
-	    	    android:layout_margin="1dp"
-		        android:layout_height="60dp"
-			    android:text="TOTAL"
-				android:gravity="left|center_vertical"
-				android:background="@color/COLOUR_TOTAL_BACKGROUND"
-	            android:textColor="@color/COLOUR_TOTAL_TEXT"/ -->   
-	    	<TextView android:id="@+id/total_price"
-	    	    android:layout_margin="1dp"
-		        android:layout_height="60dp"
-		        android:layout_width="match_parent"
-				android:text="0,00"
-				android:gravity="center"
-				android:background="@color/COLOUR_TOTAL_BACKGROUND"
-	           	android:textColor="@color/COLOUR_TOTAL_TEXT"/>
-		</LinearLayout>
-	</LinearLayout>
-	<LinearLayout
-	    android:layout_width="0dp"
-	    android:layout_height="match_parent"
-	    android:layout_weight="57"
-	    android:background="@color/ANDROID_BUTTON_BACKGROUND"
-	    android:orientation="vertical" >
-		<ImageButton
-			android:id="@+id/btn_back"
-			android:layout_width="wrap_content"
-			android:layout_height="48dp"
-			android:layout_gravity="right"
-			android:src="@drawable/back_yellow"
-			android:contentDescription="back button"
-			android:background="?attr/selectableItemBackgroundBorderless" />
-		<LinearLayout
-			android:layout_width="match_parent"
-			android:layout_height="100dp"
-			android:layout_weight="80">
-			<androidx.recyclerview.widget.RecyclerView
-				android:id="@+id/layout_menu_items"
-				android:background="@color/BLACK"
-				android:layout_width="match_parent"
-				android:layout_height="match_parent"
-				android:layout_marginLeft="1dp"
-				android:layout_marginTop="1dp"
-				android:layout_marginRight="1dp"
-				android:layout_marginBottom="1dp"
-				android:orientation="horizontal"
-				android:paddingHorizontal="2dp">
-			</androidx.recyclerview.widget.RecyclerView>
-		</LinearLayout>
-		<LinearLayout
-			android:layout_width="match_parent"
-			android:layout_height="100dp"
-			android:layout_weight="30">
-			<androidx.recyclerview.widget.RecyclerView
-				android:id="@+id/layout_menu_pages"
-				android:background="@color/BLACK"
-				android:layout_width="match_parent"
-				android:layout_height="match_parent"
-				android:layout_marginLeft="1dp"
-				android:layout_marginTop="1dp"
-				android:layout_marginRight="1dp"
-				android:layout_marginBottom="1dp"
-				android:orientation="horizontal"
-				android:paddingHorizontal="2dp">
-			</androidx.recyclerview.widget.RecyclerView>
-		</LinearLayout>
-	</LinearLayout>
-	<LinearLayout
-	    android:layout_width="0dp"
-	    android:layout_height="match_parent"
-	    android:layout_weight="10"
-	    android:background="@color/ANDROID_TABLE_BACKGROUND"
-	    android:orientation="vertical" >
-	    <LinearLayout
-	   	 	android:layout_width="match_parent"
-	    	android:layout_height="match_parent"
-	    	android:orientation="vertical" >
-			<ImageButton
-                android:id="@+id/remove_item"
-				android:src="@drawable/eraser_yellow"
-				android:layout_weight="10"
-				android:layout_margin="4dp"
-				android:layout_width="fill_parent"
-				android:layout_height="0dp"
-				android:background="@color/ANDROID_BUTTON_BACKGROUND"
-         		android:onClick="on_button_remove" />
-			<ImageButton
-                android:id="@+id/plus_one"
-				android:src="@drawable/plus_yellow"
-				android:layout_weight="10"
-				android:layout_margin="4dp"
-				android:layout_width="fill_parent"
-				android:layout_height="0dp"
-				android:background="@color/ANDROID_BUTTON_BACKGROUND"
-       			android:onClick="on_button_plus1" />
-			<ImageButton
-                android:id="@+id/minus_1"
-				android:src="@drawable/min_yellow"
-				android:layout_weight="10"
-				android:layout_margin="4dp"
-				android:layout_width="match_parent"
-				android:layout_height="0dp"
-				android:background="@color/ANDROID_BUTTON_BACKGROUND"
-      			android:onClick="on_button_minus1" />
-			<ImageButton
-                android:id="@+id/portion"
-				android:src="@drawable/half_circle_yellow"
-				android:layout_weight="10"
-				android:layout_margin="4dp"
-				android:layout_width="match_parent"
-				android:layout_height="0dp"
-				android:background="@color/ANDROID_BUTTON_BACKGROUND"
-       			android:onClick="on_button_portion" />	
-	        <ImageButton
-	            android:id="@+id/next_language"
-                style="?android:attr/buttonStyleSmall"		            
-             	android:layout_weight="10"
-             	android:layout_margin="4dp"
-                android:layout_width="match_parent"
-				android:layout_height="0dp"
-                android:gravity="center"
-				android:background="@color/ANDROID_BUTTON_BACKGROUND"
-	            android:onClick="on_button_language"
-                android:src="@drawable/languages_yellow"/>
-	       <ImageButton
-                android:id="@+id/OK"
-                style="?android:attr/buttonStyleSmall"			            
-             	android:layout_weight="15"
-             	android:layout_margin="4dp"
-                android:layout_width="match_parent"
-				android:layout_height="0dp"
-				android:background="@color/ANDROID_BUTTON_BACKGROUND"
-	            android:gravity="center"
-	            android:onClick="on_button_enter"
-	            android:src="@drawable/enter_yellow" />
-       </LinearLayout>
-	</LinearLayout>
-</LinearLayout>    		    		    	        
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:background="@color/ANDROID_TABLE_BACKGROUND">
 
+	<!-- GUIDELINES -->
+	<androidx.constraintlayout.widget.Guideline
+		android:id="@+id/guideline_left"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:orientation="vertical"
+		app:layout_constraintGuide_percent="0.33" />
+
+	<androidx.constraintlayout.widget.Guideline
+		android:id="@+id/guideline_right"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:orientation="vertical"
+		app:layout_constraintGuide_percent="0.927" />
+
+	<androidx.constraintlayout.widget.Guideline
+		android:id="@+id/guideline_top"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:orientation="horizontal"
+		app:layout_constraintGuide_percent="0.083" />
+
+	<androidx.constraintlayout.widget.Guideline
+		android:id="@+id/guideline_items_pages"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:orientation="horizontal"
+		app:layout_constraintGuide_percent="0.717" />
+
+	<!-- FIX: Guideline for the top of the Total Price footer (8.3% height from bottom) -->
+	<androidx.constraintlayout.widget.Guideline
+		android:id="@+id/guideline_price_top"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:orientation="horizontal"
+		app:layout_constraintGuide_percent="0.917" />
+
+
+	<!-- LEFT COLUMN VIEWS -->
+	<TextView
+		android:id="@+id/page_order_table_name"
+		android:layout_width="0dp"
+		android:layout_height="0dp"
+		android:background="@color/COLOUR_SELECTED_BACKGROUND"
+		android:gravity="center"
+		android:text="TAFEL 15"
+		android:textColor="@color/COLOUR_SELECTED_TEXT"
+		app:layout_constraintBottom_toTopOf="@id/guideline_top"
+		app:layout_constraintEnd_toStartOf="@id/guideline_left"
+		app:layout_constraintStart_toStartOf="parent"
+		app:layout_constraintTop_toTopOf="parent" />
+
+	<TextView
+		android:id="@+id/total_price"
+		android:layout_width="0dp"
+		android:layout_height="0dp"
+		android:layout_margin="1dp"
+		android:background="@color/COLOUR_TOTAL_BACKGROUND"
+		android:gravity="center"
+		android:text="0,00"
+		android:textColor="@color/COLOUR_TOTAL_TEXT"
+		android:textSize="32sp"
+		app:layout_constraintBottom_toBottomOf="parent"
+		app:layout_constraintEnd_toStartOf="@id/guideline_left"
+		app:layout_constraintStart_toStartOf="parent"
+		app:layout_constraintTop_toBottomOf="@id/guideline_price_top" />
+
+	<androidx.recyclerview.widget.RecyclerView
+		android:id="@+id/layout_transaction_items"
+		android:layout_width="0dp"
+		android:layout_height="0dp"
+		android:background="@color/COLOUR_ORDER_BACKGROUND_EMPTY"
+		app:layout_constraintBottom_toTopOf="@id/guideline_price_top"
+		app:layout_constraintEnd_toStartOf="@id/guideline_left"
+		app:layout_constraintStart_toStartOf="parent"
+		app:layout_constraintTop_toBottomOf="@id/guideline_top" />
+
+	<!-- MIDDLE COLUMN VIEWS -->
+	<ImageButton
+		android:id="@+id/btn_back"
+		android:layout_width="0dp"
+		android:layout_height="0dp"
+		android:src="@drawable/back_yellow"
+		android:onClick="onButtonCancel"
+		app:layout_constraintDimensionRatio="1:1"
+		app:layout_constraintBottom_toTopOf="@id/guideline_top"
+		app:layout_constraintEnd_toStartOf="@id/guideline_right"
+		app:layout_constraintTop_toTopOf="parent" />
+
+	<androidx.recyclerview.widget.RecyclerView
+		android:id="@+id/layout_menu_items"
+		android:layout_width="0dp"
+		android:layout_height="0dp"
+		android:layout_margin="1dp"
+		android:background="@color/ANDROID_BUTTON_BACKGROUND"
+		app:layout_constraintBottom_toTopOf="@id/guideline_items_pages"
+		app:layout_constraintEnd_toStartOf="@id/guideline_right"
+		app:layout_constraintStart_toEndOf="@id/guideline_left"
+		app:layout_constraintTop_toBottomOf="@id/guideline_top" />
+
+	<androidx.recyclerview.widget.RecyclerView
+		android:id="@+id/layout_menu_pages"
+		android:layout_width="0dp"
+		android:layout_height="0dp"
+		android:layout_margin="0dp"
+		android:padding="0dp"
+		android:background="@color/ANDROID_BUTTON_BACKGROUND"
+		app:layout_constraintBottom_toBottomOf="parent"
+		app:layout_constraintEnd_toStartOf="@id/guideline_right"
+		app:layout_constraintStart_toEndOf="@id/guideline_left"
+		app:layout_constraintTop_toBottomOf="@id/guideline_items_pages" />
+
+	<!-- RIGHT COLUMN VIEWS (ACTION BUTTONS) -->
+	<ImageButton
+		android:id="@+id/remove_item"
+		android:layout_width="0dp"
+		android:layout_height="0dp"
+		android:background="@color/ANDROID_BUTTON_BACKGROUND"
+		android:onClick="onButtonRemove"
+		android:src="@drawable/eraser_yellow"
+		app:layout_constraintDimensionRatio="1:1"
+		app:layout_constraintBottom_toTopOf="@+id/plus_one"
+		app:layout_constraintEnd_toEndOf="parent"
+		app:layout_constraintStart_toEndOf="@id/guideline_right"
+		app:layout_constraintTop_toTopOf="parent"
+		app:layout_constraintVertical_chainStyle="spread_inside" />
+
+	<ImageButton
+		android:id="@+id/plus_one"
+		android:layout_width="0dp"
+		android:layout_height="0dp"
+		android:layout_marginVertical="4dp"
+		android:background="@color/ANDROID_BUTTON_BACKGROUND"
+		android:onClick="onButtonPlus1"
+		android:src="@drawable/plus_yellow"
+		app:layout_constraintDimensionRatio="1:1"
+		app:layout_constraintBottom_toTopOf="@+id/minus_1"
+		app:layout_constraintEnd_toEndOf="parent"
+		app:layout_constraintStart_toEndOf="@id/guideline_right"
+		app:layout_constraintTop_toBottomOf="@+id/remove_item" />
+
+	<ImageButton
+		android:id="@+id/minus_1"
+		android:layout_width="0dp"
+		android:layout_height="0dp"
+		android:layout_marginVertical="4dp"
+		android:background="@color/ANDROID_BUTTON_BACKGROUND"
+		android:onClick="onButtonMin1"
+		android:src="@drawable/min_yellow"
+		app:layout_constraintDimensionRatio="1:1"
+		app:layout_constraintBottom_toTopOf="@+id/portion"
+		app:layout_constraintEnd_toEndOf="parent"
+		app:layout_constraintStart_toEndOf="@id/guideline_right"
+		app:layout_constraintTop_toBottomOf="@+id/plus_one" />
+
+	<ImageButton
+		android:id="@+id/portion"
+		android:layout_width="0dp"
+		android:layout_height="0dp"
+		android:background="@color/ANDROID_BUTTON_BACKGROUND"
+		android:onClick="onButtonPortion"
+		android:layout_margin="16dp"
+		android:src="@drawable/half_circle_yellow"
+		app:layout_constraintDimensionRatio="1:1"
+		app:layout_constraintBottom_toTopOf="@+id/next_language"
+		app:layout_constraintEnd_toEndOf="parent"
+		app:layout_constraintStart_toEndOf="@id/guideline_right"
+		app:layout_constraintTop_toBottomOf="@+id/minus_1" />
+
+	<ImageButton
+		android:id="@+id/next_language"
+		style="?android:attr/buttonStyleSmall"
+		android:layout_width="0dp"
+		android:layout_height="0dp"
+		android:layout_marginVertical="4dp"
+		android:background="@color/ANDROID_BUTTON_BACKGROUND"
+		android:gravity="center"
+		android:onClick="onButtonLanguage"
+		android:src="@drawable/languages_yellow"
+		app:layout_constraintDimensionRatio="1:1"
+		app:layout_constraintBottom_toTopOf="@+id/OK"
+		app:layout_constraintEnd_toEndOf="parent"
+		app:layout_constraintStart_toEndOf="@id/guideline_right"
+		app:layout_constraintTop_toBottomOf="@+id/portion" />
+
+	<ImageButton
+		android:id="@+id/OK"
+		style="?android:attr/buttonStyleSmall"
+		android:layout_width="0dp"
+		android:layout_height="0dp"
+		android:background="@color/ANDROID_BUTTON_BACKGROUND"
+		android:gravity="center"
+		android:onClick="onButtonEnter"
+		android:src="@drawable/enter_yellow"
+		app:layout_constraintDimensionRatio="1:1"
+		app:layout_constraintBottom_toBottomOf="parent"
+		app:layout_constraintEnd_toEndOf="parent"
+		app:layout_constraintStart_toEndOf="@id/guideline_right"
+		app:layout_constraintTop_toBottomOf="@+id/next_language" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

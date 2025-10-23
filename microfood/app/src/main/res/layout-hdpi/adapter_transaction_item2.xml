@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:id="@+id/transaction_order"
+	android:layout_width="match_parent"
+	android:layout_height="40dp"
+	android:clickable="true"
+	android:elevation="4dp"
+	android:padding="2dp">
+	<View
+		android:id="@+id/item_background"
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"/>
+	<!-- Item Name (Top-Left) -->
+	<TextView
+		android:id="@+id/transaction_item"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:textColor="@color/COLOUR_ITEM_TEXT"
+		android:textSize="24sp"
+		tools:text="Loempia speciaal"/>
+
+	<!-- Quantity Indicator (Top-Right, visible only when selected) -->
+	<TextView
+		android:id="@+id/transaction_price"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:textColor="@color/COLOUR_ITEM_TEXT"
+		android:textSize="12sp"
+		android:visibility="visible"
+		tools:text="3x"
+		android:gravity="top|end"
+		tools:visibility="visible"/>
+
+	<!-- Price (Below Name) -->
+	<TextView
+		android:id="@+id/item_price"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginTop="4dp"
+		android:textColor="@color/COLOUR_ITEM_TEXT"
+		android:textSize="14sp"
+		android:maxLines="4"
+		tools:text="€15.75"/>
+
+</RelativeLayout>

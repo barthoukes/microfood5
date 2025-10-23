@@ -57,6 +57,8 @@ class CSortedItem : Iterable<CItem> {
         items.add(item)
     }
 
+    fun itemSum(): Int = items.sumOf { it.getQuantity() }
+
     fun addSorted(newItem: CItem) {
         val insertIndex = items.indexOfFirst { item ->
             when {
@@ -75,7 +77,7 @@ class CSortedItem : Iterable<CItem> {
         return items[0].locations
     }
 
-    fun merge(new_item : CSortedItem) : Boolean
+   fun merge(new_item : CSortedItem) : Boolean
     {
         // Merge items for same sequence!
         items[0].merge( new_item.items[0]);
@@ -173,7 +175,7 @@ class CSortedItem : Iterable<CItem> {
         while (iterator.hasNext()) {
             val item = iterator.next()
             if (item.getQuantity() == 0) {
-                if (items[0].timeFrameId.index() < item.timeFrameId.index()) {
+                if (items[0].timeFrameId.index < item.timeFrameId.index) {
                     items[0].timeFrameId = item.timeFrameId
                 }
                 iterator.remove()
@@ -191,6 +193,7 @@ class CSortedItem : Iterable<CItem> {
         return total
     }
 
+    fun getItemLevel(): EOrderLevel = items[0].level
     fun getQuantity(): Int = items[0].getQuantity()
     fun getSign(): Int = when {
         items[0].getQuantity() < 0 -> -1
@@ -208,12 +211,25 @@ class CSortedItem : Iterable<CItem> {
         for (item in items) item.sequence += 1
     }
     fun getOrder(): Int = items[0].subSequence
-    fun getTimeFrameIndex(): Short = items[0].timeFrameId.value
+    fun getTimeFrameIndex(): ETimeFrameIndex = items[0].timeFrameId
     fun isItemGroup(): Boolean = items[0].level == EOrderLevel.LEVEL_ITEMGROUP
 
     fun isSameTimeFrame(other: CSortedItem): Boolean {
         if (size() != other.size()) return false
         return items.zip(other.items).all { (a, b) -> a.timeFrameId == b.timeFrameId }
+    }
+
+    fun undoTimeFrame(timeFrameId: ETimeFrameIndex)
+    {
+        val iterator = items.listIterator(1)
+        while (iterator.hasNext())
+        {
+            val item = iterator.next()
+            if (item.timeFrameId == timeFrameId)
+            {
+                iterator.remove()
+            }
+        }
     }
 
     fun isSimilarItemStructureAndOrder(new_item: CSortedItem, is_kitchen_printout: Boolean,

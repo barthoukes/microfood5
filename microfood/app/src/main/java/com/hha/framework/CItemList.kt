@@ -27,18 +27,21 @@ data class CItemList (
     }
 
     // Override the [] operator for getting items
-    operator fun get(index: Int): CItem {
+    operator fun get(index: Int): CItem
+    {
         return items[index]
     }
 
-    fun add(item: CItem) {
+    fun add(item: CItem)
+    {
         items.add(item)
     }
 
     val size : Int
         get() = items.size
 
-    fun clear() {
+    fun clear()
+    {
         items.clear()
     }
 

@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+option csharp_namespace = "GrpcService";
+
+package msg;
+
+import "common_types.proto";
+
+// Add these Kotlin-specific options
+option java_multiple_files = true;
+option java_package = "com.hha.message";
+
+service MessageService
+{
+  rpc GetValueById(GetValueByIdRequest) returns (GetValueByIdResponse);
+  rpc SetValueById(SetValueByIdRequest) returns (common.Empty);
+  rpc GetAllMessages(common.Empty)  returns (GetAllMessagesResponse);
+  rpc BackupMessages(common.Empty)  returns (common.Empty);
+  rpc RestoreMessages(common.Empty)  returns (common.Empty);
+}
+
+message GetAllMessagesResponse
+{
+  repeated string message = 1;
+}
+
+message GetValueByIdRequest
+{
+  int32 id = 1;
+}
+
+message GetValueByIdResponse
+{
+  string value = 1;
+}
+
+message SetValueByIdRequest
+{
+  int32 id = 1;
+  string value = 2;
+}
+
