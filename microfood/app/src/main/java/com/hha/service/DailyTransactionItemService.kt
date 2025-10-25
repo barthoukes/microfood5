@@ -320,12 +320,12 @@ class DailyTransactionItemService(channel: ManagedChannel) : BaseGrpcService<Dai
         }
     }
 
-    fun undoTimeFrame(transactionId: Long, timeFrameIndex: Int, deviceId: Int): Boolean = runBlocking {
+    fun undoTimeFrame(transactionId: Long, timeFrameIndex: Int, deviceId: Short): Boolean = runBlocking {
         try {
             val request = UndoTimeFrameRequest.newBuilder()
                 .setTransactionId(transactionId)
                 .setTimeFrameIndex(timeFrameIndex)
-                .setDeviceId(deviceId)
+                .setDeviceId(deviceId.toInt())
                 .build()
             stub.undoTimeFrame(request)
             true

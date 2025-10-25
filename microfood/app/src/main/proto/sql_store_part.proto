@@ -1,5 +1,5 @@
 //==============================================================================
-//  @file       sql_store.proto
+//  @file       sql_store_part.proto
 //  @ingroup    proto database interface
 //  @brief		Operations on store
 //
@@ -27,71 +27,61 @@ import "common_types.proto";
 option java_multiple_files = true;
 option java_package = "com.hha.store.part";
 
-service storePartService
+service StorePartService
 {
-    rpc reduceStorage(transactionId) returns (common.Empty) {}
-    rpc selectMenuItem(menuCardItemId) returns (common.StoreItem) {}	
-    rpc getMenuItems(menuCardId) returns (storeItemList) {}
-    rpc insertSmurf(newSmurfRequest) returns (storeSmurfId) {}
-    rpc removeStorePart(storePartId) returns (common.Empty) {}
-    rpc calculateUsagePerYear(itemId) returns (common.Empty) {}
-    rpc calculateSoldOutDates(itemId) returns (common.Empty) {}
-    rpc calculateMenuTranslations(itemId) returns (common.Empty) {}
-    rpc calculateFirstDay(itemId) returns (common.Empty) {}
-    rpc calculateTotalSold(itemId) returns (common.Empty) {}
-    rpc updateSold(itemId) returns (common.Empty) {}
-    rpc getStorePartFromId(storePartId) returns (common.StorePart) {}
+    rpc ReduceStorage(TransactionId) returns (common.Empty) {}
+    rpc SelectMenuItem(MenuCardItemId) returns (common.StoreItem) {}	
+    rpc GetMenuItems(MenuCardId) returns (StoreItemList) {}
+    rpc InsertSmurf(NewSmurfRequest) returns (StoreSmurfId) {}
+    rpc RemoveStorePart(StorePartId) returns (common.Empty) {}
+    rpc CalculateUsagePerYear(ItemId) returns (common.Empty) {}
+    rpc CalculateSoldOutDates(ItemId) returns (common.Empty) {}
+    rpc CalculateMenuTranslations(ItemId) returns (common.Empty) {}
+    rpc CalculateFirstDay(ItemId) returns (common.Empty) {}
+    rpc CalculateTotalSold(ItemId) returns (common.Empty) {}
+    rpc UpdateSold(ItemId) returns (common.Empty) {}
+    rpc GetStorePartFromId(StorePartId) returns (common.StorePart) {}
 }
 
-message transactionId
+message ItemId
 {
-    int32 transaction_id = 1;
+    int32 item_id = 1;
 }
 
-message menuCardId
+message MenuCardId
 {
     int32 menu_card_id = 1;
 }
 
-message menuCardItemId
+message MenuCardItemId
 {
-	int32 menu_card_id = 1;
+    int32 menu_card_id = 1;
     int32 menu_item_id = 2;
 }
 
-message storePartId
-{
-    int32 store_part_id = 1;
-}
-
-message storeSmurfId
-{
-    int32 store_smurf_id = 1;
-}
-
-message newSmurfRequest
+message NewSmurfRequest
 {
     int32 menu_item_id = 1;
     int32 smurf_id = 2;
     float percentage = 3;
 }
 
-message itemId
-{
-    int32 item_id = 1;
-}
-
-message storePartList
-{
-    repeated common.StorePart parts = 1;
-}
-
-message storeItemList
+message StoreItemList
 {
     repeated common.StoreItem store_item = 2;
 }
 
-message storeSmurf
+message StorePartId
+{
+    int32 store_part_id = 1;
+}
+
+message StorePartList
+{
+    repeated common.StorePart parts = 1;
+}
+
+message StoreSmurf
 {
     int32    smurf_id =1;
     int32    danger_level =2;
@@ -106,3 +96,12 @@ message storeSmurf
     string   end_time =11;
 }
 
+message StoreSmurfId
+{
+    int32 store_smurf_id = 1;
+}
+
+message TransactionId
+{
+    int32 transaction_id = 1;
+}

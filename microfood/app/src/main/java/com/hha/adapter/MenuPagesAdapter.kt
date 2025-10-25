@@ -14,7 +14,8 @@ class MenuPagesAdapter(
     private val colourPage: Int,
     private val colourSelectedPage: Int,
     private val onPageSelected: (Int) -> Unit
-) : RecyclerView.Adapter<MenuPagesAdapter.MenuPageViewHolder>() {
+) : RecyclerView.Adapter<MenuPagesAdapter.MenuPageViewHolder>()
+{
 
     private val m_global = Global.getInstance()
     private var m_widthPages = 1000
@@ -82,7 +83,8 @@ class MenuPagesAdapter(
         holder.binding.menuPageButton.isSelected = false
     }
 
-    override fun onViewRecycled(holder: MenuPageViewHolder) {
+    override fun onViewRecycled(holder: MenuPageViewHolder)
+    {
         // Clear any heavy resources if needed
         super.onViewRecycled(holder)
     }

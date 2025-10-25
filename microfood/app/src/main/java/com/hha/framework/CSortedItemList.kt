@@ -1,6 +1,5 @@
 package com.hha.framework
 
-import com.hha.framework.CItem
 import android.util.Log
 import com.hha.common.ItemList
 import com.hha.grpc.GrpcServiceFactory
@@ -119,17 +118,23 @@ class CSortedItemList : Iterable<CSortedItem>
     }
 
     // Override size property
-    var itemSize: Int = 0
+    var itemLines: Int = 0
+        private set
+
+    var itemSum: Int = 0
         private set
 
     private fun recalculateInternalSize(): Int
     {
         var sz = 0
+        var sum = 0
         for (item in m_sortedItems)
         {
             sz += item.size
+            sum += item.itemSum()
         }
-        itemSize = sz
+        itemSum = sum
+        itemLines = sz
         return sz
     }
 
@@ -288,6 +293,27 @@ class CSortedItemList : Iterable<CSortedItem>
         sortAndTry2Merge(0, m_sortedItems.size, false)
         recalculateInternalSize()
         return true
+    }
+
+    fun undoTimeFrame(transactionId: Int, timeFrameId: ETimeFrameIndex, deviceId: Short)
+    {
+        val transactionItems = GrpcServiceFactory.createDailyTransactionItemService()
+        transactionItems.undoTimeFrame(transactionId.toLong(),
+            timeFrameId.toInt(), deviceId)
+
+        val iterator = m_sortedItems.iterator()
+        while (iterator.hasNext())
+        {
+            val item = iterator.next()
+            if (item.getTimeFrameIndex() == timeFrameId)
+            {
+                iterator.remove()
+            }
+            else
+            {
+                item.undoTimeFrame(timeFrameId)
+            }
+        }
     }
 
     fun getTransactionSequencer(): CTransactionSequencer
@@ -616,6 +642,22 @@ class CSortedItemList : Iterable<CSortedItem>
         return list_items
     }
 
+    fun getCursor(selectedTransactionItem: CItem): Int
+    {
+        var position : Int = 0
+        for (item in m_sortedItems)
+        {
+            for (subItem in item.items)
+            {
+                if (subItem == selectedTransactionItem)
+                {
+                    return position
+                }
+                position = position + 1
+            }
+        }
+        return 0
+    }
 
     fun serializeItems(source: List<CSortedItem>, destination: CItemList)
     {

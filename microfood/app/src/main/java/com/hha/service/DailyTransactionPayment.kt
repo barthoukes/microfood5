@@ -240,7 +240,8 @@ class DailyTransactionPaymentService(channel: ManagedChannel) : BaseGrpcService<
         }
     }
 
-    fun getTransactionPaymentTotals(transactionId: Int, includeCancelledPayments: Boolean): PaymentDetailsList? = runBlocking {
+    fun getTransactionPaymentTotals(transactionId: Int, includeCancelledPayments: Boolean)
+    : PaymentDetailsList? = runBlocking {
         try {
             val request = TransactionPaymentRequest.newBuilder()
                 .setTransactionId(transactionId)

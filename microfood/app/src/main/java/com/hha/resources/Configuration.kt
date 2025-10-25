@@ -87,6 +87,11 @@ class Configuration {
         return findByName(name)?.value?.toStringUtf8()?.toIntOrNull() ?: 0
     }
 
+    fun getShort(name: String): Short
+    {
+        return findByName(name)?.value?.toStringUtf8()?.toShort() ?: 0
+    }
+
     fun getBoolean(name: String): Boolean
     {
         val value = findByName(name)?.value?.toStringUtf8()?.toIntOrNull() ?: 0

@@ -1,6 +1,5 @@
 package com.hha.dialog
 
-import MenuItemsAdapter
 import android.content.Intent
 import android.graphics.Rect
 import android.os.Bundle
@@ -8,13 +7,12 @@ import android.view.View
 import android.content.res.Resources
 import android.util.Log
 import android.view.MotionEvent
-import android.view.ViewGroup
-import android.view.WindowInsetsController
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.DialogFragment
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
-import tech.hha.microfood.databinding.PageOrderActivityBinding
 import androidx.recyclerview.widget.RecyclerView
+
 import com.hha.adapter.MenuPagesAdapter
 import com.hha.adapter.TransactionItemsAdapter
 import com.hha.common.SkipInvisible.SKIP_INVISIBLE_TRUE
@@ -24,10 +22,20 @@ import com.hha.framework.CMenuItem
 import com.hha.framework.CMenuItems
 import com.hha.framework.CMenuPage
 import com.hha.framework.CTransaction
-import com.hha.resources.Global
+import com.hha.messagebox.MessageBoxCancelReason
+import com.hha.messagebox.MessageBoxUndoChanges
+import com.hha.messagebox.MessageBoxYesNo
 import com.hha.resources.Configuration
+import com.hha.resources.Global
+import com.hha.types.ETimeFrameIndex
+import MenuItemsAdapter
 
-class PageOrderActivity : AppCompatActivity() {
+import tech.hha.microfood.databinding.PageOrderActivityBinding
+
+class PageOrderActivity : AppCompatActivity(), MessageBoxYesNo.MessageBoxYesNoListener,
+   MessageBoxCancelReason.MessageBoxCancelReasonListener,
+    MessageBoxUndoChanges.MessageBoxUndoChangesListener
+{
     private lateinit var binding: PageOrderActivityBinding
     val global = Global.getInstance()
     val menuCardId = global.menuCardId
@@ -56,6 +64,8 @@ class PageOrderActivity : AppCompatActivity() {
     private lateinit var m_menuItemsAdapter: MenuItemsAdapter
     private lateinit var m_transactionItemsAdapter: TransactionItemsAdapter
     val clusterId : Short = -1
+    var m_isChanged : Boolean = false
+    var m_fromBilling: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -70,6 +80,7 @@ class PageOrderActivity : AppCompatActivity() {
 
         // Get the current transaction object
         val transaction = global.transaction
+        m_isChanged = false
 
         // Remove the adapter as a listener from the transaction object
         if (transaction != null)
@@ -116,7 +127,8 @@ class PageOrderActivity : AppCompatActivity() {
         }
     }
 
-    override fun onResume() {
+    override fun onResume()
+    {
         super.onResume()
         // Refresh data when activity resumes
         if (global.transaction == null)
@@ -139,16 +151,38 @@ class PageOrderActivity : AppCompatActivity() {
         })
     }
 
+    private fun stopInCorrectMode()
+    {
+        // Check the boolean condition
+        if (m_fromBilling) {
+            // If true, go to BillOrderActivity
+            startActivity(Intent(this, BillOrderActivity::class.java).apply {
+                // Optional: Add flags if you need to clear the back stack
+                flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+            })
+        } else {
+            // If false, go to AskTransactionActivity
+            // Note: Make sure AskTransactionActivity exists in your project
+            startActivity(Intent(this, AskTransactionActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+            })
+        }
+        // Finish the current activity so the user can't navigate back to it
+        finish()
+    }
+
     @Suppress("UNUSED_PARAMETER")
     fun onButtonPlus1(view: View)
     {
         global.transaction?.addOneToCursorPosition()
+        m_isChanged = false
     }
 
     @Suppress("UNUSED_PARAMETER")
     fun onButtonMin1(view: View)
     {
         global.transaction?.minus1()
+        m_isChanged = false
         //m_transactionItemsAdapter.invalidate(global.cursor.position)
     }
 
@@ -163,12 +197,51 @@ class PageOrderActivity : AppCompatActivity() {
     fun onButtonPortion(view: View)
     {
         global.transaction?.nextPortion()
+        m_isChanged = false
     }
 
     @Suppress("UNUSED_PARAMETER")
     fun onButtonRemove(view: View)
     {
         global.transaction?.remove()
+        m_isChanged = false
+    }
+
+    @Suppress("UNUSED_PARAMETER")
+    fun onButtonCancel(view: View)
+    {
+        escapeTransaction()
+    }
+
+    private fun escapeTransaction()
+    {
+        if (global.transaction == null)
+        {
+            return
+        }
+        if (!m_isChanged)
+        {
+            // No changes to table, simple to remove the time frame.
+            global.transaction!!.closeTimeFrame()
+            if (global.transaction!!.transactionEmptyAtStartAndAtEnd())
+            {
+                global.transaction!!.emptyTransaction("");
+            }
+            stopInCorrectMode()
+        } else if (global.transaction!!.isTakeaway()
+            || global.transaction!!.transactionEmptyAtStartAndAtEnd()
+            || global.timeFrame.time_frame_index.index == ETimeFrameIndex.TIME_FRAME1
+        )
+        {
+            showAskCancelReasonDialog()
+
+        } else if (global.transaction!!.hasAnyChanges())
+        {
+            showUndoChanges()
+        } else
+        {
+            stopInCorrectMode()
+        }
     }
 
     private fun refreshAllData()
@@ -176,6 +249,20 @@ class PageOrderActivity : AppCompatActivity() {
         m_transactionItemsAdapter.notifyDataSetChanged()
         m_menuPagesAdapter.notifyDataSetChanged()
         m_menuItemsAdapter.notifyDataSetChanged()
+    }
+
+    override fun onDialogPositiveClick(dialog: DialogFragment)
+    {
+        // User clicked "Yes".
+        // Put your logic here, for example: clear the transaction.
+        Log.d("MessageBox", "User clicked Yes.")
+    }
+
+    override fun onDialogNegativeClick(dialog: DialogFragment)
+    {
+        // User clicked "No".
+        // The dialog is automatically dismissed. You can log or do nothing.
+        Log.d("MessageBox", "User clicked No.")
     }
 
     private fun setupRecyclerView() {
@@ -332,7 +419,7 @@ class PageOrderActivity : AppCompatActivity() {
         val oldPosition = global.cursor.position
 
         // Update the state
-        val newCursor = global.transaction?.getCursor(selectedTransactionItem) ?:0
+        val newCursor = global.transaction!!.getCursor(selectedTransactionItem) ?:0
         if (newCursor == global.cursor.position)
         {
             // Add one item
@@ -401,4 +488,49 @@ class PageOrderActivity : AppCompatActivity() {
         //startActivity(mainIntent)
         finish() // Close the SplashActivity so it's not in the back stack
     }
+
+    private fun showConfirmationDialog()
+    {
+        val dialog = MessageBoxYesNo.newInstance(
+            "Confirm Action",
+            "Are you sure you want to proceed?"
+        )
+        dialog.show(supportFragmentManager, "MessageBoxYesNo")
+    }
+
+    private fun showUndoChanges()
+    {
+        val dialog = MessageBoxYesNo.newInstance(
+            "Undo Changes",
+            "Undo the changes made to the order?"
+        )
+        dialog.show(supportFragmentManager, "MessageBoxYesNo")
+    }
+
+    private fun showAskCancelReasonDialog()
+    {
+        val dialog = MessageBoxCancelReason()
+        dialog.show(supportFragmentManager, "MessageBoxCancelReason")
+    }
+
+    override fun onReasonSelected(reason: String)
+    {
+        TODO("Not yet implemented")
+    }
+
+    override fun onDialogCancelled()
+    {
+        TODO("Not yet implemented")
+    }
+
+    override fun onDialogUndoChanges(dialog: DialogFragment)
+    {
+        TODO("Not yet implemented")
+    }
+
+    override fun onDialogContinueOrder(dialog: DialogFragment)
+    {
+        TODO("Not yet implemented")
+    }
+
 }

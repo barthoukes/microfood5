@@ -69,18 +69,13 @@ class TransactionItemsAdapter(
         }
     }
 
-    val getItemSize: Int
-        get() = global.transaction?.size ?: 0
-
     override fun getItemCount(): Int
     {
-        return global.transaction?.itemSize?.plus(1) ?: 1
+        return global.transaction?.itemSize()?.plus(1) ?: 1
     }
 
     override fun onBindViewHolder(holder: TransactionItemViewHolder, position: Int)
     {
-        // ... (Your existing setup code for clearing listeners, getting items, setting backgrounds)
-
         val item: CItem? = global.transaction?.get(position)
         holder.binding.transactionOrder.setBackgroundColor(getBackgroundColour(position))
         val colour = getTextColour(position)
@@ -178,13 +173,7 @@ class TransactionItemsAdapter(
             notifyItemRemoved(global.cursor.position)
             setCursor(global.cursor.previous())
         }
-        // USE THIS: It tells the RecyclerView to animate the removal of the item at 'position'.
         notifyItemChanged(position)
-        //notifyItemRemoved(position)
-        // And then you might need to update the items that are now in different positions.
-        // This tells the adapter to re-bind all items from the removed position to the end of the list.
-        notifyDataSetChanged()
-        //notifyItemRangeChanged(position, newSize - position)
     }
 
     override fun onItemUpdated(position: Int, item: CItem)

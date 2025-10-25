@@ -27,7 +27,6 @@ class CSortedItem : Iterable<CItem> {
         items.add(item)
     }
 
-
     constructor() {
         items.clear()
     }
@@ -57,6 +56,8 @@ class CSortedItem : Iterable<CItem> {
     fun add(item: CItem) {
         items.add(item)
     }
+
+    fun itemSum(): Int = items.sumOf { it.getQuantity() }
 
     fun addSorted(newItem: CItem) {
         val insertIndex = items.indexOfFirst { item ->
@@ -210,12 +211,25 @@ class CSortedItem : Iterable<CItem> {
         for (item in items) item.sequence += 1
     }
     fun getOrder(): Int = items[0].subSequence
-    fun getTimeFrameIndex(): Short = items[0].timeFrameId.index
+    fun getTimeFrameIndex(): ETimeFrameIndex = items[0].timeFrameId
     fun isItemGroup(): Boolean = items[0].level == EOrderLevel.LEVEL_ITEMGROUP
 
     fun isSameTimeFrame(other: CSortedItem): Boolean {
         if (size() != other.size()) return false
         return items.zip(other.items).all { (a, b) -> a.timeFrameId == b.timeFrameId }
+    }
+
+    fun undoTimeFrame(timeFrameId: ETimeFrameIndex)
+    {
+        val iterator = items.listIterator(1)
+        while (iterator.hasNext())
+        {
+            val item = iterator.next()
+            if (item.timeFrameId == timeFrameId)
+            {
+                iterator.remove()
+            }
+        }
     }
 
     fun isSimilarItemStructureAndOrder(new_item: CSortedItem, is_kitchen_printout: Boolean,

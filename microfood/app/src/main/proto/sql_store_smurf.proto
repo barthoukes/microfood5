@@ -1,5 +1,5 @@
 //==============================================================================
-//  @file       sql_store.proto
+//  @file       sql_store_smurf.proto
 //  @ingroup    proto database interface
 //  @brief		Operations on store
 //
@@ -29,40 +29,52 @@ option java_package = "com.hha.store.smurf";
 
 service storeSmurfService
 {
-    rpc setSearchString(searchName) returns (storeSmurfList) {}
-    rpc addOrGetSmurf(dangerName) returns (common.StoreSmurf) {}
-    rpc updateQuantity(totalStoreSmurf) returns (common.Empty) {}
-    rpc calculateTotalSold(storeSmurfId) returns (common.Empty) {}
-    rpc calculateFirstDay(storeSmurfId) returns (common.Empty) {};
-    rpc calculateTotalStock(storeSmurfId) returns (common.Empty) {}
-    rpc calculateUsagePerYear(storeSmurfId) returns (common.Empty) {}
-    rpc calculateSoldOutDates(storeSmurfId) returns (common.Empty) {}
-    rpc addQuantity(smurfQuantity) returns (common.Empty) {}
-    rpc removeSmurf(storeSmurfId) returns (common.Empty) {}
+    rpc AddOrGetSmurf(DangerName) returns (common.StoreSmurf) {}
+    rpc AddQuantity(SmurfQuantity) returns (common.Empty) {}
+    rpc CalculateFirstDay(StoreSmurfId) returns (common.Empty) {};
+    rpc CalculateSoldOutDates(StoreSmurfId) returns (common.Empty) {}
+    rpc CalculateTotalSold(StoreSmurfId) returns (common.Empty) {}
+    rpc CalculateTotalStock(StoreSmurfId) returns (common.Empty) {}
+    rpc CalculateUsagePerYear(StoreSmurfId) returns (common.Empty) {}
+    rpc RemoveSmurf(StoreSmurfId) returns (common.Empty) {}
+    rpc SetSearchString(SearchName) returns (StoreSmurfList) {}
+    rpc UpdateQuantity(TotalStoreSmurf) returns (common.Empty) {}
 }
 
-message getSmurfRequest
+message DangerName
 {
-    storeSmurfId  store_smurf_id = 1;
+    int32 danger_level = 1;
+    string name = 2;
+}
+
+message GetSmurfRequest
+{
+    StoreSmurfId  store_smurf_id = 1;
     string        name = 2;
 }
 
-message storeSmurfId
-{
-    int32 store_smurf_id = 1;
-}
-
-message storeSmurfList
-{
-    repeated common.StoreSmurf smurf = 1;
-}
-
-message searchName
+message SearchName
 {
     string name = 1;
 }
 
-message totalStore
+message SmurfQuantity
+{
+    int32 smurf_id = 1;
+    int32 quantity = 2;
+}
+
+message StoreSmurfId
+{
+    int32 store_smurf_id = 1;
+}
+
+message StoreSmurfList
+{
+    repeated common.StoreSmurf smurf = 1;
+}
+
+message TotalStore
 {
 	int32   prepared =2;
 	int32 	input =3;
@@ -72,22 +84,9 @@ message totalStore
 	int32	cancelled =7;
 }
 
-message totalStoreSmurf
+message TotalStoreSmurf
 {
 	int32 smurf_id = 1;
-	totalStore totals = 2;
-}
-
-message smurfQuantity
-{
-    int32 smurf_id = 1;
-    int32 quantity = 2;
-}
-
-
-message dangerName
-{
-	int32 danger_level = 1;
-	string name = 2;
+	TotalStore totals = 2;
 }
 

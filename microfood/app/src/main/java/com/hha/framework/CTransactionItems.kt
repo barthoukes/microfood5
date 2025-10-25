@@ -2,7 +2,6 @@ package com.hha.framework
 
 import EViewMode
 import android.util.Log
-import androidx.collection.emptyLongSet
 import com.hha.callback.TransactionListener
 import com.hha.common.DeletedStatus
 import com.hha.common.ItemVisible
@@ -70,7 +69,7 @@ class CTransactionItems : Iterable<CSortedItem>
         return m_items.getSortedItem(index)
     }
 
-    fun getCItem(position: Int): CItem?
+    fun get(position: Int): CItem?
     {
         var pos = position
         for (item in m_items)
@@ -87,7 +86,9 @@ class CTransactionItems : Iterable<CSortedItem>
     val empty: Boolean
         get() = m_items.empty
 
-    fun itemSize() = m_items.itemSize
+    fun itemLines() = m_items.itemLines
+
+    fun itemSum() = m_items.itemSum
 
     // A private method to perform the expensive recalculation.
     // This is much clearer than having a similarly named property.
@@ -220,6 +221,11 @@ class CTransactionItems : Iterable<CSortedItem>
 //        // Just insert this one at the cursor.
 //        retVal = touchEnd(item_id, 1, prices, cluster_id, twin_item_id)
         return retVal
+    }
+
+    fun undoTimeFrame(timeFrameId: ETimeFrameIndex, deviceId: Short)
+    {
+        m_items.undoTimeFrame(global.transactionId, timeFrameId, deviceId)
     }
 
     /*============================================================================*/
@@ -375,6 +381,17 @@ class CTransactionItems : Iterable<CSortedItem>
     //     date
     // )
 
+    fun setNegativeQuantityToRemovedItems()
+    {
+        val service = GrpcServiceFactory.createDailyTransactionItemService()
+        service.setNegativeQuantityToRemovedItems(global.transactionId)
+    }
+
+    fun hasAnyChanges() : Boolean
+    {
+        return m_changed
+    }
+
     fun touchExtraOrSpice(
         menuItem: CMenuItem, prices: CPriceAndHalfPrice,
         clusterId: Short, twinItem: CMenuItem?
@@ -436,6 +453,10 @@ class CTransactionItems : Iterable<CSortedItem>
 //        return true;
 //    }/
 
+    fun getCursor(selectedTransactionItem: CItem): Int
+    {
+        return m_items.getCursor(selectedTransactionItem)
+    }
 
     private fun insertItem(
         cursor: CCursor, menuItem: CMenuItem, quantity: Int, prices: CPriceAndHalfPrice,
@@ -570,7 +591,7 @@ class CTransactionItems : Iterable<CSortedItem>
                 // m_clientOrdersHandler ->
                 //    insertTwinItem(twin_item_id, cursor, quantity, 2, taxPercentage);
             }
-            global.cursor.set(m_items.itemSize)
+            global.cursor.set(m_items.itemLines)
         }
         if (m_state == EEnterState.ENTER_ITEM_STATE)
         {
@@ -1127,7 +1148,7 @@ class CTransactionItems : Iterable<CSortedItem>
                 )
                 m_items.eraseItem(cursor)
                 size = size - 1
-                m_listeners.forEach { it.onItemRemoved(cursor.position, m_items.itemSize) }
+                m_listeners.forEach { it.onItemRemoved(cursor.position, m_items.itemLines) }
 
                 while (cursor.position < size)
                 {
@@ -1156,7 +1177,7 @@ class CTransactionItems : Iterable<CSortedItem>
                         )
                         m_items.eraseItem(cursor)
                         size = size - 1
-                        m_listeners.forEach { it.onItemRemoved(cursor.position, m_items.itemSize) }
+                        m_listeners.forEach { it.onItemRemoved(cursor.position, m_items.itemLines) }
                     }
                 }
             }
@@ -1178,7 +1199,7 @@ class CTransactionItems : Iterable<CSortedItem>
                 )
                 m_items.eraseItem(cursor)
                 size = size - 1
-                m_listeners.forEach { it.onItemRemoved(cursor.position, m_items.itemSize) }
+                m_listeners.forEach { it.onItemRemoved(cursor.position, m_items.itemLines) }
                 while (cursor.position < size)
                 {
                     item = m_items.getItem(cursor) ?: break
@@ -1205,7 +1226,7 @@ class CTransactionItems : Iterable<CSortedItem>
                         )
                         m_items.eraseItem(cursor)
                         size = size - 1
-                        m_listeners.forEach { it.onItemRemoved(cursor.position, m_items.itemSize) }
+                        m_listeners.forEach { it.onItemRemoved(cursor.position, m_items.itemLines) }
                     } else break
                 }
             }
@@ -1229,7 +1250,7 @@ class CTransactionItems : Iterable<CSortedItem>
                 )
                 m_items.eraseItem(cursor)
                 size = size - 1
-                m_listeners.forEach { it.onItemRemoved(cursor.position, m_items.itemSize) }
+                m_listeners.forEach { it.onItemRemoved(cursor.position, m_items.itemLines) }
             }
 
             EOrderLevel.LEVEL_ASK_CLUSTER ->

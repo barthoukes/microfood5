@@ -1,5 +1,6 @@
 package com.hha.types
 
+import com.hha.common.Money
 import java.io.File
 import kotlin.math.abs
 
@@ -20,6 +21,8 @@ class CMoney(private var cents: Int = 0) {
         const val MONEY_APE = 0x04
         const val MONEY_LEADING_SPACE = 0x08
     }
+
+    constructor(value: Money) : this(value.cents)
 
     // Constructors
     constructor(value: Double) : this((value*100.0).toInt())

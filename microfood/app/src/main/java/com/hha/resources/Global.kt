@@ -9,6 +9,7 @@ import com.hha.framework.CTransaction
 import com.hha.grpc.GrpcServiceFactory
 import com.hha.types.EAccess
 import com.hha.types.ETaal
+import com.hha.types.ETimeFrameIndex
 
 class Global private constructor() {
     // Properties
@@ -16,6 +17,7 @@ class Global private constructor() {
     lateinit var myDir: File
     var menuCardId = 1
     var menuPageId = 1
+    var rfidKeyId = 108
     var currentKeyIndex = 2
     var cursor = CCursor(0)
     var language: ETaal = ETaal.LANG_SIMPLIFIED
@@ -36,7 +38,7 @@ class Global private constructor() {
     val userCFG: Configuration = Configuration()
     val fontCFG: Configuration = Configuration()
     val colourCFG: Configuration = Configuration()
-    var timeFrame: CTimeFrame? = null
+    var timeFrame = CTimeFrame(-1)
     val pcNumber: Short = 33
 
     companion object {
