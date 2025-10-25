@@ -29,7 +29,7 @@ class PaymentsAdapter(
     private val onPaymentSelected: (CPayment) -> Unit
 ) : RecyclerView.Adapter<PaymentsAdapter.PaymentsViewHolder>() {
     val global = Global.getInstance()
-    var payments = CPaymentList()
+    //var payments = CPaymentList()
 
     inner class PaymentsViewHolder(val binding: AdapterPaymentBinding) :
         RecyclerView.ViewHolder(binding.root)
@@ -88,9 +88,9 @@ class PaymentsAdapter(
     }
 
     fun getPayment(position: Int): CPayment? {
-        if (position>=0 && position <payments.size)
+        //if (position>=0 && position <payments.size)
         {
-            return payments[position]
+        //    return payments[position]
         }
         return null
     }

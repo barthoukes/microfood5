@@ -17,6 +17,7 @@ class Global private constructor() {
     lateinit var myDir: File
     var menuCardId = 1
     var menuPageId = 1
+    var rfidKeyId = 108
     var currentKeyIndex = 2
     var cursor = CCursor(0)
     var language: ETaal = ETaal.LANG_SIMPLIFIED

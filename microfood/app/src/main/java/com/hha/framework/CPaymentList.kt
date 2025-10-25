@@ -1,7 +1,7 @@
 package com.hha.framework
 
+import com.hha.callback.TransactionOperations
 import com.hha.common.PaymentMethod
-import com.hha.common.PaymentStatus
 import com.hha.daily.payment.PaymentDetailsList
 import com.hha.daily.payment.PaymentList
 import com.hha.grpc.GrpcServiceFactory
@@ -12,12 +12,12 @@ import com.hha.types.EPayed
 import com.hha.types.EPaymentMethod
 import com.hha.types.EPaymentStatus
 
-data class CPaymentList(
-    var m_transactionId: Int = 0,
-    var m_valid: Boolean = false
-) {
+class CPaymentList(transactionOperations: TransactionOperations) {
+    var m_transaction: TransactionOperations = transactionOperations
     val m_payments: MutableList<CPayment> = mutableListOf()
     var global = Global.getInstance()
+    var m_transactionId: Int = 0
+    var m_valid: Boolean = false
 
     // Add a payment to the list
     fun addPayment(payment: CPayment)
@@ -135,18 +135,19 @@ data class CPaymentList(
         return CMoney(m_payments.sumOf { it.total.cents() })
     }
 
-    fun addReturnMoney(total: CMoney)
+    fun addReturnMoney()
     {
+        val total = m_transaction.getTotalTransaction()
         var service = GrpcServiceFactory.createDailyTransactionPaymentService()
 
         // Only close if all payments together are bigger or equal to the total.
-        val payments : PaymentDetailsList? = service.getTransactionPaymentTotals(global.transactionId, false);
+        val paymentDetailsList : PaymentDetailsList? = service.getTransactionPaymentTotals(global.transactionId, false);
+        val paymentTransaction = CPaymentTransaction(paymentDetailsList)
 
-        val totalPayments: CMoney =payments.get_total(PaymentStatus.PAY_STATUS_ANY);
+        val totalPayments: CMoney =paymentTransaction.getTotal(EPaymentStatus.PAY_STATUS_ANY);
         if ( totalPayments > total)
         {
-            addPayment( PaymentMethod.PAYMENT_RETURN, total-totalPayments);
-            totalPayments =total
+            addPayment(EPaymentMethod.PAYMENT_RETURN, total-totalPayments);
         }
     }
 
@@ -164,12 +165,14 @@ data class CPaymentList(
         service.cancelPayment(m_transactionId, index, EPaymentStatus.toPaymentStatus(paymentStatus))
     }
 
-    fun addPayment(paymentMethod: EPaymentMethod, customerId: Int, amount: CMoney)
+    fun addPayment(paymentMethod: EPaymentMethod, amount: CMoney)
     {
+        val customerId = m_transaction.getCustomerId()
         var service = GrpcServiceFactory.createDailyTransactionPaymentService()
         val pay = CPayment( -1, customerId, paymentMethod, amount, "", EPayed.PAID_NO);
         val paymentIndex = service.getNewPaymentIndex(m_transactionId);
         service.addPayment( m_transactionId, pay.toPayment(), paymentIndex);
+        m_payments.add(pay)
     }
 
     fun fromPaymentList(payments: PaymentList?)

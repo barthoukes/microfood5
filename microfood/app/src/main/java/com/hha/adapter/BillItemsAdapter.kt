@@ -39,7 +39,7 @@ class BillItemsAdapter(
     override fun onBindViewHolder(holder: BillItemViewHolder, position: Int) {
         //holder.binding.transactionOrder.isSelected = true
         val transaction: CTransaction = global.transaction!!
-        val item: CItem? = transaction[position]
+        val item: CItem? = transaction.get(position)
 
         // Draw background,
         val background = getBackgroundColour(position)

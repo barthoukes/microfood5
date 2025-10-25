@@ -62,21 +62,21 @@ class CTransactionList() : Iterable<CTransaction> {
      * Gets a transaction by ID
      */
     fun getTransactionById(id: Int): CTransaction? {
-        return transactions.firstOrNull { it.m_transactionId == id }
+        return transactions.firstOrNull { it.data.transactionId == id }
     }
 
     /**
      * Gets all transactions for a specific customer
      */
     fun getTransactionsByCustomer(customerId: Int): List<CTransaction> {
-        return transactions.filter { it.customerId == customerId }
+        return transactions.filter { it.data.customerId == customerId }
     }
 
     /**
      * Gets all transactions with a specific status
      */
     fun getTransactionsByStatus(status: EClientOrdersType): List<CTransaction> {
-        return transactions.filter { it.status == status }
+        return transactions.filter { it.data.status == status }
     }
 
     /**

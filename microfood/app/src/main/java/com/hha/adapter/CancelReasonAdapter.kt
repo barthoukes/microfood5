@@ -5,6 +5,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.hha.dialog.Translation
 
 class CancelReasonAdapter(
    private val reasons: List<String>, // Assuming reasons are simple strings for now

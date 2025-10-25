@@ -2,11 +2,12 @@ package com.hha.framework
 
 import android.util.Log
 import com.hha.callback.TransactionListener
-import com.hha.common.CookingState
+import com.hha.callback.TransactionOperations
 import com.hha.common.TransactionData
 import com.hha.grpc.GrpcServiceFactory
 import com.hha.resources.Global
-import com.hha.resources.CTimestamp
+import com.hha.service.StorePartService
+import com.hha.service.StoreSmurfService
 import com.hha.types.CMoney
 import com.hha.types.EClientOrdersType
 import com.hha.types.EDeletedStatus
@@ -16,36 +17,9 @@ import com.hha.types.EPaymentStatus
 import java.text.SimpleDateFormat
 import java.util.*
 
-class CTransaction : Iterable<CSortedItem>
+class CTransaction : Iterable<CSortedItem>, TransactionOperations
 {
-    public var m_transactionId: Int = 0
-    lateinit var name: String
-    lateinit var m_transType: ETransType
-    var rfidKeyId: Int = 0
-    lateinit var type: EClientOrdersType
-    var deposit: Int = 0
-    lateinit var timeStart: String
-    lateinit var timeEnd: String
-    lateinit var timeCustomer: String
-    var subTotalLow = CMoney(0)
-    var subTotalHigh = CMoney(0)
-    var discountLow = CMoney(0)
-    var discountHigh = CMoney(0)
-    var remainsLow = 0f
-    var remainsHigh = 0f
-    var tipsLow = CMoney(0)
-    var tipsHigh = CMoney(0)
-    var totalLow = CMoney(0)
-    var totalHigh = CMoney(0)
-    var taxTotalLow = CMoney(0)
-    var taxTotalHigh = CMoney(0)
-    var customerId = 0
-    var archived = false
-    var message = ""
-    var subtotalTaxFree = CMoney(0)
-    var totalTaxFree = CMoney(0)
-    var discountTaxFree = CMoney(0)
-    var tipsTaxFree = CMoney(0)
+    var data = CTransactionData()
 
     companion object
     {
@@ -53,16 +27,15 @@ class CTransaction : Iterable<CSortedItem>
     }
 
     var global = Global.getInstance()
+    var CFG = global.CFG
 
-    var status: EClientOrdersType = EClientOrdersType.OPEN
-    var total: CMoney = CMoney(0)
     var hasOrders: Boolean = false
     private val m_global: Global = Global.getInstance()
-
+    private var m_customer: CCustomer? = null
     private val m_items = CTransactionItems()
 
     //private val m_timeFrames = CTimeFrameList()
-    private val m_payments = CPaymentList()
+    private val m_payments = CPaymentList(this)
     private lateinit var timeFrame: CTimeFrame
     private var m_sizeAtStart : Int = 0
 
@@ -75,137 +48,79 @@ class CTransaction : Iterable<CSortedItem>
         total: CMoney
     )
     {
-        this.name = name
-        this.status = status
-        this.total = total
-
-        this.m_transactionId = transactionId
+        data = CTransactionData()
+        data.name = name
+        data.status = status
+        data.transactionId = transactionId
         m_payments.setTransactionId(transactionId)
-
-        this.name = name
-        m_transType = ETransType.TRANS_TYPE_TAKEAWAY
-        rfidKeyId = -1
-        type = EClientOrdersType.OPEN
-        deposit = 0
-        timeStart = ""
-        timeEnd = ""
-        timeCustomer = ""
-        subTotalLow = CMoney(0)
-        subTotalHigh = CMoney(0)
-        discountLow = CMoney(0)
-        discountHigh = CMoney(0)
-        remainsLow = 0.0F
-        remainsHigh = 0.0F
-        tipsLow = CMoney(0)
-        tipsHigh = CMoney(0)
-        totalLow = CMoney(0)
-        totalHigh = CMoney(0)
-        taxTotalLow = CMoney(0)
-        taxTotalHigh = CMoney(0)
-        this.customerId = customerId
-        archived = false
-        message = ""
-        subtotalTaxFree = CMoney(0)
-        totalTaxFree = CMoney(0)
-        discountTaxFree = CMoney(0)
-        tipsTaxFree = CMoney(0)
+        data.transType = ETransType.TRANS_TYPE_TAKEAWAY
+        data.rfidKeyId = -1
+        data.status = EClientOrdersType.OPEN
+        data.deposit = 0
+        data.timeStart = ""
+        data.timeEnd = ""
+        data.timeCustomer = ""
+        data.subTotalLow = CMoney(0)
+        data.subTotalHigh = CMoney(0)
+        data.discountLow = CMoney(0)
+        data.discountHigh = CMoney(0)
+        data.remainsLow = 0.0F
+        data.remainsHigh = 0.0F
+        data.tipsLow = CMoney(0)
+        data.tipsHigh = CMoney(0)
+        data.totalLow = CMoney(0)
+        data.totalHigh = CMoney(0)
+        data.taxTotalLow = CMoney(0)
+        data.taxTotalHigh = CMoney(0)
+        data.customerId = customerId
+        data.archived = false
+        data.message = ""
+        data.subtotalTaxFree = CMoney(0)
+        data.totalTaxFree = CMoney(0)
+        data.discountTaxFree = CMoney(0)
+        data.tipsTaxFree = CMoney(0)
     }
 
     constructor(transactionId: Int)
     {
-        val service = GrpcServiceFactory.createDailyTransactionService()
-        val data: TransactionData? = service.selectTransactionId(transactionId.toInt())
-
-        global.transaction = CTransaction(data)
-        m_sizeAtStart = m_items.itemLines()
+        selectTransactionId(transactionId)
     }
 
-    constructor(source: CTransaction)
+    fun selectTransactionId(transactionId: Int)
     {
-        customerId = source.customerId
-        name = source.name
-        m_transactionId = source.m_transactionId
-        m_transType = source.m_transType;
-        rfidKeyId = source.rfidKeyId;
-        deposit = source.deposit
-        timeStart = source.timeStart
-        timeCustomer = source.timeCustomer
-        status = source.status;
-        total = source.total
-        hasOrders = false;
-        subTotalLow = source.subTotalLow
-        subTotalHigh = source.subTotalHigh
-        discountLow = source.discountLow
-        discountHigh = source.discountHigh
-        remainsLow = source.remainsLow
-        remainsHigh = source.remainsHigh
-        tipsLow = source.tipsLow
-        tipsHigh = source.tipsHigh
-        totalLow = source.totalLow
-        totalHigh = source.totalHigh
-        taxTotalLow = source.taxTotalLow
-        taxTotalHigh = source.taxTotalHigh
-        archived = source.archived
-        message = source.message
-        subtotalTaxFree = source.subtotalTaxFree
-        totalTaxFree = source.totalTaxFree
-        discountTaxFree = source.discountTaxFree
-        tipsTaxFree = source.tipsTaxFree
-        subtotalTaxFree = source.subtotalTaxFree
-        totalTaxFree = source.totalTaxFree
-        discountTaxFree = source.discountTaxFree
-        tipsTaxFree = source.tipsTaxFree
+        data.transactionId = transactionId
+        m_payments.setTransactionId(transactionId)
+        val service = GrpcServiceFactory.createDailyTransactionService()
+        val inputData: TransactionData? = service.selectTransactionId(transactionId.toInt())
+        data.setTransactionData(inputData)
+        m_sizeAtStart = m_items.itemLines()
     }
 
     constructor(source: TransactionData?)
     {
+        hasOrders = false
         if (source == null)
         {
-            m_transactionId = -1
-            name = "-"
-            status = EClientOrdersType.OPEN
+            data.transactionId = -1
+            data = CTransactionData()
+            data.name = "-"
+            data.status = EClientOrdersType.OPEN
             return
         }
-        m_transactionId = source.transactionId
-        customerId = source.customerId
-        name = source.name
-        m_transType = ETransType.fromTransType(source.transType)
-        rfidKeyId = source.rfidKeyId;
-        deposit = source.deposit
-        timeStart = source.timeStart
-        timeCustomer = source.timeCustomer
-        status = EClientOrdersType.fromCLientOrdersType(source.getStatus());
-        hasOrders = false
-        subTotalLow = CMoney(source.subtotalLow.cents)
-        subTotalHigh = CMoney(source.subtotalHigh.cents)
-        discountLow = CMoney(source.discountLow.cents)
-        discountHigh = CMoney(source.discountHigh.cents)
-        remainsLow = source.remainsLow
-        remainsHigh = source.remainsHigh
-        tipsLow = CMoney(source.tipsLow.cents)
-        tipsHigh = CMoney(source.tipsHigh.cents)
-        totalLow = CMoney(source.totalLow.cents)
-        totalHigh = CMoney(source.totalHigh.cents)
-        taxTotalLow = CMoney(source.taxTotalLow.cents)
-        taxTotalHigh = CMoney(source.taxTotalHigh.cents)
-        archived = source.archived
-        message = source.message
-        subtotalTaxFree = CMoney(source.subtotalTaxFree.cents)
-        totalTaxFree = CMoney(source.totalTaxFree.cents)
-        discountTaxFree = CMoney(source.discountTaxFree.cents)
-        tipsTaxFree = CMoney(source.tipsTaxFree.cents)
-        subtotalTaxFree = CMoney(source.subtotalTaxFree.cents)
-        totalTaxFree = CMoney(source.totalTaxFree.cents)
-        discountTaxFree = CMoney(source.discountTaxFree.cents)
-        tipsTaxFree = CMoney(source.tipsTaxFree.cents)
-
-        m_payments.setTransactionId(m_transactionId)
+        data.setTransactionData(source)
+        m_payments.setTransactionId(data.transactionId)
         m_sizeAtStart = m_items.itemLines()
+        m_customer = CCustomer(data.customerId)
     }
 
-    fun getTotalTransaction(): CMoney
+    override fun getTotalTransaction(): CMoney
     {
-        return totalHigh+totalLow+totalTaxFree
+        return data.totalHigh+data.totalLow+data.totalTaxFree
+    }
+
+    override fun getCustomerId(): Int
+    {
+        return data.customerId
     }
 
     fun hasAnyChanges() : Boolean
@@ -263,6 +178,20 @@ class CTransaction : Iterable<CSortedItem>
         return m_items.itemSum()
     }
 
+    fun setMessage(message: String)
+    {
+        data.message = message
+        val service = GrpcServiceFactory.createDailyTransactionService()
+        service.setMessage(global.transactionId, message)
+    }
+
+    fun updateTotal()
+    {
+        val service = GrpcServiceFactory.createDailyTransactionService()
+        service.updateTotal(data.transactionId)
+        selectTransactionId(data.transactionId)
+    }
+
     fun emptyTransaction(reason: String)
     {
         // No printing of kitchen, just go to billing...
@@ -277,20 +206,100 @@ class CTransaction : Iterable<CSortedItem>
                 closeTimeFrame()
             }
             addReturnMoney()
-            if (reason.length() > 0)
-                { m_clientOrdersHandler ->
-                    setMessage(reason);
-                }
-            m_clientOrdersHandler->updateTotal()
-            m_clientOrdersHandler->cleanCurrentTransaction()
+            if (!reason.isEmpty())
+            {
+                setMessage(reason)
+            }
+            updateTotal()
+            cleanCurrentTransaction()
         }
     }
 
-    fun addReturnMoney(total: CMoney)
+    fun cleanCurrentTransaction()
     {
-        // Only close if all payments together are bigger or equal to the total.
-        val total = getTotalTransaction()
-        m_payments.addReturnMoney(total)
+        data.rfidKeyId = global.rfidKeyId
+        val service = GrpcServiceFactory.createDailyTransactionService()
+        service.updateTotal(data.transactionId)
+        closeTransaction(EClientOrdersType.EMPTY)
+        cleanTransaction()
+    }
+
+    fun cleanTransaction()
+    {
+        GrpcServiceFactory.createDailyTransactionService().cleanTransaction(transactionId)
+        data.cleanTransaction()
+    }
+
+    fun closeTransaction(why: EClientOrdersType)
+    {
+        val service = GrpcServiceFactory.createDailyTransactionService()
+        //service.closeTransaction(transactionId, why.value)
+        val paymentServices = GrpcServiceFactory.createDailyTransactionPaymentService()
+
+        val totals = paymentServices.getTransactionPaymentTotals(transactionId,
+                false)
+        val payments = CPaymentTransaction(totals)
+
+        val totalPayments =payments.getTotal(EPaymentStatus.PAY_STATUS_ANY)
+
+        // Update storage
+        if ( why == EClientOrdersType.CLOSED && global.CFG.getBoolean("store_enable"))
+        {
+            val storePart: StorePartService = GrpcServiceFactory.createStorePartService()
+            storePart.reduceStorage(transactionId)
+            val storeSmurf: StoreSmurfService = GrpcServiceFactory.createStoreSmurfService()
+            storeSmurf.calculateTotalSold(-1)
+        }
+        val trxName: String =data.name
+        if (CFG.getBoolean("restaurant_map"))
+        {
+            val fts = GrpcServiceFactory.createFloorTableService()
+            fts.removeBeerDrinker(trxName);
+        }
+        if ( why == EClientOrdersType.CLOSED && CFG.getBoolean("prepare_display_enable"))
+        {
+            val prepareService = GrpcServiceFactory.createPrepareTransactionService()
+            prepareService.addPrepare(transactionId);
+        }
+        // Transaction may have another total, much higher.
+        if (getTotalTransaction() ==totalPayments || why != EClientOrdersType.CLOSED)
+        {
+            val service = GrpcServiceFactory.createDailyTransactionService()
+            service.closeTransaction(data.transactionId,
+                EClientOrdersType.toClientOrdersType(why))
+            val servicePayments = GrpcServiceFactory.createDailyTransactionPaymentService()
+            servicePayments.finishPayments(data.transactionId)
+            val serviceItems = GrpcServiceFactory.createDailyTransactionItemService()
+            serviceItems.finishPayments(data.transactionId)
+            val serviceChecksum = GrpcServiceFactory.createDailyTransactionChecksumService()
+            serviceChecksum.Checksum(data.transactionId)
+
+            if ( why == EClientOrdersType.CLOSED && m_customer != null)
+            {
+                m_customer!!.addEaten(totalPayments)
+            }
+        }
+        else
+        {
+            Log.e("CclientOrdersHandler", "close: Totals are not correct! Payment " +
+               "Total: ${totalPayments.cents()} " +
+               "!= Transaction Total: ${getTotalAmount().cents()}")
+        }
+        if ( why == EClientOrdersType.CLOSED || why == EClientOrdersType.EMPTY)
+        {
+            val tableService = GrpcServiceFactory.createFloorTableService()
+
+
+            tableService.closeTransaction(transactionId);
+        }
+        // Update memory
+        selectTransactionId(data.transactionId)
+        m_items.setNegativeQuantityToRemovedItems();
+    }
+
+    fun addReturnMoney()
+    {
+        m_payments.addReturnMoney()
     }
 
     fun getMinutes(): Int
@@ -298,7 +307,7 @@ class CTransaction : Iterable<CSortedItem>
         return try
         {
             val inputFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US)
-            val date = inputFormat.parse(timeStart)
+            val date = inputFormat.parse(data.timeStart)
             val millisecond = date?.time ?: 0
             val now = Date().time
             ((now - millisecond + 30000) / (1000 * 60)).toInt()
@@ -316,11 +325,11 @@ class CTransaction : Iterable<CSortedItem>
         get() = m_items.itemLines()
 
     var transactionId: Int = 0
-        get() = m_transactionId
+        get() = data.transactionId
 
     fun useTakeawayPrices(): Boolean
     {
-        return ETransType.useTakeawayPrices(m_transType)
+        return ETransType.useTakeawayPrices(data.transType)
     }
 
     fun addOneToCursorPosition()
@@ -362,7 +371,7 @@ class CTransaction : Iterable<CSortedItem>
         m_items.addQuantity(CCursor(y), -item.getQuantity())
     }
 
-    fun isTakeaway(): Boolean = when (m_transType)
+    fun isTakeaway(): Boolean = when (data.transType)
     {
         ETransType.TRANS_TYPE_TAKEAWAY, ETransType.TRANS_TYPE_EAT_INSIDE,
         ETransType.TRANS_TYPE_RECHAUD, ETransType.TRANS_TYPE_UNDEFINED
@@ -393,7 +402,7 @@ class CTransaction : Iterable<CSortedItem>
     fun startNextTimeFrame(): CTimeFrame
     {
         Log.i("Ctransaction", "Start next TimeFrame")
-        timeFrame = CTimeFrame(m_transactionId)
+        timeFrame = CTimeFrame(data.transactionId)
         global.timeFrame = timeFrame
         return timeFrame
     }
@@ -420,6 +429,6 @@ class CTransaction : Iterable<CSortedItem>
 
     fun addPayment(payment: EPaymentMethod, amount: CMoney)
     {
-        m_payments.addPayment(payment, customerId, amount)
+        m_payments.addPayment(payment, amount)
     }
 }

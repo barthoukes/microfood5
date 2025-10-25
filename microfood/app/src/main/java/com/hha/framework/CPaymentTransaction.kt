@@ -1,6 +1,8 @@
 package com.hha.framework
 
 import com.hha.daily.payment.Payment
+import com.hha.daily.payment.PaymentDetails
+import com.hha.daily.payment.PaymentDetailsList
 import com.hha.daily.payment.PaymentList
 import com.hha.types.CMoney
 import com.hha.types.EPayed
@@ -27,21 +29,43 @@ data class CPaymentTransaction(
       false, -1
    )
    {
-      if (paymentList == null || paymentList.paymentCount == 0)
+      val count = paymentList?.paymentCount ?: 0
+      if (paymentList == null || count == 0)
       {
          return
       }
-
-      // --- START OF FIX ---
-
       // Set valid to true once.
       valid = true
-      val count = paymentList.paymentCount
 
       // Single loop to process each payment once.
       for (n in 0..<count)
       {
          val p: Payment = paymentList.getPayment(n) ?: continue // Safety check
+         val paid = EPayed.fromPayed(p.isPaid)
+         val method = EPaymentMethod.fromPaymentMethod(p.paymentMethod)
+         val m = CMoney(p.total)
+         addPayment(paid, method, m)
+      }
+   }
+
+   constructor(paymentDetailsList: PaymentDetailsList?) : this(
+      CPaymentMoney(), CPaymentMoney(),
+      CPaymentMoney(), CPaymentMoney(),
+      false, -1
+   )
+   {
+      val count = paymentDetailsList?.paymentDetailsCount ?: 0
+      if (paymentDetailsList == null || count == 0)
+      {
+         return
+      }
+      // Set valid to true once.
+      valid = true
+
+      // Single loop to process each payment once.
+      for (n in 0..<count)
+      {
+         val p: PaymentDetails = paymentDetailsList.getPaymentDetails(n) ?: continue // Safety check
          val paid = EPayed.fromPayed(p.isPaid)
          val method = EPaymentMethod.fromPaymentMethod(p.paymentMethod)
          val m = CMoney(p.total)
@@ -61,7 +85,7 @@ data class CPaymentTransaction(
 
    fun addPayment(isPaid: EPayed, method: EPaymentMethod, total: CMoney): CPaymentTransaction
    {
-      val p = getPaymentMoney(isPaid)
+      val p: CPaymentMoney = getPaymentMoney(isPaid)
       p.addPayment(method, total)
       return this
    }

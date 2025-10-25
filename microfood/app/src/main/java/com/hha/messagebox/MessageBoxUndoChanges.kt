@@ -63,7 +63,7 @@ class MessageBoxUndoChanges : DialogFragment()
    companion object
    {
       private const val ARG_TITLE = "Stop order"
-      //private const val ARG_MESSAGE = "message"
+      private const val ARG_MESSAGE = "message456"
 
       // 3. Factory Method: Use this to create and show the dialog
       fun newInstance(title: String, message: String): MessageBoxYesNo

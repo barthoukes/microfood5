@@ -381,6 +381,12 @@ class CTransactionItems : Iterable<CSortedItem>
     //     date
     // )
 
+    fun setNegativeQuantityToRemovedItems()
+    {
+        val service = GrpcServiceFactory.createDailyTransactionItemService()
+        service.setNegativeQuantityToRemovedItems(global.transactionId)
+    }
+
     fun hasAnyChanges() : Boolean
     {
         return m_changed

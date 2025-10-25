@@ -54,7 +54,7 @@ class MessageBoxCancelReason : DialogFragment()
       val reasonStrings: List<String> = reasons.map { textId -> Translation.get(textId) }
 
       // --- Setup RecyclerView ---
-      val adapter = CancelReasonAdapter(reasons) { selectedReason ->
+      val adapter = CancelReasonAdapter(reasonStrings) { selectedReason ->
          // A reason was clicked, send it back to the activity and dismiss
          (activity as? MessageBoxCancelReasonListener)?.onReasonSelected(selectedReason)
          dismiss()

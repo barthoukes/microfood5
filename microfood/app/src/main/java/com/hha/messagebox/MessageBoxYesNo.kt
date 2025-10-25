@@ -1,7 +1,5 @@
 package com.hha.messagebox
 
-package com.hha.messagebox
-
 import android.app.Dialog
 import android.content.Context
 import android.os.Bundle
