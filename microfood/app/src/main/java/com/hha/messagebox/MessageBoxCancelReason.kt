@@ -47,6 +47,9 @@ class MessageBoxCancelReason : DialogFragment()
    override fun onViewCreated(view: View, savedInstanceState: Bundle?)
    {
       super.onViewCreated(view, savedInstanceState)
+
+      binding.dialogTitle.text = Translation.get(TextId.TEXT_CANCEL_REASON)
+
       isCancelable = false // Prevent closing by tapping outside
 
       // --- Fetch Data From Database ---

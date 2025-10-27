@@ -1,6 +1,7 @@
 package com.hha.framework
 
 import com.hha.callback.TransactionOperations
+import com.hha.callback.TransactionPaymentListener
 import com.hha.common.PaymentMethod
 import com.hha.daily.payment.PaymentDetailsList
 import com.hha.daily.payment.PaymentList
@@ -18,6 +19,23 @@ class CPaymentList(transactionOperations: TransactionOperations) {
     var global = Global.getInstance()
     var m_transactionId: Int = 0
     var m_valid: Boolean = false
+    private val m_listeners = mutableListOf<TransactionPaymentListener>()
+
+    fun addListener(listener: TransactionPaymentListener)
+    {
+        if (!m_listeners.contains(listener))
+            m_listeners.add(listener)
+    }
+
+    fun removeListener(listener: TransactionPaymentListener)
+    {
+        m_listeners.remove(listener)
+    }
+
+    private fun notifyListeners()
+    {
+        m_listeners.forEach { it.onListChanged() }
+    }
 
     // Add a payment to the list
     fun addPayment(payment: CPayment)
@@ -43,13 +61,6 @@ class CPaymentList(transactionOperations: TransactionOperations) {
         fromPaymentList(details)
     }
 
-
-//    // Remove a payment by ID
-//    fun removePaymentById(id: Int): Boolean
-//    {
-//        return m_payments.removeIf { it.id == id }
-//    }
-
     // Get total amount of all payments
     fun getTotalAmount(): CMoney
     {
@@ -71,13 +82,6 @@ class CPaymentList(transactionOperations: TransactionOperations) {
     {
         return m_payments.filter { it.paymentMethod == type }
     }
-
-
-    // Find payment by ID
-//    fun findPaymentById(id: Int): CPayment?
-//    {
-//        return m_payments.find { it.id == id }
-//    }
 
     // Clear all payments
     fun clearPayments()

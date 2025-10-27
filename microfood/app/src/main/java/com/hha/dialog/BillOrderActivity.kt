@@ -1,6 +1,7 @@
 package com.hha.dialog
 
 import android.os.Bundle
+import android.view.View
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.TextView
@@ -11,6 +12,8 @@ import androidx.recyclerview.widget.RecyclerView
 
 import com.hha.adapter.BillItemsAdapter
 import com.hha.adapter.PaymentsAdapter
+import com.hha.callback.TransactionListener
+import com.hha.callback.TransactionPaymentListener
 import com.hha.framework.CItem
 import com.hha.framework.CPayment
 import com.hha.framework.CTransaction
@@ -23,10 +26,13 @@ import com.hha.types.EPaymentStatus
 
 import tech.hha.microfood.databinding.BillOrderActivityBinding
 
-class BillOrderActivity : AppCompatActivity() {
+class BillOrderActivity : AppCompatActivity(), TransactionPaymentListener,
+   TransactionListener
+{
 
     val global = Global.getInstance()
     private val CFG = global.CFG
+
     // Views
     private lateinit var binding: BillOrderActivityBinding
     private lateinit var tableName: TextView
@@ -55,11 +61,12 @@ class BillOrderActivity : AppCompatActivity() {
     private var m_customerTotal = CMoney(0)
     private var m_cashTotal = CMoney(0)
     private var m_cardTotal = CMoney(0)
+    private var m_kitchenPrints2bill = 1
+    private var m_slipPrints = 1
+    lateinit private var m_transaction: CTransaction
 
-
-    private lateinit var m_transaction: CTransaction
-
-    override fun onCreate(savedInstanceState: Bundle?) {
+    override fun onCreate(savedInstanceState: Bundle?)
+    {
         super.onCreate(savedInstanceState)
         binding = BillOrderActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -68,9 +75,9 @@ class BillOrderActivity : AppCompatActivity() {
     }
 
 
-
     // Optional but clean: Create a helper function for initialization
-    private fun initializeViews() {
+    private fun initializeViews()
+    {
         tableName = binding.tableName
         totalPrice = binding.totalPrice
         //paymentMethodsLabel = binding.paymentMethodsLabel
@@ -93,24 +100,46 @@ class BillOrderActivity : AppCompatActivity() {
         paymentsRecyclerView = binding.layoutBillingPayments
     }
 
-    private fun setupRecyclerView() {
+    override fun onResume()
+    {
+        super.onResume()
+        m_transaction = global.transaction ?: CTransaction(-1) // Or handle error
+        // Register the adapter as a listener for changes in the transaction's item list.
+        // This will allow the adapter to automatically update when an item is changed,
+        // added, or removed.
+        m_transaction.addListener(this)
+
+        // Also a good place to ensure the UI is fully updated when returning to the screen
+        updateTexts()
+        setButtonListeners()
+    }
+
+    override fun onPause()
+    {
+        super.onPause()
+        // --- UNREGISTER LISTENER ---
+        // Unregister the adapter to prevent memory leaks and stop receiving updates
+        // when the activity is not in the foreground. The transaction object will outlive
+        // this activity, so it's crucial to remove the reference to the adapter.
+        if (::m_transaction.isInitialized) {
+            m_transaction.removeListener(this)
+        }
+    }
+
+    private fun setupRecyclerView()
+    {
         // 1. GridLayoutManager for pages with 3 rows (vertical span) and horizontal scrolling
         createGridLayoutBillingItems()
         createBillingItemsAdapter()
         createGridLayoutPayments()
         createPaymentsAdapter()
 
-//        override fun onResume() {
-//        super.onResume()
-//        // Refresh data when activity resumes
-//        if (global.transaction == null) {
-//            if (global.transactionId <1E6) assert(false)
-//            transaction = CTransaction(global.transactionId)
-//        }
+        // Initialize m_transaction here. It's better than doing it in onResume to avoid re-assignment.
         m_transaction = global.transaction!!
     }
 
-    fun createGridLayoutPayments() {
+    fun createGridLayoutPayments()
+    {
         // 1. GridLayoutManager for pages with 3 rows (vertical span) and horizontal scrolling
         val gridLayoutManagerTransactionItems = GridLayoutManager(
             this@BillOrderActivity,
@@ -122,10 +151,11 @@ class BillOrderActivity : AppCompatActivity() {
             gridLayoutManagerTransactionItems
     }
 
-    fun createPaymentsAdapter() {
+    fun createPaymentsAdapter()
+    {
         // 2. Initialize adapter
-        paymentsAdapter = PaymentsAdapter() {
-                selectedPayment -> handlePayment(selectedPayment)
+        paymentsAdapter = PaymentsAdapter() { selectedPayment ->
+            handlePayment(selectedPayment)
         }.apply {
             // Set dynamic height based on screen size
             binding.layoutBillingPayments.setItemViewCacheSize(18)
@@ -133,11 +163,13 @@ class BillOrderActivity : AppCompatActivity() {
         binding.layoutBillingPayments.adapter = paymentsAdapter
     }
 
-    fun handlePayment(selectedPayment: CPayment) {
+    fun handlePayment(selectedPayment: CPayment)
+    {
         // todo
     }
 
-    private fun createGridLayoutBillingItems() {
+    private fun createGridLayoutBillingItems()
+    {
         // 1. GridLayoutManager for pages with 3 rows (vertical span) and horizontal scrolling
         val gridLayoutManagerTransactionItems = GridLayoutManager(
             this@BillOrderActivity,
@@ -149,10 +181,11 @@ class BillOrderActivity : AppCompatActivity() {
             gridLayoutManagerTransactionItems
     }
 
-    fun createBillingItemsAdapter() {
+    fun createBillingItemsAdapter()
+    {
         // 2. Initialize adapter
-        billItemsAdapter = BillItemsAdapter() {
-                selectedBillItem -> handleBillItemSelection(selectedBillItem)
+        billItemsAdapter = BillItemsAdapter() { selectedBillItem ->
+            handleBillItemSelection(selectedBillItem)
         }.apply {
             // Set dynamic height based on screen size
             binding.layoutBillingItems.setItemViewCacheSize(18)
@@ -160,17 +193,22 @@ class BillOrderActivity : AppCompatActivity() {
         binding.layoutBillingItems.adapter = billItemsAdapter
     }
 
-    private fun handleBillItemSelection(selectedBillItem: CItem) {
+    private fun handleBillItemSelection(selectedBillItem: CItem)
+    {
     }
 
-    private fun refreshAllData() {
-        billItemsAdapter.notifyDataSetChanged()
-        paymentsAdapter.notifyDataSetChanged()
-    }
+//    private fun refreshAllData()
+//    {
+//        billItemsAdapter.notifyDataSetChanged()
+//        paymentsAdapter.notifyDataSetChanged()
+//    }
 
-    private fun updateTexts() {
-        when (global.language) {
-            ETaal.LANG_ENGLISH -> {
+    private fun updateTexts()
+    {
+        when (global.language)
+        {
+            ETaal.LANG_ENGLISH ->
+            {
                 tableName.text = "Table 5"
                 totalPrice.text = "Total: €0.00"
                 //paymentMethodsLabel.text = "Payment Methods:"
@@ -183,7 +221,9 @@ class BillOrderActivity : AppCompatActivity() {
                 btnKitchen1.text = "1x"
                 btnBillPrints.text = "1x"
             }
-            ETaal.LANG_SIMPLIFIED, ETaal.LANG_TRADITIONAL -> {
+
+            ETaal.LANG_SIMPLIFIED, ETaal.LANG_TRADITIONAL ->
+            {
                 tableName.text = "桌子 5"
                 totalPrice.text = "总计: €0.00"
                 //paymentMethodsLabel.text = "支付方式:"
@@ -196,7 +236,9 @@ class BillOrderActivity : AppCompatActivity() {
                 btnKitchen1.text = "1次"
                 btnBillPrints.text = "1次"
             }
-            else -> {
+
+            else ->
+            {
                 tableName.text = "Tafel 5"
                 totalPrice.text = "Totaal: €0.00"
                 //paymentMethodsLabel.text = "Betaalmethoden:"
@@ -212,8 +254,8 @@ class BillOrderActivity : AppCompatActivity() {
         }
     }
 
-    private fun setButtonListeners() {
-        btnLanguage.setOnClickListener { onLanguageButtonClicked() }
+    private fun setButtonListeners()
+    {
         btnDiscount.setOnClickListener { onDiscountClicked() }
         btnOrderMore.setOnClickListener { onOrderMoreClicked() }
         btnConfirmOrder.setOnClickListener { onConfirmOrderClicked() }
@@ -228,41 +270,72 @@ class BillOrderActivity : AppCompatActivity() {
     }
 
     // Empty button functions to be implemented
-    fun onLanguageButtonClicked() {
-        // Implement language switching logic
+    fun onButtonLanguage()
+    {
+        Translation.nextLanguage()
+        refreshAllData()
     }
 
-    private fun onDiscountClicked() {
+    private fun refreshPrints()
+    {
+        binding.btnBillPrints.text = "${m_slipPrints}x"
+        binding.btnKitchenPrints.text = "${m_kitchenPrints2bill}x" // You likely want to update the kitchen prints too
+    }
+
+    private fun refreshAllData()
+    {
+        // Implement language switching logic
+        binding.btnDiscount.text = Translation.get(Translation.TextId.TEXT_DISCOUNT)
+        binding.btnConfirmOrder.text = Translation.get(Translation.TextId.TEXT_PAY)
+        binding.btnOrderMore.text = Translation.get(Translation.TextId.TEXT_MORE)
+        binding.txtKitchenPrints.text = Translation.get(Translation.TextId.TEXT_PRINT_ROLL)
+        binding.txtBillPrints.text = Translation.get(Translation.TextId.TEXT_PRINT_SLIP)
+        refreshPrints()
+
+    }
+
+    @Suppress("UNUSED_PARAMETER")
+    fun onButtonLanguage(view: View)
+    {
+        Translation.nextLanguage()
+        refreshAllData()
+    }
+
+    private fun onDiscountClicked()
+    {
         // Implement discount logic
     }
 
-    private fun onOrderMoreClicked() {
+    private fun onOrderMoreClicked()
+    {
         // Implement order more logic
     }
 
-    private fun onConfirmOrderClicked() {
+    private fun onConfirmOrderClicked()
+    {
         // Implement confirm order logic
     }
 
-    private fun onKitchenPrintClicked() {
+    private fun onKitchenPrintClicked()
+    {
         // Implement kitchen print logic
     }
 
-    private fun onBillPrintClicked() {
+    private fun onBillPrintClicked()
+    {
         // Implement bill print logic
     }
 
     private fun payEuroButton(amount: CMoney)
     {
-        if ( m_alreadyPayed)
+        if (m_alreadyPayed)
         {
             //ERROR_SOUND();
-        }
-        else
+        } else
         {
             if (m_customerTotal <= m_cashTotal + m_cardTotal || m_customerTotal < amount)
             {
-                m_transaction.cancelPayment( -1, EPaymentStatus.PAY_STATUS_UNPAID);
+                m_transaction.cancelPayment(-1, EPaymentStatus.PAY_STATUS_UNPAID);
             }
             m_transaction.addPayment(EPaymentMethod.PAYMENT_CASH, amount)
         }
@@ -295,41 +368,75 @@ class BillOrderActivity : AppCompatActivity() {
         payEuroButton(CMoney(2000))
     }
 
-    private fun onEuro50Clicked() {
+    private fun onEuro50Clicked()
+    {
         // Implement €50 payment logic
         payEuroButton(CMoney(5000))
     }
 
-    private fun onCashClicked() {
+    private fun onCashClicked()
+    {
         // Implement cash payment logic
     }
 
-    private fun onPinClicked() {
+    private fun onPinClicked()
+    {
         payAllUsingPin()
     }
 
     // Public methods to update data
-    fun setTableName(name: String) {
-        tableName.text = when (global.language) {
+    fun setTableName(name: String)
+    {
+        tableName.text = when (global.language)
+        {
             ETaal.LANG_ENGLISH -> "Table $name"
             ETaal.LANG_SIMPLIFIED, ETaal.LANG_TRADITIONAL -> "桌子 $name"
             else -> "Tafel $name"
         }
     }
 
-    fun setTotalPrice(price: String) {
-        totalPrice.text = when (global.language) {
+    fun setTotalPrice(price: String)
+    {
+        totalPrice.text = when (global.language)
+        {
             ETaal.LANG_ENGLISH -> "Total: €$price"
             ETaal.LANG_TRADITIONAL, ETaal.LANG_SIMPLIFIED -> "总计: €$price"
             else -> "Totaal: €$price"
         }
     }
 
-    fun setOrderItemsAdapter(adapter: RecyclerView.Adapter<*>) {
+    fun setOrderItemsAdapter(adapter: RecyclerView.Adapter<*>)
+    {
         billItemsRecyclerView.adapter = adapter
     }
 
-    fun setPaymentsAdapter(adapter: RecyclerView.Adapter<*>) {
+    fun setPaymentsAdapter(adapter: RecyclerView.Adapter<*>)
+    {
         paymentsRecyclerView.adapter = adapter
+    }
+
+    override fun onListChanged()
+    {
+        TODO("Not yet implemented")
+    }
+
+    override fun onItemAdded(position: Int, item: CItem)
+    {
+        TODO("Not yet implemented")
+    }
+
+    override fun onItemRemoved(position: Int, newSize: Int)
+    {
+        TODO("Not yet implemented")
+    }
+
+    override fun onItemUpdated(position: Int, item: CItem)
+    {
+        TODO("Not yet implemented")
+    }
+
+    override fun onTransactionCleared()
+    {
+        TODO("Not yet implemented")
     }
 }

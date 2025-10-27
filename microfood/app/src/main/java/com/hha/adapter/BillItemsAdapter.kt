@@ -2,8 +2,10 @@ package com.hha.adapter
 
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.hha.dialog.Translation
 import com.hha.framework.CItem
 import com.hha.framework.CMenuItem
 import com.hha.framework.CTransaction

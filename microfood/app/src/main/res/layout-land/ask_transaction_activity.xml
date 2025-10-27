@@ -46,7 +46,7 @@
             android:weightSum="2">
 
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/layout_transaction_list"
+                android:id="@+id/layoutTransactionList"
                 android:background="@color/BLACK"
                 android:layout_width="0dp"
                 android:layout_weight="1"
