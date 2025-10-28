@@ -70,7 +70,7 @@
 		app:layout_constraintTop_toBottomOf="@id/guideline_price_top" />
 
 	<androidx.recyclerview.widget.RecyclerView
-		android:id="@+id/layout_transaction_items"
+		android:id="@+id/layoutTransactionItems"
 		android:layout_width="0dp"
 		android:layout_height="0dp"
 		android:background="@color/COLOUR_ORDER_BACKGROUND_EMPTY"

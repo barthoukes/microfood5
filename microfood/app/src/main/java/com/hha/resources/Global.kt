@@ -10,6 +10,8 @@ import com.hha.grpc.GrpcServiceFactory
 import com.hha.types.EAccess
 import com.hha.types.ETaal
 import com.hha.types.ETimeFrameIndex
+import kotlin.collections.getValue
+import kotlin.text.toShort
 
 class Global private constructor() {
     // Properties
@@ -38,8 +40,9 @@ class Global private constructor() {
     val userCFG: Configuration = Configuration()
     val fontCFG: Configuration = Configuration()
     val colourCFG: Configuration = Configuration()
-    var timeFrame = CTimeFrame(-1)
     val pcNumber: Short = 33
+    val deviceId: Short = (firstTablet +
+       CFG.getValue("handheld_id") + 3000).toShort()
 
     companion object {
         const val MY_DATABASE_NAME = "ZhongCan"

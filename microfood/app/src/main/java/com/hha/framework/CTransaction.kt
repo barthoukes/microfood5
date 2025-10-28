@@ -1,6 +1,8 @@
 package com.hha.framework
 
 import android.util.Log
+import com.hha.callback.TimeFrameOperations
+import com.hha.callback.ItemOperations
 import com.hha.callback.TransactionListener
 import com.hha.callback.TransactionOperations
 import com.hha.common.TransactionData
@@ -14,10 +16,12 @@ import com.hha.types.EDeletedStatus
 import com.hha.types.EPaymentMethod
 import com.hha.types.ETransType
 import com.hha.types.EPaymentStatus
+import com.hha.types.ETimeFrameIndex
 import java.text.SimpleDateFormat
 import java.util.*
 
-class CTransaction : Iterable<CSortedItem>, TransactionOperations
+class CTransaction : Iterable<CSortedItem>,
+    TransactionOperations, TimeFrameOperations, ItemOperations
 {
     var data = CTransactionData()
 
@@ -32,11 +36,11 @@ class CTransaction : Iterable<CSortedItem>, TransactionOperations
     var hasOrders: Boolean = false
     private val m_global: Global = Global.getInstance()
     private var m_customer: CCustomer? = null
-    private val m_items = CTransactionItems()
+    private val m_items = CTransactionItems(this)
 
     //private val m_timeFrames = CTimeFrameList()
     private val m_payments = CPaymentList(this)
-    private lateinit var timeFrame: CTimeFrame
+    private lateinit var m_timeFrame: CTimeFrame
     private var m_sizeAtStart : Int = 0
 
     // Add this iterator implementation
@@ -48,6 +52,10 @@ class CTransaction : Iterable<CSortedItem>, TransactionOperations
         total: CMoney
     )
     {
+        if (transactionId != data.transactionId)
+        {
+            m_timeFrame = CTimeFrame(this)
+        }
         data = CTransactionData()
         data.name = name
         data.status = status
@@ -157,13 +165,13 @@ class CTransaction : Iterable<CSortedItem>, TransactionOperations
 
     fun closeTimeFrame()
     {
-        global.timeFrame.closeTimeFrame()
-        global.timeFrame.previous()
+        m_timeFrame.closeTimeFrame()
+        m_timeFrame.previous()
     }
 
     fun removeTimeFrame()
     {
-        m_items.undoTimeFrame( global.timeFrame.time_frame_index,
+        m_items.undoTimeFrame( m_timeFrame.time_frame_index,
             global.CFG.getShort("pc_number"))
         closeTimeFrame()
     }
@@ -324,7 +332,7 @@ class CTransaction : Iterable<CSortedItem>, TransactionOperations
     val itemSize: Int
         get() = m_items.itemLines()
 
-    var transactionId: Int = 0
+    override var transactionId: Int = 0
         get() = data.transactionId
 
     fun useTakeawayPrices(): Boolean
@@ -382,7 +390,7 @@ class CTransaction : Iterable<CSortedItem>, TransactionOperations
 
     fun stopTimeFrame()
     {
-        timeFrame.end()
+        m_timeFrame.end()
     }
 
     fun addTransactionItem(selectedMenuItem: CMenuItem, clusterId: Short): Boolean
@@ -402,9 +410,8 @@ class CTransaction : Iterable<CSortedItem>, TransactionOperations
     fun startNextTimeFrame(): CTimeFrame
     {
         Log.i("Ctransaction", "Start next TimeFrame")
-        timeFrame = CTimeFrame(data.transactionId)
-        global.timeFrame = timeFrame
-        return timeFrame
+        m_timeFrame = CTimeFrame(data.transactionId, this)
+        return m_timeFrame
     }
 
     fun getCashTotal(): CMoney
@@ -430,5 +437,25 @@ class CTransaction : Iterable<CSortedItem>, TransactionOperations
     fun addPayment(payment: EPaymentMethod, amount: CMoney)
     {
         m_payments.addPayment(payment, amount)
+    }
+
+//    override fun getTransactionId(): Int
+//    {
+//        return data.transactionId
+//    }
+
+    override fun getDeviceId(): Short
+    {
+        return global.deviceId
+    }
+
+    override fun getTimeFrame(): CTimeFrame
+    {
+        return m_timeFrame
+    }
+
+    override fun getTimeFrameIndex(): ETimeFrameIndex
+    {
+        return m_timeFrame.getTimeFrameIndex()
     }
 }

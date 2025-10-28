@@ -2,6 +2,7 @@ package com.hha.framework
 
 import EViewMode
 import android.util.Log
+import com.hha.callback.ItemOperations
 import com.hha.callback.TransactionListener
 import com.hha.common.DeletedStatus
 import com.hha.common.ItemVisible
@@ -38,9 +39,11 @@ class CTransactionItems : Iterable<CSortedItem>
     val portionRound = CFG.getValue("portion_round")
     val portionDefinePrice = CFG.getBoolean("portion_define_price")
     val portionHalfPrice = CFG.getValue("portion_half_price")
+    lateinit var m_itemOperations: ItemOperations
 
-    constructor()
+    constructor(itemOperations : ItemOperations)
     {
+        m_itemOperations = itemOperations
         m_state = EEnterState.ENTER_ITEM_STATE
     }
 
@@ -279,7 +282,8 @@ class CTransactionItems : Iterable<CSortedItem>
 
     fun nextPortion(cursor: CCursor): Boolean
     {
-        val tfi = global.timeFrame!!.time_frame_index
+        val timeFrame = m_itemOperations.getTimeFrame()
+        val tfi = timeFrame.time_frame_index
         return nextPortion(cursor, tfi)
     }
 
@@ -577,7 +581,7 @@ class CTransactionItems : Iterable<CSortedItem>
         } else
         {
             Log.i("CtransactionItems", "insertItem insertItem")
-            val tfi = global.timeFrame!!.time_frame_index
+            val tfi = m_itemOperations.getTimeFrameIndex()
             insertItem(
                 menuItem, cursor, quantity, level, taxClusterId, page, 2,
                 prices.fullPrice, original, original_half,
@@ -956,7 +960,7 @@ class CTransactionItems : Iterable<CSortedItem>
 
     fun addQuantity(cursor: CCursor, quantity: Int): Boolean
     {
-        val tfi = global.timeFrame!!.time_frame_index
+        val tfi = m_itemOperations.getTimeFrameIndex()
         return addQuantity(cursor, tfi, quantity);
     }
 
