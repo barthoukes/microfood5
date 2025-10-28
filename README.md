@@ -2,6 +2,8 @@
 
 This repository contains the development of a modern, tablet-based Point-of-Sale (POS) client, written in Kotlin for Android. It is designed to function as a remote terminal within a larger POS ecosystem, communicating via gRPC with a central server.
 
+![Example Microfood5](https://www.kassaku.nl/wp-content/uploads/2025/10/Frida-app-1024x566.jpg)
+
 This Kotlin application represents the next evolution of our proven POS system. While this specific Kotlin client is in active development, the core C++ POS software that powers it is already successfully deployed and operational in numerous restaurants across the Netherlands.
 Architecture & Purpose
 
