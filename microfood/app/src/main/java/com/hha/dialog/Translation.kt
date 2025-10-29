@@ -9,6 +9,7 @@ object Translation {
         TEXT_CHOOSE_TABLE,
         TEXT_ABOUT_US,
         TEXT_BILL_HEADER,
+        TEXT_BILL_PAYMENTS,
         TEXT_CALCULATOR,
         TEXT_CANCEL,
         TEXT_CANCEL_REASON,
@@ -56,6 +57,7 @@ object Translation {
 
     private val m_lin = mapOf(
         TextId.TEXT_BILL_HEADER to listOf("买单", "AFREKENEN", "BILL MODE", "RECHNUNG", "BON"),
+        TextId.TEXT_BILL_PAYMENTS to listOf("付款", "BETAALWIJZE", "PAY METHOD", "BEZAHLUNG", "UANG"),
         TextId.TEXT_CHOOSE_TABLE to listOf("输入单", "KIES TAFEL BESTELLEN", "CHOOSE TABLE TO ORDER", "TISCH NAME", "PILIH MEJA PESANAN"),
         TextId.TEXT_ABOUT_US to listOf("关于", "OVER ONS", "ABOUT US", "WIR SIND", "TENTANG"),
         TextId.TEXT_CALCULATOR to listOf("计算器", "CALCULATOR", "CALCULATOR", "RECHNEN", "KALKULATOR"),

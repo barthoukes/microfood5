@@ -2,7 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:app="http://schemas.android.com/apk/res-auto"	android:layout_width="match_parent"
 	android:layout_height="match_parent"
-	android:background="@color/ANDROID_TABLE_BACKGROUND"
+	android:background="@drawable/backrepeat"
 	android:fitsSystemWindows="true">
 
 	<androidx.constraintlayout.widget.Guideline
@@ -81,16 +81,28 @@
 
 
 	<!-- RIGHT COLUMN VIEWS (Menu) -->
+	<TextView
+		android:id="@+id/poe_header_text"
+		android:layout_width="0dp"
+		android:layout_height="0dp"
+		android:gravity="center"
+		android:text="Page Order"
+		android:textColor="@color/COLOUR_HEADER_TEXT"
+		android:background="@color/COLOUR_HEADER_BACKGROUND"
+		android:textSize="20sp"
+		app:layout_constraintTop_toTopOf="parent"
+		app:layout_constraintBottom_toBottomOf="@id/guideline_top"
+		app:layout_constraintEnd_toStartOf="@id/btn_back"
+		app:layout_constraintStart_toStartOf="@id/guideline_vertical_main" />
 
 	<ImageButton
 		android:id="@+id/btn_back"
-		android:layout_width="0dp"
+		android:layout_width="wrap_content"
 		android:layout_height="0dp"
-		android:background="?attr/selectableItemBackgroundBorderless"
+		android:background="@color/COLOUR_HEADER_BACKGROUND"
 		android:contentDescription="back button"
 		android:onClick="onButtonCancel"
 		android:src="@drawable/back_yellow"
-		app:layout_constraintDimensionRatio="1:1"
 		app:layout_constraintBottom_toTopOf="@id/guideline_top"
 		app:layout_constraintEnd_toEndOf="parent"
 		app:layout_constraintTop_toTopOf="parent" />
