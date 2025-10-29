@@ -1,112 +1,138 @@
-<?xml version="1.0" encoding="utf-8"?><androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:app="http://schemas.android.com/apk/res-auto"
 	xmlns:tools="http://schemas.android.com/tools"
+	android:background="@drawable/backrepeat"
 	android:layout_width="match_parent"
 	android:layout_height="match_parent"
-	android:background="@android:color/white"
 	android:padding="8dp">
 
-	<!-- Header -->
+	<!-- NEW: Vertical Guideline to replace the layout_weight -->
+	<androidx.constraintlayout.widget.Guideline
+		android:id="@+id/guideline_vertical_split"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:orientation="vertical"
+		app:layout_constraintGuide_percent="0.60" />
+
+	<androidx.constraintlayout.widget.Guideline
+		android:id="@+id/guideline_top"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:orientation="horizontal"
+		app:layout_constraintGuide_percent="0.083" />
+
+	<!-- ============================================= -->
+	<!-- ================= TOP BAR =================== -->
+	<!-- ============================================= -->
+	<androidx.constraintlayout.widget.ConstraintLayout
+		android:layout_width="match_parent"
+		android:background="@color/COLOUR_HEADER_BACKGROUND"
+		app:layout_constraintTop_toTopOf="parent"
+		app:layout_constraintBottom_toTopOf="@id/guideline_top"
+		android:layout_height="0dp">
+		<TextView
+			android:id="@+id/billing_header_text"
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:gravity="center"
+			android:text="Billing"
+			android:textColor="@color/COLOUR_HEADER_TEXT"
+			android:textSize="20sp"
+			app:layout_constraintTop_toTopOf="parent"
+			app:layout_constraintBottom_toBottomOf="parent"
+			app:layout_constraintEnd_toStartOf="@id/btn_back"
+			app:layout_constraintStart_toStartOf="parent" />
+
+		<ImageButton
+			android:id="@+id/btn_back"
+			android:layout_width="wrap_content"
+			android:layout_height="match_parent"
+			android:background="?attr/selectableItemBackgroundBorderless"
+			android:contentDescription="back button"
+			android:src="@drawable/back_yellow"
+			android:onClick="onButtonCancel"
+			app:layout_constraintStart_toEndOf="@id/billing_header_text"
+			app:layout_constraintEnd_toEndOf="parent" />
+	</androidx.constraintlayout.widget.ConstraintLayout>
+
+	<!-- ============================================= -->
+	<!-- ===========  LEFT SIDE (BILL)  ============== -->
+	<!-- ============================================= -->
 	<TextView
 		android:id="@+id/tableName"
 		android:layout_width="0dp"
 		android:layout_height="wrap_content"
+		android:background="@color/COLOUR_SELECTED_BACKGROUND"
+		android:gravity="center"
 		android:text="Table 5"
-		android:textAlignment="center"
-		android:textColor="@android:color/black"
-		android:textSize="24sp"
-		app:layout_constraintEnd_toStartOf="@+id/btn_back"
+		android:textColor="@color/COLOUR_SELECTED_TEXT"
+		android:textSize="20sp"
+		app:layout_constraintEnd_toStartOf="@id/guideline_vertical_split"
 		app:layout_constraintStart_toStartOf="parent"
-		app:layout_constraintTop_toTopOf="parent" />
+		app:layout_constraintTop_toBottomOf="@id/guideline_top" />
 
-	<ImageButton
-		android:id="@+id/btn_back"
-		android:layout_width="wrap_content"
-		android:layout_height="48dp"
-		android:background="?attr/selectableItemBackgroundBorderless"
-		android:contentDescription="back button"
-		android:src="@drawable/back_yellow"
-		app:layout_constraintEnd_toEndOf="parent"
-		app:layout_constraintTop_toTopOf="parent" />
+	<TextView
+		android:id="@+id/total_bill_price"
+		android:layout_width="0dp"
+		android:layout_height="wrap_content"
+		android:layout_margin="1dp"
+		android:background="@color/COLOUR_TOTAL_BACKGROUND"
+		android:gravity="center"
+		android:text="0,00"
+		android:textColor="@color/COLOUR_TOTAL_TEXT"
+		android:textSize="20sp"
+		app:layout_constraintBottom_toTopOf="@+id/icon_buttons_container"
+		app:layout_constraintEnd_toStartOf="@id/guideline_vertical_split"
+		app:layout_constraintStart_toStartOf="parent" />
 
-	<!-- Order + Payments Side-by-Side -->
-	<LinearLayout
-		android:id="@+id/order_payments_container"
+	<androidx.recyclerview.widget.RecyclerView
+		android:id="@+id/layoutBillingItems"
+		android:layout_width="0dp"
+		android:layout_height="0dp"
+		android:layout_marginTop="1dp"
+		android:layout_marginBottom="1dp"
+		android:background="@color/COLOUR_ORDER_BACKGROUND_EMPTY"
+		android:choiceMode="singleChoice"
+		android:fadingEdge="none"
+		android:scrollbars="none"
+		android:scrollingCache="true"
+		app:layout_constraintBottom_toTopOf="@id/total_bill_price"
+		app:layout_constraintEnd_toStartOf="@id/guideline_vertical_split"
+		app:layout_constraintStart_toStartOf="parent"
+		app:layout_constraintTop_toBottomOf="@id/tableName" />
+
+	<androidx.recyclerview.widget.RecyclerView
+		android:id="@+id/layout_billing_payments"
 		android:layout_width="0dp"
 		android:layout_height="0dp"
 		android:layout_marginTop="8dp"
-		android:layout_marginBottom="8dp"
-		android:orientation="horizontal"
-		app:layout_constraintBottom_toTopOf="@+id/discount_language_container"
+		android:layout_marginEnd="8dp"
+		android:background="@color/COLOUR_ORDER_BACKGROUND_EMPTY"
+		android:choiceMode="singleChoice"
+		android:fadingEdge="none"
+		android:scrollbars="none"
+		android:scrollingCache="true"
+		app:layout_constraintBottom_toTopOf="@+id/btnDiscount"
 		app:layout_constraintEnd_toEndOf="parent"
-		app:layout_constraintStart_toStartOf="parent"
-		app:layout_constraintTop_toBottomOf="@id/tableName">
+		app:layout_constraintStart_toEndOf="@id/guideline_vertical_split"
+		app:layout_constraintTop_toBottomOf="@id/guideline_top" />
 
-		<!-- Left: Order Items (60%) -->
-		<LinearLayout
-			android:layout_width="0dp"
-			android:layout_height="match_parent"
-			android:layout_weight="0.6"
-			android:orientation="vertical">
 
-			<androidx.recyclerview.widget.RecyclerView
-				android:id="@+id/layoutBillingItems"
-				android:layout_width="match_parent"
-				android:layout_height="0dp"
-				android:layout_weight="1"
-				android:background="@color/COLOUR_ORDER_BACKGROUND_EMPTY"
-				android:choiceMode="singleChoice"
-				android:fadingEdge="none"
-				android:scrollbars="none"
-				android:scrollingCache="true" />
-
-			<TextView
-				android:id="@+id/totalPrice"
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content"
-				android:layout_marginTop="8dp"
-				android:text="Total: €0.00"
-				android:textAlignment="center"
-				android:textColor="@android:color/black"
-				android:textSize="18sp" />
-		</LinearLayout>
-
-		<!-- Right: Payments (40%) -->
-		<LinearLayout
-			android:layout_width="0dp"
-			android:layout_height="match_parent"
-			android:layout_marginStart="8dp"
-			android:layout_weight="0.4"
-			android:orientation="vertical">
-
-			<TextView
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content"
-				android:layout_marginBottom="4dp"
-				android:text="Payments:"
-				android:textColor="@android:color/black" />
-
-			<androidx.recyclerview.widget.RecyclerView
-				android:id="@+id/layout_billing_payments"
-				android:layout_width="match_parent"
-				android:layout_height="match_parent"
-				android:background="@color/COLOUR_ORDER_BACKGROUND_EMPTY"
-				android:choiceMode="singleChoice"
-				android:fadingEdge="none"
-				android:scrollbars="none"
-				android:scrollingCache="true" />
-		</LinearLayout>
-	</LinearLayout>
+	<!-- ################################################################## -->
+	<!-- ################ ALL BOTTOM CONTROLS (Unchanged) ################# -->
+	<!-- ################################################################## -->
 
 	<LinearLayout
-		android:id="@+id/discount_language_container"
+		android:id="@+id/icon_buttons_container"
 		android:layout_width="0dp"
 		android:layout_height="wrap_content"
 		android:orientation="horizontal"
-		app:layout_constraintBottom_toTopOf="@+id/quick_pay_label"
-		app:layout_constraintEnd_toEndOf="parent"
+		app:layout_constraintBottom_toTopOf="@+id/btn_quick_payments"
+		app:layout_constraintEnd_toStartOf="@id/guideline_vertical_split"
 		app:layout_constraintStart_toStartOf="parent">
 
+		<!-- Language Icon Button -->
 		<ImageButton
 			android:id="@+id/btnLanguage"
 			style="?android:attr/buttonStyleSmall"
@@ -117,21 +143,45 @@
 			android:background="@color/ANDROID_BUTTON_BACKGROUND"
 			android:gravity="center"
 			android:onClick="onButtonLanguage"
-			android:src="@drawable/languages_yellow" />
+			android:src="@drawable/languages_yellow"
+			tools:ignore="SpeakableTextPresentCheck" />
 
-		<Button
-			android:id="@+id/btnDiscount"
+		<!-- Message Icon Button -->
+		<ImageButton
+			android:id="@+id/btnMessage"
+			style="?android:attr/buttonStyleSmall"
 			android:layout_width="0dp"
 			android:layout_height="wrap_content"
+			android:layout_margin="4dp"
 			android:layout_weight="1"
-			android:text="Discount"
-			android:textAllCaps="false" />
-	</LinearLayout>
+			android:background="@color/ANDROID_BUTTON_BACKGROUND"
+			android:gravity="center"
+			android:onClick="onButtonMessage"
+			android:src="@drawable/abc_yellow"
+			tools:ignore="SpeakableTextPresentCheck" />
+		<!-- Note: You will need to add an 'ic_message.xml' or similar drawable for this to work -->
 
+	</LinearLayout>
+	<!-- Discount button on the right side, below the payments list -->
+	<ImageButton
+		android:id="@+id/btnDiscount"
+		style="?android:attr/buttonStyleSmall"
+		android:layout_width="0dp"
+		android:layout_height="wrap_content"
+		android:layout_margin="4dp"
+		android:layout_weight="1"
+		android:background="@color/ANDROID_BUTTON_BACKGROUND"
+		android:gravity="center"
+		android:onClick="onButtonDiscount"
+		android:src="@drawable/icon_discount_yellow"
+		tools:ignore="SpeakableTextPresentCheck"
+		app:layout_constraintBottom_toTopOf="@+id/btn_quick_payments"
+		app:layout_constraintEnd_toEndOf="parent"
+		app:layout_constraintStart_toStartOf="@id/guideline_vertical_split"/>
 
 	<!-- Payment Methods -->
 	<TextView
-		android:id="@+id/quick_pay_label"
+		android:id="@+id/btn_quick_payments"
 		android:layout_width="0dp"
 		android:layout_height="wrap_content"
 		android:layout_marginBottom="4dp"
@@ -151,8 +201,7 @@
 		app:layout_constraintBottom_toTopOf="@+id/print_options_container"
 		app:layout_constraintEnd_toEndOf="parent"
 		app:layout_constraintStart_toStartOf="parent">
-
-		<!-- All ImageButtons for Euro notes, cash, pin go here -->
+		<!-- GridLayout content remains the same... -->
 		<ImageButton
 			android:id="@+id/btnEuro5"
 			android:layout_width="0dp"
@@ -160,6 +209,7 @@
 			android:layout_rowWeight="1"
 			android:layout_columnWeight="1"
 			android:layout_margin="4dp"
+			android:onClick="onButton5Euro"
 			android:background="@color/ANDROID_BUTTON_BACKGROUND"
 			android:src="@drawable/icon_5euro40" />
 
@@ -170,6 +220,7 @@
 			android:layout_rowWeight="1"
 			android:layout_columnWeight="1"
 			android:layout_margin="4dp"
+			android:onClick="onButton10Euro"
 			android:background="@color/ANDROID_BUTTON_BACKGROUND"
 			android:src="@drawable/icon_10euro40" />
 
@@ -180,6 +231,7 @@
 			android:layout_rowWeight="1"
 			android:layout_columnWeight="1"
 			android:layout_margin="4dp"
+			android:onClick="onButton20Euro"
 			android:background="@color/ANDROID_BUTTON_BACKGROUND"
 			android:src="@drawable/icon_20euro40" />
 
@@ -190,6 +242,7 @@
 			android:layout_rowWeight="1"
 			android:layout_columnWeight="1"
 			android:layout_margin="4dp"
+			android:onClick="onButton50Euro"
 			android:background="@color/ANDROID_BUTTON_BACKGROUND"
 			android:src="@drawable/icon_50euro40" />
 
@@ -200,6 +253,7 @@
 			android:layout_rowWeight="1"
 			android:layout_columnWeight="1"
 			android:layout_margin="4dp"
+			android:onClick="onButtonCash"
 			android:background="@color/ANDROID_BUTTON_BACKGROUND"
 			android:src="@drawable/pay_cash40" />
 
@@ -210,6 +264,7 @@
 			android:layout_rowWeight="1"
 			android:layout_columnWeight="1"
 			android:layout_margin="4dp"
+			android:onClick="onButtonPin"
 			android:background="@color/ANDROID_BUTTON_BACKGROUND"
 			android:src="@drawable/pay_pin40" />
 	</GridLayout>
@@ -224,8 +279,7 @@
 		app:layout_constraintBottom_toTopOf="@+id/bottom_action_buttons"
 		app:layout_constraintEnd_toEndOf="parent"
 		app:layout_constraintStart_toStartOf="parent">
-
-		<!-- Kitchen Prints and Bill Prints LinearLayouts go here -->
+		<!-- Print options content remains the same... -->
 		<LinearLayout
 			android:layout_width="0dp"
 			android:layout_height="wrap_content"
@@ -277,7 +331,7 @@
 		app:layout_constraintBottom_toBottomOf="parent"
 		app:layout_constraintEnd_toEndOf="parent"
 		app:layout_constraintStart_toStartOf="parent">
-
+		<!-- Bottom buttons content remains the same... -->
 		<Button
 			android:id="@+id/btnOrderMore"
 			android:layout_width="0dp"
@@ -296,6 +350,8 @@
 			android:layout_weight="1"
 			android:backgroundTint="#4CAF50"
 			android:text="CONFIRM ORDER"
+			android:onClick="onButtonEnter"
 			android:textColor="@android:color/white" />
 	</LinearLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

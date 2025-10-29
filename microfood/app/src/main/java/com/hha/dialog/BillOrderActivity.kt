@@ -17,6 +17,7 @@ import com.hha.callback.TransactionPaymentListener
 import com.hha.framework.CItem
 import com.hha.framework.CPayment
 import com.hha.framework.CTransaction
+import com.hha.messagebox.MessageBoxTextInput
 import com.hha.resources.Global
 import com.hha.types.ETaal
 import com.hha.types.CMoney
@@ -27,7 +28,7 @@ import com.hha.types.EPaymentStatus
 import tech.hha.microfood.databinding.BillOrderActivityBinding
 
 class BillOrderActivity : AppCompatActivity(), TransactionPaymentListener,
-   TransactionListener
+   TransactionListener, MessageBoxTextInput.OnTextEnteredListener
 {
 
     val global = Global.getInstance()
@@ -37,22 +38,7 @@ class BillOrderActivity : AppCompatActivity(), TransactionPaymentListener,
     private lateinit var binding: BillOrderActivityBinding
     private lateinit var tableName: TextView
     private lateinit var totalPrice: TextView
-    private lateinit var paymentMethodsLabel: TextView
-    private lateinit var paymentHistoryLabel: TextView
     private lateinit var txtKitchenPrints: TextView
-    private lateinit var txtBillPrints: TextView
-    private lateinit var btnDiscount: Button
-    private lateinit var btnOrderMore: Button
-    private lateinit var btnConfirmOrder: Button
-    private lateinit var btnKitchen1: Button
-    private lateinit var btnBillPrints: Button
-    private lateinit var btnLanguage: ImageButton
-    private lateinit var btnEuro5: ImageButton
-    private lateinit var btnEuro10: ImageButton
-    private lateinit var btnEuro20: ImageButton
-    private lateinit var btnEuro50: ImageButton
-    private lateinit var btnCash: ImageButton
-    private lateinit var btnPin: ImageButton
     private lateinit var billItemsRecyclerView: RecyclerView
     private lateinit var paymentsRecyclerView: RecyclerView
     private lateinit var billItemsAdapter: BillItemsAdapter
@@ -74,28 +60,12 @@ class BillOrderActivity : AppCompatActivity(), TransactionPaymentListener,
         initializeViews()
     }
 
-
     // Optional but clean: Create a helper function for initialization
     private fun initializeViews()
     {
         tableName = binding.tableName
-        totalPrice = binding.totalPrice
-        //paymentMethodsLabel = binding.paymentMethodsLabel
-        //paymentHistoryLabel = binding.paymentHistoryLabel
+        totalPrice = binding.totalBillPrice
         txtKitchenPrints = binding.txtKitchenPrints
-        txtBillPrints = binding.txtBillPrints
-        btnDiscount = binding.btnDiscount
-        btnOrderMore = binding.btnOrderMore
-        btnConfirmOrder = binding.btnConfirmOrder
-        btnKitchen1 = binding.btnKitchenPrints // Initialization happens here
-        btnBillPrints = binding.btnBillPrints
-        btnLanguage = binding.btnLanguage
-        btnEuro5 = binding.btnEuro5
-        btnEuro10 = binding.btnEuro10
-        btnEuro20 = binding.btnEuro20
-        btnEuro50 = binding.btnEuro50
-        btnCash = binding.btnCash
-        btnPin = binding.btnPin
         billItemsRecyclerView = binding.layoutBillingItems
         paymentsRecyclerView = binding.layoutBillingPayments
     }
@@ -108,10 +78,8 @@ class BillOrderActivity : AppCompatActivity(), TransactionPaymentListener,
         // This will allow the adapter to automatically update when an item is changed,
         // added, or removed.
         m_transaction.addListener(this)
-
+        refreshAllData()
         // Also a good place to ensure the UI is fully updated when returning to the screen
-        updateTexts()
-        setButtonListeners()
     }
 
     override fun onPause()
@@ -165,7 +133,7 @@ class BillOrderActivity : AppCompatActivity(), TransactionPaymentListener,
 
     fun handlePayment(selectedPayment: CPayment)
     {
-        // todo
+        TODO("Not yet implemented")
     }
 
     private fun createGridLayoutBillingItems()
@@ -197,78 +165,6 @@ class BillOrderActivity : AppCompatActivity(), TransactionPaymentListener,
     {
     }
 
-//    private fun refreshAllData()
-//    {
-//        billItemsAdapter.notifyDataSetChanged()
-//        paymentsAdapter.notifyDataSetChanged()
-//    }
-
-    private fun updateTexts()
-    {
-        when (global.language)
-        {
-            ETaal.LANG_ENGLISH ->
-            {
-                tableName.text = "Table 5"
-                totalPrice.text = "Total: €0.00"
-                //paymentMethodsLabel.text = "Payment Methods:"
-                //paymentHistoryLabel.text = "Payment History:"
-                txtKitchenPrints.text = "Kitchen Prints:"
-                txtBillPrints.text = "Bill Prints:"
-                btnDiscount.text = "Discount"
-                btnOrderMore.text = "ORDER MORE"
-                btnConfirmOrder.text = "CONFIRM ORDER"
-                btnKitchen1.text = "1x"
-                btnBillPrints.text = "1x"
-            }
-
-            ETaal.LANG_SIMPLIFIED, ETaal.LANG_TRADITIONAL ->
-            {
-                tableName.text = "桌子 5"
-                totalPrice.text = "总计: €0.00"
-                //paymentMethodsLabel.text = "支付方式:"
-                //paymentHistoryLabel.text = "支付记录:"
-                txtKitchenPrints.text = "厨房打印:"
-                txtBillPrints.text = "账单打印:"
-                btnDiscount.text = "折扣"
-                btnOrderMore.text = "继续点餐"
-                btnConfirmOrder.text = "确认订单"
-                btnKitchen1.text = "1次"
-                btnBillPrints.text = "1次"
-            }
-
-            else ->
-            {
-                tableName.text = "Tafel 5"
-                totalPrice.text = "Totaal: €0.00"
-                //paymentMethodsLabel.text = "Betaalmethoden:"
-                //paymentHistoryLabel.text = "Betalingsgeschiedenis:"
-                txtKitchenPrints.text = "Keuken afdrukken:"
-                txtBillPrints.text = "Rekening afdrukken:"
-                btnDiscount.text = "Korting"
-                btnOrderMore.text = "MEER BESTELLEN"
-                btnConfirmOrder.text = "BEVESTIGEN"
-                btnKitchen1.text = "1x"
-                btnBillPrints.text = "1x"
-            }
-        }
-    }
-
-    private fun setButtonListeners()
-    {
-        btnDiscount.setOnClickListener { onDiscountClicked() }
-        btnOrderMore.setOnClickListener { onOrderMoreClicked() }
-        btnConfirmOrder.setOnClickListener { onConfirmOrderClicked() }
-        btnKitchen1.setOnClickListener { onKitchenPrintClicked() }
-        btnBillPrints.setOnClickListener { onBillPrintClicked() }
-        btnEuro5.setOnClickListener { onEuro5Clicked() }
-        btnEuro10.setOnClickListener { onEuro10Clicked() }
-        btnEuro20.setOnClickListener { onEuro20Clicked() }
-        btnEuro50.setOnClickListener { onEuro50Clicked() }
-        btnCash.setOnClickListener { onCashClicked() }
-        btnPin.setOnClickListener { onPinClicked() }
-    }
-
     // Empty button functions to be implemented
     fun onButtonLanguage()
     {
@@ -285,7 +181,8 @@ class BillOrderActivity : AppCompatActivity(), TransactionPaymentListener,
     private fun refreshAllData()
     {
         // Implement language switching logic
-        binding.btnDiscount.text = Translation.get(Translation.TextId.TEXT_DISCOUNT)
+        binding.billingHeaderText.text = Translation.get(Translation.TextId.TEXT_BILL_HEADER)
+        binding.btnQuickPayments.text = Translation.get(Translation.TextId.TEXT_BILL_PAYMENTS)
         binding.btnConfirmOrder.text = Translation.get(Translation.TextId.TEXT_PAY)
         binding.btnOrderMore.text = Translation.get(Translation.TextId.TEXT_MORE)
         binding.txtKitchenPrints.text = Translation.get(Translation.TextId.TEXT_PRINT_ROLL)
@@ -301,29 +198,72 @@ class BillOrderActivity : AppCompatActivity(), TransactionPaymentListener,
         refreshAllData()
     }
 
-    private fun onDiscountClicked()
+    @Suppress("UNUSED_PARAMETER")
+    fun onButtonCancel(view: View)
     {
-        // Implement discount logic
+        TODO("Not yet implemented")
     }
 
-    private fun onOrderMoreClicked()
+    @Suppress("UNUSED_PARAMETER")
+    fun onButtonDiscount(view: View)
     {
-        // Implement order more logic
+        TODO("Not yet implemented")
     }
 
-    private fun onConfirmOrderClicked()
+    @Suppress("UNUSED_PARAMETER")
+    fun onButtonEnter(view: View)
     {
-        // Implement confirm order logic
+        TODO("Not yet implemented")
     }
 
-    private fun onKitchenPrintClicked()
+    @Suppress("UNUSED_PARAMETER")
+    fun onButton5Euro(view: View)
     {
-        // Implement kitchen print logic
+        payEuroButton(CMoney(500))
     }
 
-    private fun onBillPrintClicked()
+    @Suppress("UNUSED_PARAMETER")
+    fun onButton10Euro(view: View)
     {
-        // Implement bill print logic
+        // Implement €10 payment logic
+        payEuroButton(CMoney(1000))
+    }
+
+    @Suppress("UNUSED_PARAMETER")
+    fun onButton20Euro(view: View)
+    {
+        payEuroButton(CMoney(2000))
+    }
+
+    @Suppress("UNUSED_PARAMETER")
+    fun onButton50Euro(view: View)
+    {
+        payEuroButton(CMoney(5000))
+    }
+
+    @Suppress("UNUSED_PARAMETER")
+    fun onButton100Euro(view: View)
+    {
+        TODO("Not yet implemented")
+    }
+
+    @Suppress("UNUSED_PARAMETER")
+    fun onButtonCash(view: View)
+    {
+        TODO("Not yet implemented")
+    }
+
+    @Suppress("UNUSED_PARAMETER")
+    fun onButtonPin(view: View)
+    {
+        payAllUsingPin()
+    }
+
+    fun onButtonMessage(view: View)
+    {
+        val dialog = MessageBoxTextInput()
+        dialog.listener = this // Set the activity to listen for the result
+        dialog.show(supportFragmentManager, "MessageBoxTextInput")
     }
 
     private fun payEuroButton(amount: CMoney)
@@ -348,40 +288,6 @@ class BillOrderActivity : AppCompatActivity(), TransactionPaymentListener,
         {
             m_transaction.addPayment(EPaymentMethod.PAYMENT_CASH, m_customerTotal)
         }
-    }
-
-    private fun onEuro5Clicked()
-    {
-        // Implement €5 payment logic
-        payEuroButton(CMoney(500))
-    }
-
-    private fun onEuro10Clicked()
-    {
-        // Implement €10 payment logic
-        payEuroButton(CMoney(1000))
-    }
-
-    private fun onEuro20Clicked()
-    {
-        // Implement €20 payment logic
-        payEuroButton(CMoney(2000))
-    }
-
-    private fun onEuro50Clicked()
-    {
-        // Implement €50 payment logic
-        payEuroButton(CMoney(5000))
-    }
-
-    private fun onCashClicked()
-    {
-        // Implement cash payment logic
-    }
-
-    private fun onPinClicked()
-    {
-        payAllUsingPin()
     }
 
     // Public methods to update data
@@ -438,5 +344,10 @@ class BillOrderActivity : AppCompatActivity(), TransactionPaymentListener,
     override fun onTransactionCleared()
     {
         TODO("Not yet implemented")
+    }
+
+    override fun onTextEntered(text: String)
+    {
+        m_transaction.setMessage(text)
     }
 }

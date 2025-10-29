@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="600dp"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="@android:color/white">
+
+    <TextView
+        android:id="@+id/dialog_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Enter Message"
+        android:textSize="24sp"
+        android:textColor="@android:color/black"
+        android:gravity="center"
+        android:layout_marginBottom="16dp"/>
+
+    <EditText
+        android:id="@+id/input_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:maxLength="40"
+        android:hint="Type here..."
+        android:inputType="text"
+        android:imeOptions="actionDone"
+        android:textColor="@android:color/black"
+        android:background="@drawable/edit_text_border"
+        android:padding="12dp"
+        android:layout_marginBottom="16dp"
+        android:textSize="20sp"/>
+
+    <!-- The custom GridLayout keyboard has been REMOVED -->
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="16dp">
+
+
+        <Button
+            android:id="@+id/btn_cancel"
+            style="@style/Widget.App.Button.KassakuButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Cancel"
+            android:textAlignment="center"
+            app:icon="@drawable/icon_cancel_yellow"
+            app:iconTint="@color/ANDROID_BUTTON_ICON_COLOUR"
+            android:contentDescription="Cancel"
+            android:layout_marginEnd="8dp"/>
+
+        <Button
+            android:id="@+id/btn_enter"
+            style="@style/Widget.App.Button.KassakuButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textAlignment="center"
+            android:text="Ok"
+            app:iconTint="@color/ANDROID_BUTTON_ICON_COLOUR"
+            app:icon="@drawable/enter_yellow"
+            android:contentDescription="Enter"
+            android:layout_marginStart="8dp"/>
+    </LinearLayout>
+
+</LinearLayout>
