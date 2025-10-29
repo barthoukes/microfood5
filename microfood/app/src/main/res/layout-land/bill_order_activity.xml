@@ -38,7 +38,7 @@
 			android:layout_width="0dp"
 			android:layout_height="match_parent"
 			android:layout_marginEnd="4dp"
-			android:layout_weight="4"
+			android:layout_weight="2"
 			android:backgroundTint="#FF9800"
 			android:text="ORDER MORE"
 			android:textColor="@android:color/white" />
@@ -56,26 +56,40 @@
 			android:src="@drawable/languages_yellow"
 			tools:ignore="SpeakableTextPresentCheck" />
 
+		<ImageButton
+			android:id="@+id/btnMessage"
+			style="?android:attr/buttonStyleSmall"
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_margin="4dp"
+			android:layout_weight="1"
+			android:background="@color/ANDROID_BUTTON_BACKGROUND"
+			android:gravity="center"
+			android:onClick="onButtonMessage"
+			android:src="@drawable/abc_yellow"
+			tools:ignore="SpeakableTextPresentCheck" />
+
 		<Button
 			android:id="@+id/btnConfirmOrder"
 			android:layout_width="0dp"
 			android:layout_height="match_parent"
 			android:layout_marginStart="4dp"
-			android:layout_weight="5"
+			android:layout_weight="2"
 			android:backgroundTint="#4CAF50"
 			android:text="CONFIRM ORDER"
 			android:textColor="@android:color/white" />
 	</LinearLayout>
 
-	<!-- LEFT COLUMN: Order List -->
 	<TextView
 		android:id="@+id/tableName"
 		android:layout_width="0dp"
 		android:layout_height="wrap_content"
 		android:layout_margin="8dp"
 		android:text="Table 5"
+		android:gravity="center"
 		android:textAlignment="center"
-		android:textColor="@android:color/black"
+		android:background="@color/COLOUR_SELECTED_BACKGROUND"
+		android:textColor="@color/COLOUR_SELECTED_TEXT"
 		android:textSize="20sp"
 		app:layout_constraintEnd_toStartOf="@+id/guideline_left"
 		app:layout_constraintStart_toStartOf="parent"
@@ -85,11 +99,12 @@
 		android:id="@+id/totalPrice"
 		android:layout_width="0dp"
 		android:layout_height="wrap_content"
-		android:layout_margin="8dp"
-		android:text="Total: €0.00"
-		android:textAlignment="center"
-		android:textColor="@android:color/black"
-		android:textSize="18sp"
+		android:layout_margin="1dp"
+		android:background="@color/COLOUR_TOTAL_BACKGROUND"
+		android:gravity="center"
+		android:text="0,00"
+		android:textColor="@color/COLOUR_TOTAL_TEXT"
+		android:textSize="32sp"
 		app:layout_constraintBottom_toTopOf="@id/bottom_action_buttons"
 		app:layout_constraintEnd_toStartOf="@+id/guideline_left"
 		app:layout_constraintStart_toStartOf="parent" />

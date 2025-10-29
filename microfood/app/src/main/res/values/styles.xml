@@ -82,4 +82,15 @@
         <item name="android:elevation">8dp</item>
     </style>
 
+    <!--
+  Custom ButtonBarButtonStyle with a background color.
+  It inherits the borderless look and feel from the parent
+  and applies our custom background on top.
+-->
+    <style name="Widget.App.Button.KassakuButton" parent="Widget.MaterialComponents.Button.TextButton">
+        <item name="android:backgroundTint">@color/ANDROID_BUTTON_BACKGROUND</item>
+        <item name="android:textColor">@color/ANDROID_BUTTON_TEXT</item>
+        <!-- Optional: You can also set text color or other attributes here -->
+        <!-- <item name="android:textColor">@color/your_text_color</item> -->
+    </style>
 </resources>

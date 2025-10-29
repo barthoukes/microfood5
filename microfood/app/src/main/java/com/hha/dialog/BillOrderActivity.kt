@@ -17,6 +17,7 @@ import com.hha.callback.TransactionPaymentListener
 import com.hha.framework.CItem
 import com.hha.framework.CPayment
 import com.hha.framework.CTransaction
+import com.hha.messagebox.MessageBoxTextInput
 import com.hha.resources.Global
 import com.hha.types.ETaal
 import com.hha.types.CMoney
@@ -27,7 +28,7 @@ import com.hha.types.EPaymentStatus
 import tech.hha.microfood.databinding.BillOrderActivityBinding
 
 class BillOrderActivity : AppCompatActivity(), TransactionPaymentListener,
-   TransactionListener
+   TransactionListener, MessageBoxTextInput.OnTextEnteredListener
 {
 
     val global = Global.getInstance()
@@ -301,6 +302,14 @@ class BillOrderActivity : AppCompatActivity(), TransactionPaymentListener,
         refreshAllData()
     }
 
+    fun onButtonMessage(view: View)
+    {
+        val dialog = MessageBoxTextInput()
+        dialog.listener = this // Set the activity to listen for the result
+        dialog.show(supportFragmentManager, "MessageBoxTextInput")
+    }
+
+    // Implement otherbtnMessage
     private fun onDiscountClicked()
     {
         // Implement discount logic
@@ -438,5 +447,10 @@ class BillOrderActivity : AppCompatActivity(), TransactionPaymentListener,
     override fun onTransactionCleared()
     {
         TODO("Not yet implemented")
+    }
+
+    override fun onTextEntered(text: String)
+    {
+        m_transaction.setMessage(text)
     }
 }

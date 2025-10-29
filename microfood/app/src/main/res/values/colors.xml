@@ -79,6 +79,7 @@
     <color name="COLOUR_NETWORK_NO">#FF800000</color>
     <color name="COLOUR_NETWORK_YES">#FF00F000</color>
     <color name="ANDROID_BUTTON_TEXT">#ffc0c0f0</color>
+    <color name="ANDROID_BUTTON_ICON_COLOUR">#ffcccc00</color>
     <color name="ANDROID_BUTTON_BACKGROUND">#ff404080</color>
     <color name="ANDROID_MESSAGE_BACKGROUND">#ff6060FF</color>
     <color name="ANDROID_TABLE_BACKGROUND">#ff8080c0</color>
