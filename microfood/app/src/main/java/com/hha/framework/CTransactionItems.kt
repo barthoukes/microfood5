@@ -214,9 +214,9 @@ class CTransactionItems : Iterable<CSortedItem>
 //            val cursorItem = m_clientOrdersHandler[m_transactionItemControl.cursor]
 //            change2spice = cursorItem.level == LEVEL_COMBINE_ALL
         } while (change2spice)
-        assert(false)
-        //
-//        // If same as below cursor, then add one.
+
+        // If same as below cursor, then add one.
+
 //        val cursor_item = m_clientOrdersHandler[m_transactionItemControl.cursor]
 //        if (cursor_item.menuItemId == item_id && cursor_item.twinItemId == twin_item_id && CFG("entry_merge_similar_items")) {
 //            addOneToCursorPosition()
@@ -291,7 +291,6 @@ class CTransactionItems : Iterable<CSortedItem>
     {
         Log.i("CTransactionItems", "portion cursor=${cursor.position}")
 
-        val itemsDb = GrpcServiceFactory.createDailyTransactionItemService()
 
         val item: CItem = m_items.getItem(cursor)!!
         val nextPortion = when
@@ -313,6 +312,8 @@ class CTransactionItems : Iterable<CSortedItem>
             else -> DeletedStatus.DELETE_PORTION_IMMEDIATE
         }
         var unitPrice = item.getUnitPrice()
+
+        val itemsDb = GrpcServiceFactory.createDailyTransactionItemService()
         itemsDb.createItem(
             item.menuItemId, global.transactionId.toLong(), sequence,
             subSequence, subSubSequence, -quantity,
@@ -341,6 +342,7 @@ class CTransactionItems : Iterable<CSortedItem>
         {
             item.setUnitPrice(CMoney((item.parts * price.cents())) / 2)
         }
+        m_listeners.forEach { it.onItemUpdated(cursor.position, item) }
         unitPrice = item.getUnitPrice()
         quantity = item.getQuantity()
 
@@ -353,7 +355,6 @@ class CTransactionItems : Iterable<CSortedItem>
             item.tax, item.locations, timeFrameId.toInt(),
             item.deviceId, item.clusterId, Payed.PAID_NO, statiegeld
         )
-        m_listeners.forEach { it.onItemUpdated(cursor.position, item) }
         return true
     }
     //m_global.transactionItemDB.deleteSequence(id, CTimeFrameIndex(), item.sequence, CItem.DELETE_CAUSE_CHANGE_PORTION)

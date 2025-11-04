@@ -3,6 +3,7 @@ package com.hha.framework
 import android.util.Log
 import com.hha.callback.TimeFrameOperations
 import com.hha.callback.ItemOperations
+import com.hha.callback.PaymentsListener
 import com.hha.callback.TransactionListener
 import com.hha.callback.TransactionOperations
 import com.hha.common.TransactionData
@@ -136,14 +137,24 @@ class CTransaction : Iterable<CSortedItem>,
         return m_items.hasAnyChanges()
     }
 
-    fun addListener(listener: TransactionListener)
+    fun addItemListener(listener: TransactionListener)
     {
         m_items.addListener(listener)
     }
 
-    fun removeListener(listener: TransactionListener)
+    fun removeItemListener(listener: TransactionListener)
     {
         m_items.removeListener(listener)
+    }
+
+    fun addPaymentListener(listener: PaymentsListener)
+    {
+        m_payments.addListener(listener)
+    }
+
+    fun removePaymentListener(listener: PaymentsListener)
+    {
+        m_payments.removeListener(listener)
     }
 
     fun transactionEmptyAtStartAndAtEnd(): Boolean

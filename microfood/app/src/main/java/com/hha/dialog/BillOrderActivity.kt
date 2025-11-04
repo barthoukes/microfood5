@@ -2,8 +2,6 @@ package com.hha.dialog
 
 import android.os.Bundle
 import android.view.View
-import android.widget.Button
-import android.widget.ImageButton
 import android.widget.TextView
 
 import androidx.appcompat.app.AppCompatActivity
@@ -13,7 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.hha.adapter.BillItemsAdapter
 import com.hha.adapter.PaymentsAdapter
 import com.hha.callback.TransactionListener
-import com.hha.callback.TransactionPaymentListener
+import com.hha.callback.PaymentsListener
 import com.hha.framework.CItem
 import com.hha.framework.CPayment
 import com.hha.framework.CTransaction
@@ -27,7 +25,7 @@ import com.hha.types.EPaymentStatus
 
 import tech.hha.microfood.databinding.BillOrderActivityBinding
 
-class BillOrderActivity : AppCompatActivity(), TransactionPaymentListener,
+class BillOrderActivity : AppCompatActivity(), PaymentsListener,
    TransactionListener, MessageBoxTextInput.OnTextEnteredListener
 {
 
@@ -77,7 +75,8 @@ class BillOrderActivity : AppCompatActivity(), TransactionPaymentListener,
         // Register the adapter as a listener for changes in the transaction's item list.
         // This will allow the adapter to automatically update when an item is changed,
         // added, or removed.
-        m_transaction.addListener(this)
+        m_transaction.addItemListener(this)
+        m_transaction.addPaymentListener(this)
         refreshAllData()
         // Also a good place to ensure the UI is fully updated when returning to the screen
     }
@@ -90,7 +89,8 @@ class BillOrderActivity : AppCompatActivity(), TransactionPaymentListener,
         // when the activity is not in the foreground. The transaction object will outlive
         // this activity, so it's crucial to remove the reference to the adapter.
         if (::m_transaction.isInitialized) {
-            m_transaction.removeListener(this)
+            m_transaction.removeItemListener(this)
+            m_transaction.removePaymentListener(this)
         }
     }
 
@@ -244,7 +244,7 @@ class BillOrderActivity : AppCompatActivity(), TransactionPaymentListener,
     @Suppress("UNUSED_PARAMETER")
     fun onButton100Euro(view: View)
     {
-        TODO("Not yet implemented")
+        payEuroButton(CMoney(10000))
     }
 
     @Suppress("UNUSED_PARAMETER")
@@ -321,11 +321,6 @@ class BillOrderActivity : AppCompatActivity(), TransactionPaymentListener,
         paymentsRecyclerView.adapter = adapter
     }
 
-    override fun onListChanged()
-    {
-        TODO("Not yet implemented")
-    }
-
     override fun onItemAdded(position: Int, item: CItem)
     {
         TODO("Not yet implemented")
@@ -349,5 +344,25 @@ class BillOrderActivity : AppCompatActivity(), TransactionPaymentListener,
     override fun onTextEntered(text: String)
     {
         m_transaction.setMessage(text)
+    }
+
+    override fun onPaymentAdded(position: Int, item: CPayment)
+    {
+        TODO("Not yet implemented")
+    }
+
+    override fun onPaymentRemoved(position: Int)
+    {
+        TODO("Not yet implemented")
+    }
+
+    override fun onPaymentUpdated(position: Int, item: CPayment)
+    {
+        TODO("Not yet implemented")
+    }
+
+    override fun onPaymentsCleared()
+    {
+        TODO("Not yet implemented")
     }
 }

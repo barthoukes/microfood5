@@ -41,7 +41,7 @@ enum class EPaymentMethod(val value: Int) {
         /**
          * Gets the display name for the payment method
          */
-        fun getDisplayName(paymentMethod: EPaymentMethod): String {
+        fun toString(paymentMethod: EPaymentMethod): String {
             return when (paymentMethod) {
                 PAYMENT_CASH -> "Cash"
                 PAYMENT_PIN -> "PIN"
