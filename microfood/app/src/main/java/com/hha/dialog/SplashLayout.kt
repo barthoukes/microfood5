@@ -17,6 +17,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import com.hha.resources.Global
 import com.hha.grpc.GrpcServiceFactory
+import com.hha.network.NetworkScanner
 import tech.hha.microfood.R
 
 @SuppressLint("CustomSplashScreen")
@@ -80,9 +81,22 @@ class SplashLayout : androidx.activity.ComponentActivity() {
         lifecycleScope.launch {
             delay(100) // 2 seconds delay
 
-            Global.getInstance().getOptions()
-            CMenuCards.getInstance().loadTakeaway()
-            navigateToMainActivity()
+            Toast.makeText(this@SplashLayout, "Searching for server...", Toast.LENGTH_SHORT).show()
+
+            val foundIp = NetworkScanner.findFirstOpenPort(50051)
+
+            if (foundIp != null) {
+                // Save the found IP to the global instance
+                Global.getInstance().serverIp = foundIp
+                // Proceed to the main part of the app
+                Global.getInstance().getOptions()
+                CMenuCards.getInstance().loadTakeaway()
+                navigateToMainActivity()
+            } else {
+                // Show an error message
+                Toast.makeText(this@SplashLayout, "Error: Could not find server.", Toast.LENGTH_LONG).show()
+                // Optionally, you could add a "Retry" button or close the app
+            }
         }
     }
 
