@@ -44,6 +44,11 @@ class CMoney(private var cents: Int = 0) {
 
     fun add(amount: CMoney): CMoney = CMoney(cents + amount.cents)
 
+    fun isZeroOrNegative(): Boolean
+    {
+        return cents <= 0
+    }
+
     fun str(): String {
         val euros = cents / 100.0
         return String.format("€%.2f", euros)

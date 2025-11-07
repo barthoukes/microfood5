@@ -3,7 +3,7 @@ package com.hha.framework
 import EViewMode
 import android.util.Log
 import com.hha.callback.ItemOperations
-import com.hha.callback.TransactionListener
+import com.hha.callback.TransactionItemListener
 import com.hha.common.DeletedStatus
 import com.hha.common.ItemVisible
 import com.hha.common.Payed
@@ -35,7 +35,7 @@ class CTransactionItems : Iterable<CSortedItem>
     var m_newChanged = false
     val m_clusterIsRunning = false
     val m_viewMode: EViewMode = EViewMode.VIEW_MODE_TRANSACTION ///< Are we in split or preview mode?
-    private val m_listeners = mutableListOf<TransactionListener>()
+    private val m_listeners = mutableListOf<TransactionItemListener>()
     val portionRound = CFG.getValue("portion_round")
     val portionDefinePrice = CFG.getBoolean("portion_define_price")
     val portionHalfPrice = CFG.getValue("portion_half_price")
@@ -47,7 +47,7 @@ class CTransactionItems : Iterable<CSortedItem>
         m_state = EEnterState.ENTER_ITEM_STATE
     }
 
-    fun addListener(listener: TransactionListener)
+    fun addListener(listener: TransactionItemListener)
     {
         if (!m_listeners.contains(listener))
         {
@@ -60,7 +60,7 @@ class CTransactionItems : Iterable<CSortedItem>
         // listeners.forEach { it.onItemUpdated(position, updatedItem) }
     }
 
-    fun removeListener(listener: TransactionListener)
+    fun removeListener(listener: TransactionItemListener)
     {
         m_listeners.remove(listener)
     }
@@ -214,9 +214,9 @@ class CTransactionItems : Iterable<CSortedItem>
 //            val cursorItem = m_clientOrdersHandler[m_transactionItemControl.cursor]
 //            change2spice = cursorItem.level == LEVEL_COMBINE_ALL
         } while (change2spice)
-        assert(false)
-        //
-//        // If same as below cursor, then add one.
+
+        // If same as below cursor, then add one.
+
 //        val cursor_item = m_clientOrdersHandler[m_transactionItemControl.cursor]
 //        if (cursor_item.menuItemId == item_id && cursor_item.twinItemId == twin_item_id && CFG("entry_merge_similar_items")) {
 //            addOneToCursorPosition()
@@ -291,7 +291,6 @@ class CTransactionItems : Iterable<CSortedItem>
     {
         Log.i("CTransactionItems", "portion cursor=${cursor.position}")
 
-        val itemsDb = GrpcServiceFactory.createDailyTransactionItemService()
 
         val item: CItem = m_items.getItem(cursor)!!
         val nextPortion = when
@@ -313,6 +312,8 @@ class CTransactionItems : Iterable<CSortedItem>
             else -> DeletedStatus.DELETE_PORTION_IMMEDIATE
         }
         var unitPrice = item.getUnitPrice()
+
+        val itemsDb = GrpcServiceFactory.createDailyTransactionItemService()
         itemsDb.createItem(
             item.menuItemId, global.transactionId.toLong(), sequence,
             subSequence, subSubSequence, -quantity,
@@ -341,6 +342,7 @@ class CTransactionItems : Iterable<CSortedItem>
         {
             item.setUnitPrice(CMoney((item.parts * price.cents())) / 2)
         }
+        m_listeners.forEach { it.onItemUpdated(cursor.position, item) }
         unitPrice = item.getUnitPrice()
         quantity = item.getQuantity()
 
@@ -353,7 +355,6 @@ class CTransactionItems : Iterable<CSortedItem>
             item.tax, item.locations, timeFrameId.toInt(),
             item.deviceId, item.clusterId, Payed.PAID_NO, statiegeld
         )
-        m_listeners.forEach { it.onItemUpdated(cursor.position, item) }
         return true
     }
     //m_global.transactionItemDB.deleteSequence(id, CTimeFrameIndex(), item.sequence, CItem.DELETE_CAUSE_CHANGE_PORTION)
@@ -1283,7 +1284,7 @@ class CTransactionItems : Iterable<CSortedItem>
         }
     }
 
-    fun getTotalAmount(): CMoney
+    fun getItemsTotal(): CMoney
     {
         var m = CMoney(0)
         for (item in m_items)

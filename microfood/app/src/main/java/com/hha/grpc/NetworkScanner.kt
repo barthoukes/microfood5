@@ -1,53 +1,81 @@
-package com.hha.grpc
+package com.hha.network
 
-import java.net.InetSocketAddress
-import java.net.Socket
+import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
+import java.net.InetAddress
+import java.net.InetSocketAddress
+import java.net.NetworkInterface
+import java.net.Socket
 
 object NetworkScanner {
-
-    // Timeout for connection attempt (milliseconds)
-    private const val CONNECTION_TIMEOUT = 500
+    private const val TAG = "NetworkScanner"
 
     /**
-     * Scan the local subnet for devices with port 50051 open.
-     * @param localIp Your local IP (e.g., "192.168.1.100").
-     * @return List of IPs with port 50051 open.
+     * Scans the local network for the first device with the specified port open.
+     * Must be called from a coroutine.
+     *
+     * @param port The port to scan for (e.g., 50051).
+     * @return The IP address of the first server found, or null if none are found.
      */
-    suspend fun scanForGrpcServers(localIp: String, port: Int): List<String> {
-        val subnet = localIp.substringBeforeLast('.') // e.g., "192.168.1"
-        val ipRange = 1..255
-
-        return withContext(Dispatchers.IO) {
-            ipRange.map { ipEnd ->
-                async {
-                    val host = "$subnet.$ipEnd"
-                    if (isPortOpen(host, port)) host else null
-                }
-            }.awaitAll().filterNotNull()
+    suspend fun findFirstOpenPort(port: Int): String? = withContext(Dispatchers.IO) {
+        val localIp = getLocalIpAddress()
+        if (localIp == null) {
+            Log.e(TAG, "Could not determine local IP. Scan aborted.")
+            return@withContext null
         }
+
+        val subnet = localIp.substringBeforeLast('.')
+        Log.d(TAG, "Scanning subnet: $subnet.* on port $port")
+
+        val jobs = (1..254).map { i ->
+            async {
+                val ipAddress = "$subnet.$i"
+                if (isPortOpen(ipAddress, port, 100)) {
+                    ipAddress
+                } else {
+                    null
+                }
+            }
+        }
+
+        // Return the first non-null result without waiting for all scans to finish
+        for (job in jobs) {
+            val result = job.await()
+            if (result != null) {
+                Log.i(TAG, "SUCCESS: Found server at $result:$port")
+                // Cancel remaining jobs to save resources
+                jobs.forEach { it.cancel() }
+                return@withContext result
+            }
+        }
+
+        Log.w(TAG, "Scan complete. No open ports found for $port")
+        return@withContext null
     }
 
-    /** Check if a port is open on a host. */
-    private fun isPortOpen(host: String, port: Int): Boolean {
+    private fun isPortOpen(ip: String, port: Int, timeoutMs: Int): Boolean {
         return try {
             Socket().use { socket ->
-                socket.connect(InetSocketAddress(host, port), CONNECTION_TIMEOUT)
-                true
+                socket.connect(InetSocketAddress(ip, port), timeoutMs)
             }
+            true
         } catch (e: Exception) {
             false
         }
     }
-}
 
-// Usage:
-//fun main() = runBlocking {
-//    val localIp = "192.168.1.100" // Replace with your local IP
-//    val grpcServers = NetworkScanner.scanForGrpcServers(localIp)
-//    println("Discovered gRPC servers: $grpcServers")
-//}
+    private fun getLocalIpAddress(): String? {
+        return try {
+            NetworkInterface.getNetworkInterfaces().asSequence()
+                .flatMap { it.inetAddresses.asSequence() }
+                .firstOrNull { !it.isLoopbackAddress && it.hostAddress.matches(Regex("\\d{1,3}(\\.\\d{1,3}){3}")) }
+                ?.hostAddress
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to get local IP address", e)
+            null
+        }
+    }
+}

@@ -29,8 +29,10 @@ import com.hha.resources.Configuration
 import com.hha.resources.Global
 import com.hha.types.ETimeFrameIndex
 import MenuItemsAdapter
-import com.hha.callback.TimeFrameOperations
-import com.hha.framework.CTimeFrame
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import com.hha.model.TransactionViewModel
+import com.hha.types.CMoney
 
 import tech.hha.microfood.databinding.PageOrderActivityBinding
 
@@ -60,11 +62,15 @@ class PageOrderActivity : AppCompatActivity(), MessageBoxYesNo.MessageBoxYesNoLi
     private val m_colourPage = colourCFG.getBackgroundColour("COLOUR_GROUP_BACKGROUND")
     private val m_colourSelectedPage = colourCFG.getBackgroundColour("SELECTED_GROUP_BACKGROUND")
     var itemWidth = 24
+    private val _orderTotal = MutableLiveData<CMoney>()
+    val orderTotal: LiveData<CMoney> = _orderTotal
+
     val groups = CFG.getValue("display_groups")
     val columns = CFG.getValue("display_groups_horizontal")
     val rows = (groups + columns - 1) / columns
     private lateinit var m_menuPagesAdapter: MenuPagesAdapter
     private lateinit var m_menuItemsAdapter: MenuItemsAdapter
+    private lateinit var m_viewModel: TransactionViewModel
     private lateinit var m_transactionItemsAdapter: TransactionItemsAdapter
     val clusterId: Short = -1
     var m_isChanged: Boolean = false
@@ -90,7 +96,7 @@ class PageOrderActivity : AppCompatActivity(), MessageBoxYesNo.MessageBoxYesNoLi
         // Remove the adapter as a listener from the transaction object
         if (transaction != null)
         {
-            transaction.removeListener(m_transactionItemsAdapter)
+            transaction.removeItemListener(m_transactionItemsAdapter)
             Log.d(tag, "TransactionItemsAdapter listener removed.")
         }
     }
@@ -146,7 +152,7 @@ class PageOrderActivity : AppCompatActivity(), MessageBoxYesNo.MessageBoxYesNoLi
             global.transaction = CTransaction(global.transactionId)
         }
         m_transactionItemsAdapter.updateData(global.transaction!!)
-        global.transaction!!.addListener(m_transactionItemsAdapter)
+        global.transaction!!.addItemListener(m_transactionItemsAdapter)
         global.transaction!!.startNextTimeFrame()
         //menuItemsAdapter.notifyDataSetChanged()
         //transactionItemsAdapter.notifyDataSetChanged()
@@ -390,7 +396,7 @@ class PageOrderActivity : AppCompatActivity(), MessageBoxYesNo.MessageBoxYesNoLi
     private fun setupTransaction()
     {
         // 1. Remove the listener from any old transaction to prevent leaks
-        global.transaction?.removeListener(m_transactionItemsAdapter)
+        global.transaction?.removeItemListener(m_transactionItemsAdapter)
 
         // 2. Check if a transaction exists or create a new one
         if (global.transaction == null)
@@ -408,7 +414,7 @@ class PageOrderActivity : AppCompatActivity(), MessageBoxYesNo.MessageBoxYesNoLi
         }
 
         // 3. Assign the transaction to the local variable and add the listener
-        global.transaction!!.addListener(m_transactionItemsAdapter)
+        global.transaction!!.addItemListener(m_transactionItemsAdapter)
 
         // 4. Update the adapter with the fresh transaction data
         m_transactionItemsAdapter.updateData(global.transaction!!)

@@ -1,7 +1,7 @@
 package com.hha.framework
 
+import com.hha.callback.PaymentsListener
 import com.hha.callback.TransactionOperations
-import com.hha.callback.TransactionPaymentListener
 import com.hha.common.PaymentMethod
 import com.hha.daily.payment.PaymentDetailsList
 import com.hha.daily.payment.PaymentList
@@ -18,29 +18,32 @@ class CPaymentList(transactionOperations: TransactionOperations) {
     val m_payments: MutableList<CPayment> = mutableListOf()
     var global = Global.getInstance()
     var m_transactionId: Int = 0
+    var m_alreadyPaid: CMoney = CMoney(0)
     var m_valid: Boolean = false
-    private val m_listeners = mutableListOf<TransactionPaymentListener>()
+    private val m_listeners = mutableListOf<PaymentsListener>()
 
-    fun addListener(listener: TransactionPaymentListener)
+    fun addListener(listener: PaymentsListener)
     {
         if (!m_listeners.contains(listener))
             m_listeners.add(listener)
     }
 
-    fun removeListener(listener: TransactionPaymentListener)
+    fun removeListener(listener: PaymentsListener)
     {
         m_listeners.remove(listener)
     }
 
-    private fun notifyListeners()
+    fun getPayments(): List<CPayment>
     {
-        m_listeners.forEach { it.onListChanged() }
+        return m_payments;
     }
 
     // Add a payment to the list
     fun addPayment(payment: CPayment)
     {
         m_payments.add(payment)
+        val position = m_payments.size-1
+        m_listeners.forEach { it.onPaymentAdded(position, m_payments[position]) }
     }
 
     public fun setTransactionId(transactionId: Int)
@@ -56,8 +59,8 @@ class CPaymentList(transactionOperations: TransactionOperations) {
             GrpcServiceFactory.createDailyTransactionPaymentService()
         val details = service.getTransactionPaymentsList(transactionId, false)
         var payments = CPaymentTransaction(details)
-
-
+        m_alreadyPaid = CMoney(service.getPartialTotal(transactionId, -1,
+            PaymentMethod.PAYMENT_ALL))
         fromPaymentList(details)
     }
 
@@ -67,6 +70,11 @@ class CPaymentList(transactionOperations: TransactionOperations) {
         return m_payments.fold(CMoney(0)) { total, payment ->
             total.add(payment.total)
         }
+    }
+
+    fun getTotalPaid(): CMoney
+    {
+        return m_alreadyPaid
     }
 
     fun getTotalAmountByType(paymentType: EPaymentMethod): CMoney
@@ -157,31 +165,46 @@ class CPaymentList(transactionOperations: TransactionOperations) {
 
     fun cancelPayment(index : Int, paymentStatus : EPaymentStatus)
     {
-        val service = GrpcServiceFactory.createDailyTransactionPaymentService()
+        // Remove in memory
         if (index >=0)
         {
             m_payments.removeAt(index)
+            // Notify dialog
+            m_listeners.forEach { it.onPaymentRemoved(index) }
         }
         else
         {
             clearPayments()
+            // Notify dialog
+            m_listeners.forEach { it.onPaymentsCleared() }
         }
+        // Notify server GRPC
+        val service = GrpcServiceFactory.createDailyTransactionPaymentService()
         service.cancelPayment(m_transactionId, index, EPaymentStatus.toPaymentStatus(paymentStatus))
     }
 
     fun addPayment(paymentMethod: EPaymentMethod, amount: CMoney)
     {
+        // Add in memory
         val customerId = m_transaction.getCustomerId()
-        var service = GrpcServiceFactory.createDailyTransactionPaymentService()
         val pay = CPayment( -1, customerId, paymentMethod, amount, "", EPayed.PAID_NO);
+        m_payments.add(pay)
+
+        // Notify dialog
+        val position = m_payments.size-1
+        m_listeners.forEach { it.onPaymentAdded(position, m_payments[position]) }
+
+        // Notify server GRPC
+        var service = GrpcServiceFactory.createDailyTransactionPaymentService()
         val paymentIndex = service.getNewPaymentIndex(m_transactionId);
         service.addPayment( m_transactionId, pay.toPayment(), paymentIndex);
-        m_payments.add(pay)
     }
 
     fun fromPaymentList(payments: PaymentList?)
     {
         m_payments.clear()
+        m_listeners.forEach { it.onPaymentsCleared() }
+
         if (payments == null) return
         val size = payments.paymentCount
         for (i in 0 until size)
@@ -189,6 +212,7 @@ class CPaymentList(transactionOperations: TransactionOperations) {
             val raw = payments.getPayment(i)
             var payment = CPayment.fromPayment(raw)
             m_payments.add(payment)
+            m_listeners.forEach { it.onPaymentAdded(i, payment) }
         }
     }
 }

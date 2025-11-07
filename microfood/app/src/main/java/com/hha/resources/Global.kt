@@ -23,6 +23,8 @@ class Global private constructor() {
     var currentKeyIndex = 2
     var cursor = CCursor(0)
     var language: ETaal = ETaal.LANG_SIMPLIFIED
+    // ... existing properties
+    var serverIp: String = "localhost"
     var pageOffset = 0
     var transactionId = 0
     var transaction: CTransaction? = null

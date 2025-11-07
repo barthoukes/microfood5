@@ -33,17 +33,22 @@ object GrpcServiceFactory
 {
     private var my_channel: ManagedChannel? = null
 
+    // This is now clean and synchronous
     fun getChannel(): ManagedChannel
     {
-        while (my_channel == null)
-        {
-            my_channel = GrpcChannelFactory.createChannel()
+        if (my_channel == null || my_channel!!.isShutdown) {
+            my_channel = GrpcChannelFactory.getChannel()
         }
         return my_channel!!
     }
 
     fun reconnect()
     {
+        // You might want to handle channel shutdown and recreation here
+        my_channel?.shutdownNow()
+        my_channel = null
+        // Also call the reconnect on the channel factory itself
+        GrpcChannelFactory.reconnect()
     }
 
     fun createAddressService(): AddressService

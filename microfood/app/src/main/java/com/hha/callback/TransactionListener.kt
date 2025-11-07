@@ -1,11 +1,9 @@
 package com.hha.callback
 
-import com.hha.framework.CItem
+import com.hha.framework.CTransaction
 
+// In a new file, or near CTransaction.kt
 interface TransactionListener
 {
-   fun onItemAdded(position: Int, item: CItem)
-   fun onItemRemoved(position: Int, newSize: Int)
-   fun onItemUpdated(position: Int, item: CItem)
-   fun onTransactionCleared()
+   fun onTransactionChanged(transaction: CTransaction)
 }
