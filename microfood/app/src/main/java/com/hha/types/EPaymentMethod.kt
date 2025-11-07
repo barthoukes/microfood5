@@ -106,8 +106,10 @@ enum class EPaymentMethod(val value: Int) {
             }
         }
 
-        fun fromPaymentMethod(paymentMethod: PaymentMethod): EPaymentMethod {
-            return when (paymentMethod) {
+        fun fromPaymentMethod(paymentMethod: PaymentMethod): EPaymentMethod
+        {
+            return when (paymentMethod)
+            {
                 PaymentMethod.PAYMENT_CASH -> PAYMENT_CASH
                 PaymentMethod.PAYMENT_PIN -> PAYMENT_PIN
                 PaymentMethod.PAYMENT_CREDIT_CARD -> PAYMENT_CREDIT_CARD
@@ -124,6 +126,49 @@ enum class EPaymentMethod(val value: Int) {
                 PaymentMethod.PAYMENT_DISCOUNT -> PAYMENT_DISCOUNT
                 PaymentMethod.PAYMENT_TIPS -> PAYMENT_TIPS
                 else -> PAYMENT_NONE
+            }
+        }
+
+        /**
+         * Gets the icon resource ID for this payment method instance.
+         */
+        fun getIcon(paymentMethod: EPaymentMethod): Int {
+            return when (paymentMethod) {
+                PAYMENT_CASH -> R.drawable.ic_menu_add
+                PAYMENT_PIN -> R.drawable.ic_menu_add
+                PAYMENT_CREDIT_CARD -> R.drawable.ic_menu_add
+                PAYMENT_VISA_CARD -> R.drawable.ic_menu_add
+                PAYMENT_MASTERCARD -> R.drawable.ic_menu_add
+                PAYMENT_AMERICAN_EXPRESS -> R.drawable.ic_menu_add
+                PAYMENT_DEBIT -> R.drawable.ic_menu_add
+                PAYMENT_PAY_PAL -> R.drawable.ic_menu_add
+                PAYMENT_ZETTLE -> R.drawable.ic_menu_add
+                PAYMENT_SEND_BILL -> R.drawable.ic_menu_add
+                PAYMENT_SEND_BILL_WAIT -> R.drawable.ic_menu_add
+                PAYMENT_SEND_BILL_DONE -> R.drawable.ic_menu_add
+                PAYMENT_DISCOUNT -> R.drawable.ic_menu_add
+                PAYMENT_TIPS -> R.drawable.ic_menu_add
+                else -> R.drawable.ic_menu_add // A generic payment icon
+            }
+        }
+
+        fun getName(paymentMethod: EPaymentMethod): String {
+            return when (paymentMethod) {
+                PAYMENT_CASH -> "CONTANT"
+                PAYMENT_PIN -> "PIN"
+                PAYMENT_CREDIT_CARD -> "CREDIT CARD"
+                PAYMENT_VISA_CARD -> "VISA"
+                PAYMENT_MASTERCARD -> "MASTER"
+                PAYMENT_AMERICAN_EXPRESS -> "AE"
+                PAYMENT_DEBIT -> "DEBIT"
+                PAYMENT_PAY_PAL -> "PAYPAL"
+                PAYMENT_ZETTLE -> "ZETTLE"
+                PAYMENT_SEND_BILL -> "KREDIET"
+                PAYMENT_SEND_BILL_WAIT -> "WAIT"
+                PAYMENT_SEND_BILL_DONE -> "--"
+                PAYMENT_DISCOUNT -> "KORTING"
+                PAYMENT_TIPS -> "TIPS"
+                else -> "" // A generic payment
             }
         }
     }

@@ -227,7 +227,7 @@ class DailyTransactionPaymentService(channel: ManagedChannel) : BaseGrpcService<
         }
     }
 
-    fun getPartialTotal(transactionId: Int, partialIndex: Int, paymentMethod: PaymentMethod): Int? = runBlocking {
+    fun getPartialTotal(transactionId: Int, partialIndex: Int, paymentMethod: PaymentMethod): Int = runBlocking {
         try {
             val request = PartialTotalRequest.newBuilder()
                 .setTransactionId(transactionId)
@@ -236,7 +236,7 @@ class DailyTransactionPaymentService(channel: ManagedChannel) : BaseGrpcService<
                 .build()
             stub.getPartialTotal(request).total
         } catch (e: Exception) {
-            null
+            0
         }
     }
 

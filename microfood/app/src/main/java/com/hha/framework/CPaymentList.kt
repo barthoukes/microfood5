@@ -2,6 +2,7 @@ package com.hha.framework
 
 import com.hha.callback.PaymentsListener
 import com.hha.callback.TransactionOperations
+import com.hha.common.PaymentMethod
 import com.hha.daily.payment.PaymentDetailsList
 import com.hha.daily.payment.PaymentList
 import com.hha.grpc.GrpcServiceFactory
@@ -17,6 +18,7 @@ class CPaymentList(transactionOperations: TransactionOperations) {
     val m_payments: MutableList<CPayment> = mutableListOf()
     var global = Global.getInstance()
     var m_transactionId: Int = 0
+    var m_alreadyPaid: CMoney = CMoney(0)
     var m_valid: Boolean = false
     private val m_listeners = mutableListOf<PaymentsListener>()
 
@@ -31,10 +33,10 @@ class CPaymentList(transactionOperations: TransactionOperations) {
         m_listeners.remove(listener)
     }
 
-//    private fun notifyListeners()
-//    {
-//        m_listeners.forEach { it.onListChanged() }
-//    }
+    fun getPayments(): List<CPayment>
+    {
+        return m_payments;
+    }
 
     // Add a payment to the list
     fun addPayment(payment: CPayment)
@@ -57,8 +59,8 @@ class CPaymentList(transactionOperations: TransactionOperations) {
             GrpcServiceFactory.createDailyTransactionPaymentService()
         val details = service.getTransactionPaymentsList(transactionId, false)
         var payments = CPaymentTransaction(details)
-
-
+        m_alreadyPaid = CMoney(service.getPartialTotal(transactionId, -1,
+            PaymentMethod.PAYMENT_ALL))
         fromPaymentList(details)
     }
 
@@ -68,6 +70,11 @@ class CPaymentList(transactionOperations: TransactionOperations) {
         return m_payments.fold(CMoney(0)) { total, payment ->
             total.add(payment.total)
         }
+    }
+
+    fun getTotalPaid(): CMoney
+    {
+        return m_alreadyPaid
     }
 
     fun getTotalAmountByType(paymentType: EPaymentMethod): CMoney

@@ -4,6 +4,7 @@ import android.util.Log
 import com.hha.callback.TimeFrameOperations
 import com.hha.callback.ItemOperations
 import com.hha.callback.PaymentsListener
+import com.hha.callback.TransactionItemListener
 import com.hha.callback.TransactionListener
 import com.hha.callback.TransactionOperations
 import com.hha.common.TransactionData
@@ -22,7 +23,8 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 class CTransaction : Iterable<CSortedItem>,
-    TransactionOperations, TimeFrameOperations, ItemOperations
+    TransactionOperations, TimeFrameOperations, ItemOperations,
+    PaymentsListener, TransactionItemListener
 {
     var data = CTransactionData()
 
@@ -39,6 +41,7 @@ class CTransaction : Iterable<CSortedItem>,
     private var m_customer: CCustomer? = null
     private val m_items = CTransactionItems(this)
 
+    private val m_listeners = mutableListOf<TransactionListener>()
     //private val m_timeFrames = CTimeFrameList()
     private val m_payments = CPaymentList(this)
     private lateinit var m_timeFrame: CTimeFrame
@@ -53,6 +56,9 @@ class CTransaction : Iterable<CSortedItem>,
         total: CMoney
     )
     {
+        m_items.addListener(this)
+        m_payments.addListener(this)
+
         if (transactionId != data.transactionId)
         {
             m_timeFrame = CTimeFrame(this)
@@ -95,6 +101,11 @@ class CTransaction : Iterable<CSortedItem>,
         selectTransactionId(transactionId)
     }
 
+    fun getDiscount(): CMoney
+    {
+        return data.totalHigh + data.totalLow
+    }
+
     fun selectTransactionId(transactionId: Int)
     {
         data.transactionId = transactionId
@@ -107,6 +118,8 @@ class CTransaction : Iterable<CSortedItem>,
 
     constructor(source: TransactionData?)
     {
+        m_items.addListener(this)
+        m_payments.addListener(this)
         hasOrders = false
         if (source == null)
         {
@@ -137,12 +150,12 @@ class CTransaction : Iterable<CSortedItem>,
         return m_items.hasAnyChanges()
     }
 
-    fun addItemListener(listener: TransactionListener)
+    fun addItemListener(listener: TransactionItemListener)
     {
         m_items.addListener(listener)
     }
 
-    fun removeItemListener(listener: TransactionListener)
+    fun removeItemListener(listener: TransactionItemListener)
     {
         m_items.removeListener(listener)
     }
@@ -302,7 +315,7 @@ class CTransaction : Iterable<CSortedItem>,
         {
             Log.e("CclientOrdersHandler", "close: Totals are not correct! Payment " +
                "Total: ${totalPayments.cents()} " +
-               "!= Transaction Total: ${getTotalAmount().cents()}")
+               "!= Transaction Total: ${getItemsTotal().cents()}")
         }
         if ( why == EClientOrdersType.CLOSED || why == EClientOrdersType.EMPTY)
         {
@@ -319,6 +332,11 @@ class CTransaction : Iterable<CSortedItem>,
     fun addReturnMoney()
     {
         m_payments.addReturnMoney()
+    }
+
+    fun getTotalPaid(): CMoney
+    {
+        return m_payments.getTotalPaid()
     }
 
     fun getMinutes(): Int
@@ -413,9 +431,9 @@ class CTransaction : Iterable<CSortedItem>,
         return m_items.touchItem(selectedMenuItem, clusterId)
     }
 
-    fun getTotalAmount(): CMoney
+    fun getItemsTotal(): CMoney
     {
-        return m_items.getTotalAmount()
+        return m_items.getItemsTotal()
     }
 
     fun startNextTimeFrame(): CTimeFrame
@@ -450,11 +468,6 @@ class CTransaction : Iterable<CSortedItem>,
         m_payments.addPayment(payment, amount)
     }
 
-//    override fun getTransactionId(): Int
-//    {
-//        return data.transactionId
-//    }
-
     override fun getDeviceId(): Short
     {
         return global.deviceId
@@ -468,5 +481,68 @@ class CTransaction : Iterable<CSortedItem>,
     override fun getTimeFrameIndex(): ETimeFrameIndex
     {
         return m_timeFrame.getTimeFrameIndex()
+    }
+
+    fun addListener(listener: TransactionListener)
+    {
+        m_listeners.add(listener)
+    }
+
+    fun removeListener(listener: TransactionListener)
+    {
+        m_listeners.remove(listener)
+    }
+    // A single method to notify any external listeners that something has changed.
+    private fun notifyListeners()
+    {
+        for (listener in m_listeners)
+        {
+            listener.onTransactionChanged(this)
+        }
+    }
+
+    override fun onPaymentAdded(position: Int, item: CPayment)
+    {
+        notifyListeners()
+    }
+
+    override fun onPaymentRemoved(position: Int)
+    {
+        notifyListeners();
+    }
+
+    override fun onPaymentUpdated(position: Int, item: CPayment)
+    {
+        notifyListeners();
+    }
+
+    override fun onPaymentsCleared()
+    {
+        notifyListeners();
+    }
+
+    override fun onItemAdded(position: Int, item: CItem)
+    {
+        notifyListeners();
+    }
+
+    override fun onItemRemoved(position: Int, newSize: Int)
+    {
+        notifyListeners();
+    }
+
+    override fun onItemUpdated(position: Int, item: CItem)
+    {
+        notifyListeners();
+    }
+
+    override fun onTransactionCleared()
+    {
+        notifyListeners();
+    }
+
+    fun getPayments() : List<CPayment>
+    {
+        return m_payments.getPayments()
     }
 }

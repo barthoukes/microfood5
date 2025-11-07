@@ -21,13 +21,15 @@ import com.hha.network.NetworkScanner
 import tech.hha.microfood.R
 
 @SuppressLint("CustomSplashScreen")
-class SplashLayout : androidx.activity.ComponentActivity() {
+class SplashLayout : androidx.activity.ComponentActivity()
+{
 
     val global = Global.getInstance()
     val CFG = global.CFG
     private lateinit var services: GrpcServiceFactory
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+    override fun onCreate(savedInstanceState: Bundle?)
+    {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_splash)
 
@@ -39,93 +41,126 @@ class SplashLayout : androidx.activity.ComponentActivity() {
         scheduleNavigation()
     }
 
-    private fun initializeDatabases() {
+    private fun initializeDatabases()
+    {
         val global = Global.getInstance().apply {
             myDir = applicationContext.filesDir.absoluteFile
         }
     }
 
-    private fun setupConfiguration() {
+    private fun setupConfiguration()
+    {
         global.showAllprices = CFG.getOption("entry_show_prices")
         global.showAllTimes = CFG.getOption("entry_show_times")
     }
 
-    private fun configureScreen() {
+    private fun configureScreen()
+    {
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
     }
 
-    private fun setupMessageConnection() {
-        try {
+    private fun setupMessageConnection()
+    {
+        try
+        {
             val path = CFG.getString("IP")
             val port = 9876 // Default port, could be made configurable
-        } catch (e: ConfigNotFoundException) {
+        } catch (e: ConfigNotFoundException)
+        {
             e.printStackTrace()
             // Consider showing error to user or fallback behavior
         }
     }
 
-    private fun configureSplashText() {
+    private fun configureSplashText()
+    {
         val bigTextView = findViewById<TextView>(R.id.textBig)
-        try {
+        try
+        {
             bigTextView.setTextSize(
                 TypedValue.COMPLEX_UNIT_DIP,
                 CFG.getValue("font_splash").toFloat()
             )
-        } catch (e: Exception) {
+        } catch (e: Exception)
+        {
             e.printStackTrace()
             // Fallback font size could be set here
         }
     }
 
-    private fun scheduleNavigation() {
+    private fun scheduleNavigation()
+    {
         lifecycleScope.launch {
-            delay(100) // 2 seconds delay
-
+            // Show the "Searching..." message only ONCE, outside the loop.
             Toast.makeText(this@SplashLayout, "Searching for server...", Toast.LENGTH_SHORT).show()
 
-            val foundIp = NetworkScanner.findFirstOpenPort(50051)
+            val maxRetries = 720 // Try for 1 hour before giving up.
+            var attempt = 0
 
-            if (foundIp != null) {
-                // Save the found IP to the global instance
-                Global.getInstance().serverIp = foundIp
-                // Proceed to the main part of the app
-                Global.getInstance().getOptions()
-                CMenuCards.getInstance().loadTakeaway()
-                navigateToMainActivity()
-            } else {
-                // Show an error message
-                Toast.makeText(this@SplashLayout, "Error: Could not find server.", Toast.LENGTH_LONG).show()
-                // Optionally, you could add a "Retry" button or close the app
+            while (attempt < maxRetries)
+            {
+                var foundIp: String? = null
+                try
+                {
+                    // --- Safe Network Scan ---
+                    Log.d("SplashLayout", "Searching for server, attempt ${attempt + 1}/$maxRetries...")
+                    foundIp = NetworkScanner.findFirstOpenPort(50051)
+
+                } catch (e: Exception)
+                {
+                    // Log the exception if the network scan itself fails.
+                    Log.e("SplashLayout", "NetworkScanner failed with an exception", e)
+                }
+
+                if (foundIp != null)
+                {
+                    try
+                    {
+                        // --- Safe Data Loading ---
+                        Log.i("SplashLayout", "Server found at $foundIp. Loading data...")
+
+                        // Save IP and load data. This might throw an exception.
+                        Global.getInstance().serverIp = foundIp
+                        Global.getInstance().getOptions()
+                        CMenuCards.getInstance().loadTakeaway()
+
+                        // If we get here, data loading was successful. Navigate and exit.
+                        navigateToMainActivity()
+                        return@launch // Stop the coroutine immediately.
+
+                    } catch (e: Exception)
+                    {
+                        // If data loading fails, log it and try the whole process again.
+                        Log.e("SplashLayout", "Found server but failed to load data", e)
+                    }
+                }
+
+                // --- Retry Logic ---
+                attempt++
+                if (attempt < maxRetries)
+                {
+                    // Wait 3 seconds before the next attempt.
+                    delay(3000)
+                }
             }
+
+            // --- FAILURE (Loop finished after all retries) ---
+            // This code only runs if the while loop completes without success.
+            Log.e("SplashLayout", "Could not find and connect to server after $maxRetries attempts.")
+            Toast.makeText(
+                this@SplashLayout,
+                "Error: Could not connect to server. Please check the network and restart.",
+                Toast.LENGTH_LONG
+            ).show()
         }
     }
 
-    private fun navigateToMainMenu() {
-        try {
-            val intent = Intent(this@SplashLayout, MainMenuActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            }
-            startActivity(intent)
-            finish()
-        } catch (e: Exception) {
-            Log.e("SplashScreen", "Navigation failed", e)
-            runOnUiThread {
-                Toast.makeText(
-                    this@SplashLayout,
-                    "Failed to open menu: ${e.message}",
-                    Toast.LENGTH_LONG
-                ).show()
-            }
-            // Attempt safe fallback
-            // startActivity(Intent(this@SplashLayout, FallbackActivity::class.java))
-            finish()
-        }
-    }
-    private fun navigateToMainActivity() {
+    private fun navigateToMainActivity()
+    {
         startActivity(Intent(this, MainMenuActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         })
-      //  startActivity(Intent(this@SplashLayout, MainMenuActivity::class.java))
+        //  startActivity(Intent(this@SplashLayout, MainMenuActivity::class.java))
         finish()
     }
 }

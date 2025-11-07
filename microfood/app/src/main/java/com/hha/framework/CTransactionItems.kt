@@ -3,7 +3,7 @@ package com.hha.framework
 import EViewMode
 import android.util.Log
 import com.hha.callback.ItemOperations
-import com.hha.callback.TransactionListener
+import com.hha.callback.TransactionItemListener
 import com.hha.common.DeletedStatus
 import com.hha.common.ItemVisible
 import com.hha.common.Payed
@@ -35,7 +35,7 @@ class CTransactionItems : Iterable<CSortedItem>
     var m_newChanged = false
     val m_clusterIsRunning = false
     val m_viewMode: EViewMode = EViewMode.VIEW_MODE_TRANSACTION ///< Are we in split or preview mode?
-    private val m_listeners = mutableListOf<TransactionListener>()
+    private val m_listeners = mutableListOf<TransactionItemListener>()
     val portionRound = CFG.getValue("portion_round")
     val portionDefinePrice = CFG.getBoolean("portion_define_price")
     val portionHalfPrice = CFG.getValue("portion_half_price")
@@ -47,7 +47,7 @@ class CTransactionItems : Iterable<CSortedItem>
         m_state = EEnterState.ENTER_ITEM_STATE
     }
 
-    fun addListener(listener: TransactionListener)
+    fun addListener(listener: TransactionItemListener)
     {
         if (!m_listeners.contains(listener))
         {
@@ -60,7 +60,7 @@ class CTransactionItems : Iterable<CSortedItem>
         // listeners.forEach { it.onItemUpdated(position, updatedItem) }
     }
 
-    fun removeListener(listener: TransactionListener)
+    fun removeListener(listener: TransactionItemListener)
     {
         m_listeners.remove(listener)
     }
@@ -1284,7 +1284,7 @@ class CTransactionItems : Iterable<CSortedItem>
         }
     }
 
-    fun getTotalAmount(): CMoney
+    fun getItemsTotal(): CMoney
     {
         var m = CMoney(0)
         for (item in m_items)

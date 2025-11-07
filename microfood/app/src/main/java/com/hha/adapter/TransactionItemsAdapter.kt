@@ -4,7 +4,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.hha.callback.TransactionListener
+import com.hha.callback.TransactionItemListener
 import com.hha.framework.CCursor
 import com.hha.framework.CItem
 import com.hha.framework.CTransaction
@@ -19,7 +19,7 @@ class TransactionItemsAdapter(
     colourOrderBackgroundOdd : Int,
     colourOrderBackgroundEven : Int
 ) : RecyclerView.Adapter<TransactionItemsAdapter.TransactionItemViewHolder>(),
-    TransactionListener
+    TransactionItemListener
 {
     private val global = Global.getInstance()
     private val m_colourOrderText = colourOrderText

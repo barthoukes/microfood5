@@ -4,29 +4,26 @@ import android.os.Bundle
 import android.view.View
 import android.widget.TextView
 
+import androidx.lifecycle.ViewModelProvider
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
 import com.hha.adapter.BillItemsAdapter
 import com.hha.adapter.PaymentsAdapter
-import com.hha.callback.TransactionListener
-import com.hha.callback.PaymentsListener
 import com.hha.framework.CItem
 import com.hha.framework.CPayment
-import com.hha.framework.CTransaction
 import com.hha.messagebox.MessageBoxTextInput
+import com.hha.model.BillDisplayLine
+import com.hha.model.TransactionViewModel
 import com.hha.resources.Global
 import com.hha.types.ETaal
 import com.hha.types.CMoney
-import com.hha.types.EPaymentMethod
-import com.hha.types.EPaymentStatus
-
 
 import tech.hha.microfood.databinding.BillOrderActivityBinding
 
-class BillOrderActivity : AppCompatActivity(), PaymentsListener,
-   TransactionListener, MessageBoxTextInput.OnTextEnteredListener
+class BillOrderActivity : AppCompatActivity(),
+    MessageBoxTextInput.OnTextEnteredListener
 {
 
     val global = Global.getInstance()
@@ -37,25 +34,24 @@ class BillOrderActivity : AppCompatActivity(), PaymentsListener,
     private lateinit var tableName: TextView
     private lateinit var totalPrice: TextView
     private lateinit var txtKitchenPrints: TextView
+    private lateinit var m_billItemsAdapter: BillItemsAdapter
+    private lateinit var m_paymentsAdapter: PaymentsAdapter
+    private lateinit var m_viewModel: TransactionViewModel
     private lateinit var billItemsRecyclerView: RecyclerView
     private lateinit var paymentsRecyclerView: RecyclerView
-    private lateinit var billItemsAdapter: BillItemsAdapter
-    private lateinit var paymentsAdapter: PaymentsAdapter
-    private var m_alreadyPayed = false
-    private var m_customerTotal = CMoney(0)
-    private var m_cashTotal = CMoney(0)
-    private var m_cardTotal = CMoney(0)
     private var m_kitchenPrints2bill = 1
     private var m_slipPrints = 1
-    lateinit private var m_transaction: CTransaction
 
     override fun onCreate(savedInstanceState: Bundle?)
     {
         super.onCreate(savedInstanceState)
         binding = BillOrderActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        m_viewModel = ViewModelProvider(this).get(TransactionViewModel::class.java)
         setupRecyclerView()
         initializeViews()
+        observeViewModel()
     }
 
     // Optional but clean: Create a helper function for initialization
@@ -71,12 +67,10 @@ class BillOrderActivity : AppCompatActivity(), PaymentsListener,
     override fun onResume()
     {
         super.onResume()
-        m_transaction = global.transaction ?: CTransaction(-1) // Or handle error
+        m_viewModel.prepareBillDisplayLines()
         // Register the adapter as a listener for changes in the transaction's item list.
         // This will allow the adapter to automatically update when an item is changed,
         // added, or removed.
-        m_transaction.addItemListener(this)
-        m_transaction.addPaymentListener(this)
         refreshAllData()
         // Also a good place to ensure the UI is fully updated when returning to the screen
     }
@@ -88,10 +82,6 @@ class BillOrderActivity : AppCompatActivity(), PaymentsListener,
         // Unregister the adapter to prevent memory leaks and stop receiving updates
         // when the activity is not in the foreground. The transaction object will outlive
         // this activity, so it's crucial to remove the reference to the adapter.
-        if (::m_transaction.isInitialized) {
-            m_transaction.removeItemListener(this)
-            m_transaction.removePaymentListener(this)
-        }
     }
 
     private fun setupRecyclerView()
@@ -101,9 +91,6 @@ class BillOrderActivity : AppCompatActivity(), PaymentsListener,
         createBillingItemsAdapter()
         createGridLayoutPayments()
         createPaymentsAdapter()
-
-        // Initialize m_transaction here. It's better than doing it in onResume to avoid re-assignment.
-        m_transaction = global.transaction!!
     }
 
     fun createGridLayoutPayments()
@@ -121,19 +108,28 @@ class BillOrderActivity : AppCompatActivity(), PaymentsListener,
 
     fun createPaymentsAdapter()
     {
-        // 2. Initialize adapter
-        paymentsAdapter = PaymentsAdapter() { selectedPayment ->
+        // --- FIX 3b: Assign to the class property 'm_paymentsAdapter' ---
+        m_paymentsAdapter = PaymentsAdapter() { selectedPayment ->
             handlePayment(selectedPayment)
         }.apply {
-            // Set dynamic height based on screen size
             binding.layoutBillingPayments.setItemViewCacheSize(18)
         }
-        binding.layoutBillingPayments.adapter = paymentsAdapter
+        binding.layoutBillingPayments.adapter = m_paymentsAdapter
     }
 
-    fun handlePayment(selectedPayment: CPayment)
+    private fun observeViewModel() {
+        m_viewModel.displayLines.observe(this) { billDisplayLines ->
+            if (billDisplayLines != null)
+            {
+                m_paymentsAdapter.submitList(billDisplayLines)
+            }
+        }
+       // m_viewModel.displayLines.observe(this) { billDisplayLines ->
+    }
+
+    fun handlePayment(selectedPayment: BillDisplayLine)
     {
-        TODO("Not yet implemented")
+        //TODO("Not yet implemented")
     }
 
     private fun createGridLayoutBillingItems()
@@ -151,14 +147,13 @@ class BillOrderActivity : AppCompatActivity(), PaymentsListener,
 
     fun createBillingItemsAdapter()
     {
-        // 2. Initialize adapter
-        billItemsAdapter = BillItemsAdapter() { selectedBillItem ->
+        // --- FIX 3a: Assign to the class property 'm_billItemsAdapter' ---
+        m_billItemsAdapter = BillItemsAdapter() { selectedBillItem ->
             handleBillItemSelection(selectedBillItem)
         }.apply {
-            // Set dynamic height based on screen size
             binding.layoutBillingItems.setItemViewCacheSize(18)
         }
-        binding.layoutBillingItems.adapter = billItemsAdapter
+        binding.layoutBillingItems.adapter = m_billItemsAdapter
     }
 
     private fun handleBillItemSelection(selectedBillItem: CItem)
@@ -268,26 +263,11 @@ class BillOrderActivity : AppCompatActivity(), PaymentsListener,
 
     private fun payEuroButton(amount: CMoney)
     {
-        if (m_alreadyPayed)
-        {
-            //ERROR_SOUND();
-        } else
-        {
-            if (m_customerTotal <= m_cashTotal + m_cardTotal || m_customerTotal < amount)
-            {
-                m_transaction.cancelPayment(-1, EPaymentStatus.PAY_STATUS_UNPAID);
-            }
-            m_transaction.addPayment(EPaymentMethod.PAYMENT_CASH, amount)
-        }
+        m_viewModel.payEuros(amount)
     }
 
     public fun payAllUsingPin()
     {
-        m_transaction.cancelPayment(-1, EPaymentStatus.PAY_STATUS_UNPAID)
-        if (!m_customerTotal.empty())
-        {
-            m_transaction.addPayment(EPaymentMethod.PAYMENT_CASH, m_customerTotal)
-        }
     }
 
     // Public methods to update data
@@ -321,48 +301,8 @@ class BillOrderActivity : AppCompatActivity(), PaymentsListener,
         paymentsRecyclerView.adapter = adapter
     }
 
-    override fun onItemAdded(position: Int, item: CItem)
-    {
-        TODO("Not yet implemented")
-    }
-
-    override fun onItemRemoved(position: Int, newSize: Int)
-    {
-        TODO("Not yet implemented")
-    }
-
-    override fun onItemUpdated(position: Int, item: CItem)
-    {
-        TODO("Not yet implemented")
-    }
-
-    override fun onTransactionCleared()
-    {
-        TODO("Not yet implemented")
-    }
-
     override fun onTextEntered(text: String)
     {
-        m_transaction.setMessage(text)
-    }
-
-    override fun onPaymentAdded(position: Int, item: CPayment)
-    {
-        TODO("Not yet implemented")
-    }
-
-    override fun onPaymentRemoved(position: Int)
-    {
-        TODO("Not yet implemented")
-    }
-
-    override fun onPaymentUpdated(position: Int, item: CPayment)
-    {
-        TODO("Not yet implemented")
-    }
-
-    override fun onPaymentsCleared()
-    {
-        TODO("Not yet implemented")
+        m_viewModel.setMessage(text)
     }
 }

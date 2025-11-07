@@ -29,6 +29,10 @@ import com.hha.resources.Configuration
 import com.hha.resources.Global
 import com.hha.types.ETimeFrameIndex
 import MenuItemsAdapter
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import com.hha.model.TransactionViewModel
+import com.hha.types.CMoney
 
 import tech.hha.microfood.databinding.PageOrderActivityBinding
 
@@ -58,11 +62,15 @@ class PageOrderActivity : AppCompatActivity(), MessageBoxYesNo.MessageBoxYesNoLi
     private val m_colourPage = colourCFG.getBackgroundColour("COLOUR_GROUP_BACKGROUND")
     private val m_colourSelectedPage = colourCFG.getBackgroundColour("SELECTED_GROUP_BACKGROUND")
     var itemWidth = 24
+    private val _orderTotal = MutableLiveData<CMoney>()
+    val orderTotal: LiveData<CMoney> = _orderTotal
+
     val groups = CFG.getValue("display_groups")
     val columns = CFG.getValue("display_groups_horizontal")
     val rows = (groups + columns - 1) / columns
     private lateinit var m_menuPagesAdapter: MenuPagesAdapter
     private lateinit var m_menuItemsAdapter: MenuItemsAdapter
+    private lateinit var m_viewModel: TransactionViewModel
     private lateinit var m_transactionItemsAdapter: TransactionItemsAdapter
     val clusterId: Short = -1
     var m_isChanged: Boolean = false
