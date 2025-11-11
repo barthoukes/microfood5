@@ -13,6 +13,8 @@ import com.hha.types.CMoney
 import com.hha.types.EAccess
 import com.hha.types.EDeletedStatus
 import com.hha.types.EEnterState
+import com.hha.types.EItemLocation
+import com.hha.types.EItemLocation.Companion.location2Locations
 import com.hha.types.ENameType
 import com.hha.types.EOrderLevel
 import com.hha.types.EPayed
@@ -53,11 +55,6 @@ class CTransactionItems : Iterable<CSortedItem>
         {
             m_listeners.add(listener)
         }
-        // Use following to notify:
-        // listeners.forEach { it.onItemAdded(newPosition, item) }
-        // listeners.forEach { it.onItemRemoved(position) }
-        // listeners.forEach { it.onTransactionCleared() }
-        // listeners.forEach { it.onItemUpdated(position, updatedItem) }
     }
 
     fun removeListener(listener: TransactionItemListener)
@@ -92,18 +89,6 @@ class CTransactionItems : Iterable<CSortedItem>
     fun itemLines() = m_items.itemLines
 
     fun itemSum() = m_items.itemSum
-
-    // A private method to perform the expensive recalculation.
-    // This is much clearer than having a similarly named property.
-//    private fun recalculateInternalSize(): Int
-//    {
-//        var sz = 0
-//        for (item in m_items)
-//        {
-//            sz += item.size
-//        }
-//        return sz
-//    }
 
     // Add this iterator implementation
     override fun iterator(): Iterator<CSortedItem> = m_items.iterator()
@@ -1290,6 +1275,36 @@ class CTransactionItems : Iterable<CSortedItem>
         for (item in m_items)
         {
             m = m + item.getTotal()
+        }
+        return m
+    }
+
+    fun getKitchenTotal(): CMoney
+    {
+        val drinks = location2Locations(EItemLocation.ITEM_BAR) +
+            location2Locations(EItemLocation.ITEM_DRINKS)
+        var m = CMoney(0)
+        for (item in m_items)
+        {
+            if ((item.getLocations() and drinks) == 0)
+            {
+                m = m + item.getTotal()
+            }
+        }
+        return m
+    }
+
+    fun getDrinksTotal(): CMoney
+    {
+        val drinks = location2Locations(EItemLocation.ITEM_BAR) +
+           location2Locations(EItemLocation.ITEM_DRINKS)
+        var m = CMoney(0)
+        for (item in m_items)
+        {
+            if ((item.getLocations() and drinks) != 0)
+            {
+                m = m + item.getTotal()
+            }
         }
         return m
     }

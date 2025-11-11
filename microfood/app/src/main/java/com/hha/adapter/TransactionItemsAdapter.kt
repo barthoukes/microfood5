@@ -27,6 +27,7 @@ class TransactionItemsAdapter(
     private val m_colourOrderBackgroundSelected = colourOrderBackgroundSelected
     private val m_colourOrderBackgroundOdd = colourOrderBackgroundOdd
     private val m_colourOrderBackgroundEven = colourOrderBackgroundEven
+    private var m_transaction : CTransaction? = null
 
     inner class TransactionItemViewHolder(val binding: AdapterTransactionItemBinding) :
         RecyclerView.ViewHolder(binding.root)
@@ -48,6 +49,7 @@ class TransactionItemsAdapter(
         // We don't need to store it, as we can rely on the global,
         // but we MUST tell the RecyclerView to redraw itself completely.
         notifyDataSetChanged()
+        m_transaction = newTransaction
     }
 
     fun setCursor(cursor: CCursor)
@@ -71,12 +73,16 @@ class TransactionItemsAdapter(
 
     override fun getItemCount(): Int
     {
-        return global.transaction?.itemSize()?.plus(1) ?: 1
+        return m_transaction ?.itemSize()?.plus(1) ?: 1
     }
 
     override fun onBindViewHolder(holder: TransactionItemViewHolder, position: Int)
     {
-        val item: CItem? = global.transaction?.get(position)
+        if (m_transaction == null)
+        {
+            return
+        }
+        val item: CItem? = m_transaction!!.get(position)
         holder.binding.transactionOrder.setBackgroundColor(getBackgroundColour(position))
         val colour = getTextColour(position)
         holder.binding.transactionItem.setTextColor(colour)

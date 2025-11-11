@@ -103,7 +103,7 @@ class CTransaction : Iterable<CSortedItem>,
 
     fun getDiscount(): CMoney
     {
-        return data.totalHigh + data.totalLow
+        return data.discountHigh + data.discountLow
     }
 
     fun selectTransactionId(transactionId: Int)
@@ -227,24 +227,21 @@ class CTransaction : Iterable<CSortedItem>,
     fun emptyTransaction(reason: String)
     {
         // No printing of kitchen, just go to billing...
-        if (global.transaction != null)
+        val itemSum = itemSum()
+        if (itemSum != 0)
         {
-            val itemSum = itemSum()
-            if (itemSum != 0)
-            {
-                removeTimeFrame()
-            } else
-            {
-                closeTimeFrame()
-            }
-            addReturnMoney()
-            if (!reason.isEmpty())
-            {
-                setMessage(reason)
-            }
-            updateTotal()
-            cleanCurrentTransaction()
+            removeTimeFrame()
+        } else
+        {
+            closeTimeFrame()
         }
+        addReturnMoney()
+        if (!reason.isEmpty())
+        {
+            setMessage(reason)
+        }
+        updateTotal()
+        cleanCurrentTransaction()
     }
 
     fun cleanCurrentTransaction()
@@ -369,13 +366,14 @@ class CTransaction : Iterable<CSortedItem>,
         return ETransType.useTakeawayPrices(data.transType)
     }
 
-    fun addOneToCursorPosition()
+    fun addOneToCursorPosition(): Boolean
     {
-        if (size == 0) return
+        if (size == 0) return false
         var y = m_global.cursor.position
-        var item = get(y) ?: get(--y) ?: return
-        if (item.deletedStatus != EDeletedStatus.DELETE_NOT) return
-        m_items.addQuantity(CCursor(y), 1)
+        var item = get(y) ?: get(--y) ?: return false
+        if (item.deletedStatus != EDeletedStatus.DELETE_NOT) return false
+        return m_items.addQuantity(CCursor(y)
+        , 1)
     }
 
     fun minus1()
@@ -434,6 +432,16 @@ class CTransaction : Iterable<CSortedItem>,
     fun getItemsTotal(): CMoney
     {
         return m_items.getItemsTotal()
+    }
+
+    fun getKitchenTotal(): CMoney
+    {
+        return m_items.getKitchenTotal()
+    }
+
+    fun getDrinksTotal(): CMoney
+    {
+        return m_items.getDrinksTotal()
     }
 
     fun startNextTimeFrame(): CTimeFrame

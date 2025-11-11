@@ -27,13 +27,10 @@ class Global private constructor() {
     var serverIp: String = "localhost"
     var pageOffset = 0
     var transactionId = 0
-    var transaction: CTransaction? = null
     var selectedItem = 10
     var pageBackgroundColor = 0xFF400040.toInt()
     var pageSelectedBackgroundColor = 0xFFc000c0.toInt()
     var pageTextColor = 0xFFf0f080.toInt()
-    var mainMenuHandler: Handler? = null
-    var askTableHandler: Handler? = null
     var clusterNoItems = false
     var showAllprices = false
     var showAllTimes = false
