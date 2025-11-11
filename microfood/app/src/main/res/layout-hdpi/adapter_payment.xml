@@ -1,58 +1,95 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/payment_container"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:background="@color/ANDROID_BUTTON_BACKGROUND"
-    android:padding="16dp">
+    android:background="@color/ANDROID_BUTTON_BACKGROUND">
 
-    <!-- Horizontal container for icon, name, and amount -->
-    <LinearLayout
-        android:layout_width="match_parent"
+    <View
+        android:id="@+id/dividerAbove"
+        android:layout_width="0dp"
+        android:layout_height="3dp"
+        android:background="#CCCC00"
+        android:visibility="visible"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <ImageView
+        android:id="@+id/payment_icon"
+        android:layout_width="32dp"
+        android:layout_height="match_parent"
+        android:src="@drawable/cancel"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/payment_name"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:src="@drawable/pay_cash40" />
+
+    <!-- Name -->
+    <TextView
+        android:id="@+id/payment_name"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical">
+        android:layout_marginStart="4dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:textColor="@color/ANDROID_BUTTON_TEXT"
+        android:textSize="20sp"
+        app:layout_constraintEnd_toStartOf="@id/payment_amount"
+        app:layout_constraintStart_toEndOf="@id/payment_icon"
+        tools:text="Cash Payment Long Name" />
 
-        <!-- Icon -->
-        <ImageView
-            android:id="@+id/payment_icon"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:layout_marginEnd="16dp"
-            android:src="@drawable/cancel"
-            android:tint="#FF6200EE"
-            tools:src="@drawable/pay_cash40" />
+    <!-- Sign (+, -, or empty) -->
+    <!-- KEY: This is constrained to the END of the parent -->
+    <TextView
+        android:id="@+id/payment_sign"
+        android:layout_width="32dp"
+        android:layout_height="wrap_content"
+        android:padding="4dp"
+        android:gravity="center"
+        android:visibility="visible"
+        android:textColor="@color/ANDROID_BUTTON_TEXT"
+        android:textSize="20sp"
+        app:layout_constraintBaseline_toBaselineOf="@id/payment_name"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:text="+" />
 
-        <!-- Name -->
-        <TextView
-            android:id="@+id/payment_name"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginLeft="4dp"
-            android:textColor="@color/ANDROID_BUTTON_TEXT"
-            android:textSize="20sp"
-            tools:text="Cash" />
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/vertical_guideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.70" />
 
-        <!-- Amount -->
-        <TextView
-            android:id="@+id/payment_amount"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@color/ANDROID_BUTTON_TEXT"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            tools:text="$100.00" />
-    </LinearLayout>
+    <!-- Amount -->
+    <!-- KEY: This is constrained to the START of the sign -->
+    <TextView
+        android:id="@+id/payment_amount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="4dp"
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp"
+        android:textColor="@color/ANDROID_BUTTON_TEXT"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintBaseline_toBaselineOf="@+id/payment_name"
+        app:layout_constraintEnd_toStartOf="@+id/payment_sign"
+        tools:text="$100.00" />
 
     <!-- Divider -->
     <View
-        android:id="@+id/dividerView"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginTop="16dp"
+        android:id="@+id/dividerBelow"
+        android:layout_width="0dp"
+        android:layout_height="3dp"
         android:background="#E0E0E0"
-        android:visibility="gone" />
-</LinearLayout>
+        android:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

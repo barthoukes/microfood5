@@ -18,7 +18,8 @@ import com.hha.types.ETaal
 import tech.hha.microfood.databinding.AskTransactionActivityBinding
 import tech.hha.microfood.databinding.BillOrderActivityBinding
 
-class AskTransactionActivity : AppCompatActivity() {
+class AskTransactionActivity : AppCompatActivity()
+{
 
     private val global = Global.getInstance()
     private val CFG = global.CFG
@@ -28,21 +29,24 @@ class AskTransactionActivity : AppCompatActivity() {
     private lateinit var floorTablesAdapter: FloorTablesAdapter
     private lateinit var transaction: CTransaction
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+    override fun onCreate(savedInstanceState: Bundle?)
+    {
         super.onCreate(savedInstanceState)
         binding = AskTransactionActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setupRecyclerView()
     }
 
-    private fun setupRecyclerView() {
+    private fun setupRecyclerView()
+    {
         createGridLayoutFloorTables()
         createFloorTablesAdapter()
         createGridLayoutTransactionList()
         createTransactionsAdapter()
     }
 
-    fun createGridLayoutFloorTables() {
+    fun createGridLayoutFloorTables()
+    {
         val gridLayoutFloorTables = GridLayoutManager(
             this@AskTransactionActivity,
             4,
@@ -52,7 +56,8 @@ class AskTransactionActivity : AppCompatActivity() {
         binding.layoutFloorTables.layoutManager = gridLayoutFloorTables
     }
 
-    fun createFloorTablesAdapter() {
+    fun createFloorTablesAdapter()
+    {
         // 2. Initialize adapter
         floorTablesAdapter = FloorTablesAdapter() { selectedFloorTable ->
             onFloorTableSelected(selectedFloorTable)
@@ -62,7 +67,8 @@ class AskTransactionActivity : AppCompatActivity() {
         binding.layoutFloorTables.adapter = floorTablesAdapter
     }
 
-    fun createGridLayoutTransactionList() {
+    fun createGridLayoutTransactionList()
+    {
         val gridLayoutTransactions = GridLayoutManager(
             this@AskTransactionActivity,
             1,
@@ -72,31 +78,36 @@ class AskTransactionActivity : AppCompatActivity() {
         binding.layoutTransactionList.layoutManager = gridLayoutTransactions
     }
 
-    fun createTransactionsAdapter() {
+    fun createTransactionsAdapter()
+    {
         // 2. Initialize adapter
-        transactionListAdapter = TransactionListAdapter() {
-                selectedTransaction -> onTransactionSelected(selectedTransaction)
+        transactionListAdapter = TransactionListAdapter() { selectedTransaction ->
+            onTransactionSelected(selectedTransaction)
         }.apply {
             binding.layoutFloorTables.setItemViewCacheSize(28)
         }
         binding.layoutFloorTables.adapter = floorTablesAdapter
     }
 
-    private fun refreshAllData() {
+    private fun refreshAllData()
+    {
         floorTablesAdapter.notifyDataSetChanged()
         transactionListAdapter.notifyDataSetChanged()
     }
 
 
-    fun onFloorTableSelected(selectedFloorTable: CFloorTable) {
+    fun onFloorTableSelected(selectedFloorTable: CFloorTable)
+    {
         // todo
     }
 
-    fun onTransactionSelected(selectedTransaction: CTransaction) {
+    fun onTransactionSelected(selectedTransaction: CTransaction)
+    {
         // todo
     }
 
-    private fun updateTexts() {
+    private fun updateTexts()
+    {
 //        when (global.language) {
 //            ETaal.LANG_ENGLISH -> {
 //                titleLabel.text = "Transaction Options"
@@ -124,45 +135,55 @@ class AskTransactionActivity : AppCompatActivity() {
         // Update adapter data if needed
     }
 
-    private fun getTransactionOptions(): List<String> {
-        return when (global.language) {
+    private fun getTransactionOptions(): List<String>
+    {
+        return when (global.language)
+        {
             ETaal.LANG_ENGLISH -> listOf("Split Bill", "Add Discount", "Change Table", "Print Receipt")
             ETaal.LANG_SIMPLIFIED, ETaal.LANG_TRADITIONAL -> listOf("分单", "添加折扣", "换桌", "打印收据")
             else -> listOf("Rekening splitsen", "Korting toevoegen", "Tafel veranderen", "Bon afdrukken")
         }
     }
 
-    private fun onExistingTransactionClicked() {
+    private fun onExistingTransactionClicked()
+    {
         // Implement existing transaction logic
-        if (global.transactionId > 0) {
+        if (global.transactionId > 0)
+        {
             transaction = CTransaction(global.transactionId)
-            global.transaction = transaction
         }
         finish()
     }
 
-    private fun onCancelClicked() {
+    private fun onCancelClicked()
+    {
         finish()
     }
 
-    private fun onSplitBillClicked() {
+    private fun onSplitBillClicked()
+    {
         // Implement split bill logic
     }
 
-    private fun onAddDiscountClicked() {
+    private fun onAddDiscountClicked()
+    {
         // Implement add discount logic
     }
 
-    private fun onChangeTableClicked() {
+    private fun onChangeTableClicked()
+    {
         // Implement change table logic
     }
 
-    private fun onPrintReceiptClicked() {
+    private fun onPrintReceiptClicked()
+    {
         // Implement print receipt logic
     }
 
-    companion object {
-        fun updateTransactionData(transaction: CTransaction) {
+    companion object
+    {
+        fun updateTransactionData(transaction: CTransaction)
+        {
             // Update transaction data if needed
         }
     }
