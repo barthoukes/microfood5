@@ -31,7 +31,10 @@ import com.hha.types.ETimeFrameIndex
 import MenuItemsAdapter
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.observe
 import com.hha.model.TransactionViewModel
+import com.hha.model.TransactionViewModelFactory
 import com.hha.types.CMoney
 
 import tech.hha.microfood.databinding.PageOrderActivityBinding
@@ -70,19 +73,33 @@ class PageOrderActivity : AppCompatActivity(), MessageBoxYesNo.MessageBoxYesNoLi
     val rows = (groups + columns - 1) / columns
     private lateinit var m_menuPagesAdapter: MenuPagesAdapter
     private lateinit var m_menuItemsAdapter: MenuItemsAdapter
-    private lateinit var m_viewModel: TransactionViewModel
     private lateinit var m_transactionItemsAdapter: TransactionItemsAdapter
+    private lateinit var m_viewModel: TransactionViewModel
     val clusterId: Short = -1
-    var m_isChanged: Boolean = false
     var m_fromBilling: Boolean = false
-    //private var m_transaction: CTransaction? = null
 
     override fun onCreate(savedInstanceState: Bundle?)
     {
         super.onCreate(savedInstanceState)
         binding = PageOrderActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        m_viewModel = ViewModelProvider(this, TransactionViewModelFactory)
+            .get(TransactionViewModel::class.java)
+
         setupRecyclerView()
+        // 3. OBSERVE the LiveData from the ViewModel
+        m_viewModel.transaction.observe(this) { transaction ->
+            // This block will run automatically when the transaction is loaded.
+            if (transaction != null) {
+                // --- THIS IS THE CORRECT PLACE TO CALL .updateData() ---
+                m_transactionItemsAdapter.updateData(transaction)
+
+                // It's also the correct place to add the listener
+                transaction.addItemListener(m_transactionItemsAdapter)
+            }
+        }
+        m_viewModel.initializeTransaction(TransactionViewModel.InitMode.VIEW_PAGE_ORDER)
     }
 
     override fun onDestroy()
@@ -90,15 +107,7 @@ class PageOrderActivity : AppCompatActivity(), MessageBoxYesNo.MessageBoxYesNoLi
         super.onDestroy() // Always call the superclass method first
 
         // Get the current transaction object
-        val transaction = global.transaction
-        m_isChanged = false
-
-        // Remove the adapter as a listener from the transaction object
-        if (transaction != null)
-        {
-            transaction.removeItemListener(m_transactionItemsAdapter)
-            Log.d(tag, "TransactionItemsAdapter listener removed.")
-        }
+        m_viewModel.resetIsChanged()
     }
 
     override fun dispatchTouchEvent(ev: MotionEvent?): Boolean
@@ -132,11 +141,11 @@ class PageOrderActivity : AppCompatActivity(), MessageBoxYesNo.MessageBoxYesNoLi
                 Log.d(tag, "Clicked item at position: $position")
 
                 // Manually trigger the click
-                val item = global.transaction?.get(position)
-                if (item != null)
-                {
-                    onClickTransactionItem(item)
-                }
+//                val item = global.transaction?.get(position)
+//                if (item != null)
+//                {
+//                    onClickTransactionItem(item)
+//                }
                 break
             }
         }
@@ -145,16 +154,16 @@ class PageOrderActivity : AppCompatActivity(), MessageBoxYesNo.MessageBoxYesNoLi
     override fun onResume()
     {
         super.onResume()
-        // Refresh data when activity resumes
-        if (global.transaction == null)
-        {
-            if (global.transactionId < 1E6) assert(false)
-            global.transaction = CTransaction(global.transactionId)
-        }
-        m_transactionItemsAdapter.updateData(global.transaction!!)
-        global.transaction!!.addItemListener(m_transactionItemsAdapter)
-        global.transaction!!.startNextTimeFrame()
-        //menuItemsAdapter.notifyDataSetChanged()
+//        // Refresh data when activity resumes
+//        if (global.transaction == null)
+//        {
+//            if (global.transactionId < 1E6) assert(false)
+//            global.transaction = CTransaction(global.transactionId)
+//        }
+//        m_transactionItemsAdapter.updateData(global.transaction!!)
+//        global.transaction!!.addItemListener(m_transactionItemsAdapter)
+//        global.transaction!!.startNextTimeFrame()
+//        //menuItemsAdapter.notifyDataSetChanged()
         //transactionItemsAdapter.notifyDataSetChanged()
     }
 
@@ -163,7 +172,6 @@ class PageOrderActivity : AppCompatActivity(), MessageBoxYesNo.MessageBoxYesNoLi
     fun onButtonEnter(view: View)
     {
         startActivity(Intent(this, BillOrderActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         })
     }
 
@@ -173,10 +181,12 @@ class PageOrderActivity : AppCompatActivity(), MessageBoxYesNo.MessageBoxYesNoLi
         if (m_fromBilling)
         {
             // If true, go to BillOrderActivity
-            startActivity(Intent(this, BillOrderActivity::class.java).apply {
-                // Optional: Add flags if you need to clear the back stack
-                flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
-            })
+            startActivity(Intent(this, BillOrderActivity::class.java))
+
+//                .apply {
+//                // Optional: Add flags if you need to clear the back stack
+//                flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+//            })
         } else
         {
             // If false, go to AskTransactionActivity
@@ -186,22 +196,19 @@ class PageOrderActivity : AppCompatActivity(), MessageBoxYesNo.MessageBoxYesNoLi
             })
         }
         // Finish the current activity so the user can't navigate back to it
-        finish()
+        //finish()
     }
 
     @Suppress("UNUSED_PARAMETER")
     fun onButtonPlus1(view: View)
     {
-        global.transaction?.addOneToCursorPosition()
-        m_isChanged = true
+        m_viewModel.onButtonPlus1()
     }
 
     @Suppress("UNUSED_PARAMETER")
     fun onButtonMin1(view: View)
     {
-        global.transaction?.minus1()
-        m_isChanged = true
-        //m_transactionItemsAdapter.invalidate(global.cursor.position)
+        m_viewModel.onButtonMin1()
     }
 
     @Suppress("UNUSED_PARAMETER")
@@ -214,15 +221,13 @@ class PageOrderActivity : AppCompatActivity(), MessageBoxYesNo.MessageBoxYesNoLi
     @Suppress("UNUSED_PARAMETER")
     fun onButtonPortion(view: View)
     {
-        global.transaction?.nextPortion()
-        m_isChanged = true
+        m_viewModel.onButtonPortion()
     }
 
     @Suppress("UNUSED_PARAMETER")
     fun onButtonRemove(view: View)
     {
-        global.transaction?.remove()
-        m_isChanged = true
+        m_viewModel.onButtonRemove()
     }
 
     @Suppress("UNUSED_PARAMETER")
@@ -233,29 +238,29 @@ class PageOrderActivity : AppCompatActivity(), MessageBoxYesNo.MessageBoxYesNoLi
 
     private fun escapeTransaction()
     {
-        if (!m_isChanged)
+        if (!m_viewModel.isChanged())
         {
             // No changes to table, simple to remove the time frame.
-            global.transaction!!.closeTimeFrame()
-            if (global.transaction!!.transactionEmptyAtStartAndAtEnd())
-            {
-                global.transaction!!.emptyTransaction("");
-            }
+            m_viewModel.closeTimeFrame()
+
             stopInCorrectMode()
-        } else if (global.transaction!!.isTakeaway()
-            || global.transaction!!.transactionEmptyAtStartAndAtEnd()
-            || global.transaction!!.getTimeFrameIndex().index == ETimeFrameIndex.TIME_FRAME1
-        )
+        } else if (m_viewModel.needToAskCancelReason())
         {
             showAskCancelReasonDialog()
 
-        } else if (global.transaction!!.hasAnyChanges())
+        } else if (m_viewModel.hasAnyChanges())
         {
             showUndoChanges()
         } else
         {
             stopInCorrectMode()
         }
+    }
+
+    fun addOneToCursorPosition(): Boolean
+    {
+        val currentTransaction = m_viewModel.transaction.value
+        return currentTransaction?.addOneToCursorPosition() ?: false
     }
 
     private fun refreshAllData()
@@ -393,33 +398,18 @@ class PageOrderActivity : AppCompatActivity(), MessageBoxYesNo.MessageBoxYesNoLi
     }
 
     // Add this new function to PageOrderActivity
-    private fun setupTransaction()
-    {
-        // 1. Remove the listener from any old transaction to prevent leaks
-        global.transaction?.removeItemListener(m_transactionItemsAdapter)
-
-        // 2. Check if a transaction exists or create a new one
-        if (global.transaction == null)
-        {
-            if (global.transactionId > 0)
-            { // Basic check
-                global.transaction = CTransaction(global.transactionId)
-            } else
-            {
-                // Handle case where there is no valid transaction ID
-                Log.e(tag, "No valid transactionId to load.")
-                // You might want to show an error or finish the activity here
-                return
-            }
-        }
-
-        // 3. Assign the transaction to the local variable and add the listener
-        global.transaction!!.addItemListener(m_transactionItemsAdapter)
-
-        // 4. Update the adapter with the fresh transaction data
-        m_transactionItemsAdapter.updateData(global.transaction!!)
-        global.transaction?.startNextTimeFrame()
-    }
+//    private fun setupTransaction()
+//    {
+//        // 1. Remove the listener from any old transaction to prevent leaks
+//        m_viewModel.transaction.removeItemListener(m_transactionItemsAdapter)
+//
+//        // 3. Assign the transaction to the local variable and add the listener
+//        m_viewModel.transaction.addItemListener(m_transactionItemsAdapter)
+//
+//        // 4. Update the adapter with the fresh transaction data
+//        m_transactionItemsAdapter.updateData(m_viewModel.transaction)
+//        m_viewModel.transaction.startNextTimeFrame()
+//    }
 
     // DP-to-pixel conversion extension
     fun Int.dpToPx(): Int = (this * Resources.getSystem()
@@ -439,11 +429,11 @@ class PageOrderActivity : AppCompatActivity(), MessageBoxYesNo.MessageBoxYesNoLi
         val oldPosition = global.cursor.position
 
         // Update the state
-        val newCursor = global.transaction!!.getCursor(selectedTransactionItem) ?: 0
+        val newCursor = m_viewModel.getCursor(selectedTransactionItem)
         if (newCursor == global.cursor.position)
         {
             // Add one item
-            global.transaction?.addOneToCursorPosition()
+            m_viewModel.onButtonPlus1()
             m_transactionItemsAdapter.invalidate(newCursor)
         } else
         {
@@ -451,8 +441,6 @@ class PageOrderActivity : AppCompatActivity(), MessageBoxYesNo.MessageBoxYesNoLi
             global.cursor.set(newCursor)
             m_transactionItemsAdapter.setCursor(global.cursor)
         }
-
-
         // Also, scroll to the newly added item so the user can see it
         binding.layoutTransactionItems.scrollToPosition(newCursor)
         // Update UI minimum
@@ -462,16 +450,11 @@ class PageOrderActivity : AppCompatActivity(), MessageBoxYesNo.MessageBoxYesNoLi
 
     private fun handleMenuItem(selectedMenuItem: CMenuItem)
     {
-        if (global.transaction == null)
-        {
-            return
-        }
         Log.d(tag, "MenuItem clicked: ${selectedMenuItem.localName}")
-        if (global.transaction!!.addTransactionItem(selectedMenuItem, clusterId))
+        if (m_viewModel.addItem(selectedMenuItem, clusterId))
         {
-            m_isChanged = true
             m_transactionItemsAdapter.setCursor(global.cursor)
-            //m_menuItemsAdapter.notifyDataSetChanged()
+           // m_menuItemsAdapter.notifyDataSetChanged()
             m_transactionItemsAdapter.notifyDataSetChanged()
             /// binding.totalPrice.text = m_transaction.getTotalAmount().str()
             //m_transactionItemsAdapter.setCursor(global.cursor)
@@ -539,7 +522,7 @@ class PageOrderActivity : AppCompatActivity(), MessageBoxYesNo.MessageBoxYesNoLi
     override fun onReasonSelected(reason: String)
     {
         Log.i(tag, "Cancelled $reason")
-        global.transaction!!.emptyTransaction(reason);
+        m_viewModel.emptyTransaction(reason)
         finish()
     }
 

@@ -16,6 +16,8 @@ import com.hha.framework.CPayment
 import com.hha.messagebox.MessageBoxTextInput
 import com.hha.model.BillDisplayLine
 import com.hha.model.TransactionViewModel
+import com.hha.model.TransactionViewModelFactory
+import com.hha.resources.Configuration
 import com.hha.resources.Global
 import com.hha.types.ETaal
 import com.hha.types.CMoney
@@ -25,10 +27,7 @@ import tech.hha.microfood.databinding.BillOrderActivityBinding
 class BillOrderActivity : AppCompatActivity(),
     MessageBoxTextInput.OnTextEnteredListener
 {
-
     val global = Global.getInstance()
-    private val CFG = global.CFG
-
     // Views
     private lateinit var binding: BillOrderActivityBinding
     private lateinit var tableName: TextView
@@ -41,6 +40,14 @@ class BillOrderActivity : AppCompatActivity(),
     private lateinit var paymentsRecyclerView: RecyclerView
     private var m_kitchenPrints2bill = 1
     private var m_slipPrints = 1
+    private val CFG: Configuration = global.CFG
+    private val colourCFG = global.colourCFG
+    private val m_colourOdd = colourCFG.getBackgroundColour("COLOUR_BILL_AMOUNT_BACKGROUND1")
+    private val m_colourEven = colourCFG.getBackgroundColour("COLOUR_BILL_AMOUNT_BACKGROUND2")
+    private val m_colourPayOdd = colourCFG.getBackgroundColour("COLOUR_BILL_TOTALS_BACKGROUND1")
+    private val m_colourPayEven = colourCFG.getBackgroundColour("COLOUR_BILL_TOTALS_BACKGROUND2")
+    private val m_frontText = colourCFG.getBackgroundColour("COLOUR_BILL_TOTALS_TEXT1")
+    private val m_payText = colourCFG.getBackgroundColour("COLOUR_BILL_AMOUNT_TEXT1")
 
     override fun onCreate(savedInstanceState: Bundle?)
     {
@@ -48,10 +55,22 @@ class BillOrderActivity : AppCompatActivity(),
         binding = BillOrderActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        m_viewModel = ViewModelProvider(this).get(TransactionViewModel::class.java)
+        m_viewModel = ViewModelProvider(this, TransactionViewModelFactory)
+            .get(TransactionViewModel::class.java)
+
         setupRecyclerView()
         initializeViews()
-        observeViewModel()
+
+        m_viewModel.transaction.observe(this) { transaction ->
+            // This block will run automatically when the activity starts
+            // and any time the transaction data changes.
+            if (transaction != null) {
+                // --- THIS IS WHERE YOU CALL updateData ---
+                m_billItemsAdapter.updateData(transaction)
+                //m_paymentsAdapter.updateData(transaction)
+            }
+        }
+        m_viewModel.initializeTransaction(TransactionViewModel.InitMode.VIEW_BILLING)
     }
 
     // Optional but clean: Create a helper function for initialization
@@ -67,12 +86,6 @@ class BillOrderActivity : AppCompatActivity(),
     override fun onResume()
     {
         super.onResume()
-        m_viewModel.prepareBillDisplayLines()
-        // Register the adapter as a listener for changes in the transaction's item list.
-        // This will allow the adapter to automatically update when an item is changed,
-        // added, or removed.
-        refreshAllData()
-        // Also a good place to ensure the UI is fully updated when returning to the screen
     }
 
     override fun onPause()
@@ -109,24 +122,18 @@ class BillOrderActivity : AppCompatActivity(),
     fun createPaymentsAdapter()
     {
         // --- FIX 3b: Assign to the class property 'm_paymentsAdapter' ---
-        m_paymentsAdapter = PaymentsAdapter() { selectedPayment ->
-            handlePayment(selectedPayment)
-        }.apply {
+        m_paymentsAdapter = PaymentsAdapter(
+            {selectedPayment -> handlePayment(selectedPayment) },
+            m_colourOdd,
+               m_colourEven,
+               m_colourPayOdd,
+               m_colourPayEven,
+               m_frontText,
+               m_payText).apply {
             binding.layoutBillingPayments.setItemViewCacheSize(18)
         }
         binding.layoutBillingPayments.adapter = m_paymentsAdapter
     }
-
-    private fun observeViewModel() {
-        m_viewModel.displayLines.observe(this) { billDisplayLines ->
-            if (billDisplayLines != null)
-            {
-                m_paymentsAdapter.submitList(billDisplayLines)
-            }
-        }
-       // m_viewModel.displayLines.observe(this) { billDisplayLines ->
-    }
-
     fun handlePayment(selectedPayment: BillDisplayLine)
     {
         //TODO("Not yet implemented")
@@ -183,7 +190,7 @@ class BillOrderActivity : AppCompatActivity(),
         binding.txtKitchenPrints.text = Translation.get(Translation.TextId.TEXT_PRINT_ROLL)
         binding.txtBillPrints.text = Translation.get(Translation.TextId.TEXT_PRINT_SLIP)
         refreshPrints()
-
+        m_viewModel.refreshAllData()
     }
 
     @Suppress("UNUSED_PARAMETER")
@@ -254,11 +261,24 @@ class BillOrderActivity : AppCompatActivity(),
         payAllUsingPin()
     }
 
+    @Suppress("UNUSED_PARAMETER")
     fun onButtonMessage(view: View)
     {
         val dialog = MessageBoxTextInput()
         dialog.listener = this // Set the activity to listen for the result
         dialog.show(supportFragmentManager, "MessageBoxTextInput")
+    }
+
+    @Suppress("UNUSED_PARAMETER")
+    fun onButtonMore(view: View)
+    {
+        // Tell the ViewModel to switch its mode back to ordering.
+        // This is important for when PageOrderActivity resumes.
+        m_viewModel.setMode(TransactionViewModel.InitMode.VIEW_PAGE_ORDER)
+
+        // Finish the current activity (BillOrderActivity).
+        // This will automatically return the user to the previous activity (PageOrderActivity).
+        finish()
     }
 
     private fun payEuroButton(amount: CMoney)

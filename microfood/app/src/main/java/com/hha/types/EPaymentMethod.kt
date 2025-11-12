@@ -1,12 +1,15 @@
 package com.hha.types
 
-import android.R
+import tech.hha.microfood.R
 import com.hha.common.PaymentMethod
+import com.hha.dialog.Translation
+import com.hha.dialog.Translation.TextId
 
 /**
  * Enum representing different payment methods.
  */
-enum class EPaymentMethod(val value: Int) {
+enum class EPaymentMethod(val value: Int)
+{
     PAYMENT_NONE(0),
     PAYMENT_ALL(1),                  ///< Also no meaning
     PAYMENT_CASH(10),                ///< Cash payment
@@ -28,35 +31,40 @@ enum class EPaymentMethod(val value: Int) {
     PAYMENT_TIPS(31),                ///< Tips already given
     PAYMENT_INVALID(-2);             ///< No payment
 
-    companion object {
+    companion object
+    {
         /**
          * Converts an integer value to the corresponding [EPaymentMethod].
          * @param value The integer value to convert
          * @return The matching [EPaymentMethod] or null if invalid
          */
-        fun fromInt(value: Int): EPaymentMethod? {
+        fun fromInt(value: Int): EPaymentMethod?
+        {
             return values().firstOrNull { it.value == value }
         }
 
         /**
          * Gets the display name for the payment method
          */
-        fun toString(paymentMethod: EPaymentMethod): String {
-            return when (paymentMethod) {
-                PAYMENT_CASH -> "Cash"
+        fun toString(paymentMethod: EPaymentMethod): String
+        {
+            Translation
+            return when (paymentMethod)
+            {
+                PAYMENT_CASH -> Translation.get(TextId.TEXT_CASH)
                 PAYMENT_PIN -> "PIN"
-                PAYMENT_CREDIT_CARD -> "Credit Card"
-                PAYMENT_VISA_CARD -> "Visa"
-                PAYMENT_PAY_PAL -> "PayPal"
-                PAYMENT_MASTERCARD -> "Mastercard"
-                PAYMENT_AMERICAN_EXPRESS -> "American Express"
-                PAYMENT_DEBIT -> "Debit Card"
-                PAYMENT_ZETTLE -> "Zettle"
-                PAYMENT_SEND_BILL -> "Send Bill"
-                PAYMENT_RETURN -> "Return"
+                PAYMENT_CREDIT_CARD -> "CREDIT CARD"
+                PAYMENT_VISA_CARD -> "VISA"
+                PAYMENT_PAY_PAL -> "PAYPAL"
+                PAYMENT_MASTERCARD -> "MASTERCARD"
+                PAYMENT_AMERICAN_EXPRESS -> "AE"
+                PAYMENT_DEBIT -> "DEBIT"
+                PAYMENT_ZETTLE -> "ZETTLE"
+                PAYMENT_SEND_BILL -> Translation.get(TextId.TEXT_SEND_BILL)
+                PAYMENT_RETURN -> Translation.get(TextId.TEXT_CASH_OUT)
                 PAYMENT_SEND_BILL_WAIT -> "Bill Pending"
                 PAYMENT_SEND_BILL_DONE -> "Bill Paid"
-                PAYMENT_DISCOUNT -> "Discount"
+                PAYMENT_DISCOUNT -> Translation.get(TextId.TEXT_DISCOUNT)
                 PAYMENT_TIPS -> "Tips"
                 else -> "Unknown"
             }
@@ -65,28 +73,32 @@ enum class EPaymentMethod(val value: Int) {
         /**
          * Gets the icon resource ID for the payment method
          */
-        fun getIconResource(paymentMethod: EPaymentMethod): Int {
-            return when (paymentMethod) {
-                PAYMENT_CASH -> R.drawable.ic_menu_add
-//                PAYMENT_PIN -> R.drawable.ic_pin
-//                PAYMENT_CREDIT_CARD,
-//                PAYMENT_VISA_CARD,
-//                PAYMENT_MASTERCARD,
-//                PAYMENT_AMERICAN_EXPRESS,
-//                PAYMENT_DEBIT -> R.drawable.ic_credit_card
-//                PAYMENT_PAY_PAL -> R.drawable.ic_paypal
-//                PAYMENT_ZETTLE -> R.drawable.ic_zettle
-//                PAYMENT_SEND_BILL,
-//                PAYMENT_SEND_BILL_WAIT,
-//                PAYMENT_SEND_BILL_DONE -> R.drawable.ic_bill
-//                PAYMENT_DISCOUNT -> R.drawable.ic_discount
-//                PAYMENT_TIPS -> R.drawable.ic_tips
-                else -> R.drawable.star_on
+        fun getIconResource(paymentMethod: EPaymentMethod): Int?
+        {
+            return when (paymentMethod)
+            {
+                PAYMENT_CASH, PAYMENT_RENMINBI -> R.drawable.pay_cash40
+                PAYMENT_CREDIT_CARD, PAYMENT_PIN -> R.drawable.pay_pin40
+                PAYMENT_VISA_CARD -> R.drawable.pay_visa40
+                PAYMENT_MASTERCARD -> R.drawable.pay_mastercard40
+                PAYMENT_AMERICAN_EXPRESS -> R.drawable.pay_american_express40
+                PAYMENT_DEBIT -> R.drawable.icon_debit40
+                PAYMENT_PAY_PAL -> R.drawable.pay_paypal40
+                PAYMENT_ZETTLE -> R.drawable.icon_zettle40
+                PAYMENT_SEND_BILL_DONE, PAYMENT_SEND_BILL_WAIT,
+                PAYMENT_SEND_BILL
+                    -> R.drawable.icon_send_mail40
+
+                PAYMENT_DISCOUNT -> R.drawable.icon_discount_yellow
+                PAYMENT_TIPS -> null
+                else -> null
             }
         }
 
-        fun toPaymentMethod(paymentMethod: EPaymentMethod): PaymentMethod  {
-            return when(paymentMethod) {
+        fun toPaymentMethod(paymentMethod: EPaymentMethod): PaymentMethod
+        {
+            return when (paymentMethod)
+            {
                 PAYMENT_CASH -> PaymentMethod.PAYMENT_CASH
                 PAYMENT_PIN -> PaymentMethod.PAYMENT_PIN
                 PAYMENT_CREDIT_CARD -> PaymentMethod.PAYMENT_CREDIT_CARD
@@ -129,47 +141,5 @@ enum class EPaymentMethod(val value: Int) {
             }
         }
 
-        /**
-         * Gets the icon resource ID for this payment method instance.
-         */
-        fun getIcon(paymentMethod: EPaymentMethod): Int {
-            return when (paymentMethod) {
-                PAYMENT_CASH -> R.drawable.ic_menu_add
-                PAYMENT_PIN -> R.drawable.ic_menu_add
-                PAYMENT_CREDIT_CARD -> R.drawable.ic_menu_add
-                PAYMENT_VISA_CARD -> R.drawable.ic_menu_add
-                PAYMENT_MASTERCARD -> R.drawable.ic_menu_add
-                PAYMENT_AMERICAN_EXPRESS -> R.drawable.ic_menu_add
-                PAYMENT_DEBIT -> R.drawable.ic_menu_add
-                PAYMENT_PAY_PAL -> R.drawable.ic_menu_add
-                PAYMENT_ZETTLE -> R.drawable.ic_menu_add
-                PAYMENT_SEND_BILL -> R.drawable.ic_menu_add
-                PAYMENT_SEND_BILL_WAIT -> R.drawable.ic_menu_add
-                PAYMENT_SEND_BILL_DONE -> R.drawable.ic_menu_add
-                PAYMENT_DISCOUNT -> R.drawable.ic_menu_add
-                PAYMENT_TIPS -> R.drawable.ic_menu_add
-                else -> R.drawable.ic_menu_add // A generic payment icon
-            }
-        }
-
-        fun getName(paymentMethod: EPaymentMethod): String {
-            return when (paymentMethod) {
-                PAYMENT_CASH -> "CONTANT"
-                PAYMENT_PIN -> "PIN"
-                PAYMENT_CREDIT_CARD -> "CREDIT CARD"
-                PAYMENT_VISA_CARD -> "VISA"
-                PAYMENT_MASTERCARD -> "MASTER"
-                PAYMENT_AMERICAN_EXPRESS -> "AE"
-                PAYMENT_DEBIT -> "DEBIT"
-                PAYMENT_PAY_PAL -> "PAYPAL"
-                PAYMENT_ZETTLE -> "ZETTLE"
-                PAYMENT_SEND_BILL -> "KREDIET"
-                PAYMENT_SEND_BILL_WAIT -> "WAIT"
-                PAYMENT_SEND_BILL_DONE -> "--"
-                PAYMENT_DISCOUNT -> "KORTING"
-                PAYMENT_TIPS -> "TIPS"
-                else -> "" // A generic payment
-            }
-        }
     }
 }

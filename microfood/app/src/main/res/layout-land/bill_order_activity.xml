@@ -90,6 +90,7 @@
 			android:layout_marginEnd="4dp"
 			android:layout_weight="2"
 			android:backgroundTint="#FF9800"
+			android:onClick="onButtonMore"
 			android:text="ORDER MORE"
 			android:textColor="@android:color/white" />
 
