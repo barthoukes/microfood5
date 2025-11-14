@@ -3,16 +3,22 @@ package com.hha.dialog
 import android.os.Bundle
 import android.view.View
 import android.widget.TextView
+import android.widget.Toast
 
 import androidx.lifecycle.ViewModelProvider
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.observe
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
 import com.hha.adapter.BillItemsAdapter
 import com.hha.adapter.PaymentsAdapter
+import com.hha.callback.PaymentEnteredListener
+import com.hha.callback.TransactionListener
 import com.hha.framework.CItem
 import com.hha.framework.CPayment
+import com.hha.framework.CTransaction
+import com.hha.messagebox.MessageBoxPayment
 import com.hha.messagebox.MessageBoxTextInput
 import com.hha.model.BillDisplayLine
 import com.hha.model.TransactionViewModel
@@ -21,13 +27,16 @@ import com.hha.resources.Configuration
 import com.hha.resources.Global
 import com.hha.types.ETaal
 import com.hha.types.CMoney
+import com.hha.types.EPaymentMethod
 
 import tech.hha.microfood.databinding.BillOrderActivityBinding
 
 class BillOrderActivity : AppCompatActivity(),
-    MessageBoxTextInput.OnTextEnteredListener
+    MessageBoxTextInput.OnTextEnteredListener,
+    PaymentEnteredListener, TransactionListener
 {
     val global = Global.getInstance()
+
     // Views
     private lateinit var binding: BillOrderActivityBinding
     private lateinit var tableName: TextView
@@ -61,15 +70,26 @@ class BillOrderActivity : AppCompatActivity(),
         setupRecyclerView()
         initializeViews()
 
+
         m_viewModel.transaction.observe(this) { transaction ->
             // This block will run automatically when the activity starts
             // and any time the transaction data changes.
-            if (transaction != null) {
+
+            if (transaction != null)
+            {
                 // --- THIS IS WHERE YOU CALL updateData ---
                 m_billItemsAdapter.updateData(transaction)
-                //m_paymentsAdapter.updateData(transaction)
+
+                transaction.calculateTotalTransaction()
+                binding.totalBillPrice.text = transaction.getTotalTransaction().toString()
             }
         }
+        // OBSERVER 2: For the payments list (bottom RecyclerView)
+        m_viewModel.billDisplayLines.observe(this) { paymentLines ->
+            // This block runs when the list of payment lines is ready.
+            m_paymentsAdapter.submitList(paymentLines)
+        }
+
         m_viewModel.initializeTransaction(TransactionViewModel.InitMode.VIEW_BILLING)
     }
 
@@ -123,17 +143,19 @@ class BillOrderActivity : AppCompatActivity(),
     {
         // --- FIX 3b: Assign to the class property 'm_paymentsAdapter' ---
         m_paymentsAdapter = PaymentsAdapter(
-            {selectedPayment -> handlePayment(selectedPayment) },
+            { selectedPayment -> handlePayment(selectedPayment) },
             m_colourOdd,
-               m_colourEven,
-               m_colourPayOdd,
-               m_colourPayEven,
-               m_frontText,
-               m_payText).apply {
+            m_colourEven,
+            m_colourPayOdd,
+            m_colourPayEven,
+            m_frontText,
+            m_payText
+        ).apply {
             binding.layoutBillingPayments.setItemViewCacheSize(18)
         }
         binding.layoutBillingPayments.adapter = m_paymentsAdapter
     }
+
     fun handlePayment(selectedPayment: BillDisplayLine)
     {
         //TODO("Not yet implemented")
@@ -281,6 +303,15 @@ class BillOrderActivity : AppCompatActivity(),
         finish()
     }
 
+    // This is the new method you must implement
+    override fun onPaymentEntered(
+        paymentMethod: EPaymentMethod,
+        amount: CMoney,
+    )
+    {
+        m_viewModel.addPayment(paymentMethod, amount)
+    }
+
     private fun payEuroButton(amount: CMoney)
     {
         m_viewModel.payEuros(amount)
@@ -325,4 +356,34 @@ class BillOrderActivity : AppCompatActivity(),
     {
         m_viewModel.setMessage(text)
     }
+
+// ... inside the BillOrderActivity class
+
+    // Add this entire function. The system will now find this method when the button is clicked.
+    @Suppress("UNUSED_PARAMETER")
+    fun onButtonConfirmBill(view: View)
+    {
+        // 1. Get the remaining amount that needs to be paid from the ViewModel.
+        val requiredAmount = m_viewModel.getRequiredAdditionalPayment()
+
+        // 2. Check if payment is actually needed.
+        if (requiredAmount > CMoney(0))
+        {
+            // 3. If so, create and show your new MessageBoxPayment dialog.
+            val dialog = MessageBoxPayment.newInstance(requiredAmount)
+            dialog.listener = this // 'this' is BillOrderActivity, which implements the listener
+            dialog.show(supportFragmentManager, "MessageBoxPayment")
+        } else
+        {
+            // 4. If the bill is already paid (or has change), you can proceed to print.
+            Toast.makeText(this, "Bill is already fully paid. Printing...", Toast.LENGTH_SHORT).show()
+            m_viewModel.onPrintBill()
+        }
+    }
+
+    override fun onTransactionChanged(transaction: CTransaction)
+    {
+       // binding.totalBillPrice.text = transaction.getTotalTransaction().toString()
+    }
+
 }

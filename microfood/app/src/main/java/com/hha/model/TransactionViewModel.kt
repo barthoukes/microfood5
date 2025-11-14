@@ -1,7 +1,5 @@
 package com.hha.model
 
-import android.util.Log
-import android.view.View
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -12,7 +10,6 @@ import com.hha.framework.CItem
 import com.hha.framework.CMenuItem
 import com.hha.framework.CPayment
 import com.hha.framework.CTransaction
-import com.hha.types.EPaymentStatus
 import com.hha.dialog.Translation
 import com.hha.dialog.Translation.TextId
 import com.hha.resources.Global
@@ -21,7 +18,7 @@ import com.hha.types.EBillBackgroundType
 import com.hha.types.EBillLineType
 import com.hha.types.EPaymentMethod
 import com.hha.types.ETimeFrameIndex
-import tech.hha.microfood.R
+import com.hha.types.ETransType
 
 /**
  * A shared ViewModel that manages the state of a single CTransaction.
@@ -47,11 +44,15 @@ class TransactionViewModel : ViewModel(), PaymentsListener, TransactionListener,
 
    // For the detailed BillOrderView
    private val _displayLines = MutableLiveData<List<BillDisplayLine>>()
-   val displayLines: LiveData<List<BillDisplayLine>> = _displayLines
+   val billDisplayLines: LiveData<List<BillDisplayLine>> = _displayLines
    private var m_isChanged: Boolean = false
    private var m_isInitialized = false
-
+   private var m_customerTotal = CMoney(0)
+   private var m_returnTotal = CMoney(0)
+   private var m_alreadyPayed = false
    private lateinit var m_mode: InitMode
+   private var m_cardTotal = CMoney(0)
+   private var m_cashTotal = CMoney(0)
 
    // For the simple PageOrderView
    private val _orderTotal = MutableLiveData<CMoney>()
@@ -126,8 +127,9 @@ class TransactionViewModel : ViewModel(), PaymentsListener, TransactionListener,
     */
    override fun onTransactionChanged(transaction: CTransaction)
    {
-      _transaction.value = transaction
+      _transaction.postValue(transaction)
       // When any part of the transaction changes, update all relevant LiveData.
+      transaction.calculateTotalTransaction()
       _orderTotal.postValue(transaction.getTotalTransaction())
       prepareBillDisplayLines()
    }
@@ -167,6 +169,14 @@ class TransactionViewModel : ViewModel(), PaymentsListener, TransactionListener,
       currentTransaction?.addPayment(method, amount)
    }
 
+   /**
+    * Adds a payment to the current transaction.
+    */
+   fun addPayment(payment: CPayment)
+   {
+      addPayment(payment.paymentMethod, payment.total)
+   }
+
    // 6. UI PREPARATION LOGIC
    /**
     * Prepares the detailed list of display lines for the BillOrderView.
@@ -186,24 +196,46 @@ class TransactionViewModel : ViewModel(), PaymentsListener, TransactionListener,
       val drinksTotal = currentTransaction.getDrinksTotal()
       val itemTotal = currentTransaction.getItemsTotal()
       val discount = currentTransaction.getDiscount()
-      val totalPaid = currentTransaction.getTotalPaid()
-      var subTotal = itemTotal - discount
+      val totalPaid = currentTransaction.getTotalAlreadyPaid()
+      m_customerTotal = itemTotal - discount - totalPaid
+      val payments: List<CPayment> = currentTransaction.getPayments()
+
+      m_cashTotal.clear()
+      m_cardTotal.clear()
+      for (payment in payments)
+      {
+         if (payment.paymentMethod == EPaymentMethod.PAYMENT_CASH)
+         {
+            m_cashTotal = m_cashTotal + payment.total
+         }
+         else
+         {
+            m_cardTotal = m_cardTotal + payment.total
+         }
+      }
+      m_returnTotal = m_cashTotal+m_cardTotal - m_customerTotal
+
       var myId = 0
+      var sign = ""
       //val kitchenAndDrinks = !kitchenTotal.empty() and !drinksTotal.empty()
-      lines.add(
-         BillDisplayLine(
-            id = ++myId,
-            iconResId = null,
-            text = Translation.get(TextId.TEXT_ITEM_KITCHEN),
-            amount = kitchenTotal,
-            lineType = EBillLineType.BILL_LINE_NONE,
-            backgroundType = EBillBackgroundType.BILL_BACKGROUND_TOTAL
+      if (kitchenTotal > CMoney(0))
+      {
+         lines.add(
+            BillDisplayLine(
+               id = ++myId,
+               iconResId = null,
+               text = Translation.get(TextId.TEXT_ITEM_KITCHEN),
+               amount = kitchenTotal,
+               lineType = EBillLineType.BILL_LINE_NONE,
+               backgroundType = EBillBackgroundType.BILL_BACKGROUND_TOTAL
+            )
          )
-      )
+         sign = "+"
+      }
       lines.add(
          BillDisplayLine(
             id = ++myId,
-            sign = "+",
+            sign = sign,
             iconResId = null,
             text = Translation.get(TextId.TEXT_ITEM_DRINKS), // Recommended: Use string resources
             amount = drinksTotal,
@@ -211,53 +243,60 @@ class TransactionViewModel : ViewModel(), PaymentsListener, TransactionListener,
             backgroundType = EBillBackgroundType.BILL_BACKGROUND_TOTAL
          )
       )
-      lines.add(
-         BillDisplayLine(
-            id = ++myId,
-            iconResId = null,
-            text = Translation.get(TextId.TEXT_SUBTOTAL), // Recommended: Use string resources
-            amount = itemTotal,
-            lineType = EBillLineType.BILL_LINE_ABOVE,
-            backgroundType = EBillBackgroundType.BILL_BACKGROUND_TOTAL
+      if (totalPaid != CMoney(0) || discount !=CMoney(0))
+      {
+         lines.add(
+            BillDisplayLine(
+               id = ++myId,
+               iconResId = null,
+               text = Translation.get(TextId.TEXT_SUBTOTAL), // Recommended: Use string resources
+               amount = itemTotal,
+               lineType = EBillLineType.BILL_LINE_ABOVE,
+               backgroundType = EBillBackgroundType.BILL_BACKGROUND_TOTAL
+            )
          )
-      )
-      lines.add(
-         BillDisplayLine(
-            id = ++myId,
-            iconResId = null,
-            text = Translation.get(TextId.TEXT_PAID),
-            sign = "-",
-            amount = totalPaid,
-            lineType = EBillLineType.BILL_LINE_NONE,
-            backgroundType = EBillBackgroundType.BILL_BACKGROUND_TOTAL
+      }
+      if (!totalPaid.empty())
+      {
+         lines.add(
+            BillDisplayLine(
+               id = ++myId,
+               iconResId = null,
+               text = Translation.get(TextId.TEXT_PAID),
+               sign = "-",
+               amount = totalPaid,
+               lineType = EBillLineType.BILL_LINE_NONE,
+               backgroundType = EBillBackgroundType.BILL_BACKGROUND_TOTAL
+            )
          )
-      )
-      lines.add(
-         BillDisplayLine(
-            id = ++myId,
-            iconResId = null,
-            text = Translation.get(TextId.TEXT_DISCOUNT),
-            amount = discount,
-            sign = "-",
-            lineType = EBillLineType.BILL_LINE_NONE,
-            backgroundType = EBillBackgroundType.BILL_BACKGROUND_TOTAL
+      }
+      if (!discount.empty())
+      {
+         lines.add(
+            BillDisplayLine(
+               id = ++myId,
+               iconResId = null,
+               text = Translation.get(TextId.TEXT_DISCOUNT),
+               amount = discount,
+               sign = "-",
+               lineType = EBillLineType.BILL_LINE_NONE,
+               backgroundType = EBillBackgroundType.BILL_BACKGROUND_TOTAL
+            )
          )
-      )
+      }
       lines.add(
          BillDisplayLine(
             id = ++myId,
             iconResId = null,
             text = Translation.get(TextId.TEXT_CLIENT_AMOUNT),
-            amount = subTotal,
+            amount = m_customerTotal,
             lineType = EBillLineType.BILL_LINE_ABOVE,
             backgroundType = EBillBackgroundType.BILL_BACKGROUND_TOTAL
          )
       )
 
-      val payments: List<CPayment> = currentTransaction.getPayments()
-
       // Calculate remaining balance and return money
-      var sign = ""
+      sign = ""
       var clientPayments = CMoney(0)
       for (payment in payments)
       {
@@ -286,27 +325,33 @@ class TransactionViewModel : ViewModel(), PaymentsListener, TransactionListener,
             backgroundType = EBillBackgroundType.BILL_BACKGROUND_PAYMENTS
          )
       )
-      lines.add(
-         BillDisplayLine(
-            id = ++myId,
-            iconResId = null,
-            text = Translation.get(TextId.TEXT_CLIENT_AMOUNT),
-            amount = subTotal,
-            sign = "-",
-            lineType = EBillLineType.BILL_LINE_NONE,
-            backgroundType = EBillBackgroundType.BILL_BACKGROUND_PAYMENTS
+      if (!m_customerTotal.empty())
+      {
+         lines.add(
+            BillDisplayLine(
+               id = ++myId,
+               iconResId = null,
+               text = Translation.get(TextId.TEXT_CLIENT_AMOUNT),
+               amount = m_customerTotal,
+               sign = "-",
+               lineType = EBillLineType.BILL_LINE_NONE,
+               backgroundType = EBillBackgroundType.BILL_BACKGROUND_PAYMENTS
+            )
          )
-      )
-      lines.add(
-         BillDisplayLine(
-            id = ++myId,
-            iconResId = null,
-            text = Translation.get(TextId.TEXT_EXCHANGE_MONEY),
-            amount = subTotal,
-            lineType = EBillLineType.BILL_LINE_ABOVE,
-            backgroundType = EBillBackgroundType.BILL_BACKGROUND_PAYMENTS
+      }
+      if (m_returnTotal >= CMoney(0))
+      {
+         lines.add(
+            BillDisplayLine(
+               id = ++myId,
+               iconResId = null,
+               text = Translation.get(TextId.TEXT_EXCHANGE_MONEY),
+               amount = m_returnTotal,
+               lineType = EBillLineType.BILL_LINE_ABOVE,
+               backgroundType = EBillBackgroundType.BILL_BACKGROUND_PAYMENTS
+            )
          )
-      )
+      }
       // Post the final list to the UI. postValue is safe to call from any thread.
       _displayLines.postValue(lines)
    }
@@ -373,7 +418,6 @@ class TransactionViewModel : ViewModel(), PaymentsListener, TransactionListener,
 
    override fun onItemAdded(position: Int, item: CItem)
    {
-      TODO("Not yet implemented")
    }
 
    override fun onItemRemoved(position: Int, newSize: Int)
@@ -484,4 +528,28 @@ class TransactionViewModel : ViewModel(), PaymentsListener, TransactionListener,
       return false
    }
 
+
+   fun getRequiredAdditionalPayment() : CMoney
+   {
+      val currentTransaction = _transaction.value
+      if (currentTransaction == null)
+      {
+         return CMoney(0)
+      }
+      // return true if a payment should be requested.
+      if (!m_alreadyPayed && currentTransaction.transactionType != ETransType.TRANS_TYPE_WOK)
+      {
+         val returnTotal = m_customerTotal-m_cashTotal-m_cardTotal
+         if ( returnTotal > CMoney(0))
+         {
+            return returnTotal
+         }
+      }
+      return CMoney(0)
+   }
+
+   fun onPrintBill()
+   {
+      TODO("Not yet implemented")
+   }
 }

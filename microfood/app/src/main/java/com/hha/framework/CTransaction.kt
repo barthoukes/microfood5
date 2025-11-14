@@ -12,6 +12,7 @@ import com.hha.grpc.GrpcServiceFactory
 import com.hha.resources.Global
 import com.hha.service.StorePartService
 import com.hha.service.StoreSmurfService
+import com.hha.types.C3Moneys
 import com.hha.types.CMoney
 import com.hha.types.EClientOrdersType
 import com.hha.types.EDeletedStatus
@@ -47,6 +48,9 @@ class CTransaction : Iterable<CSortedItem>,
     private lateinit var m_timeFrame: CTimeFrame
     private var m_sizeAtStart : Int = 0
 
+    val transactionType : ETransType
+        get() = data.transType
+
     // Add this iterator implementation
     override fun iterator(): Iterator<CSortedItem> = m_items.iterator()
 
@@ -75,35 +79,29 @@ class CTransaction : Iterable<CSortedItem>,
         data.timeStart = ""
         data.timeEnd = ""
         data.timeCustomer = ""
-        data.subTotalLow = CMoney(0)
-        data.subTotalHigh = CMoney(0)
-        data.discountLow = CMoney(0)
-        data.discountHigh = CMoney(0)
-        data.remainsLow = 0.0F
-        data.remainsHigh = 0.0F
-        data.tipsLow = CMoney(0)
-        data.tipsHigh = CMoney(0)
-        data.totalLow = CMoney(0)
-        data.totalHigh = CMoney(0)
-        data.taxTotalLow = CMoney(0)
-        data.taxTotalHigh = CMoney(0)
+        data.subTotal = C3Moneys(0, 0, 0)
+        data.discount= C3Moneys(0,0,0)
+        data.tips = C3Moneys(0,0,0)
+        data.total = C3Moneys(0,0,0)
+        data.taxTotal = C3Moneys(0,0,0)
         data.customerId = customerId
         data.archived = false
+        data.remainsLow = 0.0F
+        data.remainsHigh = 0.0F
         data.message = ""
-        data.subtotalTaxFree = CMoney(0)
-        data.totalTaxFree = CMoney(0)
-        data.discountTaxFree = CMoney(0)
-        data.tipsTaxFree = CMoney(0)
     }
 
     constructor(transactionId: Int)
     {
         selectTransactionId(transactionId)
+
+        m_items.addListener(this)
+        m_payments.addListener(this)
     }
 
     fun getDiscount(): CMoney
     {
-        return data.discountHigh + data.discountLow
+        return data.discount.toMoney()
     }
 
     fun selectTransactionId(transactionId: Int)
@@ -118,7 +116,7 @@ class CTransaction : Iterable<CSortedItem>,
 
     constructor(source: TransactionData?)
     {
-        m_items.addListener(this)
+        //m_items.addListener(this)
         m_payments.addListener(this)
         hasOrders = false
         if (source == null)
@@ -137,7 +135,16 @@ class CTransaction : Iterable<CSortedItem>,
 
     override fun getTotalTransaction(): CMoney
     {
-        return data.totalHigh+data.totalLow+data.totalTaxFree
+        return data.total.toMoney()
+    }
+
+    fun calculateTotalTransaction()
+    {
+        data.subTotal = m_items.calculateTotalItems()
+        data.total = data.subTotal - data.discount + data.tips
+        data.taxTotal.calculateTax(data.total,
+            Global.getInstance().taxPercentageLow,
+            Global.getInstance().taxPercentageHigh)
     }
 
     override fun getCustomerId(): Int
@@ -331,9 +338,9 @@ class CTransaction : Iterable<CSortedItem>,
         m_payments.addReturnMoney()
     }
 
-    fun getTotalPaid(): CMoney
+    fun getTotalAlreadyPaid(): CMoney
     {
-        return m_payments.getTotalPaid()
+        return m_payments.getTotalAlreadyPaid()
     }
 
     fun getMinutes(): Int
@@ -493,7 +500,10 @@ class CTransaction : Iterable<CSortedItem>,
 
     fun addListener(listener: TransactionListener)
     {
-        m_listeners.add(listener)
+        if (!m_listeners.contains(listener))
+        {
+            m_listeners.add(listener)
+        }
     }
 
     fun removeListener(listener: TransactionListener)

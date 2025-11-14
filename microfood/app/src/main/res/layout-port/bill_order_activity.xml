@@ -358,7 +358,7 @@
 			android:layout_weight="1"
 			android:backgroundTint="#4CAF50"
 			android:text="CONFIRM ORDER"
-			android:onClick="onButtonEnter"
+			android:onClick="onButtonConfirmBill"
 			android:textColor="@android:color/white" />
 	</LinearLayout>
 

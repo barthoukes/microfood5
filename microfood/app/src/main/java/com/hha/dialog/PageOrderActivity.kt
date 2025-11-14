@@ -33,6 +33,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.observe
+import com.hha.callback.TransactionListener
 import com.hha.model.TransactionViewModel
 import com.hha.model.TransactionViewModelFactory
 import com.hha.types.CMoney
@@ -41,7 +42,8 @@ import tech.hha.microfood.databinding.PageOrderActivityBinding
 
 class PageOrderActivity : AppCompatActivity(), MessageBoxYesNo.MessageBoxYesNoListener,
    MessageBoxCancelReason.MessageBoxCancelReasonListener,
-    MessageBoxUndoChanges.MessageBoxUndoChangesListener
+   MessageBoxUndoChanges.MessageBoxUndoChangesListener,
+    TransactionListener
 {
     private final var tag = "POE"
     private lateinit var binding: PageOrderActivityBinding
@@ -95,6 +97,9 @@ class PageOrderActivity : AppCompatActivity(), MessageBoxYesNo.MessageBoxYesNoLi
                 // --- THIS IS THE CORRECT PLACE TO CALL .updateData() ---
                 m_transactionItemsAdapter.updateData(transaction)
 
+                transaction.calculateTotalTransaction()
+                binding.totalPrice.text = transaction.getTotalTransaction().toString()
+                transaction.addListener(this)
                 // It's also the correct place to add the listener
                 transaction.addItemListener(m_transactionItemsAdapter)
             }
@@ -455,7 +460,7 @@ class PageOrderActivity : AppCompatActivity(), MessageBoxYesNo.MessageBoxYesNoLi
         {
             m_transactionItemsAdapter.setCursor(global.cursor)
            // m_menuItemsAdapter.notifyDataSetChanged()
-            m_transactionItemsAdapter.notifyDataSetChanged()
+            //m_transactionItemsAdapter.notifyDataSetChanged()
             /// binding.totalPrice.text = m_transaction.getTotalAmount().str()
             //m_transactionItemsAdapter.setCursor(global.cursor)
         }
@@ -539,6 +544,12 @@ class PageOrderActivity : AppCompatActivity(), MessageBoxYesNo.MessageBoxYesNoLi
     override fun onDialogContinueOrder(dialog: DialogFragment)
     {
         TODO("Not yet implemented")
+    }
+
+    override fun onTransactionChanged(transaction: CTransaction)
+    {
+        // Update display price not allowed here.
+        //binding.totalPrice.text = transaction.getTotalTransaction().toString()
     }
 
 }

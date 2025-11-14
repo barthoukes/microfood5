@@ -28,6 +28,8 @@ class Global private constructor() {
     var pageOffset = 0
     var transactionId = 0
     var selectedItem = 10
+    var taxPercentageLow = 6.0
+    var taxPercentageHigh = 10.0
     var pageBackgroundColor = 0xFF400040.toInt()
     var pageSelectedBackgroundColor = 0xFFc000c0.toInt()
     var pageTextColor = 0xFFf0f080.toInt()
