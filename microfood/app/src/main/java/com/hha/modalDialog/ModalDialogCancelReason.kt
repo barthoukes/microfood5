@@ -1,4 +1,4 @@
-package com.hha.messagebox
+package com.hha.modalDialog
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -11,7 +11,7 @@ import com.hha.dialog.Translation
 import com.hha.dialog.Translation.TextId
 import tech.hha.microfood.databinding.DialogCancelReasonBinding
 
-class MessageBoxCancelReason : DialogFragment()
+class ModalDialogCancelReason : DialogFragment()
 {
 
    private var _binding: DialogCancelReasonBinding? = null

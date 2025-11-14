@@ -6,11 +6,10 @@ import com.hha.resources.Global
 
 import com.hha.dialog.Translation.TextId
 import com.hha.grpc.GrpcServiceFactory
-import com.hha.messagebox.StringDialog
-import org.intellij.lang.annotations.Language
+import com.hha.modalDialog.ModalDialogStringEdit
 
 
-object COpenClientsHandler : StringDialog.StringListener {
+object COpenClientsHandler : ModalDialogStringEdit.StringListener {
     private val CFG = Global.getInstance().CFG
     val service = GrpcServiceFactory.createDailyTransactionService()
     var stringTyped = ""
@@ -62,7 +61,7 @@ object COpenClientsHandler : StringDialog.StringListener {
 
     fun askRemark(addTextPhone: Boolean, titleId: TextId): String? {
         val title = Translation.get(titleId)
-        StringDialog.Builder()
+        ModalDialogStringEdit.Builder()
             .setTitle(title)
             .setListener(this)
             .show()

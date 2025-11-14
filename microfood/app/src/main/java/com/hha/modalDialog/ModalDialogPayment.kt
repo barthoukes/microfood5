@@ -1,4 +1,4 @@
-package com.hha.messagebox
+package com.hha.modalDialog
 
 import com.hha.types.EPaymentMethod
 
@@ -9,14 +9,12 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
-import com.google.android.material.chip.Chip
 import com.hha.callback.PaymentEnteredListener
-import com.hha.framework.CPayment
 import com.hha.types.CMoney
 import tech.hha.microfood.R
 import tech.hha.microfood.databinding.MessageboxPaymentBinding
 
-class MessageBoxPayment : DialogFragment()
+class ModalDialogPayment : DialogFragment()
 {
    var listener: PaymentEnteredListener? = null
 
@@ -27,9 +25,9 @@ class MessageBoxPayment : DialogFragment()
    companion object
    {
       private const val ARG_AMOUNT = "amount"
-      fun newInstance(amount: CMoney): MessageBoxPayment
+      fun newInstance(amount: CMoney): ModalDialogPayment
       {
-         return MessageBoxPayment().apply {
+         return ModalDialogPayment().apply {
             arguments = bundleOf(ARG_AMOUNT to amount.toLong())
          }
       }

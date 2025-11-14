@@ -22,17 +22,15 @@ import com.hha.framework.CMenuItem
 import com.hha.framework.CMenuItems
 import com.hha.framework.CMenuPage
 import com.hha.framework.CTransaction
-import com.hha.messagebox.MessageBoxCancelReason
-import com.hha.messagebox.MessageBoxUndoChanges
-import com.hha.messagebox.MessageBoxYesNo
+import com.hha.modalDialog.ModalDialogCancelReason
+import com.hha.modalDialog.ModalDialogUndoChanges
+import com.hha.modalDialog.ModalDialogYesNo
 import com.hha.resources.Configuration
 import com.hha.resources.Global
-import com.hha.types.ETimeFrameIndex
 import MenuItemsAdapter
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.observe
 import com.hha.callback.TransactionListener
 import com.hha.model.TransactionViewModel
 import com.hha.model.TransactionViewModelFactory
@@ -40,9 +38,9 @@ import com.hha.types.CMoney
 
 import tech.hha.microfood.databinding.PageOrderActivityBinding
 
-class PageOrderActivity : AppCompatActivity(), MessageBoxYesNo.MessageBoxYesNoListener,
-   MessageBoxCancelReason.MessageBoxCancelReasonListener,
-   MessageBoxUndoChanges.MessageBoxUndoChangesListener,
+class PageOrderActivity : AppCompatActivity(), ModalDialogYesNo.MessageBoxYesNoListener,
+   ModalDialogCancelReason.MessageBoxCancelReasonListener,
+   ModalDialogUndoChanges.MessageBoxUndoChangesListener,
     TransactionListener
 {
     private final var tag = "POE"
@@ -502,7 +500,7 @@ class PageOrderActivity : AppCompatActivity(), MessageBoxYesNo.MessageBoxYesNoLi
 
     private fun showConfirmationDialog()
     {
-        val dialog = MessageBoxYesNo.newInstance(
+        val dialog = ModalDialogYesNo.newInstance(
             "Confirm Action",
             "Are you sure you want to proceed?"
         )
@@ -511,7 +509,7 @@ class PageOrderActivity : AppCompatActivity(), MessageBoxYesNo.MessageBoxYesNoLi
 
     private fun showUndoChanges()
     {
-        val dialog = MessageBoxYesNo.newInstance(
+        val dialog = ModalDialogYesNo.newInstance(
             "Undo Changes",
             "Undo the changes made to the order?"
         )
@@ -520,7 +518,7 @@ class PageOrderActivity : AppCompatActivity(), MessageBoxYesNo.MessageBoxYesNoLi
 
     private fun showAskCancelReasonDialog()
     {
-        val dialog = MessageBoxCancelReason()
+        val dialog = ModalDialogCancelReason()
         dialog.show(supportFragmentManager, "MessageBoxCancelReason")
     }
 

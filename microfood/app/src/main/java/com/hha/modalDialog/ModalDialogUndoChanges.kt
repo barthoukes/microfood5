@@ -1,4 +1,4 @@
-package com.hha.messagebox
+package com.hha.modalDialog
 
 import android.app.Dialog
 import android.content.Context
@@ -6,17 +6,17 @@ import android.os.Bundle
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
 
-class MessageBoxYesNo : DialogFragment()
+class ModalDialogUndoChanges : DialogFragment()
 {
 
    // 1. Listener Interface: Activities will implement this to get the result.
-   interface MessageBoxYesNoListener
+   interface MessageBoxUndoChangesListener
    {
-      fun onDialogPositiveClick(dialog: DialogFragment) // "Yes" was clicked
-      fun onDialogNegativeClick(dialog: DialogFragment) // "No" was clicked
+      fun onDialogUndoChanges(dialog: DialogFragment) // "Yes" was clicked
+      fun onDialogContinueOrder(dialog: DialogFragment) // "No" was clicked
    }
 
-   private lateinit var listener: MessageBoxYesNoListener
+   private lateinit var listener: MessageBoxUndoChangesListener
    private var title: String? = null
    private var message: String? = null
 
@@ -28,11 +28,11 @@ class MessageBoxYesNo : DialogFragment()
       try
       {
          // Instantiate the listener so we can send events to the host.
-         listener = context as MessageBoxYesNoListener
+         listener = context as MessageBoxUndoChangesListener
       } catch (e: ClassCastException)
       {
          // The activity doesn't implement the interface, throw exception.
-         throw ClassCastException(("$context must implement MessageBoxYesNoListener"))
+         throw ClassCastException(("$context must implement MessageBoxUndoChangesListener"))
       }
    }
 
@@ -49,11 +49,11 @@ class MessageBoxYesNo : DialogFragment()
          builder.setMessage(message)
             // Set the "Yes" button and its click listener
             .setPositiveButton("Yes") { _, _ ->
-               listener.onDialogPositiveClick(this)
+               listener.onDialogUndoChanges(this)
             }
             // Set the "No" button and its click listener
             .setNegativeButton("No") { _, _ ->
-               listener.onDialogNegativeClick(this)
+               listener.onDialogContinueOrder(this)
             }
          // Create the AlertDialog object and return it.
          builder.create()
@@ -62,16 +62,16 @@ class MessageBoxYesNo : DialogFragment()
 
    companion object
    {
-      private const val ARG_TITLE = "title"
-      private const val ARG_MESSAGE = "message"
+      private const val ARG_TITLE = "Stop order"
+      private const val ARG_MESSAGE = "message456"
 
       // 3. Factory Method: Use this to create and show the dialog
-      fun newInstance(title: String, message: String): MessageBoxYesNo
+      fun newInstance(title: String, message: String): ModalDialogYesNo
       {
-         val fragment = MessageBoxYesNo()
+         val fragment = ModalDialogYesNo()
          val args = Bundle().apply {
             putString(ARG_TITLE, title)
-            putString(ARG_MESSAGE, message)
+            //putString(ARG_MESSAGE, message)
          }
          fragment.arguments = args
          return fragment
