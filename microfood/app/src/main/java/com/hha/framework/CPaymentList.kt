@@ -72,7 +72,7 @@ class CPaymentList(transactionOperations: TransactionOperations) {
         }
     }
 
-    fun getTotalPaid(): CMoney
+    fun getTotalAlreadyPaid(): CMoney
     {
         return m_alreadyPaid
     }

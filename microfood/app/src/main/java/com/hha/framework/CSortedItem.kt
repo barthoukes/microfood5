@@ -5,6 +5,7 @@ import com.hha.framework.CItem
 import com.hha.resources.Global
 import com.hha.types.ETimeFrameIndex
 import com.hha.resources.Configuration
+import com.hha.types.C3Moneys
 import com.hha.types.CMoney
 import com.hha.types.EOrderLevel
 import com.hha.types.ETaal
@@ -55,6 +56,21 @@ class CSortedItem : Iterable<CItem> {
 
     fun add(item: CItem) {
         items.add(item)
+    }
+
+    fun calculateTotalItems() : C3Moneys
+    {
+        var total = C3Moneys()
+        for (item in items)
+        {
+            when
+            {
+                item.tax > 13.5 -> total.taxHigh = total.taxHigh + item.getTotal()
+                item.tax > 0.1 -> total.taxLow = total.taxLow + item.getTotal()
+                else -> total.taxFree = total.taxFree + item.getTotal()
+            }
+        }
+        return total
     }
 
     fun itemSum(): Int = items.sumOf { it.getQuantity() }

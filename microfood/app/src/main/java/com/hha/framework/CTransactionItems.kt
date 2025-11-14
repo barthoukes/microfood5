@@ -9,6 +9,7 @@ import com.hha.common.ItemVisible
 import com.hha.common.Payed
 import com.hha.grpc.GrpcServiceFactory
 import com.hha.resources.Global
+import com.hha.types.C3Moneys
 import com.hha.types.CMoney
 import com.hha.types.EAccess
 import com.hha.types.EDeletedStatus
@@ -49,171 +50,56 @@ class CTransactionItems : Iterable<CSortedItem>
         m_state = EEnterState.ENTER_ITEM_STATE
     }
 
-    fun addListener(listener: TransactionItemListener)
-    {
-        if (!m_listeners.contains(listener))
-        {
-            m_listeners.add(listener)
-        }
-    }
-
-    fun removeListener(listener: TransactionItemListener)
-    {
-        m_listeners.remove(listener)
-    }
-
-    // Add this iterator implementation
-    //override fun iterator(): Iterator<CSortedItem> = m_items.iterator()
-    fun getSortedItem(index: Int): CSortedItem
-    {
-        return m_items.getSortedItem(index)
-    }
-
-    fun get(position: Int): CItem?
-    {
-        var pos = position
-        for (item in m_items)
-        {
-            if (pos < item.size)
-            {
-                return item[pos]
-            }
-            pos -= item.size
-        }
-        return null
-    }
-
-    val empty: Boolean
-        get() = m_items.empty
-
-    fun itemLines() = m_items.itemLines
-
-    fun itemSum() = m_items.itemSum
-
-    // Add this iterator implementation
-    override fun iterator(): Iterator<CSortedItem> = m_items.iterator()
-
-    //bool CtransactionItemDialog::touchItem(int item_id, short cluster_id)
-    fun touchItem(menuItem: CMenuItem, clusterId: Short): Boolean
-    {
-        Log.i("CTransactionItems", "touchItem")
-//        IclientOrdersHandlerPtr clientOrdersHandler(m_transactionItemModel.getClientOrdersHandler());
-//
-//        /** @brief Ask the twin item */
-//        int twin_item_id = 0;
-//        int menuCardId =clientOrdersHandler->getMenuCardId();
-//        CproductPtr product =CmenuCards::Instance()->getProductFromProductId(menuCardId, -1, item_id);
-//        if (!product.get())
-//        {
-//            return false;
-//        }
-//
-//        if (product->is_twin)
-//        {
-//            bool isTakeaway(clientOrdersHandler->isTakeawayPrice());
-//            CchooseItemDialog dialog( menuCardId, isTakeaway, _CHOOSE_TWIN, SKIP_INVISIBLE_FALSE);
-//            dialog.onExecute(this);
-//            if (m_parent)
-//                {
-//                        m_parent->invalidate();
-//                }
-//            if (dialog.m_validItemSelected)
-//            {
-//                twin_item_id = dialog.m_itemId;
-//            }
-//            else
-//            {
-//                return false;
-//            }
-//        }
-        val twinItem: CMenuItem? = null
-        val retVal = touchItem(menuItem, clusterId, twinItem);
-//        LOG_FUNC_EXIT << Endl;
-        return retVal
-    }
-
-    /*============================================================================*/
-    /// @brief Touch or type any item.
-    /// @param item_id What item is pressed
-    /// @param cluster_id What cluster is pressed
-    /// @param twin_item_id The twin item to use.
-    /// @post Item handled. Screen to be updated.
-    /// @return true when item added.
-    // bool CtransactionItemModel::touchItem(int item_id, short cluster_id, int twin_item_id)
-    /*============================================================================*/
-    fun touchItem(menuItem: CMenuItem, clusterId: Short, twinItem: CMenuItem?): Boolean
+    /*----------------------------------------------------------------------------*/
+    /** @brief Add item at end in the list or for descriptive at some location.
+     *  @param cursor [in] Location of the cursor in the list vertical.
+     *  @param item_id [in] Id for the item to select.
+     *  @param  prices [in] New prices for the item.
+     *  @param cluster_id [in] What clusters to use.
+     *  @param twin_item_id [in] Which twin item to use.
+     *  @post  Cursor at the end.
+     *  @return true on succes.
+     */
+    fun addItem(
+        cursor: CCursor, menuItem: CMenuItem, prices: CPriceAndHalfPrice,
+        clusterId: Short, twinItem: CMenuItem?
+    ): Boolean
     {
         var retVal = false
-        var change2spice = false
-        val prices = menuItem.getPriceAndHalfPrice(0, false)
-        if (!prices.isValid)
-        {
-            Log.i(
-                "framework", "CtransactionItemDialog::touchItem cannot find cluster" +
-                   " $global.cluster_id"
+        Log.i("CTransactionItems", "addItem ${menuItem.localName}")
+        if (insertItem(
+                cursor.next(), menuItem, 1, prices,
+                clusterId, twinItem
             )
-            return false
-        }
-        val menuCardId = global.menuCardId
-        var level = menuItem.level
-        if (level == EOrderLevel.LEVEL_NOTHING)
+        )
         {
-            Log.i("framework", "LEVEL_NOTHING will not be added")
-            return false
+            global.cursor.set(m_items.size)
+            retVal = true
         }
-        if (m_state == EEnterState.ENTER_SUBITEM_STATE)
-        {
-            change2spice = true
-        }
-        do
-        {
-            if (change2spice)
-            {
-                prices.clear()
-                if (level != EOrderLevel.LEVEL_SPICES)
-                {
-                    level = EOrderLevel.LEVEL_EXTRA
-                }
-            }
-            // Check if we touch an extra/descriptive item.
-            when (level)
-            {
-                EOrderLevel.LEVEL_EXTRA, EOrderLevel.LEVEL_SPICES,
-                EOrderLevel.LEVEL_SUB_EXTRA, EOrderLevel.LEVEL_SUB_SPICES
-                    ->
-                    return touchExtraOrSpice(menuItem, prices, clusterId, twinItem)
-
-                else ->
-                {
-                }
-            }
-
-            // Check if the item is at the end.
-            if (global.cursor.position >= m_items.size)
-            {
-                // If so: Call another function.
-                retVal = touchEnd(menuItem, 1, prices, clusterId, twinItem)
-                return retVal
-            }
-            assert(false)
-//            val cursorItem = m_clientOrdersHandler[m_transactionItemControl.cursor]
-//            change2spice = cursorItem.level == LEVEL_COMBINE_ALL
-        } while (change2spice)
-
-        // If same as below cursor, then add one.
-
-//        val cursor_item = m_clientOrdersHandler[m_transactionItemControl.cursor]
-//        if (cursor_item.menuItemId == item_id && cursor_item.twinItemId == twin_item_id && CFG("entry_merge_similar_items")) {
-//            addOneToCursorPosition()
-//            return true
-//        // Just insert this one at the cursor.
-//        retVal = touchEnd(item_id, 1, prices, cluster_id, twin_item_id)
         return retVal
     }
 
-    fun undoTimeFrame(timeFrameId: ETimeFrameIndex, deviceId: Short)
+    /*============================================================================*/
+///  @brief     Plus button pressed, to increase the quantity.
+///  @post      Quantity increased.
+    /*============================================================================*/
+    private fun addOne(cursor: CCursor): Boolean
     {
-        m_items.undoTimeFrame(global.transactionId, timeFrameId, deviceId)
+        if (m_allowChanges == false || m_viewMode != EViewMode.VIEW_MODE_TRANSACTION)
+        {
+            return false;
+        }
+        if (empty)
+        {
+            return false;
+        }
+        val y = getValidCursorPosition(cursor);
+        if (y.position < 0)
+        {
+            return false;
+        }
+        val retVal = addQuantity(y, 1)
+        return retVal
     }
 
     /*============================================================================*/
@@ -242,139 +128,182 @@ class CTransactionItems : Iterable<CSortedItem>
 //        }
     }
 
-    /*============================================================================*/
-///  @brief     Plus button pressed, to increase the quantity.
-///  @post      Quantity increased.
-    /*============================================================================*/
-    private fun addOne(cursor: CCursor): Boolean
+    fun addQuantity(cursor: CCursor, quantity: Int): Boolean
     {
-        if (m_allowChanges == false || m_viewMode != EViewMode.VIEW_MODE_TRANSACTION)
-        {
-            return false;
-        }
-        if (empty)
-        {
-            return false;
-        }
-        val y = getValidCursorPosition(cursor);
-        if (y.position < 0)
-        {
-            return false;
-        }
-        val retVal = addQuantity(y, 1)
-        return retVal
+        val tfi = m_itemOperations.getTimeFrameIndex()
+        return addQuantity(cursor, tfi, quantity);
     }
 
-    fun nextPortion(cursor: CCursor): Boolean
+    fun addQuantity(cursor: CCursor, timeFrameId: ETimeFrameIndex, quantity: Int): Boolean
     {
-        val timeFrame = m_itemOperations.getTimeFrame()
-        val tfi = timeFrame.time_frame_index
-        return nextPortion(cursor, tfi)
-    }
+        // Increase in items.
+        var mutableQuantity = quantity
+        val item: CItem = m_items.getItem(cursor) ?: return false
 
-    fun nextPortion(cursor: CCursor, timeFrameId: ETimeFrameIndex): Boolean
-    {
-        Log.i("CTransactionItems", "portion cursor=${cursor.position}")
+        var why = EDeletedStatus.DELETE_NOT
+        var oldTimeFrame = ETimeFrameIndex(ETimeFrameIndex.TIME_FRAME_UNDEFINED)
 
-
-        val item: CItem = m_items.getItem(cursor)!!
-        val nextPortion = when
+        if (mutableQuantity < 0)
         {
-            (item.parts == 2) -> 1
-            else -> 2
-        }
-        var price = item.originalAmount
-        val halfPrice = item.originalHalfAmount
-        val sequence = item.sequence
-        val subSequence = item.subSequence
-        val subSubSequence = item.subSubSequence
-        val statiegeld = item.getStatiegeldPerPiece()
-        var quantity = item.getQuantity()
-        val level = EOrderLevel.toOrderLevel(item.level)
-        val why = when
+            why = when
+            {
+                timeFrameId == item.timeFrameId -> EDeletedStatus.DELETE_REMOVE_IMMEDIATE
+                else -> EDeletedStatus.DELETE_REMOVE_AFTER_PRINTING
+            }
+            oldTimeFrame = item.timeFrameId
+        } else if (item.level == EOrderLevel.LEVEL_SEPARATOR)
         {
-            item.timeFrameId != timeFrameId -> DeletedStatus.DELETE_PORTION_AFTER_PRINTING
-            else -> DeletedStatus.DELETE_PORTION_IMMEDIATE
+            return false
         }
+        val maxq = 9999
+        if (item.getQuantity() + mutableQuantity > maxq)
+        {
+            mutableQuantity = maxq - item.getQuantity()
+        }
+        if (item.getQuantity() + mutableQuantity < -maxq)
+        {
+            mutableQuantity = -maxq - item.getQuantity()
+        }
+        if (item.getQuantity() + mutableQuantity == 0)
+        {
+            val level = CFG.getValue("entry_negative_quantity")
+            if (level == 0 || (level == 1 && global.access == EAccess.ACCESS_EMPLOYEE_KEY)
+                || (item.level != EOrderLevel.LEVEL_ITEM
+                   && item.level != EOrderLevel.LEVEL_COMBINE_ALL
+                   && item.level != EOrderLevel.LEVEL_FREE
+                   && item.level != EOrderLevel.LEVEL_MINUTES_PRICE
+                   && item.level != EOrderLevel.LEVEL_PERSON)
+            )
+            {
+                return deleteItem(cursor, timeFrameId, why);
+            }
+        }
+
+        item.addQuantity(quantity)
+        if (item.getQuantity() > quantity)
+            m_listeners.forEach { it.onItemUpdated(cursor.position, item) }
+        else m_listeners.forEach { it.onItemAdded(cursor.position, item) }
+
+        // Increase in database.
         var unitPrice = item.getUnitPrice()
+        var statiegeld = item.getStatiegeldPerPiece();
 
         val itemsDb = GrpcServiceFactory.createDailyTransactionItemService()
+        val whys = EDeletedStatus.toDeletedStatus(why)
+        var level = EOrderLevel.toOrderLevel(item.level)
         itemsDb.createItem(
-            item.menuItemId, global.transactionId.toLong(), sequence,
-            subSequence, subSubSequence, -quantity,
-            level, item.group, item.page, item.parts,
+            item.menuItemId,
+            global.transactionId.toLong(), item.sequence,
+            item.subSequence, item.subSubSequence,
+            quantity, level,
+            item.group, item.page, item.parts,
             unitPrice.cents(), item.originalAmount.cents(),
             item.originalHalfAmount.cents(), item.tax,
-            item.locations, timeFrameId.toInt(),
-            item.deviceId, item.clusterId,
-            Payed.PAID_NO, statiegeld,
-            why, item.timeFrameId.toInt()
-        )
-        item.parts = nextPortion
-        item.updateName()
-        if (item.parts == 1)
+            item.locations, timeFrameId.toInt(), item.deviceId,
+            item.clusterId, Payed.PAID_NO, statiegeld,
+            whys, oldTimeFrame.toInt()
+        );
+        if (item.twinItemId > 0)
         {
-            var price2 = (price.cents() * portionHalfPrice) /
-               100 + portionRound
-            price = price - CMoney(price.cents() % portionRound)
-
-            if (portionDefinePrice && !halfPrice.empty())
-            {
-                price = halfPrice;
-            }
-            item.setUnitPrice(price);
-        } else
-        {
-            item.setUnitPrice(CMoney((item.parts * price.cents())) / 2)
+            val quantity = item.getQuantity()
+            itemsDb.setTwinQuantity(
+                global.transactionId.toLong(),
+                item.sequence, item.subSequence,
+                item.subSubSequence,
+                quantity, item.parts
+            );
         }
-        m_listeners.forEach { it.onItemUpdated(cursor.position, item) }
-        unitPrice = item.getUnitPrice()
-        quantity = item.getQuantity()
 
-        itemsDb.createItem(
-            item.menuItemId, global.transactionId.toLong(), sequence,
-            subSequence, subSubSequence, quantity,
-            level, item.group, item.page, item.parts,
-            unitPrice.cents(), item.originalAmount.cents(),
-            item.originalHalfAmount.cents(),
-            item.tax, item.locations, timeFrameId.toInt(),
-            item.deviceId, item.clusterId, Payed.PAID_NO, statiegeld
+        // Remove extras and spices for normal items, except when we remove a spice.
+        if ((item.level == EOrderLevel.LEVEL_ITEM
+               || item.level == EOrderLevel.LEVEL_FREE)
+            && CFG.getValue("transaction_item_tree") == 0
+            && CFG.getValue("entry_extra_main_quantity") > 0
         )
-        return true
+        {
+            var idx = CCursor(0)
+            // Add all the Spices and Extras also the same amount, remove them if 0!
+            for (subItem: CItem in m_items.flatMap { it.items })
+            {
+                if (subItem.sequence == item.sequence &&
+                    (subItem.level == EOrderLevel.LEVEL_EXTRA
+                       || subItem.level == EOrderLevel.LEVEL_SPICES)
+                )
+                {
+                    if (why != EDeletedStatus.DELETE_REMOVE_IMMEDIATE)
+                    {
+                        oldTimeFrame = subItem.timeFrameId
+                    }
+                    subItem.addQuantity(quantity);
+                    if (subItem.getQuantity() == 0)
+                    {
+                        deleteItem(idx, timeFrameId, why);
+                        continue;
+                    }
+                    statiegeld = subItem.getStatiegeldPerPiece()
+                    unitPrice = subItem.getUnitPrice()
+                    level = EOrderLevel.toOrderLevel(subItem.level)
+                    itemsDb.createItem(
+                        subItem.menuItemId,
+                        global.transactionId.toLong(),
+                        subItem.sequence, subItem.subSequence,
+                        subItem.subSubSequence,
+                        quantity, level, subItem.group, subItem.page,
+                        subItem.parts, unitPrice.cents(),
+                        subItem.originalAmount.cents(),
+                        subItem.originalHalfAmount.cents(), subItem.tax,
+                        subItem.locations, timeFrameId.toInt(),
+                        subItem.deviceId, subItem.clusterId,
+                        Payed.PAID_NO, statiegeld,
+                        whys, oldTimeFrame.toInt()
+                    );
+                }
+                idx.position++;
+            }
+        }
+        return true;
     }
-    //m_global.transactionItemDB.deleteSequence(id, CTimeFrameIndex(), item.sequence, CItem.DELETE_CAUSE_CHANGE_PORTION)
-    //item.portion = if (item.portion == 2.toByte()) 1 else 2
-    //val mi = m_global.itemDB.getItemFromIndex(item.menu_item_index)
-    //var price = if (isTakeaway()) mi.takeaway_price else mi.restaurant_price
 
-    //price = if (item.portion == 1.toByte()) {
-    //    (price * 60 / 100 + 49).let { it - (it % 50) }
-    //} else {
-    //    (item.portion * price) / 2
-    // }
-    //item.unit = price
-
-    //val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-    //val date = dateFormat.format(Date())
-
-    //m_global.transactionItemDB.createItem(
-    //    item.menu_item_id,
-    //    item.sequence,
-    //    timeFrameIndex(),
-    //    0,
-    //    id,
-    //    item.quantity,
-    //   item.level,
-    //    item.portion,
-    //    item.original,
-    //    item.unit,
-    //     date
-    // )
-
-    fun setNegativeQuantityToRemovedItems()
+    fun addListener(listener: TransactionItemListener)
     {
-        val service = GrpcServiceFactory.createDailyTransactionItemService()
-        service.setNegativeQuantityToRemovedItems(global.transactionId)
+        if (!m_listeners.contains(listener))
+        {
+            m_listeners.add(listener)
+        }
+    }
+
+    // Add this iterator implementation
+    //override fun iterator(): Iterator<CSortedItem> = m_items.iterator()
+    fun getSortedItem(index: Int): CSortedItem
+    {
+        return m_items.getSortedItem(index)
+    }
+
+    fun calculateTotalItems() : C3Moneys
+    {
+        var total = C3Moneys()
+        for (item in m_items)
+        {
+            total = total + item.calculateTotalItems()
+        }
+        return total
+    }
+
+    val empty: Boolean
+        get() = m_items.empty
+
+    fun get(position: Int): CItem?
+    {
+        var pos = position
+        for (item in m_items)
+        {
+            if (pos < item.size)
+            {
+                return item[pos]
+            }
+            pos -= item.size
+        }
+        return null
     }
 
     fun hasAnyChanges() : Boolean
@@ -382,71 +311,12 @@ class CTransactionItems : Iterable<CSortedItem>
         return m_changed
     }
 
-    fun touchExtraOrSpice(
-        menuItem: CMenuItem, prices: CPriceAndHalfPrice,
-        clusterId: Short, twinItem: CMenuItem?
-    ): Boolean
-    {
-        assert(false)
-        return false
-    }
-//    if ( m_clientOrdersHandler->empty())
-//    {
-//        m_transactionItemControl.errorSound();
-//        return false;
-//    }
-//    int menuCardId =  m_clientOrdersHandler->getMenuCardId();
-//    CproductPtr product =CmenuCards::Instance()->getProductFromProductId(menuCardId, -1, item_id);
-//    if ( product.get() ==nullptr)
-//    {
-//        Log.error( "CproductToTransaction::touchExtraOrSpice wrong item pressed =%d", item_id);
-//        return false;
-//    }
-//    if (!m_clusterIsRunning && product->visible_state == ITEM_INVISIBLE)
-//    {
-//        Log.write("CproductToTransaction::touchExtraOrSpice  product invisible");
-//        return false;
-//    }
-//
-//    int main_cursor =m_clientOrdersHandler->mainItem(m_transactionItemControl.getCursor());
-//    if ( main_cursor < 0 && main_cursor >= (int) rows())
-//    {
-//        m_transactionItemControl.errorSound();
-//        return false;
-//    }
-//    // 4 if so: Is it listed.
-//    int main_quantity =1;
-//    CitemPtr main_item =(*m_clientOrdersHandler)[main_cursor];
-//    if ( !CFG( "transaction_item_tree") && CFG("entry_extra_main_quantity"))
-//    {
-//        main_quantity =main_item->getQuantity();
-//    }
-//    if ( main_quantity == 0)
-//    {
-//        m_transactionItemControl.errorSound();
-//        return false;
-//    }
-//    double tax = CtransactionItemModel::getTaxPercentage(item_id);
-//
-//    int newCursor =m_clientOrdersHandler->insertExtra( item_id, twin_item_id, main_cursor,
-//    main_quantity, main_item->parts, prices.full_price.Long(),
-//    prices.half_price.Long(), tax, main_item->locations, cluster_id,
-//    PAID_NO, product->statiegeld.Long());
-//    m_transactionItemControl.moveCursorTo( newCursor);
-//    if ( checkNextCluster( main_cursor, cluster_id))
-//    {
-//        newCursor =m_clientOrdersHandler->size();
-//        m_transactionItemControl.moveCursorTo( newCursor);
-//    }
-//    m_transactionItemControl.invalidateDisplayAndSetOrderChanged();
-//    m_transactionItemControl.customerDisplay(m_transactionItemControl.getCursor());
-//        return true;
-//    }/
+    fun itemLines() = m_items.itemLines
 
-    fun getCursor(selectedTransactionItem: CItem): Int
-    {
-        return m_items.getCursor(selectedTransactionItem)
-    }
+    fun itemSum() = m_items.itemSum
+
+    // Add this iterator implementation
+    override fun iterator(): Iterator<CSortedItem> = m_items.iterator()
 
     private fun insertItem(
         cursor: CCursor, menuItem: CMenuItem, quantity: Int, prices: CPriceAndHalfPrice,
@@ -591,6 +461,306 @@ class CTransactionItems : Iterable<CSortedItem>
         return true;
     }
 
+    fun touchItem(menuItem: CMenuItem, clusterId: Short): Boolean
+    {
+        Log.i("CTransactionItems", "touchItem")
+//        IclientOrdersHandlerPtr clientOrdersHandler(m_transactionItemModel.getClientOrdersHandler());
+//
+//        /** @brief Ask the twin item */
+//        int twin_item_id = 0;
+//        int menuCardId =clientOrdersHandler->getMenuCardId();
+//        CproductPtr product =CmenuCards::Instance()->getProductFromProductId(menuCardId, -1, item_id);
+//        if (!product.get())
+//        {
+//            return false;
+//        }
+//
+//        if (product->is_twin)
+//        {
+//            bool isTakeaway(clientOrdersHandler->isTakeawayPrice());
+//            CchooseItemDialog dialog( menuCardId, isTakeaway, _CHOOSE_TWIN, SKIP_INVISIBLE_FALSE);
+//            dialog.onExecute(this);
+//            if (m_parent)
+//                {
+//                        m_parent->invalidate();
+//                }
+//            if (dialog.m_validItemSelected)
+//            {
+//                twin_item_id = dialog.m_itemId;
+//            }
+//            else
+//            {
+//                return false;
+//            }
+//        }
+        val twinItem: CMenuItem? = null
+        val retVal = touchItem(menuItem, clusterId, twinItem);
+//        LOG_FUNC_EXIT << Endl;
+        return retVal
+    }
+
+    /*============================================================================*/
+    /// @brief Touch or type any item.
+    /// @param item_id What item is pressed
+    /// @param cluster_id What cluster is pressed
+    /// @param twin_item_id The twin item to use.
+    /// @post Item handled. Screen to be updated.
+    /// @return true when item added.
+    // bool CtransactionItemModel::touchItem(int item_id, short cluster_id, int twin_item_id)
+    /*============================================================================*/
+    fun touchItem(menuItem: CMenuItem, clusterId: Short, twinItem: CMenuItem?): Boolean
+    {
+        var retVal = false
+        var change2spice = false
+        val prices = menuItem.getPriceAndHalfPrice(0, false)
+        if (!prices.isValid)
+        {
+            Log.i(
+                "framework", "CtransactionItemDialog::touchItem cannot find cluster" +
+                   " $global.cluster_id"
+            )
+            return false
+        }
+        val menuCardId = global.menuCardId
+        var level = menuItem.level
+        if (level == EOrderLevel.LEVEL_NOTHING)
+        {
+            Log.i("framework", "LEVEL_NOTHING will not be added")
+            return false
+        }
+        if (m_state == EEnterState.ENTER_SUBITEM_STATE)
+        {
+            change2spice = true
+        }
+        do
+        {
+            if (change2spice)
+            {
+                prices.clear()
+                if (level != EOrderLevel.LEVEL_SPICES)
+                {
+                    level = EOrderLevel.LEVEL_EXTRA
+                }
+            }
+            // Check if we touch an extra/descriptive item.
+            when (level)
+            {
+                EOrderLevel.LEVEL_EXTRA, EOrderLevel.LEVEL_SPICES,
+                EOrderLevel.LEVEL_SUB_EXTRA, EOrderLevel.LEVEL_SUB_SPICES
+                    ->
+                    return touchExtraOrSpice(menuItem, prices, clusterId, twinItem)
+
+                else ->
+                {
+                }
+            }
+
+            // Check if the item is at the end.
+            if (global.cursor.position >= m_items.size)
+            {
+                // If so: Call another function.
+                retVal = touchEnd(menuItem, 1, prices, clusterId, twinItem)
+                return retVal
+            }
+            assert(false)
+//            val cursorItem = m_clientOrdersHandler[m_transactionItemControl.cursor]
+//            change2spice = cursorItem.level == LEVEL_COMBINE_ALL
+        } while (change2spice)
+
+        // If same as below cursor, then add one.
+
+//        val cursor_item = m_clientOrdersHandler[m_transactionItemControl.cursor]
+//        if (cursor_item.menuItemId == item_id && cursor_item.twinItemId == twin_item_id && CFG("entry_merge_similar_items")) {
+//            addOneToCursorPosition()
+//            return true
+//        // Just insert this one at the cursor.
+//        retVal = touchEnd(item_id, 1, prices, cluster_id, twin_item_id)
+        return retVal
+    }
+
+    fun nextPortion(cursor: CCursor): Boolean
+    {
+        val timeFrame = m_itemOperations.getTimeFrame()
+        val tfi = timeFrame.time_frame_index
+        return nextPortion(cursor, tfi)
+    }
+
+    fun nextPortion(cursor: CCursor, timeFrameId: ETimeFrameIndex): Boolean
+    {
+        Log.i("CTransactionItems", "portion cursor=${cursor.position}")
+
+
+        val item: CItem = m_items.getItem(cursor)!!
+        val nextPortion = when
+        {
+            (item.parts == 2) -> 1
+            else -> 2
+        }
+        var price = item.originalAmount
+        val halfPrice = item.originalHalfAmount
+        val sequence = item.sequence
+        val subSequence = item.subSequence
+        val subSubSequence = item.subSubSequence
+        val statiegeld = item.getStatiegeldPerPiece()
+        var quantity = item.getQuantity()
+        val level = EOrderLevel.toOrderLevel(item.level)
+        val why = when
+        {
+            item.timeFrameId != timeFrameId -> DeletedStatus.DELETE_PORTION_AFTER_PRINTING
+            else -> DeletedStatus.DELETE_PORTION_IMMEDIATE
+        }
+        var unitPrice = item.getUnitPrice()
+
+        val itemsDb = GrpcServiceFactory.createDailyTransactionItemService()
+        itemsDb.createItem(
+            item.menuItemId, global.transactionId.toLong(), sequence,
+            subSequence, subSubSequence, -quantity,
+            level, item.group, item.page, item.parts,
+            unitPrice.cents(), item.originalAmount.cents(),
+            item.originalHalfAmount.cents(), item.tax,
+            item.locations, timeFrameId.toInt(),
+            item.deviceId, item.clusterId,
+            Payed.PAID_NO, statiegeld,
+            why, item.timeFrameId.toInt()
+        )
+        item.parts = nextPortion
+        item.updateName()
+        if (item.parts == 1)
+        {
+            var price2 = (price.cents() * portionHalfPrice) /
+               100 + portionRound
+            price = price - CMoney(price.cents() % portionRound)
+
+            if (portionDefinePrice && !halfPrice.empty())
+            {
+                price = halfPrice;
+            }
+            item.setUnitPrice(price);
+        } else
+        {
+            item.setUnitPrice(CMoney((item.parts * price.cents())) / 2)
+        }
+        m_listeners.forEach { it.onItemUpdated(cursor.position, item) }
+        unitPrice = item.getUnitPrice()
+        quantity = item.getQuantity()
+
+        itemsDb.createItem(
+            item.menuItemId, global.transactionId.toLong(), sequence,
+            subSequence, subSubSequence, quantity,
+            level, item.group, item.page, item.parts,
+            unitPrice.cents(), item.originalAmount.cents(),
+            item.originalHalfAmount.cents(),
+            item.tax, item.locations, timeFrameId.toInt(),
+            item.deviceId, item.clusterId, Payed.PAID_NO, statiegeld
+        )
+        return true
+    }
+    //m_global.transactionItemDB.deleteSequence(id, CTimeFrameIndex(), item.sequence, CItem.DELETE_CAUSE_CHANGE_PORTION)
+    //item.portion = if (item.portion == 2.toByte()) 1 else 2
+    //val mi = m_global.itemDB.getItemFromIndex(item.menu_item_index)
+    //var price = if (isTakeaway()) mi.takeaway_price else mi.restaurant_price
+
+    //price = if (item.portion == 1.toByte()) {
+    //    (price * 60 / 100 + 49).let { it - (it % 50) }
+    //} else {
+    //    (item.portion * price) / 2
+    // }
+    //item.unit = price
+
+    //val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+    //val date = dateFormat.format(Date())
+
+    //m_global.transactionItemDB.createItem(
+    //    item.menu_item_id,
+    //    item.sequence,
+    //    timeFrameIndex(),
+    //    0,
+    //    id,
+    //    item.quantity,
+    //   item.level,
+    //    item.portion,
+    //    item.original,
+    //    item.unit,
+    //     date
+    // )
+
+    fun removeListener(listener: TransactionItemListener)
+    {
+        m_listeners.remove(listener)
+    }
+
+    fun setNegativeQuantityToRemovedItems()
+    {
+        val service = GrpcServiceFactory.createDailyTransactionItemService()
+        service.setNegativeQuantityToRemovedItems(global.transactionId)
+    }
+
+    fun touchExtraOrSpice(
+        menuItem: CMenuItem, prices: CPriceAndHalfPrice,
+        clusterId: Short, twinItem: CMenuItem?
+    ): Boolean
+    {
+        assert(false)
+        return false
+    }
+//    if ( m_clientOrdersHandler->empty())
+//    {
+//        m_transactionItemControl.errorSound();
+//        return false;
+//    }
+//    int menuCardId =  m_clientOrdersHandler->getMenuCardId();
+//    CproductPtr product =CmenuCards::Instance()->getProductFromProductId(menuCardId, -1, item_id);
+//    if ( product.get() ==nullptr)
+//    {
+//        Log.error( "CproductToTransaction::touchExtraOrSpice wrong item pressed =%d", item_id);
+//        return false;
+//    }
+//    if (!m_clusterIsRunning && product->visible_state == ITEM_INVISIBLE)
+//    {
+//        Log.write("CproductToTransaction::touchExtraOrSpice  product invisible");
+//        return false;
+//    }
+//
+//    int main_cursor =m_clientOrdersHandler->mainItem(m_transactionItemControl.getCursor());
+//    if ( main_cursor < 0 && main_cursor >= (int) rows())
+//    {
+//        m_transactionItemControl.errorSound();
+//        return false;
+//    }
+//    // 4 if so: Is it listed.
+//    int main_quantity =1;
+//    CitemPtr main_item =(*m_clientOrdersHandler)[main_cursor];
+//    if ( !CFG( "transaction_item_tree") && CFG("entry_extra_main_quantity"))
+//    {
+//        main_quantity =main_item->getQuantity();
+//    }
+//    if ( main_quantity == 0)
+//    {
+//        m_transactionItemControl.errorSound();
+//        return false;
+//    }
+//    double tax = CtransactionItemModel::getTaxPercentage(item_id);
+//
+//    int newCursor =m_clientOrdersHandler->insertExtra( item_id, twin_item_id, main_cursor,
+//    main_quantity, main_item->parts, prices.full_price.Long(),
+//    prices.half_price.Long(), tax, main_item->locations, cluster_id,
+//    PAID_NO, product->statiegeld.Long());
+//    m_transactionItemControl.moveCursorTo( newCursor);
+//    if ( checkNextCluster( main_cursor, cluster_id))
+//    {
+//        newCursor =m_clientOrdersHandler->size();
+//        m_transactionItemControl.moveCursorTo( newCursor);
+//    }
+//    m_transactionItemControl.invalidateDisplayAndSetOrderChanged();
+//    m_transactionItemControl.customerDisplay(m_transactionItemControl.getCursor());
+//        return true;
+//    }/
+
+    fun getCursor(selectedTransactionItem: CItem): Int
+    {
+        return m_items.getCursor(selectedTransactionItem)
+    }
+
     /*----------------------------------------------------------------------------*/
     // @brief Touch item at the end of the list.
     // @post Screen to be updated.
@@ -636,35 +806,6 @@ class CTransactionItems : Iterable<CSortedItem>
         retVal = addItem(global.cursor, menuItem, prices, clusterId, twinItem)
         Log.i("CTransactionItems", "Item added")
         //assert(false)
-        return retVal
-    }
-
-    /*----------------------------------------------------------------------------*/
-    /** @brief Add item at end in the list or for descriptive at some location.
-     *  @param cursor [in] Location of the cursor in the list vertical.
-     *  @param item_id [in] Id for the item to select.
-     *  @param  prices [in] New prices for the item.
-     *  @param cluster_id [in] What clusters to use.
-     *  @param twin_item_id [in] Which twin item to use.
-     *  @post  Cursor at the end.
-     *  @return true on succes.
-     */
-    fun addItem(
-        cursor: CCursor, menuItem: CMenuItem, prices: CPriceAndHalfPrice,
-        clusterId: Short, twinItem: CMenuItem?
-    ): Boolean
-    {
-        var retVal = false
-        Log.i("CTransactionItems", "addItem ${menuItem.localName}")
-        if (insertItem(
-                cursor.next(), menuItem, 1, prices,
-                clusterId, twinItem
-            )
-        )
-        {
-            global.cursor.set(m_items.size)
-            retVal = true
-        }
         return retVal
     }
 
@@ -805,279 +946,6 @@ class CTransactionItems : Iterable<CSortedItem>
 //        // Totally not found, probably an error already.
 //        m_itemList.push_back( xtra);
 //        return m_itemList.size();
-    }
-
-    // bool CclientItemsHandler::insertItem( long itemId,...)
-    fun insertItem(
-        menuItem: CMenuItem, cursr: CCursor,
-        quantity: Int, level: EOrderLevel, group: Int, page: Int, parts: Int,
-        unitPrice: CMoney, originalPrice: CMoney, originalHalfPrice: CMoney,
-        taxPercentage: Double, locations: Int,
-        timeFrameId: ETimeFrameIndex, deviceId: Short, clusterId: Short,
-        isPaid: EPayed, statiegeld: CMoney
-    ): Boolean
-    {
-        var cursor = cursr
-        var sequence = FIRST_SEQUENCE_ID
-        val subSequence = 0 // NORMAL_ITEM_SUB_SEQUENCE
-        val subSubSequence = 0 // NORMAL_ITEM_SUB_SEQUENCE;
-
-        val itemsDb = GrpcServiceFactory.createDailyTransactionItemService()
-        if (cursor.position >= 0 && cursor.position < m_items.size)
-        {
-            // Same as below cursor?
-            val mi = m_items.mainItem(cursor)
-            if (mi != null)
-            {
-                val i: CItem = mi.mainItem()
-                if (i.menuItemId == menuItem.menuItemId
-                    && i.level == level
-                    && i.group == group
-                    && i.page == page
-                    && i.parts == parts
-                    && i.getUnitPrice() == unitPrice
-                    && i.originalAmount == originalPrice
-                    && i.originalHalfAmount == originalHalfPrice
-                    && i.tax == taxPercentage
-                    && i.clusterId == clusterId
-                    && i.deviceId == deviceId
-                    && i.locations == locations
-                )
-                {
-                    return addQuantity(cursor, timeFrameId, 1)
-                }
-            }
-            // Not same as below cursor.
-            val mainItem = m_items.mainItem(cursor)
-            if (mainItem != null)
-            {
-                sequence = mainItem.getSequence()
-                itemsDb.insertSequence(global.transactionId, sequence)
-                Log.i("CTransactionItems", "insertItem should not happen anymore!!")
-            } else
-            {
-                cursor.set(m_items.size)
-                sequence = getNewSequence()
-            }
-        } else
-        {
-            cursor.set(m_items.size);
-            sequence = getNewSequence()
-        }
-
-        val orderLevel = EOrderLevel.toOrderLevel(level)
-        val timeFrame = timeFrameId.toInt()
-        val paid = EPayed.toPayed(isPaid)
-        itemsDb.createItem(
-            menuItem.menuItemId, global.transactionId.toLong(),
-            sequence, subSequence, subSubSequence, quantity, orderLevel, group, page,
-            parts, unitPrice.cents(), originalPrice.cents(),
-            originalHalfPrice.cents(), taxPercentage,
-            locations, timeFrame,
-            deviceId, clusterId, paid, statiegeld.cents()
-        )
-
-        val i = CItem(
-            menuItem.menuItemId,
-            0,
-            menuItem.alias,
-            sequence,
-            subSequence,
-            subSubSequence,
-            menuItem.Name(
-                ETaal.LANG_DUTCH, parts,
-                ENameType.NAME_SCREEN, false
-            ),
-            menuItem.Name(
-                ETaal.LANG_SIMPLIFIED, parts,
-                ENameType.NAME_SCREEN, false
-            ),
-            originalPrice,
-            originalHalfPrice,
-            locations,
-            EDeletedStatus.DELETE_NOT,
-            parts,
-            group,
-            page,
-            timeFrameId,
-            level,
-            taxPercentage,
-            menuItem.menuItemId.toInt(),
-            deviceId,
-            "", "",
-            clusterId,
-            ETreeRow.TREE_ITEM,
-            menuItem.paperCutPerItem,
-            isPaid,
-            "",
-            unitPrice,
-            quantity,
-            statiegeld
-        )
-        i.setQuantityPrice(quantity, unitPrice, statiegeld);
-        if (cursor.position >= m_items.size)
-        {
-            val cs = CSortedItem(i)
-            m_items.add(cs)
-        } else
-        {
-            // Increase sequence ID's.
-            for (item in m_items)
-            {
-                if (item.getSequence() >= sequence)
-                {
-                    item.increaseSequence()
-                }
-            }
-            m_items.add(cursor, i)
-        }
-        //recalculateInternalSize()
-        return true;
-    }
-
-    private fun getNewSequence(): Int =
-        (m_items.maxOfOrNull { it.getSequence() } ?: 0) + 1
-
-    private fun invalidateDisplayAndSetOrderChanged()
-    {
-        m_changed = true;
-        m_newChanged = true;
-    }
-
-    fun addQuantity(cursor: CCursor, quantity: Int): Boolean
-    {
-        val tfi = m_itemOperations.getTimeFrameIndex()
-        return addQuantity(cursor, tfi, quantity);
-    }
-
-    fun addQuantity(cursor: CCursor, timeFrameId: ETimeFrameIndex, quantity: Int): Boolean
-    {
-        // Increase in items.
-        var mutableQuantity = quantity
-        val item: CItem = m_items.getItem(cursor) ?: return false
-
-        var why = EDeletedStatus.DELETE_NOT
-        var oldTimeFrame = ETimeFrameIndex(ETimeFrameIndex.TIME_FRAME_UNDEFINED)
-
-        if (mutableQuantity < 0)
-        {
-            why = when
-            {
-                timeFrameId == item.timeFrameId -> EDeletedStatus.DELETE_REMOVE_IMMEDIATE
-                else -> EDeletedStatus.DELETE_REMOVE_AFTER_PRINTING
-            }
-            oldTimeFrame = item.timeFrameId
-        } else if (item.level == EOrderLevel.LEVEL_SEPARATOR)
-        {
-            return false
-        }
-        val maxq = 9999
-        if (item.getQuantity() + mutableQuantity > maxq)
-        {
-            mutableQuantity = maxq - item.getQuantity()
-        }
-        if (item.getQuantity() + mutableQuantity < -maxq)
-        {
-            mutableQuantity = -maxq - item.getQuantity()
-        }
-        if (item.getQuantity() + mutableQuantity == 0)
-        {
-            val level = CFG.getValue("entry_negative_quantity")
-            if (level == 0 || (level == 1 && global.access == EAccess.ACCESS_EMPLOYEE_KEY)
-                || (item.level != EOrderLevel.LEVEL_ITEM
-                   && item.level != EOrderLevel.LEVEL_COMBINE_ALL
-                   && item.level != EOrderLevel.LEVEL_FREE
-                   && item.level != EOrderLevel.LEVEL_MINUTES_PRICE
-                   && item.level != EOrderLevel.LEVEL_PERSON)
-            )
-            {
-                return deleteItem(cursor, timeFrameId, why);
-            }
-        }
-
-        item.addQuantity(quantity)
-        if (item.getQuantity() > quantity)
-            m_listeners.forEach { it.onItemUpdated(cursor.position, item) }
-        else m_listeners.forEach { it.onItemAdded(cursor.position, item) }
-
-        // Increase in database.
-        var unitPrice = item.getUnitPrice()
-        var statiegeld = item.getStatiegeldPerPiece();
-
-        val itemsDb = GrpcServiceFactory.createDailyTransactionItemService()
-        val whys = EDeletedStatus.toDeletedStatus(why)
-        var level = EOrderLevel.toOrderLevel(item.level)
-        itemsDb.createItem(
-            item.menuItemId,
-            global.transactionId.toLong(), item.sequence,
-            item.subSequence, item.subSubSequence,
-            quantity, level,
-            item.group, item.page, item.parts,
-            unitPrice.cents(), item.originalAmount.cents(),
-            item.originalHalfAmount.cents(), item.tax,
-            item.locations, timeFrameId.toInt(), item.deviceId,
-            item.clusterId, Payed.PAID_NO, statiegeld,
-            whys, oldTimeFrame.toInt()
-        );
-        if (item.twinItemId > 0)
-        {
-            val quantity = item.getQuantity()
-            itemsDb.setTwinQuantity(
-                global.transactionId.toLong(),
-                item.sequence, item.subSequence,
-                item.subSubSequence,
-                quantity, item.parts
-            );
-        }
-
-        // Remove extras and spices for normal items, except when we remove a spice.
-        if ((item.level == EOrderLevel.LEVEL_ITEM
-               || item.level == EOrderLevel.LEVEL_FREE)
-            && CFG.getValue("transaction_item_tree") == 0
-            && CFG.getValue("entry_extra_main_quantity") > 0
-        )
-        {
-            var idx = CCursor(0)
-            // Add all the Spices and Extras also the same amount, remove them if 0!
-            for (subItem: CItem in m_items.flatMap { it.items })
-            {
-                if (subItem.sequence == item.sequence &&
-                    (subItem.level == EOrderLevel.LEVEL_EXTRA
-                       || subItem.level == EOrderLevel.LEVEL_SPICES)
-                )
-                {
-                    if (why != EDeletedStatus.DELETE_REMOVE_IMMEDIATE)
-                    {
-                        oldTimeFrame = subItem.timeFrameId
-                    }
-                    subItem.addQuantity(quantity);
-                    if (subItem.getQuantity() == 0)
-                    {
-                        deleteItem(idx, timeFrameId, why);
-                        continue;
-                    }
-                    statiegeld = subItem.getStatiegeldPerPiece()
-                    unitPrice = subItem.getUnitPrice()
-                    level = EOrderLevel.toOrderLevel(subItem.level)
-                    itemsDb.createItem(
-                        subItem.menuItemId,
-                        global.transactionId.toLong(),
-                        subItem.sequence, subItem.subSequence,
-                        subItem.subSubSequence,
-                        quantity, level, subItem.group, subItem.page,
-                        subItem.parts, unitPrice.cents(),
-                        subItem.originalAmount.cents(),
-                        subItem.originalHalfAmount.cents(), subItem.tax,
-                        subItem.locations, timeFrameId.toInt(),
-                        subItem.deviceId, subItem.clusterId,
-                        Payed.PAID_NO, statiegeld,
-                        whys, oldTimeFrame.toInt()
-                    );
-                }
-                idx.position++;
-            }
-        }
-        return true;
     }
 
     /*----------------------------------------------------------------------------*/
@@ -1269,6 +1137,21 @@ class CTransactionItems : Iterable<CSortedItem>
         }
     }
 
+    fun getDrinksTotal(): CMoney
+    {
+        val drinks = location2Locations(EItemLocation.ITEM_BAR) +
+           location2Locations(EItemLocation.ITEM_DRINKS)
+        var m = CMoney(0)
+        for (item in m_items)
+        {
+            if ((item.getLocations() and drinks) != 0)
+            {
+                m = m + item.getTotal()
+            }
+        }
+        return m
+    }
+
     fun getItemsTotal(): CMoney
     {
         var m = CMoney(0)
@@ -1294,20 +1177,8 @@ class CTransactionItems : Iterable<CSortedItem>
         return m
     }
 
-    fun getDrinksTotal(): CMoney
-    {
-        val drinks = location2Locations(EItemLocation.ITEM_BAR) +
-           location2Locations(EItemLocation.ITEM_DRINKS)
-        var m = CMoney(0)
-        for (item in m_items)
-        {
-            if ((item.getLocations() and drinks) != 0)
-            {
-                m = m + item.getTotal()
-            }
-        }
-        return m
-    }
+    private fun getNewSequence(): Int =
+        (m_items.maxOfOrNull { it.getSequence() } ?: 0) + 1
 
     fun getNrItemsAndSubItems(): Int
     {
@@ -1328,5 +1199,145 @@ class CTransactionItems : Iterable<CSortedItem>
             y = sz - 1
         }
         return CCursor(y)
+    }
+
+    // bool CclientItemsHandler::insertItem( long itemId,...)
+    fun insertItem(
+        menuItem: CMenuItem, cursr: CCursor,
+        quantity: Int, level: EOrderLevel, group: Int, page: Int, parts: Int,
+        unitPrice: CMoney, originalPrice: CMoney, originalHalfPrice: CMoney,
+        taxPercentage: Double, locations: Int,
+        timeFrameId: ETimeFrameIndex, deviceId: Short, clusterId: Short,
+        isPaid: EPayed, statiegeld: CMoney
+    ): Boolean
+    {
+        var cursor = cursr
+        var sequence = FIRST_SEQUENCE_ID
+        val subSequence = 0 // NORMAL_ITEM_SUB_SEQUENCE
+        val subSubSequence = 0 // NORMAL_ITEM_SUB_SEQUENCE;
+
+        val itemsDb = GrpcServiceFactory.createDailyTransactionItemService()
+        if (cursor.position >= 0 && cursor.position < m_items.size)
+        {
+            // Same as below cursor?
+            val mi = m_items.mainItem(cursor)
+            if (mi != null)
+            {
+                val i: CItem = mi.mainItem()
+                if (i.menuItemId == menuItem.menuItemId
+                    && i.level == level
+                    && i.group == group
+                    && i.page == page
+                    && i.parts == parts
+                    && i.getUnitPrice() == unitPrice
+                    && i.originalAmount == originalPrice
+                    && i.originalHalfAmount == originalHalfPrice
+                    && i.tax == taxPercentage
+                    && i.clusterId == clusterId
+                    && i.deviceId == deviceId
+                    && i.locations == locations
+                )
+                {
+                    return addQuantity(cursor, timeFrameId, 1)
+                }
+            }
+            // Not same as below cursor.
+            val mainItem = m_items.mainItem(cursor)
+            if (mainItem != null)
+            {
+                sequence = mainItem.getSequence()
+                itemsDb.insertSequence(global.transactionId, sequence)
+                Log.i("CTransactionItems", "insertItem should not happen anymore!!")
+            } else
+            {
+                cursor.set(m_items.size)
+                sequence = getNewSequence()
+            }
+        } else
+        {
+            cursor.set(m_items.size);
+            sequence = getNewSequence()
+        }
+
+        val orderLevel = EOrderLevel.toOrderLevel(level)
+        val timeFrame = timeFrameId.toInt()
+        val paid = EPayed.toPayed(isPaid)
+        itemsDb.createItem(
+            menuItem.menuItemId, global.transactionId.toLong(),
+            sequence, subSequence, subSubSequence, quantity, orderLevel, group, page,
+            parts, unitPrice.cents(), originalPrice.cents(),
+            originalHalfPrice.cents(), taxPercentage,
+            locations, timeFrame,
+            deviceId, clusterId, paid, statiegeld.cents()
+        )
+
+        val i = CItem(
+            menuItem.menuItemId,
+            0,
+            menuItem.alias,
+            sequence,
+            subSequence,
+            subSubSequence,
+            menuItem.Name(
+                ETaal.LANG_DUTCH, parts,
+                ENameType.NAME_SCREEN, false
+            ),
+            menuItem.Name(
+                ETaal.LANG_SIMPLIFIED, parts,
+                ENameType.NAME_SCREEN, false
+            ),
+            originalPrice,
+            originalHalfPrice,
+            locations,
+            EDeletedStatus.DELETE_NOT,
+            parts,
+            group,
+            page,
+            timeFrameId,
+            level,
+            taxPercentage,
+            menuItem.menuItemId.toInt(),
+            deviceId,
+            "", "",
+            clusterId,
+            ETreeRow.TREE_ITEM,
+            menuItem.paperCutPerItem,
+            isPaid,
+            "",
+            unitPrice,
+            quantity,
+            statiegeld
+        )
+        i.setQuantityPrice(quantity, unitPrice, statiegeld);
+        if (cursor.position >= m_items.size)
+        {
+            val cs = CSortedItem(i)
+            m_items.add(cs)
+            m_listeners.forEach { it.onItemAdded(cursor.position, i) }
+        } else
+        {
+            // Increase sequence ID's.
+            for (item in m_items)
+            {
+                if (item.getSequence() >= sequence)
+                {
+                    item.increaseSequence()
+                }
+            }
+            m_items.add(cursor, i)
+            m_listeners.forEach { it.onItemAdded(cursor.position, i) }
+        }
+        return true;
+    }
+
+    private fun invalidateDisplayAndSetOrderChanged()
+    {
+        m_changed = true;
+        m_newChanged = true;
+    }
+
+    fun undoTimeFrame(timeFrameId: ETimeFrameIndex, deviceId: Short)
+    {
+        m_items.undoTimeFrame(global.transactionId, timeFrameId, deviceId)
     }
 }
