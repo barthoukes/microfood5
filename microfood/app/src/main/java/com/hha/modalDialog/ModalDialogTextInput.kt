@@ -1,18 +1,16 @@
-package com.hha.messagebox
+package com.hha.modalDialog
 
-import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.inputmethod.EditorInfo
-import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import androidx.fragment.app.DialogFragment
 import tech.hha.microfood.databinding.PopupTextInputBinding
 
-class MessageBoxTextInput: DialogFragment()
+class ModalDialogTextInput: DialogFragment()
 {
    private lateinit var binding: PopupTextInputBinding
    private lateinit var inputText: EditText

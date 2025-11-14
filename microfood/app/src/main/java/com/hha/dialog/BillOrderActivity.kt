@@ -7,7 +7,6 @@ import android.widget.Toast
 
 import androidx.lifecycle.ViewModelProvider
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.observe
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
@@ -16,10 +15,9 @@ import com.hha.adapter.PaymentsAdapter
 import com.hha.callback.PaymentEnteredListener
 import com.hha.callback.TransactionListener
 import com.hha.framework.CItem
-import com.hha.framework.CPayment
 import com.hha.framework.CTransaction
-import com.hha.messagebox.MessageBoxPayment
-import com.hha.messagebox.MessageBoxTextInput
+import com.hha.modalDialog.ModalDialogPayment
+import com.hha.modalDialog.ModalDialogTextInput
 import com.hha.model.BillDisplayLine
 import com.hha.model.TransactionViewModel
 import com.hha.model.TransactionViewModelFactory
@@ -32,7 +30,7 @@ import com.hha.types.EPaymentMethod
 import tech.hha.microfood.databinding.BillOrderActivityBinding
 
 class BillOrderActivity : AppCompatActivity(),
-    MessageBoxTextInput.OnTextEnteredListener,
+    ModalDialogTextInput.OnTextEnteredListener,
     PaymentEnteredListener, TransactionListener
 {
     val global = Global.getInstance()
@@ -286,7 +284,7 @@ class BillOrderActivity : AppCompatActivity(),
     @Suppress("UNUSED_PARAMETER")
     fun onButtonMessage(view: View)
     {
-        val dialog = MessageBoxTextInput()
+        val dialog = ModalDialogTextInput()
         dialog.listener = this // Set the activity to listen for the result
         dialog.show(supportFragmentManager, "MessageBoxTextInput")
     }
@@ -370,7 +368,7 @@ class BillOrderActivity : AppCompatActivity(),
         if (requiredAmount > CMoney(0))
         {
             // 3. If so, create and show your new MessageBoxPayment dialog.
-            val dialog = MessageBoxPayment.newInstance(requiredAmount)
+            val dialog = ModalDialogPayment.newInstance(requiredAmount)
             dialog.listener = this // 'this' is BillOrderActivity, which implements the listener
             dialog.show(supportFragmentManager, "MessageBoxPayment")
         } else

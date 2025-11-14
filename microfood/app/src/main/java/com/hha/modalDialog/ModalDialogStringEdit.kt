@@ -1,4 +1,4 @@
-package com.hha.messagebox
+package com.hha.modalDialog
 
 import android.R
 import android.app.Dialog
@@ -12,9 +12,8 @@ import androidx.fragment.app.FragmentActivity
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
-import com.hha.framework.COpenClientsHandler
 
-class StringDialog() : DialogFragment() {
+class ModalDialogStringEdit() : DialogFragment() {
 
     // Configuration options with defaults
     private var title: String = ""
@@ -31,7 +30,7 @@ class StringDialog() : DialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val inputLayout = TextInputLayout(requireContext()).apply {
-            hint = this@StringDialog.hint
+            hint = this@ModalDialogStringEdit.hint
             addView(TextInputEditText(context).apply {
                 setText(initialText)
                 imeOptions = EditorInfo.IME_ACTION_DONE
@@ -86,7 +85,7 @@ class StringDialog() : DialogFragment() {
     }
 
     class Builder {
-        private val dialog = StringDialog()
+        private val dialog = ModalDialogStringEdit()
 
         fun setTitle(title: String): Builder {
             dialog.title = title
