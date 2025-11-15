@@ -138,13 +138,21 @@ class CTransaction : Iterable<CSortedItem>,
         return data.total.toMoney()
     }
 
-    fun calculateTotalTransaction()
+    fun calculateTotalTransaction(): CMoney
     {
+        val previousTotal = data.total.toMoney()
         data.subTotal = m_items.calculateTotalItems()
         data.total = data.subTotal - data.discount + data.tips
         data.taxTotal.calculateTax(data.total,
             Global.getInstance().taxPercentageLow,
             Global.getInstance().taxPercentageHigh)
+
+        val newTotal = data.total.toMoney()
+        if (newTotal != previousTotal)
+        {
+            notifyListeners()
+        }
+        return newTotal
     }
 
     override fun getCustomerId(): Int

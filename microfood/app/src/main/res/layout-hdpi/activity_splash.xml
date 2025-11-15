@@ -3,14 +3,15 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/backrepeat"
-    android:orientation="vertical" >
+    android:orientation="vertical">
 
     <ImageView
         android:id="@+id/imageView1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:src="@drawable/logo256" />
+        android:scaleType="centerCrop"
+        android:src="@drawable/tablets_port" />
 
     <TextView
         android:id="@+id/textBig"
@@ -21,7 +22,7 @@
         android:textColor="#FFFF0088"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
-    <TextView
+    <!-- TextView
         android:id="@+id/textView2"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -29,7 +30,7 @@
         android:text="@string/copyright"
         android:textSize="30sp"
         android:textColor="#FF000080"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        android:textAppearance="?android:attr/textAppearanceMedium" / -->
 
     <ProgressBar
         android:id="@+id/progress_bar_loading"

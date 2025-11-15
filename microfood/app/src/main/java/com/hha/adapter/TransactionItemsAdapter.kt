@@ -48,7 +48,6 @@ class TransactionItemsAdapter(
         // The adapter now knows about the new data.
         // We don't need to store it, as we can rely on the global,
         // but we MUST tell the RecyclerView to redraw itself completely.
-        notifyDataSetChanged()
         m_transaction = newTransaction
     }
 
