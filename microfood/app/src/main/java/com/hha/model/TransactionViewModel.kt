@@ -422,17 +422,14 @@ class TransactionViewModel : ViewModel(), PaymentsListener, TransactionListener,
 
    override fun onItemRemoved(position: Int, newSize: Int)
    {
-      TODO("Not yet implemented")
    }
 
    override fun onItemUpdated(position: Int, item: CItem)
    {
-      TODO("Not yet implemented")
    }
 
    override fun onTransactionCleared()
    {
-      TODO("Not yet implemented")
    }
 
    fun needToAskCancelReason(): Boolean
