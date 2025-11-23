@@ -27,6 +27,10 @@ data class CCustomer(
     */
    fun fromId(customerId: Int): CCustomer?
    {
+      if (customerId<=0)
+      {
+         return null
+      }
       val service = GrpcServiceFactory.createClientService()
       val ptr: Customer? = service.getCustomerFromId(customerId.toLong())
       var customer = fromCustomer(ptr)

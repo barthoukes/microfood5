@@ -3,7 +3,7 @@
 //  @ingroup    proto database interface
 //  @brief      Operations on ticket printers
 //
-//  Messages for storage
+//  Messages for printers
 //
 //  @author     Bart Houkes
 //
@@ -19,7 +19,7 @@ syntax = "proto3";
 
 option csharp_namespace = "GrpcService";
 
-package print;
+package prn;
 
 import "common_types.proto";
 
@@ -27,11 +27,11 @@ import "common_types.proto";
 option java_multiple_files = true;
 option java_package = "com.hha.printer";
 
-service TicketPrinter
+service TicketPrinterService
 {
     rpc AddRawText(AddRawTextRequest)  returns (PrinterStatusResponse) {}
-    rpc PrinterStatus(PrinterStatusRequest)  returns (PrinterStatusResponse) {}
-    rpc HasSlipPrinter(HasSlipPrinterRequest)  returns (HasSlipPrinterResponse) {}
+    rpc PrinterStatus(PrinterStatusRequest)  returns (PrinterStatusResponse) {}   
+    rpc HasSlipPrinter(HasSlipPrinterRequest)  returns (HasSlipPrinterResponse) {} 
     rpc TestPrinters(common.Empty)  returns (common.Empty) {}
     rpc WaitPrinters(common.Empty)  returns (WaitPrintersStatus) {}
 }
@@ -84,25 +84,26 @@ enum Priority
 
 enum PrinterLocation
 {
-  BILL_PRN            = 0;
-  KITCHEN_PRN1        = 1;
-  DRINKS_PRN          = 2;
-  BAR_PRN             = 3;
-  MANAGER_PRN         = 4;
-  SLIP_PRN            = 5;
-  BARCODE_PRN         = 6;
-  LABEL_PRN           = 7;
-  KITCHEN_PRN2        = 8;
-  KITCHEN_PRN3        = 9;
-  KITCHEN_PRN4        = 10;
-  KITCHEN_COLLECT_PRN = 11;
-  AUTOMATIC_PRN       = 13;
+  PRINTER_LOCATION_BILL_PRN            = 0;
+  PRINTER_LOCATION_KITCHEN_PRN1        = 1;
+  PRINTER_LOCATION_DRINKS_PRN          = 2;
+  PRINTER_LOCATION_BAR_PRN             = 3;
+  PRINTER_LOCATION_MANAGER_PRN         = 4;
+  PRINTER_LOCATION_SLIP_PRN            = 5;
+  PRINTER_LOCATION_BARCODE_PRN         = 6;
+  PRINTER_LOCATION_LABEL_PRN           = 7;
+  PRINTER_LOCATION_KITCHEN_PRN2        = 8;
+  PRINTER_LOCATION_KITCHEN_PRN3        = 9;
+  PRINTER_LOCATION_KITCHEN_PRN4        = 10;
+  PRINTER_LOCATION_KITCHEN_COLLECT_PRN = 11;
+  PRINTER_LOCATION_INVALID_PRN         = 12;
+  PRINTER_LOCATION_AUTOMATIC_PRN       = 13;
 }
 
 enum PrinterStatus
 {
-  PRINTER_OK          = 0;
-  PRINTER_BUSY        = 1;
-  PRINTER_READY       = 2;
-  PRINTER_ERROR       = 3;
+  PRINTER_STATUS_OK          = 0;
+  PRINTER_STATUS_BUSY        = 1;
+  PRINTER_STATUS_READY       = 2;
+  PRINTER_STATUS_ERROR       = 3;
 }

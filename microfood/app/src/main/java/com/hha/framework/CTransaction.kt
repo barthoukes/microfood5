@@ -16,9 +16,11 @@ import com.hha.types.C3Moneys
 import com.hha.types.CMoney
 import com.hha.types.EClientOrdersType
 import com.hha.types.EDeletedStatus
+import com.hha.types.EItemSort
 import com.hha.types.EPaymentMethod
 import com.hha.types.ETransType
 import com.hha.types.EPaymentStatus
+import com.hha.types.ETaxType
 import com.hha.types.ETimeFrameIndex
 import java.text.SimpleDateFormat
 import java.util.*
@@ -51,8 +53,17 @@ class CTransaction : Iterable<CSortedItem>,
     val transactionType : ETransType
         get() = data.transType
 
-    // Add this iterator implementation
-    override fun iterator(): Iterator<CSortedItem> = m_items.iterator()
+    val transType : ETransType
+        get() = data.transType
+
+    val customerTime : String
+        get() = data.timeCustomer
+
+    val deliverTime : String
+        get() = data.timeCustomer
+
+    val displayName : String
+        get() = data.name
 
     constructor(
         transactionId: Int, name: String, time: String,
@@ -99,19 +110,10 @@ class CTransaction : Iterable<CSortedItem>,
         m_payments.addListener(this)
     }
 
-    fun getDiscount(): CMoney
+    constructor(transactionId: Int, itemSort: EItemSort, timeFrameIndex: ETimeFrameIndex)
     {
-        return data.discount.toMoney()
-    }
+        selectTransactionId(transactionId)
 
-    fun selectTransactionId(transactionId: Int)
-    {
-        data.transactionId = transactionId
-        m_payments.setTransactionId(transactionId)
-        val service = GrpcServiceFactory.createDailyTransactionService()
-        val inputData: TransactionData? = service.selectTransactionId(transactionId.toInt())
-        data.setTransactionData(inputData)
-        m_sizeAtStart = m_items.itemLines()
     }
 
     constructor(source: TransactionData?)
@@ -133,9 +135,14 @@ class CTransaction : Iterable<CSortedItem>,
         m_customer = CCustomer(data.customerId)
     }
 
-    override fun getTotalTransaction(): CMoney
+    fun addItemListener(listener: TransactionItemListener)
     {
-        return data.total.toMoney()
+        m_items.addListener(listener)
+    }
+
+    fun addReturnMoney()
+    {
+        m_payments.addReturnMoney()
     }
 
     fun calculateTotalTransaction(): CMoney
@@ -155,39 +162,14 @@ class CTransaction : Iterable<CSortedItem>,
         return newTotal
     }
 
-    override fun getCustomerId(): Int
-    {
-        return data.customerId
-    }
-
-    fun hasAnyChanges() : Boolean
-    {
-        return m_items.hasAnyChanges()
-    }
-
-    fun addItemListener(listener: TransactionItemListener)
-    {
-        m_items.addListener(listener)
-    }
-
-    fun removeItemListener(listener: TransactionItemListener)
-    {
-        m_items.removeListener(listener)
-    }
-
     fun addPaymentListener(listener: PaymentsListener)
     {
         m_payments.addListener(listener)
     }
 
-    fun removePaymentListener(listener: PaymentsListener)
+    fun getBillRemarks(): String
     {
-        m_payments.removeListener(listener)
-    }
-
-    fun transactionEmptyAtStartAndAtEnd(): Boolean
-    {
-        return m_sizeAtStart == 0 && m_items.itemLines() == 0
+        return data.message
     }
 
     fun getCursor(selectedTransactionItem: CItem): Int
@@ -200,63 +182,10 @@ class CTransaction : Iterable<CSortedItem>,
         return m_items.get(position)
     }
 
-    fun itemSize() = m_items.itemLines()
-
-    fun closeTimeFrame()
+    fun getEmployeeName(): String
     {
-        m_timeFrame.closeTimeFrame()
-        m_timeFrame.previous()
-    }
-
-    fun removeTimeFrame()
-    {
-        m_items.undoTimeFrame( m_timeFrame.time_frame_index,
-            global.CFG.getShort("pc_number"))
-        closeTimeFrame()
-    }
-
-    fun itemLines(): Int
-    {
-        return m_items.itemLines()
-    }
-
-    fun itemSum(): Int
-    {
-        return m_items.itemSum()
-    }
-
-    fun setMessage(message: String)
-    {
-        data.message = message
-        val service = GrpcServiceFactory.createDailyTransactionService()
-        service.setMessage(global.transactionId, message)
-    }
-
-    fun updateTotal()
-    {
-        val service = GrpcServiceFactory.createDailyTransactionService()
-        service.updateTotal(data.transactionId)
-        selectTransactionId(data.transactionId)
-    }
-
-    fun emptyTransaction(reason: String)
-    {
-        // No printing of kitchen, just go to billing...
-        val itemSum = itemSum()
-        if (itemSum != 0)
-        {
-            removeTimeFrame()
-        } else
-        {
-            closeTimeFrame()
-        }
-        addReturnMoney()
-        if (!reason.isEmpty())
-        {
-            setMessage(reason)
-        }
-        updateTotal()
-        cleanCurrentTransaction()
+        val key = data.rfidKeyId
+        return CPersonnel().getEmployeeName(key)
     }
 
     fun cleanCurrentTransaction()
@@ -272,6 +201,12 @@ class CTransaction : Iterable<CSortedItem>,
     {
         GrpcServiceFactory.createDailyTransactionService().cleanTransaction(transactionId)
         data.cleanTransaction()
+    }
+
+    fun closeTimeFrame()
+    {
+        m_timeFrame.closeTimeFrame()
+        m_timeFrame.previous()
     }
 
     fun closeTransaction(why: EClientOrdersType)
@@ -341,14 +276,120 @@ class CTransaction : Iterable<CSortedItem>,
         m_items.setNegativeQuantityToRemovedItems();
     }
 
-    fun addReturnMoney()
+    val size: Int
+        get() = m_items.itemLines()
+
+    val itemSize: Int
+        get() = m_items.itemLines()
+
+    override var transactionId: Int = 0
+        get() = data.transactionId
+
+
+    fun addOneToCursorPosition(): Boolean
     {
-        m_payments.addReturnMoney()
+        if (size == 0) return false
+        var y = m_global.cursor.position
+        var item = get(y) ?: get(--y) ?: return false
+        if (item.deletedStatus != EDeletedStatus.DELETE_NOT) return false
+        return m_items.addQuantity(CCursor(y)
+        , 1)
     }
 
-    fun getTotalAlreadyPaid(): CMoney
+    fun addListener(listener: TransactionListener)
     {
-        return m_payments.getTotalAlreadyPaid()
+        if (!m_listeners.contains(listener))
+        {
+            m_listeners.add(listener)
+        }
+    }
+
+    fun addPayment(payment: EPaymentMethod, amount: CMoney)
+    {
+        m_payments.addPayment(payment, amount)
+    }
+
+    fun addTransactionItem(selectedMenuItem: CMenuItem, clusterId: Short): Boolean
+    {
+        Log.d(
+            "CTransaction", "add transaction item: " +
+               "${selectedMenuItem.menuItemId} cursor ${global.cursor}"
+        )
+        return m_items.touchItem(selectedMenuItem, clusterId)
+    }
+
+    fun cancelPayment(index: Int, paymentStatus: EPaymentStatus)
+    {
+        m_payments.cancelPayment(index, paymentStatus)
+    }
+
+    val empty: Boolean
+        get() = m_items.empty
+
+    fun emptyTransaction(reason: String)
+    {
+        // No printing of kitchen, just go to billing...
+        val itemSum = itemSum()
+        if (itemSum != 0)
+        {
+            removeTimeFrame()
+        } else
+        {
+            closeTimeFrame()
+        }
+        addReturnMoney()
+        if (!reason.isEmpty())
+        {
+            setMessage(reason)
+        }
+        updateTotal()
+        cleanCurrentTransaction()
+    }
+
+    fun getCashTotal(): CMoney
+    {
+        return m_payments.getCashTotal();
+    }
+
+    fun getCardTotal(): CMoney
+    {
+        return m_payments.getCardTotal();
+    }
+
+    fun getClient(): String
+    {
+        // @todo get the customer
+        return m_customer?.name ?: ""
+    }
+
+    override fun getCustomerId(): Int
+    {
+        return data.customerId
+    }
+
+    override fun getDeviceId(): Short
+    {
+        return global.deviceId
+    }
+
+    fun getDiscount(): CMoney
+    {
+        return data.discount.toMoney()
+    }
+
+    fun getDrinksTotal(): CMoney
+    {
+        return m_items.getDrinksTotal()
+    }
+
+    fun getItemsTotal(): CMoney
+    {
+        return m_items.getItemsTotal()
+    }
+
+    fun getKitchenTotal(): CMoney
+    {
+        return m_items.getKitchenTotal()
     }
 
     fun getMinutes(): Int
@@ -367,133 +408,14 @@ class CTransaction : Iterable<CSortedItem>,
         }
     }
 
-    val size: Int
-        get() = m_items.itemLines()
-
-    val itemSize: Int
-        get() = m_items.itemLines()
-
-    override var transactionId: Int = 0
-        get() = data.transactionId
-
-    fun useTakeawayPrices(): Boolean
+    fun getPayments() : List<CPayment>
     {
-        return ETransType.useTakeawayPrices(data.transType)
-    }
-
-    fun addOneToCursorPosition(): Boolean
-    {
-        if (size == 0) return false
-        var y = m_global.cursor.position
-        var item = get(y) ?: get(--y) ?: return false
-        if (item.deletedStatus != EDeletedStatus.DELETE_NOT) return false
-        return m_items.addQuantity(CCursor(y)
-        , 1)
-    }
-
-    fun minus1()
-    {
-        if (size == 0) return
-        var y = m_global.cursor.position
-        var item = get(y) ?: get(--y) ?: return
-        if (item.deletedStatus != EDeletedStatus.DELETE_NOT) return
-        m_items.addQuantity(CCursor(y), -1)
-    }
-
-    val empty: Boolean
-        get() = m_items.empty
-
-    fun nextPortion()
-    {
-        if (size == 0) return
-        var y = m_global.cursor.position
-        var item = get(y) ?: get(--y) ?: return
-        if (item.deletedStatus != EDeletedStatus.DELETE_NOT) return
-        m_items.nextPortion(CCursor(y))
-    }
-
-    public fun remove()
-    {
-        if (size == 0) return
-        var y = m_global.cursor.position
-        var item = get(y) ?: get(--y) ?: return
-        if (item.deletedStatus != EDeletedStatus.DELETE_NOT) return
-        m_items.addQuantity(CCursor(y), -item.getQuantity())
-    }
-
-    fun isTakeaway(): Boolean = when (data.transType)
-    {
-        ETransType.TRANS_TYPE_TAKEAWAY, ETransType.TRANS_TYPE_EAT_INSIDE,
-        ETransType.TRANS_TYPE_RECHAUD, ETransType.TRANS_TYPE_UNDEFINED
-            -> true
-
-        else -> false
-    }
-
-    fun stopTimeFrame()
-    {
-        m_timeFrame.end()
-    }
-
-    fun addTransactionItem(selectedMenuItem: CMenuItem, clusterId: Short): Boolean
-    {
-        Log.d(
-            "CTransaction", "add transaction item: " +
-               "${selectedMenuItem.menuItemId} cursor ${global.cursor}"
-        )
-        return m_items.touchItem(selectedMenuItem, clusterId)
-    }
-
-    fun getItemsTotal(): CMoney
-    {
-        return m_items.getItemsTotal()
-    }
-
-    fun getKitchenTotal(): CMoney
-    {
-        return m_items.getKitchenTotal()
-    }
-
-    fun getDrinksTotal(): CMoney
-    {
-        return m_items.getDrinksTotal()
-    }
-
-    fun startNextTimeFrame(): CTimeFrame
-    {
-        Log.i("Ctransaction", "Start next TimeFrame")
-        m_timeFrame = CTimeFrame(data.transactionId, this)
-        return m_timeFrame
-    }
-
-    fun getCashTotal(): CMoney
-    {
-        return m_payments.getCashTotal();
-    }
-
-    fun getCardTotal(): CMoney
-    {
-        return m_payments.getCardTotal();
+        return m_payments.getPayments()
     }
 
     fun getPaymentTotal(): CMoney
     {
         return m_payments.getTotal();
-    }
-
-    fun cancelPayment(index: Int, paymentStatus: EPaymentStatus)
-    {
-        m_payments.cancelPayment(index, paymentStatus)
-    }
-
-    fun addPayment(payment: EPaymentMethod, amount: CMoney)
-    {
-        m_payments.addPayment(payment, amount)
-    }
-
-    override fun getDeviceId(): Short
-    {
-        return global.deviceId
     }
 
     override fun getTimeFrame(): CTimeFrame
@@ -506,18 +428,90 @@ class CTransaction : Iterable<CSortedItem>,
         return m_timeFrame.getTimeFrameIndex()
     }
 
-    fun addListener(listener: TransactionListener)
+    fun getTotal(taxType: ETaxType): CMoney
     {
-        if (!m_listeners.contains(listener))
+        return when (taxType)
         {
-            m_listeners.add(listener)
+           ETaxType.BTW_TYPE_LOW -> data.total.taxLow
+           ETaxType.BTW_TYPE_HIGH -> data.total.taxHigh
+           else -> data.total.taxFree
         }
     }
 
-    fun removeListener(listener: TransactionListener)
+    fun getTotalAlreadyPaid(): CMoney
     {
-        m_listeners.remove(listener)
+        return m_payments.getTotalAlreadyPaid()
     }
+
+    override fun getTotalTransaction(): CMoney
+    {
+        return data.total.toMoney()
+    }
+
+    fun hasAnyChanges() : Boolean
+    {
+        return m_items.hasAnyChanges()
+    }
+
+    fun isRechaud(): Boolean
+    {
+        return data.transType == ETransType.TRANS_TYPE_RECHAUD
+    }
+
+    fun itemSize() = m_items.itemLines()
+
+    fun itemLines(): Int
+    {
+        return m_items.itemLines()
+    }
+
+    fun isShop(): Boolean = when (data.transType)
+    {
+        ETransType.TRANS_TYPE_SHOP -> true
+        else -> false
+    }
+
+    fun isTakeaway(): Boolean = when (data.transType)
+    {
+        ETransType.TRANS_TYPE_TAKEAWAY, ETransType.TRANS_TYPE_EAT_INSIDE,
+        ETransType.TRANS_TYPE_RECHAUD, ETransType.TRANS_TYPE_UNDEFINED
+            -> true
+
+        else -> false
+    }
+
+    fun isTelephone(): Boolean = when (data.transType)
+    {
+        ETransType.TRANS_TYPE_DELIVERY -> true
+        else -> false
+    }
+
+    fun itemSum(): Int
+    {
+        return m_items.itemSum()
+    }
+
+    // Add this iterator implementation
+    override fun iterator(): Iterator<CSortedItem> = m_items.iterator()
+
+    fun minus1()
+    {
+        if (size == 0) return
+        var y = m_global.cursor.position
+        var item = get(y) ?: get(--y) ?: return
+        if (item.deletedStatus != EDeletedStatus.DELETE_NOT) return
+        m_items.addQuantity(CCursor(y), -1)
+    }
+
+    fun nextPortion()
+    {
+        if (size == 0) return
+        var y = m_global.cursor.position
+        var item = get(y) ?: get(--y) ?: return
+        if (item.deletedStatus != EDeletedStatus.DELETE_NOT) return
+        m_items.nextPortion(CCursor(y))
+    }
+
     // A single method to notify any external listeners that something has changed.
     private fun notifyListeners()
     {
@@ -567,8 +561,86 @@ class CTransaction : Iterable<CSortedItem>,
         notifyListeners();
     }
 
-    fun getPayments() : List<CPayment>
+    public fun remove()
     {
-        return m_payments.getPayments()
+        if (size == 0) return
+        var y = m_global.cursor.position
+        var item = get(y) ?: get(--y) ?: return
+        if (item.deletedStatus != EDeletedStatus.DELETE_NOT) return
+        m_items.addQuantity(CCursor(y), -item.getQuantity())
     }
+
+    fun removeItemListener(listener: TransactionItemListener)
+    {
+        m_items.removeListener(listener)
+    }
+
+    fun removeListener(listener: TransactionListener)
+    {
+        m_listeners.remove(listener)
+    }
+
+    fun removePaymentListener(listener: PaymentsListener)
+    {
+        m_payments.removeListener(listener)
+    }
+
+    fun removeTimeFrame()
+    {
+        m_items.undoTimeFrame( m_timeFrame.time_frame_index,
+            global.CFG.getShort("pc_number"))
+        closeTimeFrame()
+    }
+
+    fun setMessage(message: String)
+    {
+        data.message = message
+        val service = GrpcServiceFactory.createDailyTransactionService()
+        service.setMessage(global.transactionId, message)
+    }
+
+    fun startNextTimeFrame(): CTimeFrame
+    {
+        Log.i("Ctransaction", "Start next TimeFrame")
+        m_timeFrame = CTimeFrame(data.transactionId, this)
+        return m_timeFrame
+    }
+
+    fun selectTransactionId(transactionId: Int)
+    {
+        data.transactionId = transactionId
+        m_payments.setTransactionId(transactionId)
+        val service = GrpcServiceFactory.createDailyTransactionService()
+        val inputData: TransactionData? = service.selectTransactionId(transactionId.toInt())
+        data.setTransactionData(inputData)
+        m_sizeAtStart = m_items.itemLines()
+    }
+
+    fun stopTimeFrame()
+    {
+        m_timeFrame.end()
+    }
+
+    fun transactionEmptyAtStartAndAtEnd(): Boolean
+    {
+        return m_sizeAtStart == 0 && m_items.itemLines() == 0
+    }
+
+    fun TAcount() : Int
+    {
+        return data.name.toIntOrNull() ?:0
+    }
+
+    fun updateTotal()
+    {
+        val service = GrpcServiceFactory.createDailyTransactionService()
+        service.updateTotal(data.transactionId)
+        selectTransactionId(data.transactionId)
+    }
+
+    fun useTakeawayPrices(): Boolean
+    {
+        return ETransType.useTakeawayPrices(data.transType)
+    }
+
 }

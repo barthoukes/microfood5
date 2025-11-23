@@ -9,6 +9,7 @@ object Translation {
         TEXT_CHOOSE_TABLE,
         TEXT_ABOUT_US,
         TEXT_ALREADY_PAYED,
+        TEXT_ASAP,
         TEXT_BILL_HEADER,
         TEXT_BILL_PAYMENTS,
         TEXT_CALCULATOR,
@@ -29,13 +30,17 @@ object Translation {
         TEXT_CHANGE_LANGUAGE,
         TEXT_CLIENT_AMOUNT,
         TEXT_CLIENT_PAYS_WITH,
+        TEXT_DELIVER_TIME,
         TEXT_DISCOUNT,
         TEXT_EAT_INSIDE,
         TEXT_ERROR,
         TEXT_EXCHANGE_MONEY,
         TEXT_EXIT_PROGRAM,
+        TEXT_EXTRA,
         TEXT_ITEM_DRINKS,
         TEXT_ITEM_KITCHEN,
+        TEXT_KEY,
+        TEXT_LIST,
         TEXT_MIN_1,
         TEXT_NAME,
         TEXT_MORE,
@@ -50,11 +55,14 @@ object Translation {
         TEXT_PRINT_QUANTITY,
         TEXT_PRINT_SLIP,
         TEXT_PRINT_ROLL,
+        TEXT_RECHAUD,
         TEXT_REMARK,
         TEXT_TABLE,
         TEXT_TABLE_OVERVIEW,
         TEXT_TAKEAWAY,
+        TEXT_TELEPHONE,
         TEXT_REMOVE_ITEM,
+        TEXT_REPRINT,
         TEXT_SEND_ALL,
         TEXT_SEND_BILL,
         TEXT_SENDING_TABLES,
@@ -70,80 +78,88 @@ object Translation {
 
     private val m_lin = mapOf(
         TextId.TEXT_ALREADY_PAYED to listOf("一切都付了", "ALLES REEDS BETAALD", "ALL IS PAYED", "ALLES IST BEZAHLT",
-            "SEMUA DIBAYARKAN"),
-        TextId.TEXT_BILL_HEADER to listOf("买单", "AFREKENEN", "BILL MODE", "RECHNUNG", "BON"),
-        TextId.TEXT_BILL_PAYMENTS to listOf("付款", "BETAALWIJZE", "PAY METHOD", "BEZAHLUNG", "UANG"),
-        TextId.TEXT_CHOOSE_TABLE to listOf("输入单", "KIES TAFEL BESTELLEN", "CHOOSE TABLE TO ORDER", "TISCH NAME", "PILIH MEJA PESANAN"),
-        TextId.TEXT_ABOUT_US to listOf("关于", "OVER ONS", "ABOUT US", "WIR SIND", "TENTANG"),
-        TextId.TEXT_CALCULATOR to listOf("计算器", "CALCULATOR", "CALCULATOR", "RECHNEN", "KALKULATOR"),
-        TextId.TEXT_CANCEL to listOf("取消", "STOP", "STOP", "STOP", "BATAL"),
+            "SEMUA DIBAYARKAN", "TAMAMI ÖDENDİ"),
+        TextId.TEXT_ASAP to listOf("尽快", "SNEL", "ASAP", "SCHNELL", "SEPAT", "HEMEN"),
+        TextId.TEXT_BILL_HEADER to listOf("买单", "AFREKENEN", "BILL MODE", "RECHNUNG", "BON", "HESAP MODU"),
+        TextId.TEXT_BILL_PAYMENTS to listOf("付款", "BETAALWIJZE", "PAY METHOD", "BEZAHLUNG", "UANG", "ÖDEME YÖNTEMİ"),
+        TextId.TEXT_CHOOSE_TABLE to listOf("输入单", "KIES TAFEL BESTELLEN", "CHOOSE TABLE TO ORDER", "TISCH NAME", "PILIH MEJA PESANAN", "SİPARİŞ İÇİN MASA SEÇ"),
+        TextId.TEXT_ABOUT_US to listOf("关于", "OVER ONS", "ABOUT US", "WIR SIND", "TENTANG", "HAKKIMIZDA"),
+        TextId.TEXT_CALCULATOR to listOf("计算器", "CALCULATOR", "CALCULATOR", "RECHNEN", "KALKULATOR", "HESAP MAKİNESİ"),
+        TextId.TEXT_CANCEL to listOf("取消", "STOP", "STOP", "STOP", "BATAL", "İPTAL"),
         TextId.TEXT_CANCEL_REASON to listOf("取消原因", "REDEN WAAROM DE BESTELLING STOPT", "REASON WHY THE ORDER IS " +
-           "CANCELLED", "CANCEL GRUND", "ALASAN MENGAPA PESANAN DI STOP"),
+           "CANCELLED", "CANCEL GRUND", "ALASAN MENGAPA PESANAN DI STOP", "İPTAL NEDENİ"),
         TextId.TEXT_CANCEL_REASON_BAD_FOOD to listOf("取消原因变质的食物", "HET ETEN SMAAKT SLECHT",
-            "FOOD TASTE BAD", "CANCEL GRUND BAD FOOD", "MAKANAN TIDAK ENAK"),
+            "FOOD TASTE BAD", "CANCEL GRUND BAD FOOD", "MAKANAN TIDAK ENAK", "KÖTÜ YEMEK"),
         TextId.TEXT_CANCEL_REASON_NO_MONEY to listOf("客户没有钱", "KLANT HEEFT GEEN GELD",
-            "CUSTOMER HAS NO MONEY", "KUNDE HAT KEIN GELD", "PELANGGAN TIADA UANG"),
+            "CUSTOMER HAS NO MONEY", "KUNDE HAT KEIN GELD", "PELANGGAN TIADA UANG", "MÜŞTERİNİN PARASI YOK"),
         TextId.TEXT_CANCEL_REASON_NO_STOCK to listOf("无库存", "GEEN VOORRAAD OF INGREDIENTEN",
-            "NO STOCK OR FOOD", "NICHTS AUF LAGER", "TIDAK ADA STOK"),
+            "NO STOCK OR FOOD", "NICHTS AUF LAGER", "TIDAK ADA STOK", "STOK YOK"),
         TextId.TEXT_CANCEL_REASON_PERSONNEL to listOf("食物的人员", "ETEN VOOR HET PERSONEEL",
-            "FOOD FOR PERSONNEL", "ESSEN FUR DAS PERSONAL", "MAKANAN UNTUK PERSONIL"),
+            "FOOD FOR PERSONNEL", "ESSEN FUR DAS PERSONAL", "MAKANAN UNTUK PERSONIL", "PERSONEL YEMEĞİ"),
         TextId.TEXT_CANCEL_REASON_RUN_AWAY to listOf("客户跑掉了", "KLANT WEGGEREND ZONDER BETALEN",
-            "CUSTOMER RAN AWAY", "KUNDEN LIEF WEG", "PELANGGAN PERGI TANPA BAYAR"),
+            "CUSTOMER RAN AWAY", "KUNDEN LIEF WEG", "PELANGGAN PERGI TANPA BAYAR", "MÜŞTERİ KAÇTI"),
         TextId.TEXT_CANCEL_REASON_TECHNICAL to listOf("技術原因不能準備食物",
             "TECHNISCHE REDEN, KAN HET ETEN NIET MAKEN",
             "CANNOT COOK FOR TECHNICAL REASONS", "ESSEN ZUBEREITEN NICHT MOGLICH JETZT",
-            "ALASAN TEKNIS TIDAK BISA SIAPKAN MAKANAN"),
+            "ALASAN TEKNIS TIDAK BISA SIAPKAN MAKANAN", "TEKNİK NEDEN"),
         TextId.TEXT_CANCEL_REASON_TELEPHONE to listOf("无需客户电话订购", "KLANT HAALT BESTELLING NIET OP", "TELEPHONE ORDER WITHOUT CUSTOMER",
-            "TELEFON BESTELLEN OHNE KUNDEN", "PESANAN TIDAK DI AMBIL"),
+            "TELEFON BESTELLEN OHNE KUNDEN", "PESANAN TIDAK DI AMBIL", "TELEFON SİPARİŞİ ALINMADI"),
         TextId.TEXT_CANCEL_REASON_TOO_LATE to listOf("食物送得太晚", "ETEN TE LAAT BEZORGD",
             "FOOD DELIVERED TOO LATE", "ESSEN ZU SPÄT GELIEFERT",
-            "MAKANAN DIKIRIM TERLAMBAT"),
+            "MAKANAN DIKIRIM TERLAMBAT", "YEMEK GEÇ GELDİ"),
         TextId.TEXT_CANCEL_REASON_TRAINING to listOf("交易培训", "TRAINING TRANSACTIE",
-            "TRAINING TRANSACTION", "TRAINING TRANSACTION", "TRANSAKSI PERCOBAAN"),
+            "TRAINING TRANSACTION", "TRAINING TRANSACTION", "TRANSAKSI PERCOBAAN", "EĞİTİM İŞLEMİ"),
         TextId.TEXT_CANCEL_REASON_WRONG_DISH to listOf("错误的食物送呈", "VERKEERDE ETEN BEZORGD",
-            "WRONG FOOD PREPARED", "FALSCH GELIEFERT FOOD", "SALAH PESANAN MAKANAN"),
-        TextId.TEXT_CASH to listOf("现金", "CONTANT", "CASH", "KASSE", "KAS"),
-        TextId.TEXT_CASH_OUT to listOf("续回", "TERUG", "EXCHANGE", "ZUR]CKGABE", "PERUBAHAN"),
-        TextId.TEXT_CHANGE_LANGUAGE to listOf("TAAL", "改变语言", "改变语言", "改变语言", "改变语言"),
+            "WRONG FOOD PREPARED", "FALSCH GELIEFERT FOOD", "SALAH PESANAN MAKANAN", "YANLIŞ YEMEK"),
+        TextId.TEXT_CASH to listOf("现金", "CONTANT", "CASH", "KASSE", "KAS", "NAKİT"),
+        TextId.TEXT_CASH_OUT to listOf("续回", "TERUG", "EXCHANGE", "ZUR]CKGABE", "PERUBAHAN", "PARA ÜSTÜ"),
+        TextId.TEXT_CHANGE_LANGUAGE to listOf("TAAL", "改变语言", "改变语言", "改变语言", "改变语言", "DİL DEĞİŞTİR"),
         TextId.TEXT_CLIENT_AMOUNT to listOf("顾客买单", "KLANT BEDRAG", "CLIENT AMOUNT", "KUNDE BETRAG", "JUMLAH " +
-           "PELANGGAN"),
-        TextId.TEXT_CLIENT_PAYS_WITH to listOf("客户付钱", "KLANT BETAALT", "CUSTOMER PAYS", "KUNDE BEZAHLT", "MEMBAYAR"),
-        TextId.TEXT_DISCOUNT to listOf("折扣", "KORTING", "DISCOUNT", "RABBAT", "DISKON"),
-        TextId.TEXT_EAT_INSIDE to listOf("里面吃", "HIER ETEN", "EAT HERE", "ISS HIER", "MAKAN DISINI"),
-        TextId.TEXT_ERROR to listOf("ERROR", "ERROR", "ERROR", "ERROR", "ERROR"),
-        TextId.TEXT_EXCHANGE_MONEY to listOf("底钱", "WISSELGELD", "EXCHANGE MONEY", "WECHSELGELT", "UANG EXCHANGE"),
-        TextId.TEXT_EXIT_PROGRAM to listOf("停止软件", "STOP PROGRAMMA", "STOP PROGRAM", "PROGRAM STOP", "STOP PROGRAM"),
-        TextId.TEXT_ITEM_DRINKS to listOf("饮料", "DRANK", "DRANK", "DRANK", "DRANK"),
-        TextId.TEXT_ITEM_KITCHEN to listOf("厨房", "KEUKEN", "KITCHEN", "KUCHE", "DAPUR"),
-        TextId.TEXT_MIN_1 to listOf("减一", "MIN 1", "", "", "-1"),
-        TextId.TEXT_NAME to listOf("换菜单名字", "NAMEN VERANDEREN", "MENU NAMES CHANGE", "MENU NAMEN ANDERN", "NAMA MENU GANTI", "換菜單名字"),
-        TextId.TEXT_MORE to listOf("加餐", "MEER", "MORE", "MEHR", "LEBIH"),
-        TextId.TEXT_OK to listOf("好 !", "OK !", "OK !", "GUT !", "OK !"),
-        TextId.TEXT_PAID to listOf("一切都付了", "AL BETAALD", "PAID", "BEZAHLT", "DIBAYARKAN"),
-        TextId.TEXT_PAY to listOf("埋单", "BETALEN", "PAY", "BEZAHLEN", "BAYAR"),
-        TextId.TEXT_PAYED to listOf("已付账单", "BETAALD", "BEZAHLT", "PAYED", "DIBAYAR"),
-        TextId.TEXT_PLUS_1 to listOf("递增", "PLUS 1", "", "", "+1"),
-        TextId.TEXT_PORTION to listOf("部分", "PORTIE", "PORTION", "PORTIE", "MELAYANI"),
-        TextId.TEXT_PRICE to listOf("价格", "PRIJS", "PRICE", "PREIS", "HARGA"),
-        TextId.TEXT_PRINTER to listOf("打印机", "AFDRUK", "PRINTER", "DRUCKER", "PRINTER"),
-        TextId.TEXT_PRINT_QUANTITY to listOf("打印多少?", "AANTAL AFDRUKKEN?", "PRINT HOW,MANY TIMES?", "DRUCK ANZAHL", "PRINTER BERAPA KALI?"),
-        TextId.TEXT_PRINT_SLIP to listOf("打印单", "SLIP PRINTER", "SLIP BILL", "SLIP DRUCKER", "PRINTER SLIP"),
-        TextId.TEXT_PRINT_ROLL to listOf("卷打印机", "REKENING ROL PRINTER" , "PRINT ROLL BILL", "ROLL DRUCKER", "PRINTER PERAN NOTA"),
-        TextId.TEXT_REMARK to listOf("写备注", "OPMERKING", "REMARK", "NOTITZEN", "KETERANGAN"),
-        TextId.TEXT_TABLE to listOf("餐桌", "TAFEL", "TABLE", "TISCH", "MEJA"),
-        TextId.TEXT_TABLE_OVERVIEW to listOf("输入单", "TAFEL OVERZICHT", "CHOOSE TABLE TO ORDER", "TISCH NAME", "PILIH MEJA PESANAN"),
-        TextId.TEXT_TAKEAWAY to listOf("新打包", "AFHALEN", "TAKEAWAY", "MITNEHMEN", "CINA TAKE AWAY"),
-        TextId.TEXT_TOTAL to listOf( "总数", "TOTAAL", "TOTAL", "TOTAL", "JUMLAH"),
-        TextId.TEXT_REMOVE_ITEM to listOf("删除", "WEGHALEN", "REMOVE", "ENTFERNEN", "DIHAPUS"),
-        TextId.TEXT_SEND_ALL to listOf("发送", "VERZEND ORDERS", "SEND ORDERS", "UBERTRAGEN", "MENGIRIMKAN"),
-        TextId.TEXT_SEND_BILL to listOf("银行", "OP REKENING", "ACCOUNT", "ACCOUNT", "POS"),
-        TextId.TEXT_SENDING_TABLES to listOf("互联网，请稍候", "BEZIG MET INTERNET\nWACHT TOT DE TAFEL VERSTUURD IS.", "SEND ORDERS, PLEASE WAIT", "WARTEN BITTE", "TUNGGU,INTERNET"),
-        TextId.TEXT_SETTINGS to listOf("改变配置", "VERANDER CONFIGURATIE", "CHANGE CONFIGURATION", "ANDERN EINSTELLUNGEN", "GANTI KONFIGURASI"),
-        TextId.TEXT_STOP to listOf("停止", "STOP", "STOP", "STOP", "STOP"),
-        TextId.TEXT_STOP_PROGRAM to listOf("停止软件", "STOP PROGRAMMA", "STOP PROGRAM", "PROGRAM STOP", "STOP PROGRAM"),
-        TextId.TEXT_SUBTOTAL to listOf("合计", "SUBTOTAAL", "SUBTOTAL", "SUBTOTAL", "KHUSUS"),
-        TextId.TEXT_UPDATE to listOf("更新", "UPDATE", "UPDATE", "UPDATE", "UPDATE"),
-        TextId.TEXT_UPDATE_MENU to listOf("菜单更新", "UPDATE MENU KAART", "UPDATE MENU CARD", "MENU UPDATE", "MENU PEMBARUAN")
+           "PELANGGAN", "MÜŞTERİ TUTARI"),
+        TextId.TEXT_CLIENT_PAYS_WITH to listOf("客户付钱", "KLANT BETAALT", "CUSTOMER PAYS", "KUNDE BEZAHLT", "MEMBAYAR", "MÜŞTERİ ÖDEMESİ"),
+        TextId.TEXT_DELIVER_TIME to listOf("出餐", "LEVERTIJD", "TIME NOTE", "LIEFERZEIT", "JAM", "TESLİM SÜRESİ"),
+        TextId.TEXT_DISCOUNT to listOf("折扣", "KORTING", "DISCOUNT", "RABBAT", "DISKON", "İNDİRİM"),
+        TextId.TEXT_EAT_INSIDE to listOf("里面吃", "HIER ETEN", "EAT HERE", "ISS HIER", "MAKAN DISINI", "BURADA YE"),
+        TextId.TEXT_ERROR to listOf("ERROR", "ERROR", "ERROR", "ERROR", "ERROR", "HATA"),
+        TextId.TEXT_EXCHANGE_MONEY to listOf("底钱", "WISSELGELD", "EXCHANGE MONEY", "WECHSELGELT", "UANG EXCHANGE", "PARA ÜSTÜ"),
+        TextId.TEXT_EXIT_PROGRAM to listOf("停止软件", "STOP PROGRAMMA", "STOP PROGRAM", "PROGRAM STOP", "STOP PROGRAM", "PROGRAMI KAPAT"),
+        TextId.TEXT_EXTRA to listOf("改餐", "EXTRA", "EXTRA", "EXTRA", "EXTRA", "EKSTRA"),
+        TextId.TEXT_ITEM_DRINKS to listOf("饮料", "DRANK", "DRANK", "DRANK", "DRANK", "İÇECEKLER"),
+        TextId.TEXT_KEY to listOf( "匙", "SLEUTEL", "KEY", "SCHLÜSSEL", "KUNCI", "ANAHTAR"),
+        TextId.TEXT_ITEM_KITCHEN to listOf("厨房", "KEUKEN", "KITCHEN", "KUCHE", "DAPUR", "MUTFAK"),
+        TextId.TEXT_LIST to listOf("买主 ", "KLANT ", "CLIENT ", "KUNDE ", "KLIEN", "MÜŞTERİ"),
+        TextId.TEXT_MIN_1 to listOf("减一", "MIN 1", "", "", "-1", "-1"),
+        TextId.TEXT_NAME to listOf("换菜单名字", "NAMEN VERANDEREN", "MENU NAMES CHANGE", "MENU NAMEN ANDERN", "NAMA MENU GANTI", "MENÜ ADI DEĞİŞTİR"),
+        TextId.TEXT_MORE to listOf("加餐", "MEER", "MORE", "MEHR", "LEBIH", "DAHA FAZLA"),
+        TextId.TEXT_OK to listOf("好 !", "OK !", "OK !", "GUT !", "OK !", "TAMAM !"),
+        TextId.TEXT_PAID to listOf("一切都付了", "AL BETAALD", "PAID", "BEZAHLT", "DIBAYARKAN", "ÖDENDİ"),
+        TextId.TEXT_PAY to listOf("埋单", "BETALEN", "PAY", "BEZAHLEN", "BAYAR", "ÖDE"),
+        TextId.TEXT_PAYED to listOf("已付账单", "BETAALD", "BEZAHLT", "PAYED", "DIBAYAR", "ÖDENDİ"),
+        TextId.TEXT_PLUS_1 to listOf("递增", "PLUS 1", "", "", "+1", "+1"),
+        TextId.TEXT_PORTION to listOf("部分", "PORTIE", "PORTION", "PORTIE", "MELAYANI", "PORSİYON"),
+        TextId.TEXT_PRICE to listOf("价格", "PRIJS", "PRICE", "PREIS", "HARGA", "FİYAT"),
+        TextId.TEXT_PRINTER to listOf("打印机", "AFDRUK", "PRINTER", "DRUCKER", "PRINTER", "YAZICI"),
+        TextId.TEXT_PRINT_QUANTITY to listOf("打印多少?", "AANTAL AFDRUKKEN?", "PRINT HOW,MANY TIMES?", "DRUCK ANZAHL", "PRINTER BERAPA KALI?", "KAÇ TANE YAZDIRILSIN?"),
+        TextId.TEXT_PRINT_SLIP to listOf("打印单", "SLIP PRINTER", "SLIP BILL", "SLIP DRUCKER", "PRINTER SLIP", "FİŞ YAZDIR"),
+        TextId.TEXT_PRINT_ROLL to listOf("卷打印机", "REKENING ROL PRINTER" , "PRINT ROLL BILL", "ROLL DRUCKER", "PRINTER PERAN NOTA", "RULO YAZDIR"),
+        TextId.TEXT_RECHAUD to listOf("炭烧盘", "RECHAUD", "RECHAUD", "RECHAUD", "RECHAUD", "REŞO"),
+        TextId.TEXT_REMARK to listOf("写备注", "OPMERKING", "REMARK", "NOTITZEN", "KETERANGAN", "NOT"),
+        TextId.TEXT_REPRINT to listOf("重印", "HERDRUK", "REPRINT", "NEUDRUCK", "PRINT LAGI", "YENİDEN YAZDIR"),
+        TextId.TEXT_TABLE to listOf("餐桌", "TAFEL", "TABLE", "TISCH", "MEJA", "MASA"),
+        TextId.TEXT_TABLE_OVERVIEW to listOf("输入单", "TAFEL OVERZICHT", "CHOOSE TABLE TO ORDER", "TISCH NAME", "PILIH MEJA PESANAN", "MASA GENEL BAKIŞ"),
+        TextId.TEXT_TAKEAWAY to listOf("新打包", "AFHALEN", "TAKEAWAY", "MITNEHMEN", "CINA TAKE AWAY", "PAKET SERVİS"),
+        TextId.TEXT_TELEPHONE to listOf("电话", "TEL.", "TEL.", "TEL.", "TEL.", "TEL."),
+        TextId.TEXT_TOTAL to listOf( "总数", "TOTAAL", "TOTAL", "TOTAL", "JUMLAH", "TOPLAM"),
+        TextId.TEXT_REMOVE_ITEM to listOf("删除", "WEGHALEN", "REMOVE", "ENTFERNEN", "DIHAPUS", "SİL"),
+        TextId.TEXT_SEND_ALL to listOf("发送", "VERZEND ORDERS", "SEND ORDERS", "UBERTRAGEN", "MENGIRIMKAN", "TÜMÜNÜ GÖNDER"),
+        TextId.TEXT_SEND_BILL to listOf("银行", "OP REKENING", "ACCOUNT", "ACCOUNT", "POS", "HESABA GÖNDER"),
+        TextId.TEXT_SENDING_TABLES to listOf("互联网，请稍候", "BEZIG MET INTERNET\nWACHT TOT DE TAFEL VERSTUURD IS.", "SEND ORDERS, PLEASE WAIT", "WARTEN BITTE", "TUNGGU,INTERNET", "SİPARİŞ GÖNDERİLİYOR, LÜTFEN BEKLEYİN"),
+        TextId.TEXT_SETTINGS to listOf("改变配置", "VERANDER CONFIGURATIE", "CHANGE CONFIGURATION", "ANDERN EINSTELLUNGEN", "GANTI KONFIGURASI", "AYARLAR"),
+        TextId.TEXT_STOP to listOf("停止", "STOP", "STOP", "STOP", "STOP", "DUR"),
+        TextId.TEXT_STOP_PROGRAM to listOf("停止软件", "STOP PROGRAMMA", "STOP PROGRAM", "PROGRAM STOP", "STOP PROGRAM", "PROGRAMI DURDUR"),
+        TextId.TEXT_SUBTOTAL to listOf("合计", "SUBTOTAAL", "SUBTOTAL", "SUBTOTAL", "KHUSUS", "ARA TOPLAM"),
+        TextId.TEXT_UPDATE to listOf("更新", "UPDATE", "UPDATE", "UPDATE", "UPDATE", "GÜNCELLE"),
+        TextId.TEXT_UPDATE_MENU to listOf("菜单更新", "UPDATE MENU KAART", "UPDATE MENU CARD", "MENU UPDATE", "MENU PEMBARUAN", "MENÜYÜ GÜNCELLE")
     )
 
     private const val DEFAULT_STRING = "??";
@@ -151,6 +167,11 @@ object Translation {
     fun get(id: TextId): String {
         val lang = Global.getInstance().language.value
         return m_lin[id]?.getOrElse(lang-1) { DEFAULT_STRING } ?: DEFAULT_STRING
+    }
+
+    fun get(id: TextId, lang: ETaal): String
+    {
+        return m_lin[id]?.getOrElse(lang.value - 1) { DEFAULT_STRING } ?: DEFAULT_STRING
     }
 
     fun nextLanguage(): ETaal {
@@ -165,6 +186,8 @@ object Translation {
                 ETaal.LANG_DUTCH -> ETaal.LANG_ENGLISH
                 ETaal.LANG_ENGLISH -> ETaal.LANG_GERMAN
                 ETaal.LANG_GERMAN -> ETaal.LANG_INDONESIAN
+                ETaal.LANG_INDONESIAN -> ETaal.LANG_TURKISH
+                // You'll need to add logic for when to switch to Turkish here
                 else -> ETaal.LANG_SIMPLIFIED
             }
             when (global.language) {
@@ -193,6 +216,12 @@ object Translation {
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
+                ETaal.LANG_TURKISH -> try {
+                    if (CFG.getOption("turkish")) break
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+                // Also add a case for Turkish here
                 else -> {}
             }
         }
