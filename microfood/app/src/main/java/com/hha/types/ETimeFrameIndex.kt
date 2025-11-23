@@ -10,6 +10,7 @@ data class ETimeFrameIndex constructor(var index: Short) {
         public const val TIME_FRAME_NONE: Short = -5
         public const val TIME_FRAME_UNDEFINED: Short = 0
 
+        public const val TIME_FRAME0: Short = 0
         public const val TIME_FRAME1: Short = 1
         public const val TIME_FRAME2: Short = 2
         public const val TIME_FRAME3: Short = 3

@@ -10,7 +10,8 @@ enum class ETaal(public val value: Int) {
     LANG_ENGLISH(3),
     LANG_GERMAN(4),
     LANG_INDONESIAN(5),
-    LANG_TRADITIONAL(6);
+    LANG_TURKISH(6),
+    LANG_TRADITIONAL(8);
 
     companion object {
         /**

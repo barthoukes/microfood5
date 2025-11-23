@@ -1,0 +1,109 @@
+//==============================================================================
+//  @file       ticket_printer.proto
+//  @ingroup    proto database interface
+//  @brief      Operations on ticket printers
+//
+//  Messages for printers
+//
+//  @author     Bart Houkes
+//
+//------------------------------------------------------------------------------
+//  Copyright (c) Bart Houkes, 24-11-2025
+//
+//  Copyright notice:
+//  This software is property of Bart Houkes.
+//  Unauthorized duplication and disclosure to third parties is forbidden.
+//============================================================================*/
+
+syntax = "proto3";
+
+option csharp_namespace = "GrpcService";
+
+package prn;
+
+import "common_types.proto";
+
+// Add these Kotlin-specific options
+option java_multiple_files = true;
+option java_package = "com.hha.printer";
+
+service TicketPrinterService
+{
+    rpc AddRawText(AddRawTextRequest)  returns (PrinterStatusResponse) {}
+    rpc PrinterStatus(PrinterStatusRequest)  returns (PrinterStatusResponse) {}   
+    rpc HasSlipPrinter(HasSlipPrinterRequest)  returns (HasSlipPrinterResponse) {} 
+    rpc TestPrinters(common.Empty)  returns (common.Empty) {}
+    rpc WaitPrinters(common.Empty)  returns (WaitPrintersStatus) {}
+}
+
+message AddRawTextRequest
+{
+   PrinterLocation     location = 1;
+   string              text = 2;
+   Priority            priority = 3;
+   int32               repeat = 4;
+}
+
+message HasSlipPrinterRequest
+{
+}
+
+message HasSlipPrinterResponse
+{
+   bool                has_slip_printer = 1;
+}
+
+message PrinterStatusRequest
+{
+   PrinterLocation     location = 1;
+}
+
+message PrinterStatusResponse
+{
+   PrinterStatus       status = 1;
+}
+
+message WaitPrintersStatus
+{
+   bool                wait_printers_status = 1;
+}
+
+enum Priority
+{
+    PRIORITY_INVALID = 0;
+	PRIORITY_1 = 1;
+	PRIORITY_2 = 2;
+	PRIORITY_3 = 3;
+	PRIORITY_4 = 4;
+	PRIORITY_5 = 5;
+	PRIORITY_6 = 6;
+	PRIORITY_7 = 7;
+	PRIORITY_8 = 8;
+	PRIORITY_REROUTE = 9;
+}
+
+enum PrinterLocation
+{
+  PRINTER_LOCATION_BILL_PRN            = 0;
+  PRINTER_LOCATION_KITCHEN_PRN1        = 1;
+  PRINTER_LOCATION_DRINKS_PRN          = 2;
+  PRINTER_LOCATION_BAR_PRN             = 3;
+  PRINTER_LOCATION_MANAGER_PRN         = 4;
+  PRINTER_LOCATION_SLIP_PRN            = 5;
+  PRINTER_LOCATION_BARCODE_PRN         = 6;
+  PRINTER_LOCATION_LABEL_PRN           = 7;
+  PRINTER_LOCATION_KITCHEN_PRN2        = 8;
+  PRINTER_LOCATION_KITCHEN_PRN3        = 9;
+  PRINTER_LOCATION_KITCHEN_PRN4        = 10;
+  PRINTER_LOCATION_KITCHEN_COLLECT_PRN = 11;
+  PRINTER_LOCATION_INVALID_PRN         = 12;
+  PRINTER_LOCATION_AUTOMATIC_PRN       = 13;
+}
+
+enum PrinterStatus
+{
+  PRINTER_STATUS_OK          = 0;
+  PRINTER_STATUS_BUSY        = 1;
+  PRINTER_STATUS_READY       = 2;
+  PRINTER_STATUS_ERROR       = 3;
+}

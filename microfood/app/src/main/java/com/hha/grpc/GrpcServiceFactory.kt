@@ -27,6 +27,7 @@ import com.hha.service.PrepareTransactionService
 import com.hha.service.StorePartService
 import com.hha.service.StoreSmurfService
 import com.hha.service.TaxService
+import com.hha.service.TicketPrinterService
 import com.hha.service.ZipCodeService
 
 object GrpcServiceFactory
@@ -193,6 +194,12 @@ object GrpcServiceFactory
     {
         val channel = getChannel()
         return TaxService(channel)
+    }
+
+    fun createTicketPrinterService(): TicketPrinterService
+    {
+        val channel = getChannel()
+        return TicketPrinterService(channel)
     }
 
     fun createZipCodeService(): ZipCodeService

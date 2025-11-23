@@ -27,15 +27,15 @@ class DailyTimeFrameService(channel: ManagedChannel) : BaseGrpcService<DailyTime
         DailyTimeFrameServiceGrpcKt.DailyTimeFrameServiceCoroutineStub(channel)
     }
 
-    fun nextKitchenIndex(transactionId: Int, timeFrameIndex: Int): Int? = runBlocking {
+    fun nextKitchenIndex(transactionId: Int, timeFrameIndex: Short): Int = runBlocking {
         try {
             val request = TransactionIdTimeFrameIndexParam.newBuilder()
                 .setTransactionId(transactionId)
-                .setTimeFrameIndex(timeFrameIndex)
+                .setTimeFrameIndex(timeFrameIndex.toInt())
                 .build()
             stub.nextKitchenIndex(request).timeFrameIndex
         } catch (e: Exception) {
-            null
+            1
         }
     }
 
