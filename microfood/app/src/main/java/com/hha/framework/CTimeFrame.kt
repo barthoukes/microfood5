@@ -8,6 +8,7 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import com.hha.common.CookingState
 import com.hha.resources.CTimestamp
+import com.hha.types.ECookingState
 import com.hha.types.ETimeFrameIndex
 
 class CTimeFrame
@@ -63,11 +64,28 @@ class CTimeFrame
       val service = GrpcServiceFactory.createDailyTimeFrameService()
       service.endTimeFrame(
          m_operations.transactionId,
-         time_frame_index.index.toInt(),
+         time_frame_index.index.toShort(),
          m_operations.getDeviceId(),
          "", false,
          CookingState.COOKING_DONE
       )
+   }
+
+   fun endTimeFrame(
+      transactionId: Int,
+      pcNumber: Short,
+      newTime: String,
+      timeChanged: Boolean,
+      newState: ECookingState
+   )
+   {
+      val service = GrpcServiceFactory.createDailyTimeFrameService()
+
+      val state = newState.toCookingState()
+      service.endTimeFrame(
+         transactionId, time_frame_index.index,
+         pcNumber, newTime,
+         timeChanged, state)
    }
 
    fun closeTimeFrame()
@@ -77,7 +95,7 @@ class CTimeFrame
       val now = CTimestamp()
       service.endTimeFrame(
          m_operations.transactionId,
-         time_frame_index.toInt(),
+         time_frame_index.index,
          m_operations.getDeviceId(),
          now.getDateTime(), false,
          CookingState.COOKING_DONE

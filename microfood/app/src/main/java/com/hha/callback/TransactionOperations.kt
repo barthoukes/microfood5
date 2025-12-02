@@ -7,6 +7,7 @@ import com.hha.types.EPaymentStatus
 // Interface defining the payment functions we want to expose
 interface TransactionOperations
 {
+   var transactionId: kotlin.Int
    fun getTotalTransaction(): CMoney
    fun getCustomerId(): Int
 }

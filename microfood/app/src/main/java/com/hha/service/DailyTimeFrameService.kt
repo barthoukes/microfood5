@@ -115,14 +115,14 @@ class DailyTimeFrameService(channel: ManagedChannel) : BaseGrpcService<DailyTime
         }
     }
 
-    fun endTimeFrame(transactionId: Int, timeFrameId: Int,
+    fun endTimeFrame(transactionId: Int, timeFrameId: Short,
                      deviceId: Short, delayedTime: String,
                      isDelayed: Boolean, newState: CookingState): Boolean = runBlocking {
         try {
             val request = EndTimeFrameRequest
                 .newBuilder()
                 .setTransactionId(transactionId)
-                .setTimeFrameId(timeFrameId)
+                .setTimeFrameId(timeFrameId.toInt())
                 .setDeviceId(deviceId.toInt())
                 .setDelayedTime(delayedTime)
                 .setIsDelayed(isDelayed)

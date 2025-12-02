@@ -273,14 +273,14 @@ class PageOrderActivity : AppCompatActivity(), ModalDialogYesNo.MessageBoxYesNoL
         m_menuItemsAdapter.notifyDataSetChanged()
     }
 
-    override fun onDialogPositiveClick(dialog: DialogFragment)
+    override fun onDialogPositiveClick(dialog: DialogFragment, requestCode: Int)
     {
         // User clicked "Yes".
         // Put your logic here, for example: clear the transaction.
         Log.d(tag, "MessageBox User clicked Yes.")
     }
 
-    override fun onDialogNegativeClick(dialog: DialogFragment)
+    override fun onDialogNegativeClick(dialog: DialogFragment, requestCode: Int)
     {
         // User clicked "No".
         // The dialog is automatically dismissed. You can log or do nothing.
@@ -502,8 +502,8 @@ class PageOrderActivity : AppCompatActivity(), ModalDialogYesNo.MessageBoxYesNoL
     {
         val dialog = ModalDialogYesNo.newInstance(
             "Confirm Action",
-            "Are you sure you want to proceed?"
-        )
+            "Are you sure you want to proceed?",
+            0)
         dialog.show(supportFragmentManager, "MessageBoxYesNo")
     }
 
@@ -511,8 +511,8 @@ class PageOrderActivity : AppCompatActivity(), ModalDialogYesNo.MessageBoxYesNoL
     {
         val dialog = ModalDialogYesNo.newInstance(
             "Undo Changes",
-            "Undo the changes made to the order?"
-        )
+            "Undo the changes made to the order?",
+            1)
         dialog.show(supportFragmentManager, "MessageBoxYesNo")
     }
 

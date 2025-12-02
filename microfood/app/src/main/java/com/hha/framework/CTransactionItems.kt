@@ -19,6 +19,7 @@ import com.hha.types.EItemLocation.Companion.location2Locations
 import com.hha.types.ENameType
 import com.hha.types.EOrderLevel
 import com.hha.types.EPayed
+import com.hha.types.EPaymentStatus
 import com.hha.types.ETaal
 import com.hha.types.ETimeFrameIndex
 import com.hha.types.ETreeRow
@@ -29,12 +30,12 @@ class CTransactionItems : Iterable<CSortedItem>
     var m_state: EEnterState = EEnterState.ENTER_ITEM_STATE
     val global = Global.getInstance()
     val CFG = global.CFG
-    var m_items = CSortedItemList()
+    var mItems = CSortedItemList()
     var change2spice = false
     var m_clusterId: Short = -1
     var m_twinItemId = -1
-    var m_allowChanges = true
-    var m_changed = false
+    var mAllowChanges = true
+    var mChanged = false
     var m_newChanged = false
     val m_clusterIsRunning = false
     val m_viewMode: EViewMode = EViewMode.VIEW_MODE_TRANSACTION ///< Are we in split or preview mode?
@@ -73,7 +74,7 @@ class CTransactionItems : Iterable<CSortedItem>
             )
         )
         {
-            global.cursor.set(m_items.size)
+            global.cursor.set(mItems.size)
             retVal = true
         }
         return retVal
@@ -85,7 +86,7 @@ class CTransactionItems : Iterable<CSortedItem>
     /*============================================================================*/
     private fun addOne(cursor: CCursor): Boolean
     {
-        if (m_allowChanges == false || m_viewMode != EViewMode.VIEW_MODE_TRANSACTION)
+        if (mAllowChanges == false || m_viewMode != EViewMode.VIEW_MODE_TRANSACTION)
         {
             return false;
         }
@@ -138,7 +139,7 @@ class CTransactionItems : Iterable<CSortedItem>
     {
         // Increase in items.
         var mutableQuantity = quantity
-        val item: CItem = m_items.getItem(cursor) ?: return false
+        val item: CItem = mItems.getItem(cursor) ?: return false
 
         var why = EDeletedStatus.DELETE_NOT
         var oldTimeFrame = ETimeFrameIndex(ETimeFrameIndex.TIME_FRAME_UNDEFINED)
@@ -223,7 +224,7 @@ class CTransactionItems : Iterable<CSortedItem>
         {
             var idx = CCursor(0)
             // Add all the Spices and Extras also the same amount, remove them if 0!
-            for (subItem: CItem in m_items.flatMap { it.items })
+            for (subItem: CItem in mItems.flatMap { it.items })
             {
                 if (subItem.sequence == item.sequence &&
                     (subItem.level == EOrderLevel.LEVEL_EXTRA
@@ -276,13 +277,13 @@ class CTransactionItems : Iterable<CSortedItem>
     //override fun iterator(): Iterator<CSortedItem> = m_items.iterator()
     fun getSortedItem(index: Int): CSortedItem
     {
-        return m_items.getSortedItem(index)
+        return mItems.getSortedItem(index)
     }
 
     fun calculateTotalItems() : C3Moneys
     {
         var total = C3Moneys()
-        for (item in m_items)
+        for (item in mItems)
         {
             total = total + item.calculateTotalItems()
         }
@@ -290,12 +291,12 @@ class CTransactionItems : Iterable<CSortedItem>
     }
 
     val empty: Boolean
-        get() = m_items.empty
+        get() = mItems.empty
 
     fun get(position: Int): CItem?
     {
         var pos = position
-        for (item in m_items)
+        for (item in mItems)
         {
             if (pos < item.size)
             {
@@ -306,17 +307,39 @@ class CTransactionItems : Iterable<CSortedItem>
         return null
     }
 
-    fun hasAnyChanges() : Boolean
+    fun getAllKitchenTotal(
+        payStatus: EPaymentStatus, isWithStatiegeld: Boolean): CMoney
     {
-        return m_changed
+        val transactionId = m_itemOperations.transactionId
+
+        val service = GrpcServiceFactory.createDailyTransactionItemService()
+        val status = payStatus.toPaymentStatus()
+
+
+        val total = service.getAllKitchenTotal(
+            transactionId, status, isWithStatiegeld)
+
+        return CMoney(total?.cents ?: 0)
     }
 
-    fun itemLines() = m_items.itemLines
+    fun getItemTotal(location: EItemLocation,
+                     payStatus: EPaymentStatus,
+                     withStatiegeld: Boolean) =
+        mItems.getItemTotal(location, payStatus, withStatiegeld)
 
-    fun itemSum() = m_items.itemSum
+    fun getTotalFromIndex(line: Int): CMoney = mItems.getTotalFromIndex(line)
+
+    fun hasAnyChanges() : Boolean
+    {
+        return mChanged
+    }
+
+    fun itemLines() = mItems.itemLines
+
+    fun itemSum() = mItems.itemSum
 
     // Add this iterator implementation
-    override fun iterator(): Iterator<CSortedItem> = m_items.iterator()
+    override fun iterator(): Iterator<CSortedItem> = mItems.iterator()
 
     private fun insertItem(
         cursor: CCursor, menuItem: CMenuItem, quantity: Int, prices: CPriceAndHalfPrice,
@@ -329,7 +352,7 @@ class CTransactionItems : Iterable<CSortedItem>
         var page = 0
         var clusters = 0
         //CsqlTaxRateIterator itax
-        if (m_allowChanges == false || m_viewMode != EViewMode.VIEW_MODE_TRANSACTION)
+        if (mAllowChanges == false || m_viewMode != EViewMode.VIEW_MODE_TRANSACTION)
         {
             return false;
         }
@@ -451,7 +474,7 @@ class CTransactionItems : Iterable<CSortedItem>
                 // m_clientOrdersHandler ->
                 //    insertTwinItem(twin_item_id, cursor, quantity, 2, taxPercentage);
             }
-            global.cursor.set(m_items.itemLines)
+            global.cursor.set(mItems.itemLines)
         }
         if (m_state == EEnterState.ENTER_ITEM_STATE)
         {
@@ -459,6 +482,13 @@ class CTransactionItems : Iterable<CSortedItem>
             //m_transactionItemControl.askOrDisplayClusters(clusters, item_id);
         }
         return true;
+    }
+
+    fun numberKitchenItems(transactionId: Int, timeFrameId: ETimeFrameIndex): Int
+    {
+        val service = GrpcServiceFactory.createDailyTransactionItemService()
+        val number = service.numberKitchenItems(transactionId, timeFrameId.index)
+        return number
     }
 
     fun touchItem(menuItem: CMenuItem, clusterId: Short): Boolean
@@ -556,7 +586,7 @@ class CTransactionItems : Iterable<CSortedItem>
             }
 
             // Check if the item is at the end.
-            if (global.cursor.position >= m_items.size)
+            if (global.cursor.position >= mItems.size)
             {
                 // If so: Call another function.
                 retVal = touchEnd(menuItem, 1, prices, clusterId, twinItem)
@@ -590,7 +620,7 @@ class CTransactionItems : Iterable<CSortedItem>
         Log.i("CTransactionItems", "portion cursor=${cursor.position}")
 
 
-        val item: CItem = m_items.getItem(cursor)!!
+        val item: CItem = mItems.getItem(cursor)!!
         val nextPortion = when
         {
             (item.parts == 2) -> 1
@@ -758,7 +788,7 @@ class CTransactionItems : Iterable<CSortedItem>
 
     fun getCursor(selectedTransactionItem: CItem): Int
     {
-        return m_items.getCursor(selectedTransactionItem)
+        return mItems.getCursor(selectedTransactionItem)
     }
 
     /*----------------------------------------------------------------------------*/
@@ -776,7 +806,7 @@ class CTransactionItems : Iterable<CSortedItem>
             return false
         }
         retVal = true
-        global.cursor.set(m_items.size)
+        global.cursor.set(mItems.size)
 
         // No items yet, then add the food?
         if (global.cursor.position == 0)
@@ -956,13 +986,13 @@ class CTransactionItems : Iterable<CSortedItem>
      */
     fun deleteItem(cursor: CCursor, timeFrameId: ETimeFrameIndex, why: EDeletedStatus): Boolean
     {
-        var size = m_items.size
+        var size = mItems.size
         if (cursor.position < 0 || cursor.position >= size)
         {
             Log.e("CTI", "DeleteItem  Cursor overflow!!")
             return false
         }
-        var item: CItem = m_items.getItem(cursor) ?: return false
+        var item: CItem = mItems.getItem(cursor) ?: return false
         var statiegeld = item.getStatiegeldPerPiece()
         var unitPrice = item.getUnitPrice()
         var quantity = item.getQuantity()
@@ -1004,13 +1034,13 @@ class CTransactionItems : Iterable<CSortedItem>
                     whys,
                     item.timeFrameId.toInt()
                 )
-                m_items.eraseItem(cursor)
+                mItems.eraseItem(cursor)
                 size = size - 1
-                m_listeners.forEach { it.onItemRemoved(cursor.position, m_items.itemLines) }
+                m_listeners.forEach { it.onItemRemoved(cursor.position, mItems.itemLines) }
 
                 while (cursor.position < size)
                 {
-                    item = m_items.getItem(cursor) ?: break
+                    item = mItems.getItem(cursor) ?: break
                     unitPrice = item.getUnitPrice();
                     quantity = item.getQuantity();
                     statiegeld = item.getStatiegeldPerPiece();
@@ -1033,9 +1063,9 @@ class CTransactionItems : Iterable<CSortedItem>
                             item.deviceId, item.clusterId, Payed.PAID_NO,
                             statiegeld, whys, item.timeFrameId.toInt()
                         )
-                        m_items.eraseItem(cursor)
+                        mItems.eraseItem(cursor)
                         size = size - 1
-                        m_listeners.forEach { it.onItemRemoved(cursor.position, m_items.itemLines) }
+                        m_listeners.forEach { it.onItemRemoved(cursor.position, mItems.itemLines) }
                     }
                 }
             }
@@ -1055,12 +1085,12 @@ class CTransactionItems : Iterable<CSortedItem>
                     item.clusterId, Payed.PAID_NO, statiegeld, whys,
                     item.timeFrameId.toInt()
                 )
-                m_items.eraseItem(cursor)
+                mItems.eraseItem(cursor)
                 size = size - 1
-                m_listeners.forEach { it.onItemRemoved(cursor.position, m_items.itemLines) }
+                m_listeners.forEach { it.onItemRemoved(cursor.position, mItems.itemLines) }
                 while (cursor.position < size)
                 {
-                    item = m_items.getItem(cursor) ?: break
+                    item = mItems.getItem(cursor) ?: break
                     statiegeld = item.getStatiegeldPerPiece()
                     unitPrice = item.getUnitPrice()
                     quantity = item.getQuantity()
@@ -1082,9 +1112,9 @@ class CTransactionItems : Iterable<CSortedItem>
                             item.clusterId, Payed.PAID_NO, statiegeld,
                             whys, item.timeFrameId.toInt()
                         )
-                        m_items.eraseItem(cursor)
+                        mItems.eraseItem(cursor)
                         size = size - 1
-                        m_listeners.forEach { it.onItemRemoved(cursor.position, m_items.itemLines) }
+                        m_listeners.forEach { it.onItemRemoved(cursor.position, mItems.itemLines) }
                     } else break
                 }
             }
@@ -1106,9 +1136,9 @@ class CTransactionItems : Iterable<CSortedItem>
                     Payed.PAID_NO, statiegeld,
                     whys, item.timeFrameId.toInt()
                 )
-                m_items.eraseItem(cursor)
+                mItems.eraseItem(cursor)
                 size = size - 1
-                m_listeners.forEach { it.onItemRemoved(cursor.position, m_items.itemLines) }
+                m_listeners.forEach { it.onItemRemoved(cursor.position, mItems.itemLines) }
             }
 
             EOrderLevel.LEVEL_ASK_CLUSTER ->
@@ -1142,7 +1172,7 @@ class CTransactionItems : Iterable<CSortedItem>
         val drinks = location2Locations(EItemLocation.ITEM_BAR) +
            location2Locations(EItemLocation.ITEM_DRINKS)
         var m = CMoney(0)
-        for (item in m_items)
+        for (item in mItems)
         {
             if ((item.getLocations() and drinks) != 0)
             {
@@ -1155,7 +1185,7 @@ class CTransactionItems : Iterable<CSortedItem>
     fun getItemsTotal(): CMoney
     {
         var m = CMoney(0)
-        for (item in m_items)
+        for (item in mItems)
         {
             m = m + item.getTotal()
         }
@@ -1167,7 +1197,7 @@ class CTransactionItems : Iterable<CSortedItem>
         val drinks = location2Locations(EItemLocation.ITEM_BAR) +
             location2Locations(EItemLocation.ITEM_DRINKS)
         var m = CMoney(0)
-        for (item in m_items)
+        for (item in mItems)
         {
             if ((item.getLocations() and drinks) == 0)
             {
@@ -1178,12 +1208,12 @@ class CTransactionItems : Iterable<CSortedItem>
     }
 
     private fun getNewSequence(): Int =
-        (m_items.maxOfOrNull { it.getSequence() } ?: 0) + 1
+        (mItems.maxOfOrNull { it.getSequence() } ?: 0) + 1
 
     fun getNrItemsAndSubItems(): Int
     {
         var m = 0
-        for (item in m_items)
+        for (item in mItems)
         {
             m = m + item.size
         }
@@ -1217,10 +1247,10 @@ class CTransactionItems : Iterable<CSortedItem>
         val subSubSequence = 0 // NORMAL_ITEM_SUB_SEQUENCE;
 
         val itemsDb = GrpcServiceFactory.createDailyTransactionItemService()
-        if (cursor.position >= 0 && cursor.position < m_items.size)
+        if (cursor.position >= 0 && cursor.position < mItems.size)
         {
             // Same as below cursor?
-            val mi = m_items.mainItem(cursor)
+            val mi = mItems.mainItem(cursor)
             if (mi != null)
             {
                 val i: CItem = mi.mainItem()
@@ -1242,7 +1272,7 @@ class CTransactionItems : Iterable<CSortedItem>
                 }
             }
             // Not same as below cursor.
-            val mainItem = m_items.mainItem(cursor)
+            val mainItem = mItems.mainItem(cursor)
             if (mainItem != null)
             {
                 sequence = mainItem.getSequence()
@@ -1250,12 +1280,12 @@ class CTransactionItems : Iterable<CSortedItem>
                 Log.i("CTransactionItems", "insertItem should not happen anymore!!")
             } else
             {
-                cursor.set(m_items.size)
+                cursor.set(mItems.size)
                 sequence = getNewSequence()
             }
         } else
         {
-            cursor.set(m_items.size);
+            cursor.set(mItems.size);
             sequence = getNewSequence()
         }
 
@@ -1309,22 +1339,22 @@ class CTransactionItems : Iterable<CSortedItem>
             statiegeld
         )
         i.setQuantityPrice(quantity, unitPrice, statiegeld);
-        if (cursor.position >= m_items.size)
+        if (cursor.position >= mItems.size)
         {
             val cs = CSortedItem(i)
-            m_items.add(cs)
+            mItems.add(cs)
             m_listeners.forEach { it.onItemAdded(cursor.position, i) }
         } else
         {
             // Increase sequence ID's.
-            for (item in m_items)
+            for (item in mItems)
             {
                 if (item.getSequence() >= sequence)
                 {
                     item.increaseSequence()
                 }
             }
-            m_items.add(cursor, i)
+            mItems.add(cursor, i)
             m_listeners.forEach { it.onItemAdded(cursor.position, i) }
         }
         return true;
@@ -1332,12 +1362,12 @@ class CTransactionItems : Iterable<CSortedItem>
 
     private fun invalidateDisplayAndSetOrderChanged()
     {
-        m_changed = true;
+        mChanged = true;
         m_newChanged = true;
     }
 
     fun undoTimeFrame(timeFrameId: ETimeFrameIndex, deviceId: Short)
     {
-        m_items.undoTimeFrame(global.transactionId, timeFrameId, deviceId)
+        mItems.undoTimeFrame(global.transactionId, timeFrameId, deviceId)
     }
 }

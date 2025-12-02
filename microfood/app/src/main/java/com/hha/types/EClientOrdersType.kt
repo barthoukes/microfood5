@@ -39,22 +39,19 @@ enum class EClientOrdersType(val value: Int)
                 else -> EMPTY
             }
         }
+    }
 
-        fun toClientOrdersType(value: EClientOrdersType): ClientOrdersType
-        {
-            return when (value)
-            {
-                INIT -> ClientOrdersType.CLIENT_ORDER_INIT
-                OPEN -> ClientOrdersType.CLIENT_ORDER_OPEN
-                PAYING -> ClientOrdersType.CLIENT_ORDER_PAYING
-                CLOSED -> ClientOrdersType.CLIENT_ORDER_CLOSED
-                OPEN_PAID -> ClientOrdersType.CLIENT_ORDER_OPEN_PAID
-                EMPTY -> ClientOrdersType.CLIENT_ORDER_EMPTY
-                ALL -> ClientOrdersType.CLIENT_ORDER_ALL
-                PERSONNEL -> ClientOrdersType.CLIENT_ORDER_PERSONNEL
-                CREDIT -> ClientOrdersType.CLIENT_ORDER_CREDIT
-                CLOSED_CREDIT -> ClientOrdersType.CLIENT_ORDER_CLOSED_CREDIT
-            }
-        }
+    fun toClientOrdersType(): ClientOrdersType = when (this)
+    {
+        INIT -> ClientOrdersType.CLIENT_ORDER_INIT
+        OPEN -> ClientOrdersType.CLIENT_ORDER_OPEN
+        PAYING -> ClientOrdersType.CLIENT_ORDER_PAYING
+        CLOSED -> ClientOrdersType.CLIENT_ORDER_CLOSED
+        OPEN_PAID -> ClientOrdersType.CLIENT_ORDER_OPEN_PAID
+        EMPTY -> ClientOrdersType.CLIENT_ORDER_EMPTY
+        ALL -> ClientOrdersType.CLIENT_ORDER_ALL
+        PERSONNEL -> ClientOrdersType.CLIENT_ORDER_PERSONNEL
+        CREDIT -> ClientOrdersType.CLIENT_ORDER_CREDIT
+        CLOSED_CREDIT -> ClientOrdersType.CLIENT_ORDER_CLOSED_CREDIT
     }
 }

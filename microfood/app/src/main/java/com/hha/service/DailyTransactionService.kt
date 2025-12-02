@@ -546,11 +546,11 @@ class DailyTransactionService(channel: ManagedChannel) : BaseGrpcService<DailyTr
         }
     }
 
-    fun setRfidKeyId(transactionId: Int, newRfidKeyId: Int): Boolean = runBlocking {
+    fun setRfidKeyId(transactionId: Int, newRfidKeyId: Short): Boolean = runBlocking {
         try {
             val request = SetRfidKeyIdRequest.newBuilder()
                 .setTransactionId(transactionId)
-                .setNewRfidKeyId(newRfidKeyId)
+                .setNewRfidKeyId(newRfidKeyId.toInt())
                 .build()
             stub.setRfidKeyId(request)
             true

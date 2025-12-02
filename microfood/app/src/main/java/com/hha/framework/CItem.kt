@@ -7,6 +7,7 @@ import com.hha.types.CMoney
 import com.hha.types.ENameType
 import com.hha.types.EOrderLevel
 import com.hha.types.EPayed
+import com.hha.types.EPaymentStatus
 import com.hha.types.ETaal
 import com.hha.types.ETimeFrameIndex
 import com.hha.types.ETreeRow
@@ -42,7 +43,8 @@ class CItem(
     private var unitPrice: CMoney = CMoney(0),
     private var quantity: Int = 0,
     private var statiegeld : CMoney = CMoney(0)
-) {
+)
+{
 
     // Add this new parameterless constructor
     constructor() : this(
@@ -81,11 +83,12 @@ class CItem(
     private var totalPrice: CMoney = CMoney(0)
         private set
 
-    init {
+    init
+    {
         calculateTotal()
     }
 
-    constructor(item: CItem) : this (
+    constructor(item: CItem) : this(
         menuItemId = item.menuItemId,
         twinItemId = item.twinItemId,
         alias = item.alias,
@@ -178,7 +181,7 @@ class CItem(
         CMoney(unit_statiegeld)
     )
 
-    constructor(item : Item) : this(
+    constructor(item: Item) : this(
         menuItemId = item.menuItemId.toInt(),
         twinItemId = -1,
         alias = item.aliasName,
@@ -211,7 +214,109 @@ class CItem(
         statiegeld = CMoney(item.unitStatiegeld)
     )
 
-    fun merge(found: CItem) {
+    fun addQuantity(quantity: Int)
+    {
+        this.quantity += quantity
+        calculateTotal()
+    }
+
+    private fun calculateTotal()
+    {
+        totalPrice = (unitPrice + statiegeld) * quantity
+    }
+
+    fun getCustomerDisplayName(displayMaxWidth: Int, alignLCR: Short): String
+    {
+        var name = localName.replace("½", "ª")
+
+        return when
+        {
+            name.length > displayMaxWidth -> name.substring(0, displayMaxWidth)
+            name.length < displayMaxWidth -> when (alignLCR)
+            {
+                0.toShort() -> name.padEnd(displayMaxWidth, ' ')
+                1.toShort() ->
+                {
+                    name = name.padStart(name.length + (displayMaxWidth - name.length) / 2, ' ')
+                    name.padEnd(displayMaxWidth, ' ')
+                }
+
+                2.toShort() -> name.padStart(displayMaxWidth, ' ')
+                else -> name.padEnd(displayMaxWidth, ' ')
+            }
+
+            else -> name
+        }
+    }
+
+    fun getFirstLocation(): EItemLocation
+    {
+        return EItemLocation.getFirstLocation(locations)
+    }
+
+    fun getStatiegeld(): CMoney = statiegeld
+
+    fun getTaxAmount(): CMoney
+    {
+        val tx = (getTotalWithoutStatiegeld().toLong() * tax) / (100.0 + tax)
+        return CMoney((tx + 0.5).toInt())
+    }
+
+    fun getTotalItemsStatiegeld(): Int = if (!statiegeld.empty()) quantity else 0
+
+    fun getUnitPrice(): CMoney = unitPrice
+
+    fun isValidItem(payStatus: EPaymentStatus): Boolean
+    {
+        var retVal = true
+        if (payStatus != EPaymentStatus.PAY_STATUS_ANY)
+        {
+            when (isPaid)
+            {
+                EPayed.PAID_NO -> if (payStatus != EPaymentStatus.PAY_STATUS_UNPAID)
+                {
+                    retVal = false
+                }
+
+                EPayed.PAID_ORDER -> if (payStatus == EPaymentStatus.PAY_STATUS_UNPAID)
+                {
+                    retVal = false
+                }
+
+                EPayed.PAID_BEFORE -> if (payStatus == EPaymentStatus.PAY_STATUS_PAID_ORDER
+                    || payStatus == EPaymentStatus.PAY_STATUS_UNPAID
+                )
+                {
+                    retVal = false
+                }
+
+                EPayed.PAID_CANCEL -> if (payStatus != EPaymentStatus.PAY_STATUS_CANCEL)
+                {
+                    retVal = false
+                }
+
+                EPayed.PAID_ALL ->
+                {
+                }
+            }
+        }
+        return retVal
+    }
+
+    fun getQuantity(): Int = quantity
+
+    fun getTotal(): CMoney = totalPrice
+
+    fun getTotalWithoutStatiegeld(): CMoney = CMoney(quantity * unitPrice.cents())
+
+    fun getTotalStatiegeld(): CMoney = CMoney(quantity * statiegeld.cents())
+
+    fun getStatiegeldPerPiece(): Int = statiegeld.cents()
+
+    fun isValid(): Boolean = id >= 0
+
+    fun merge(found: CItem)
+    {
         alias = found.alias
         chineseName = found.chineseName
         localName = found.localName
@@ -235,24 +340,59 @@ class CItem(
         chinesePrinterName = found.chinesePrinterName
     }
 
-    fun isValid(): Boolean = id >= 0
-
     fun name(lang: ETaal): String =
         if (lang == ETaal.LANG_SIMPLIFIED ||
-            lang == ETaal.LANG_TRADITIONAL) chineseName else localName
+            lang == ETaal.LANG_TRADITIONAL
+        ) chineseName else localName
 
-    fun updateName() {
+    fun setQuantityPrice(quantity: Int, unitPrice: CMoney, statiegld: CMoney = CMoney(0))
+    {
+        this.quantity = quantity
+        this.unitPrice = unitPrice
+        statiegeld = statiegld
+        calculateTotal()
+    }
+
+    fun setUnitPrice(unitPrice: CMoney)
+    {
+        this.unitPrice = unitPrice
+        calculateTotal()
+    }
+
+    fun setUnitPrice(unitPrice: Int)
+    {
+        this.unitPrice = CMoney(unitPrice)
+        calculateTotal()
+    }
+
+    fun setQuantity(quantity: Int)
+    {
+        this.quantity = quantity
+        calculateTotal()
+    }
+
+    fun setStatiegeld(statiegld: Int)
+    {
+        statiegeld = CMoney(statiegld)
+        calculateTotal()
+    }
+
+    fun updateName()
+    {
         val product = CMenuCards.getInstance().getProductFromProductId(menuItemId)
-        if (product != null) {
+        if (product != null)
+        {
             chineseName = product.name(ETaal.LANG_SIMPLIFIED, parts, ENameType.NAME_SCREEN, false)
             localName = product.name(ETaal.LANG_DUTCH, parts, ENameType.NAME_SCREEN, false)
             chinesePrinterName =
                 product.name(ETaal.LANG_SIMPLIFIED, parts, ENameType.NAME_PRINTER, false)
             localPrinterName = product.name(ETaal.LANG_DUTCH, parts, ENameType.NAME_PRINTER, false)
 
-            if (twinItemId > 0) {
+            if (twinItemId > 0)
+            {
                 val twinProduct = CMenuCards.getInstance().getProductFromProductId(twinItemId)
-                if (twinProduct != null) {
+                if (twinProduct != null)
+                {
                     chineseName += twinProduct.name(
                         ETaal.LANG_SIMPLIFIED,
                         2,
@@ -279,92 +419,13 @@ class CItem(
                     )
                 }
             }
-        }
-        else {
+        } else
+        {
             chineseName = "-"
             localName = "-"
             chinesePrinterName = "-"
             localPrinterName = "-"
         }
-    }
-
-    fun getFirstLocation(): EItemLocation {
-        return EItemLocation.getFirstLocation(locations)
-    }
-
-    fun getCustomerDisplayName(displayMaxWidth: Int, alignLCR: Short): String {
-        var name = localName.replace("½", "ª")
-
-        return when {
-            name.length > displayMaxWidth -> name.substring(0, displayMaxWidth)
-            name.length < displayMaxWidth -> when (alignLCR) {
-                0.toShort() -> name.padEnd(displayMaxWidth, ' ')
-                1.toShort() -> {
-                    name = name.padStart(name.length + (displayMaxWidth - name.length) / 2, ' ')
-                    name.padEnd(displayMaxWidth, ' ')
-                }
-                2.toShort() -> name.padStart(displayMaxWidth, ' ')
-                else -> name.padEnd(displayMaxWidth, ' ')
-            }
-            else -> name
-        }
-    }
-
-    fun setQuantity(quantity: Int) {
-        this.quantity = quantity
-        calculateTotal()
-    }
-
-    fun addQuantity(quantity: Int) {
-        this.quantity += quantity
-        calculateTotal()
-    }
-
-    fun getTotal(): CMoney = totalPrice
-
-    fun getQuantity(): Int = quantity
-
-    fun getTotalWithoutStatiegeld(): CMoney = CMoney(quantity * unitPrice.cents())
-
-    fun getTotalStatiegeld(): CMoney = CMoney(quantity * statiegeld.cents())
-
-    fun getStatiegeldPerPiece(): Int = statiegeld.cents()
-
-    private fun calculateTotal() {
-        totalPrice = (unitPrice + statiegeld) * quantity
-    }
-
-    fun setQuantityPrice(quantity: Int, unitPrice: CMoney, statiegld: CMoney = CMoney(0)) {
-        this.quantity = quantity
-        this.unitPrice = unitPrice
-        statiegeld = statiegld
-        calculateTotal()
-    }
-
-    fun setUnitPrice(unitPrice: CMoney) {
-        this.unitPrice = unitPrice
-        calculateTotal()
-    }
-
-    fun setUnitPrice(unitPrice: Int) {
-        this.unitPrice = CMoney(unitPrice)
-        calculateTotal()
-    }
-
-    fun getUnitPrice(): CMoney = unitPrice
-
-    fun getStatiegeld(): CMoney = statiegeld
-
-    fun getTotalItemsStatiegeld(): Int = if (!statiegeld.empty()) quantity else 0
-
-    fun setStatiegeld(statiegld: Int) {
-        statiegeld = CMoney(statiegld)
-        calculateTotal()
-    }
-
-    fun getTaxAmount(): CMoney {
-        val tx = (getTotalWithoutStatiegeld().toLong() * tax) / (100.0 + tax)
-        return CMoney((tx + 0.5).toInt())
     }
 
 }

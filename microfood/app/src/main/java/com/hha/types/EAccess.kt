@@ -43,4 +43,16 @@ enum class EAccess(val value: Int) {
       }
 
    } // Companion
+
+   fun toAccess(): Access
+   {
+      return when (this)
+      {
+         ACCESS_EMPLOYEE_KEY -> Access.EMPLOYEE_KEY
+         ACCESS_MANAGER_KEY -> Access.MANAGER_KEY
+         ACCESS_NO_KEY -> Access.NO_KEY
+         ACCESS_SERVICE_KEY -> Access.SERVICE_KEY
+         else -> Access.INVALID_KEY
+      }
+   }
 }
