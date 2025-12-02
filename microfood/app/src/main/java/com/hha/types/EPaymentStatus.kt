@@ -43,23 +43,23 @@ enum class EPaymentStatus(val value: Int)
                 else -> PAY_STATUS_UNPAID // default fallback for UNRECOGNIZED or unknown values
             }
         }
+    }
 
-        /**
-         * Convert from EPaymentStatus to protobuf PaymentStatus
-         * @param status The EPaymentStatus to convert
-         * @return Corresponding protobuf PaymentStatus
-         */
-        fun toPaymentStatus(status: EPaymentStatus): PaymentStatus
+    /**
+     * Convert from EPaymentStatus to protobuf PaymentStatus
+     * @param status The EPaymentStatus to convert
+     * @return Corresponding protobuf PaymentStatus
+     */
+    fun toPaymentStatus(): PaymentStatus
+    {
+        return when (this)
         {
-            return when (status)
-            {
-                PAY_STATUS_UNPAID -> PaymentStatus.PAY_STATUS_UNPAID
-                PAY_STATUS_PAID_ORDER -> PaymentStatus.PAY_STATUS_PAID_ORDER
-                PAY_STATUS_PAID_BEFORE -> PaymentStatus.PAY_STATUS_PAID_BEFORE
-                PAY_STATUS_PAID_ORDER_BEFORE -> PaymentStatus.PAY_STATUS_PAID_ORDER_BEFORE
-                PAY_STATUS_CANCEL -> PaymentStatus.PAY_STATUS_CANCEL
-                PAY_STATUS_ANY -> PaymentStatus.PAY_STATUS_ANY
-            }
+            PAY_STATUS_UNPAID -> PaymentStatus.PAY_STATUS_UNPAID
+            PAY_STATUS_PAID_ORDER -> PaymentStatus.PAY_STATUS_PAID_ORDER
+            PAY_STATUS_PAID_BEFORE -> PaymentStatus.PAY_STATUS_PAID_BEFORE
+            PAY_STATUS_PAID_ORDER_BEFORE -> PaymentStatus.PAY_STATUS_PAID_ORDER_BEFORE
+            PAY_STATUS_CANCEL -> PaymentStatus.PAY_STATUS_CANCEL
+            PAY_STATUS_ANY -> PaymentStatus.PAY_STATUS_ANY
         }
     }
 }

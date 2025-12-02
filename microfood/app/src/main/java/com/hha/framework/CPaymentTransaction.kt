@@ -65,7 +65,7 @@ data class CPaymentTransaction(
       // Single loop to process each payment once.
       for (n in 0..<count)
       {
-         val p: PaymentDetails = paymentDetailsList.getPaymentDetails(n) ?: continue // Safety check
+         val p: PaymentDetails = paymentDetailsList.getPaymentDetails(n) ?: continue
          val paid = EPayed.fromPayed(p.isPaid)
          val method = EPaymentMethod.fromPaymentMethod(p.paymentMethod)
          val m = CMoney(p.total)

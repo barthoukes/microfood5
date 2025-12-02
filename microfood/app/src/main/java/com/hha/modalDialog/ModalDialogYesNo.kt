@@ -8,17 +8,17 @@ import androidx.fragment.app.DialogFragment
 
 class ModalDialogYesNo : DialogFragment()
 {
-
    // 1. Listener Interface: Activities will implement this to get the result.
    interface MessageBoxYesNoListener
    {
-      fun onDialogPositiveClick(dialog: DialogFragment) // "Yes" was clicked
-      fun onDialogNegativeClick(dialog: DialogFragment) // "No" was clicked
+      fun onDialogPositiveClick(dialog: DialogFragment, requestCode: Int) // "Yes" was clicked
+      fun onDialogNegativeClick(dialog: DialogFragment, requestCode: Int) // "No" was clicked
    }
 
-   private lateinit var listener: MessageBoxYesNoListener
-   private var title: String? = null
-   private var message: String? = null
+   private lateinit var mListener: MessageBoxYesNoListener
+   private var mRequestCode: Int = 0
+   private var mTitle: String? = null
+   private var mMessage: String? = null
 
    // This method is called by the system to attach the listener from the Activity.
    override fun onAttach(context: Context)
@@ -28,7 +28,7 @@ class ModalDialogYesNo : DialogFragment()
       try
       {
          // Instantiate the listener so we can send events to the host.
-         listener = context as MessageBoxYesNoListener
+         mListener = context as MessageBoxYesNoListener
       } catch (e: ClassCastException)
       {
          // The activity doesn't implement the interface, throw exception.
@@ -40,20 +40,20 @@ class ModalDialogYesNo : DialogFragment()
    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog
    {
       // Retrieve arguments set by the newInstance method
-      title = arguments?.getString(ARG_TITLE)
-      message = arguments?.getString(ARG_MESSAGE)
+      mTitle = arguments?.getString(ARG_TITLE)
+      mMessage = arguments?.getString(ARG_MESSAGE)
 
       return activity?.let {
          val builder = AlertDialog.Builder(it)
-         builder.setTitle(title)
-         builder.setMessage(message)
+         builder.setTitle(mTitle)
+         builder.setMessage(mMessage)
             // Set the "Yes" button and its click listener
             .setPositiveButton("Yes") { _, _ ->
-               listener.onDialogPositiveClick(this)
+               mListener.onDialogPositiveClick(this, mRequestCode)
             }
             // Set the "No" button and its click listener
             .setNegativeButton("No") { _, _ ->
-               listener.onDialogNegativeClick(this)
+               mListener.onDialogNegativeClick(this, mRequestCode)
             }
          // Create the AlertDialog object and return it.
          builder.create()
@@ -66,7 +66,7 @@ class ModalDialogYesNo : DialogFragment()
       private const val ARG_MESSAGE = "message"
 
       // 3. Factory Method: Use this to create and show the dialog
-      fun newInstance(title: String, message: String): ModalDialogYesNo
+      fun newInstance(title: String, message: String, requestCode: Int): ModalDialogYesNo
       {
          val fragment = ModalDialogYesNo()
          val args = Bundle().apply {

@@ -51,12 +51,11 @@ class KitchenPrinter(
    private var m_kitchenLocal: Boolean = false
    private var m_enableCollectPrinter: Boolean = collectPrinter
    private var m_printKitchenSorted: Boolean = false
-   private var m_euroLang: ETaal = ETaal.LANG_DUTCH
-   private var m_printLang: ETaal = ETaal.LANG_DUTCH
-
    private val global = Global.getInstance()
    private val CFG = global.CFG
    private val userCFG = global.userCFG
+   private var m_euroLang: ETaal = global.euroLang
+   private var m_printLang: ETaal = global.euroLang
    private var m_timeFrameIndex: ETimeFrameIndex = timeFrameIndex
    private var m_orderNumberPrinted: Boolean = false
    private var m_timeDelay: Int = timeDelay

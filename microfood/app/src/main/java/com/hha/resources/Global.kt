@@ -2,6 +2,7 @@ package com.hha.resources
 
 import android.os.Handler
 import com.hha.framework.CCursor
+import com.hha.framework.CPersonnel
 import java.io.File
 
 import com.hha.framework.CTimeFrame
@@ -19,15 +20,18 @@ class Global private constructor() {
     lateinit var myDir: File
     var menuCardId = 1
     var menuPageId = 1
-    var rfidKeyId = 108
+    var rfidKeyId: Short = 31
     var currentKeyIndex = 2
     var cursor = CCursor(0)
     var language: ETaal = ETaal.LANG_SIMPLIFIED
+    var euroLang: ETaal = ETaal.LANG_DUTCH
+
     // ... existing properties
     var serverIp: String = "localhost"
     var pageOffset = 0
     var transactionId = 0
     var selectedItem = 10
+    var personnel  = CPersonnel()
     var taxPercentageLow = 6.0
     var taxPercentageHigh = 10.0
     var pageBackgroundColor = 0xFF400040.toInt()
@@ -42,6 +46,9 @@ class Global private constructor() {
     val fontCFG: Configuration = Configuration()
     val colourCFG: Configuration = Configuration()
     val pcNumber: Short = 33
+    var mKitchenPrints = userCFG.getValue("user_print_kitchen_quantity")
+    var mKitchenPrints2bill = userCFG.getValue("user_print_kitchen2pos_quantity")
+    var lastPrintedBillNumber : String = ""
     val deviceId: Short = (firstTablet +
        CFG.getValue("handheld_id") + 3000).toShort()
 

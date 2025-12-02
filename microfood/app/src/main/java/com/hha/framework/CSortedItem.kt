@@ -8,6 +8,7 @@ import com.hha.resources.Configuration
 import com.hha.types.C3Moneys
 import com.hha.types.CMoney
 import com.hha.types.EOrderLevel
+import com.hha.types.EPaymentStatus
 import com.hha.types.ETaal
 import com.hha.types.ETreeRow
 
@@ -80,6 +81,9 @@ class CSortedItem : Iterable<CItem>
     }
 
     fun itemSum(): Int = items.sumOf { it.getQuantity() }
+
+    fun isValidItem(payStatus: EPaymentStatus)
+     = items[0].isValidItem(payStatus)
 
     fun addSorted(newItem: CItem)
     {
@@ -233,6 +237,16 @@ class CSortedItem : Iterable<CItem>
         for (item in items)
         {
             total = total + item.getTotal()
+        }
+        return total
+    }
+
+    fun getTotalWithoutStatiegeld(): CMoney
+    {
+        var total = CMoney(0)
+        for (item in items)
+        {
+            total = total + item.getTotalWithoutStatiegeld()
         }
         return total
     }

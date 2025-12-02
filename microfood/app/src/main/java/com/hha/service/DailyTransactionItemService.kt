@@ -51,15 +51,15 @@ class DailyTransactionItemService(channel: ManagedChannel) : BaseGrpcService<Dai
         DailyTransactionItemServiceGrpcKt.DailyTransactionItemServiceCoroutineStub(channel)
     }
 
-    fun numberKitchenItems(transactionId: Long, timeFrameIndex: Int): Int? = runBlocking {
+    fun numberKitchenItems(transactionId: Int, timeFrameIndex: Short): Int = runBlocking {
         try {
             val request = TransactionTimeFrame.newBuilder()
-                .setTransactionId(transactionId)
-                .setTimeFrameIndex(timeFrameIndex)
+                .setTransactionId(transactionId.toLong())
+                .setTimeFrameIndex(timeFrameIndex.toInt())
                 .build()
             stub.numberKitchenItems(request).number
         } catch (e: Exception) {
-            null
+            0
         }
     }
 
@@ -257,10 +257,11 @@ class DailyTransactionItemService(channel: ManagedChannel) : BaseGrpcService<Dai
         }
     }
 
-    fun getAllKitchenTotal(transactionId: Long, payStatus: PaymentStatus, isWithStatiegeld: Boolean): com.hha.daily.item.Money? = runBlocking {
+    fun getAllKitchenTotal(transactionId: Int, payStatus: PaymentStatus, isWithStatiegeld: Boolean): com.hha.daily.item
+        .Money? = runBlocking {
         try {
             val request = GetAllKitchenTotalRequest.newBuilder()
-                .setTransactionId(transactionId)
+                .setTransactionId(transactionId.toLong())
                 .setPayStatus(payStatus)
                 .setIsWithStatiegeld(isWithStatiegeld)
                 .build()

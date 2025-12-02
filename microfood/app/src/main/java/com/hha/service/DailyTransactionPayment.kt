@@ -216,22 +216,24 @@ class DailyTransactionPaymentService(channel: ManagedChannel) : BaseGrpcService<
         }
     }
 
-    fun getHighestPaymentIndex(transactionId: Int): Int? = runBlocking {
+    fun getHighestPaymentIndex(transactionId: Int): Int = runBlocking {
         try {
             val request = TransactionId.newBuilder()
                 .setTransactionId(transactionId)
                 .build()
             stub.getHighestPaymentIndex(request).partialIndex
         } catch (e: Exception) {
-            null
+            1
         }
     }
 
-    fun getPartialTotal(transactionId: Int, partialIndex: Int, paymentMethod: PaymentMethod): Int = runBlocking {
+    fun getPartialTotal(
+        transactionId: Int, partialIndex: Short,
+        paymentMethod: PaymentMethod): Int = runBlocking {
         try {
             val request = PartialTotalRequest.newBuilder()
                 .setTransactionId(transactionId)
-                .setPartialIndex(partialIndex)
+                .setPartialIndex(partialIndex.toInt())
                 .setPaymentMethod(paymentMethod)
                 .build()
             stub.getPartialTotal(request).total
@@ -265,7 +267,8 @@ class DailyTransactionPaymentService(channel: ManagedChannel) : BaseGrpcService<
         }
     }
 
-    fun selectTransactionId(transactionId: Int, includeCancelledPayments: Boolean): PaymentDetailsList? = runBlocking {
+    fun selectTransactionId(
+        transactionId: Int, includeCancelledPayments: Boolean): PaymentDetailsList? = runBlocking {
         try {
             val request = TransactionPaymentRequest.newBuilder()
                 .setTransactionId(transactionId)

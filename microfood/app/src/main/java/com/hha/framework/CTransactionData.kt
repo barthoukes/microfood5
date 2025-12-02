@@ -15,7 +15,7 @@ data class CTransactionData(
    var customerId: Int = -1,
    var name: String = "",
    var transType: ETransType = ETransType.TRANS_TYPE_UNDEFINED,
-   var rfidKeyId: Int = -1,
+   var rfidKeyId: Short = -1,
    var deposit: Int = 0,
    var timeStart: String = "",
    var timeEnd: String = "",
@@ -43,7 +43,7 @@ data class CTransactionData(
       customerId = source.customerId
       name = source.name
       transType = ETransType.fromTransType(source.transType)
-      rfidKeyId = source.rfidKeyId
+      rfidKeyId = source.rfidKeyId.toShort()
       deposit = source.deposit
       timeStart = source.timeStart
       timeEnd = source.timeEnd
@@ -92,7 +92,7 @@ data class CTransactionData(
             customerId = source.customerId,
             name = source.name,
             transType = ETransType.fromTransType(source.transType),
-            rfidKeyId = source.rfidKeyId,
+            rfidKeyId = source.rfidKeyId.toShort(),
             deposit = source.deposit,
             timeStart = source.timeStart,
             timeEnd = source.timeEnd,

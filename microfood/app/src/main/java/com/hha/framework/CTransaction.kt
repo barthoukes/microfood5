@@ -9,13 +9,16 @@ import com.hha.callback.TransactionListener
 import com.hha.callback.TransactionOperations
 import com.hha.common.TransactionData
 import com.hha.grpc.GrpcServiceFactory
+import com.hha.resources.CTimestamp
 import com.hha.resources.Global
 import com.hha.service.StorePartService
 import com.hha.service.StoreSmurfService
 import com.hha.types.C3Moneys
 import com.hha.types.CMoney
 import com.hha.types.EClientOrdersType
+import com.hha.types.ECookingState
 import com.hha.types.EDeletedStatus
+import com.hha.types.EItemLocation
 import com.hha.types.EItemSort
 import com.hha.types.EPaymentMethod
 import com.hha.types.ETransType
@@ -38,29 +41,40 @@ class CTransaction : Iterable<CSortedItem>,
 
     var global = Global.getInstance()
     var CFG = global.CFG
+    var userCFG = global.userCFG
 
+    private var mCustomer: CCustomer? = null
+    private var mFactorHigh: Double = 1.0
+    private var mFactorLow: Double = 1.0
     var hasOrders: Boolean = false
-    private val m_global: Global = Global.getInstance()
-    private var m_customer: CCustomer? = null
-    private val m_items = CTransactionItems(this)
+    private val mItems = CTransactionItems(this)
+    private val mListeners = mutableListOf<TransactionListener>()
 
-    private val m_listeners = mutableListOf<TransactionListener>()
+    private var mPartial: CMoney = CMoney(0)
     //private val m_timeFrames = CTimeFrameList()
-    private val m_payments = CPaymentList(this)
-    private lateinit var m_timeFrame: CTimeFrame
-    private var m_sizeAtStart : Int = 0
-
-    val transactionType : ETransType
-        get() = data.transType
-
-    val transType : ETransType
-        get() = data.transType
-
+    private val mPayments = CPaymentList(this)
+    private var mSizeAtStart : Int = 0
+    private lateinit var mTimeFrame: CTimeFrame
     val customerTime : String
         get() = data.timeCustomer
 
     val deliverTime : String
         get() = data.timeCustomer
+
+    val itemSize: Int
+        get() = mItems.itemLines()
+
+    var rfidKeyId: Short = 0
+       get() = data.rfidKeyId
+
+    val size: Int
+        get() = mItems.itemLines()
+
+    override var transactionId: Int = 0
+        get() = data.transactionId
+
+    val transType : ETransType
+        get() = data.transType
 
     val displayName : String
         get() = data.name
@@ -71,18 +85,18 @@ class CTransaction : Iterable<CSortedItem>,
         total: CMoney
     )
     {
-        m_items.addListener(this)
-        m_payments.addListener(this)
+        mItems.addListener(this)
+        mPayments.addListener(this)
 
         if (transactionId != data.transactionId)
         {
-            m_timeFrame = CTimeFrame(this)
+            mTimeFrame = CTimeFrame(this)
         }
         data = CTransactionData()
         data.name = name
         data.status = status
         data.transactionId = transactionId
-        m_payments.setTransactionId(transactionId)
+        mPayments.setTransactionId()
         data.transType = ETransType.TRANS_TYPE_TAKEAWAY
         data.rfidKeyId = -1
         data.status = EClientOrdersType.OPEN
@@ -106,8 +120,8 @@ class CTransaction : Iterable<CSortedItem>,
     {
         selectTransactionId(transactionId)
 
-        m_items.addListener(this)
-        m_payments.addListener(this)
+        mItems.addListener(this)
+        mPayments.addListener(this)
     }
 
     constructor(transactionId: Int, itemSort: EItemSort, timeFrameIndex: ETimeFrameIndex)
@@ -119,7 +133,7 @@ class CTransaction : Iterable<CSortedItem>,
     constructor(source: TransactionData?)
     {
         //m_items.addListener(this)
-        m_payments.addListener(this)
+        mPayments.addListener(this)
         hasOrders = false
         if (source == null)
         {
@@ -130,25 +144,87 @@ class CTransaction : Iterable<CSortedItem>,
             return
         }
         data.setTransactionData(source)
-        m_payments.setTransactionId(data.transactionId)
-        m_sizeAtStart = m_items.itemLines()
-        m_customer = CCustomer(data.customerId)
+        mPayments.setTransactionId()
+        mSizeAtStart = mItems.itemLines()
+        mCustomer = CCustomer(data.customerId)
     }
 
     fun addItemListener(listener: TransactionItemListener)
     {
-        m_items.addListener(listener)
+        mItems.addListener(listener)
+    }
+
+    fun addListener(listener: TransactionListener)
+    {
+        if (!mListeners.contains(listener))
+        {
+            mListeners.add(listener)
+        }
+    }
+
+    fun addPayment(payment: EPaymentMethod, amount: CMoney)
+    {
+        mPayments.addPayment(payment, amount)
+    }
+
+    fun addOneToCursorPosition(): Boolean
+    {
+        if (size == 0) return false
+        var y = global.cursor.position
+        var item = get(y) ?: get(--y) ?: return false
+        if (item.deletedStatus != EDeletedStatus.DELETE_NOT) return false
+        return mItems.addQuantity(CCursor(y)
+            , 1)
+    }
+
+    fun addPaymentListener(listener: PaymentsListener)
+    {
+        mPayments.addListener(listener)
     }
 
     fun addReturnMoney()
     {
-        m_payments.addReturnMoney()
+        mPayments.addReturnMoney()
+    }
+
+    /** @brief Add money to a waiter
+     *  @param waiter [in] Waiter amount
+     *  @todo For change after bill: Only the items that were added.
+     */
+    fun addToEmployee(payStatus: EPaymentStatus)
+    {
+        val cash = getCashTotal(payStatus)
+        val card = getCardTotal(payStatus)
+        val returns = getReturnTotal(payStatus)
+        val allKitchen = getAllKitchenTotal(payStatus,true)
+        val employee = global.personnel.getPerson(global.rfidKeyId)
+        employee.add( allKitchen,
+            mItems.getItemTotal( EItemLocation.ITEM_KITCHEN2, payStatus, true),
+            mItems.getItemTotal( EItemLocation.ITEM_DRINKS, payStatus, true),
+            mItems.getItemTotal( EItemLocation.ITEM_BAR, payStatus, true),
+            mItems.getItemTotal( EItemLocation.ITEM_SUSHI, payStatus, true),
+            mItems.getItemTotal( EItemLocation.ITEM_NONFOOD, payStatus, true),
+            mItems.getItemTotal( EItemLocation.ITEM_OTHERS, payStatus, true),
+        cash,
+        card,
+        returns)
+        employee.update(false);
+    }
+
+
+    fun addTransactionItem(selectedMenuItem: CMenuItem, clusterId: Short): Boolean
+    {
+        Log.d(
+            "CTransaction", "add transaction item: " +
+               "${selectedMenuItem.menuItemId} cursor ${global.cursor.position}"
+        )
+        return mItems.touchItem(selectedMenuItem, clusterId)
     }
 
     fun calculateTotalTransaction(): CMoney
     {
         val previousTotal = data.total.toMoney()
-        data.subTotal = m_items.calculateTotalItems()
+        data.subTotal = mItems.calculateTotalItems()
         data.total = data.subTotal - data.discount + data.tips
         data.taxTotal.calculateTax(data.total,
             Global.getInstance().taxPercentageLow,
@@ -162,30 +238,9 @@ class CTransaction : Iterable<CSortedItem>,
         return newTotal
     }
 
-    fun addPaymentListener(listener: PaymentsListener)
+    fun cancelNewPayments()
     {
-        m_payments.addListener(listener)
-    }
-
-    fun getBillRemarks(): String
-    {
-        return data.message
-    }
-
-    fun getCursor(selectedTransactionItem: CItem): Int
-    {
-        return m_items.getCursor(selectedTransactionItem)
-    }
-
-    fun get(position: Int): CItem?
-    {
-        return m_items.get(position)
-    }
-
-    fun getEmployeeName(): String
-    {
-        val key = data.rfidKeyId
-        return CPersonnel().getEmployeeName(key)
+        mPayments.cancelNewPayments()
     }
 
     fun cleanCurrentTransaction()
@@ -205,8 +260,8 @@ class CTransaction : Iterable<CSortedItem>,
 
     fun closeTimeFrame()
     {
-        m_timeFrame.closeTimeFrame()
-        m_timeFrame.previous()
+        mTimeFrame.closeTimeFrame()
+        mTimeFrame.previous()
     }
 
     fun closeTransaction(why: EClientOrdersType)
@@ -216,13 +271,13 @@ class CTransaction : Iterable<CSortedItem>,
         val paymentServices = GrpcServiceFactory.createDailyTransactionPaymentService()
 
         val totals = paymentServices.getTransactionPaymentTotals(transactionId,
-                false)
+            false)
         val payments = CPaymentTransaction(totals)
 
         val totalPayments =payments.getTotal(EPaymentStatus.PAY_STATUS_ANY)
 
         // Update storage
-        if ( why == EClientOrdersType.CLOSED && global.CFG.getBoolean("store_enable"))
+        if ( why == EClientOrdersType.CLOSED && CFG.getBoolean("store_enable"))
         {
             val storePart: StorePartService = GrpcServiceFactory.createStorePartService()
             storePart.reduceStorage(transactionId)
@@ -245,7 +300,7 @@ class CTransaction : Iterable<CSortedItem>,
         {
             val service = GrpcServiceFactory.createDailyTransactionService()
             service.closeTransaction(data.transactionId,
-                EClientOrdersType.toClientOrdersType(why))
+                why.toClientOrdersType())
             val servicePayments = GrpcServiceFactory.createDailyTransactionPaymentService()
             servicePayments.finishPayments(data.transactionId)
             val serviceItems = GrpcServiceFactory.createDailyTransactionItemService()
@@ -253,16 +308,16 @@ class CTransaction : Iterable<CSortedItem>,
             val serviceChecksum = GrpcServiceFactory.createDailyTransactionChecksumService()
             serviceChecksum.Checksum(data.transactionId)
 
-            if ( why == EClientOrdersType.CLOSED && m_customer != null)
+            if ( why == EClientOrdersType.CLOSED && mCustomer != null)
             {
-                m_customer!!.addEaten(totalPayments)
+                mCustomer!!.addEaten(totalPayments)
             }
         }
         else
         {
             Log.e("CclientOrdersHandler", "close: Totals are not correct! Payment " +
                "Total: ${totalPayments.cents()} " +
-               "!= Transaction Total: ${getItemsTotal().cents()}")
+               "!= Transaction Total: ${getItemTotal().cents()}")
         }
         if ( why == EClientOrdersType.CLOSED || why == EClientOrdersType.EMPTY)
         {
@@ -273,58 +328,79 @@ class CTransaction : Iterable<CSortedItem>,
         }
         // Update memory
         selectTransactionId(data.transactionId)
-        m_items.setNegativeQuantityToRemovedItems();
+        mItems.setNegativeQuantityToRemovedItems();
     }
 
-    val size: Int
-        get() = m_items.itemLines()
-
-    val itemSize: Int
-        get() = m_items.itemLines()
-
-    override var transactionId: Int = 0
-        get() = data.transactionId
-
-
-    fun addOneToCursorPosition(): Boolean
+    fun cancelPayments(status: EPaymentStatus)
     {
-        if (size == 0) return false
-        var y = m_global.cursor.position
-        var item = get(y) ?: get(--y) ?: return false
-        if (item.deletedStatus != EDeletedStatus.DELETE_NOT) return false
-        return m_items.addQuantity(CCursor(y)
-        , 1)
+        mPayments.cancelPayments(status)
     }
 
-    fun addListener(listener: TransactionListener)
+    fun cancelPayments(index: Int, status: EPaymentStatus)
     {
-        if (!m_listeners.contains(listener))
-        {
-            m_listeners.add(listener)
-        }
+        mPayments.cancelPayments(index, status)
     }
 
-    fun addPayment(payment: EPaymentMethod, amount: CMoney)
+    fun endTimeFrame(
+        transactionId: Int,
+        pcNumber: Int,
+        newTime: CTimestamp,
+        timeChanged: Boolean,
+        newState: ECookingState
+    )
     {
-        m_payments.addPayment(payment, amount)
-    }
-
-    fun addTransactionItem(selectedMenuItem: CMenuItem, clusterId: Short): Boolean
-    {
-        Log.d(
-            "CTransaction", "add transaction item: " +
-               "${selectedMenuItem.menuItemId} cursor ${global.cursor}"
+        val strTime = newTime.getDateTime()
+        mTimeFrame.endTimeFrame(
+            transactionId,
+            CFG.getShort("pc_number"),
+            strTime,
+            timeChanged,
+            newState
         )
-        return m_items.touchItem(selectedMenuItem, clusterId)
+    }
+
+    fun get(position: Int): CItem?
+    {
+        return mItems.get(position)
+    }
+
+    fun getBillPrinterQuantity(): Int
+    {
+        var quantity = userCFG.getValue("user_print_bills")
+        if ( quantity == 0 && CFG.getBoolean("bill_always_print_delivery"))
+        {
+            val str = getBillRemarks()
+            if (!str.isEmpty())
+            {
+                quantity =1
+            }
+        }
+        return quantity
+    }
+
+    fun getBillRemarks(): String
+    {
+        return data.message
+    }
+
+    fun getCursor(selectedTransactionItem: CItem): Int
+    {
+        return mItems.getCursor(selectedTransactionItem)
+    }
+
+    fun getEmployeeName(): String
+    {
+        val key = data.rfidKeyId
+        return CPersonnel().getEmployeeName(key)
     }
 
     fun cancelPayment(index: Int, paymentStatus: EPaymentStatus)
     {
-        m_payments.cancelPayment(index, paymentStatus)
+        mPayments.cancelPayments(index, paymentStatus)
     }
 
     val empty: Boolean
-        get() = m_items.empty
+        get() = mItems.empty
 
     fun emptyTransaction(reason: String)
     {
@@ -348,18 +424,28 @@ class CTransaction : Iterable<CSortedItem>,
 
     fun getCashTotal(): CMoney
     {
-        return m_payments.getCashTotal();
+        return mPayments.getCashTotal();
+    }
+
+    fun getCashTotal(payStatus: EPaymentStatus) : CMoney
+    {
+        return mPayments.getCashTotal(payStatus)
     }
 
     fun getCardTotal(): CMoney
     {
-        return m_payments.getCardTotal();
+        return mPayments.getCardTotal();
+    }
+
+    fun getCardTotal(payStatus: EPaymentStatus) : CMoney
+    {
+        return mPayments.getCardTotal(payStatus)
     }
 
     fun getClient(): String
     {
         // @todo get the customer
-        return m_customer?.name ?: ""
+        return mCustomer?.name ?: ""
     }
 
     override fun getCustomerId(): Int
@@ -379,17 +465,35 @@ class CTransaction : Iterable<CSortedItem>,
 
     fun getDrinksTotal(): CMoney
     {
-        return m_items.getDrinksTotal()
+        return mItems.getDrinksTotal()
     }
 
-    fun getItemsTotal(): CMoney
+    fun getAllKitchenTotal(
+        payStatus: EPaymentStatus, isWithStatiegeld: Boolean): CMoney
     {
-        return m_items.getItemsTotal()
+        return mItems.getAllKitchenTotal(payStatus, isWithStatiegeld);
+    }
+
+    fun getEmployeeId(): Short = data.rfidKeyId
+
+    fun getItemTotal(location: EItemLocation,
+        payStatus: EPaymentStatus,
+        withStatiegeld: Boolean) =
+            mItems.getItemTotal(location, payStatus, withStatiegeld)
+
+    fun getItemTotal(): CMoney
+    {
+        return mItems.getItemsTotal()
     }
 
     fun getKitchenTotal(): CMoney
     {
-        return m_items.getKitchenTotal()
+        return mItems.getKitchenTotal()
+    }
+
+    fun getHighestPaymentIndex(): Int
+    {
+        return mPayments.getHighestPaymentIndex()
     }
 
     fun getMinutes(): Int
@@ -408,24 +512,39 @@ class CTransaction : Iterable<CSortedItem>,
         }
     }
 
-    fun getPayments() : List<CPayment>
+    fun getName(): String = data.name
+
+    fun getPartialTotal(partialIndex: Short): CMoney
     {
-        return m_payments.getPayments()
+        return mPayments.getPartialTotal(partialIndex)
     }
 
-    fun getPaymentTotal(): CMoney
-    {
-        return m_payments.getTotal();
-    }
+    fun getPaidTotal(payStatus: EPaymentStatus): CMoney =
+        mPayments.getPaidTotal(payStatus)
+
+    fun getPayments() : List<CPayment> = mPayments.getPayments()
+
+    fun getPaymentTotal(): CMoney = mPayments.getTotal();
+
+    fun getReturnTotal(paymentStatus: EPaymentStatus):
+       CMoney = mPayments.getReturnTotal(paymentStatus)
+
+    fun getStatus(): EClientOrdersType = data.status
 
     override fun getTimeFrame(): CTimeFrame
     {
-        return m_timeFrame
+        return mTimeFrame
+    }
+
+    fun getTransactionPaymentTotals(
+        includeCancelledPayments: Boolean): CPaymentTransaction
+    {
+        return mPayments.getTransactionPaymentTotals(includeCancelledPayments)
     }
 
     override fun getTimeFrameIndex(): ETimeFrameIndex
     {
-        return m_timeFrame.getTimeFrameIndex()
+        return mTimeFrame.getTimeFrameIndex()
     }
 
     fun getTotal(taxType: ETaxType): CMoney
@@ -438,32 +557,34 @@ class CTransaction : Iterable<CSortedItem>,
         }
     }
 
+    /*----------------------------------------------------------------------------*/
+    fun getTransactionPayments(): CPaymentTransaction
+    {
+        return mPayments.getTransactionPaymentTotals(false)
+    }
+
     fun getTotalAlreadyPaid(): CMoney
     {
-        return m_payments.getTotalAlreadyPaid()
+        return mPayments.getTotalAlreadyPaid()
     }
+
+    fun getTotalFromIndex(line: Int): CMoney = mItems.getTotalFromIndex(line)
 
     override fun getTotalTransaction(): CMoney
     {
         return data.total.toMoney()
     }
 
-    fun hasAnyChanges() : Boolean
-    {
-        return m_items.hasAnyChanges()
-    }
+    fun hasAnyChanges() : Boolean = mItems.hasAnyChanges()
 
     fun isRechaud(): Boolean
     {
         return data.transType == ETransType.TRANS_TYPE_RECHAUD
     }
 
-    fun itemSize() = m_items.itemLines()
+    fun itemSize() = mItems.itemLines()
 
-    fun itemLines(): Int
-    {
-        return m_items.itemLines()
-    }
+    fun itemLines(): Int = mItems.itemLines()
 
     fun isShop(): Boolean = when (data.transType)
     {
@@ -486,39 +607,51 @@ class CTransaction : Iterable<CSortedItem>,
         else -> false
     }
 
+    fun isValid(): Boolean
+    {
+        return data.transactionId > 0
+    }
+
     fun itemSum(): Int
     {
-        return m_items.itemSum()
+        return mItems.itemSum()
     }
 
     // Add this iterator implementation
-    override fun iterator(): Iterator<CSortedItem> = m_items.iterator()
+    override fun iterator(): Iterator<CSortedItem> = mItems.iterator()
 
     fun minus1()
     {
         if (size == 0) return
-        var y = m_global.cursor.position
+        var y = global.cursor.position
         var item = get(y) ?: get(--y) ?: return
         if (item.deletedStatus != EDeletedStatus.DELETE_NOT) return
-        m_items.addQuantity(CCursor(y), -1)
+        mItems.addQuantity(CCursor(y), -1)
     }
 
     fun nextPortion()
     {
         if (size == 0) return
-        var y = m_global.cursor.position
+        var y = global.cursor.position
         var item = get(y) ?: get(--y) ?: return
         if (item.deletedStatus != EDeletedStatus.DELETE_NOT) return
-        m_items.nextPortion(CCursor(y))
+        mItems.nextPortion(CCursor(y))
     }
 
     // A single method to notify any external listeners that something has changed.
     private fun notifyListeners()
     {
-        for (listener in m_listeners)
+        for (listener in mListeners)
         {
             listener.onTransactionChanged(this)
         }
+    }
+
+    fun numberKitchenItems(): Int
+    {
+        return mItems.numberKitchenItems(
+            data.transactionId,
+            mTimeFrame.getTimeFrameIndex())
     }
 
     override fun onPaymentAdded(position: Int, item: CPayment)
@@ -564,30 +697,30 @@ class CTransaction : Iterable<CSortedItem>,
     public fun remove()
     {
         if (size == 0) return
-        var y = m_global.cursor.position
+        var y = global.cursor.position
         var item = get(y) ?: get(--y) ?: return
         if (item.deletedStatus != EDeletedStatus.DELETE_NOT) return
-        m_items.addQuantity(CCursor(y), -item.getQuantity())
+        mItems.addQuantity(CCursor(y), -item.getQuantity())
     }
 
     fun removeItemListener(listener: TransactionItemListener)
     {
-        m_items.removeListener(listener)
+        mItems.removeListener(listener)
     }
 
     fun removeListener(listener: TransactionListener)
     {
-        m_listeners.remove(listener)
+        mListeners.remove(listener)
     }
 
     fun removePaymentListener(listener: PaymentsListener)
     {
-        m_payments.removeListener(listener)
+        mPayments.removeListener(listener)
     }
 
     fun removeTimeFrame()
     {
-        m_items.undoTimeFrame( m_timeFrame.time_frame_index,
+        mItems.undoTimeFrame( mTimeFrame.time_frame_index,
             global.CFG.getShort("pc_number"))
         closeTimeFrame()
     }
@@ -602,28 +735,124 @@ class CTransaction : Iterable<CSortedItem>,
     fun startNextTimeFrame(): CTimeFrame
     {
         Log.i("Ctransaction", "Start next TimeFrame")
-        m_timeFrame = CTimeFrame(data.transactionId, this)
-        return m_timeFrame
+        mTimeFrame = CTimeFrame(data.transactionId, this)
+        return mTimeFrame
     }
 
     fun selectTransactionId(transactionId: Int)
     {
         data.transactionId = transactionId
-        m_payments.setTransactionId(transactionId)
+        mPayments.setTransactionId()
         val service = GrpcServiceFactory.createDailyTransactionService()
         val inputData: TransactionData? = service.selectTransactionId(transactionId.toInt())
         data.setTransactionData(inputData)
-        m_sizeAtStart = m_items.itemLines()
+        mSizeAtStart = mItems.itemLines()
+    }
+
+    fun setDiscount(discount: CMoney)
+    {
+        val high = data.subTotal.taxHigh.cents()
+        val low = data.subTotal.taxLow.cents()
+
+        if ( high+low > 0)
+        {
+            var h =0
+            var l =0
+            var z =0
+            var factorLow =1.0
+            var factorHigh =1.0
+            if ( discount.cents() < high && high > 0)
+            {
+                // Discount less than high tax amount
+                h =discount.cents()
+                factorHigh -=(h.toDouble()/high.toDouble())
+            }
+            else
+            {
+                h =high
+                if (high!=0) factorHigh = 0.0 else factorHigh = 1.0
+                val rest =discount.cents() - high
+                if (rest < low && low > 0)
+                {
+                    l =rest
+                    factorLow -=(rest.toDouble()/low.toDouble())
+                }
+                else
+                {
+                    // Rest more than amount or amount zero
+                    l =low
+                    if (low!=0) factorLow = 0.0 else factorLow = 1.0
+                }
+            }
+            setDiscount( h, l, 0, factorHigh, factorLow)
+        }
+        mPayments.invalidate()
+        updateTotal()
+    }
+
+    fun setDiscount(discountHigh: Int, discountLow: Int, discountTaxFree: Int,
+                    factorHigh: Double, factorLow: Double)
+    {
+        val service = GrpcServiceFactory.createDailyTransactionService()
+        val iter = service.setDiscount(
+            data.transactionId, discountHigh, discountLow, discountTaxFree,
+            factorHigh, factorLow)
+        data.discount.taxLow = CMoney(discountLow)
+        data.discount.taxHigh = CMoney(discountHigh)
+        data.discount.taxFree = CMoney(discountTaxFree)
+        mFactorHigh = factorHigh
+        mFactorLow = factorLow
+    }
+
+    fun setTips(tips: CMoney)
+    {
+        data.tips.taxLow = CMoney(0)
+        data.tips.taxHigh = CMoney(0)
+        data.tips.taxFree = CMoney(0)
+        if (data.total.taxHigh.empty())
+        {
+            data.tips.taxLow = tips
+        }
+        else
+        {
+            data.tips.taxHigh = tips
+        }
+    }
+
+    fun setPartialAmount(amount: CMoney)
+    {
+        mPartial =amount
+    }
+
+    fun setEmployeeId(rfidKeyId: Short)
+    {
+        data.rfidKeyId = rfidKeyId
+        val service = GrpcServiceFactory.createDailyTransactionService()
+        service.setRfidKeyId(
+            data.transactionId, rfidKeyId)
+    }
+
+    fun setPayingState()
+    {
+        setStatus(EClientOrdersType.PAYING)
+    }
+
+    fun setStatus(status : EClientOrdersType)
+    {
+        data.status = status
+        val pType = status.toClientOrdersType()
+        val service = GrpcServiceFactory.createDailyTransactionService()
+        service.setStatus(data.transactionId, pType)
     }
 
     fun stopTimeFrame()
     {
-        m_timeFrame.end()
+        mTimeFrame.end()
     }
 
     fun transactionEmptyAtStartAndAtEnd(): Boolean
     {
-        return m_sizeAtStart == 0 && m_items.itemLines() == 0
+        return mSizeAtStart == 0 && mItems.itemLines() == 0
     }
 
     fun TAcount() : Int
