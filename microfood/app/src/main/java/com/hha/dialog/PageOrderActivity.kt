@@ -44,26 +44,26 @@ class PageOrderActivity : AppCompatActivity(), ModalDialogYesNo.MessageBoxYesNoL
     TransactionListener
 {
     private final var tag = "POE"
-    private lateinit var binding: PageOrderActivityBinding
+    private lateinit var mBinding: PageOrderActivityBinding
     val global = Global.getInstance()
     val menuCardId = global.menuCardId
     val menuCard = CMenuCards.getInstance().getMenuCard(menuCardId)
-    val m_menuPages = menuCard.getOrderedPages()
-    var m_menuPage: CMenuPage = menuCard.getMenuPage(global.menuPageId)
-    var m_menuItems: CMenuItems =
-        m_menuPage.loadItems(SKIP_INVISIBLE_TRUE)
+    val mMenuPages = menuCard.getOrderedPages()
+    var mMenuPage: CMenuPage = menuCard.getMenuPage(global.menuPageId)
+    var mMenuItems: CMenuItems =
+        mMenuPage.loadItems(SKIP_INVISIBLE_TRUE)
     private val CFG: Configuration = global.CFG
     private val colourCFG = global.colourCFG
-    private val m_colourOrderText = colourCFG.getTextColour("COLOUR_ORDER_TEXT")
-    private val m_colourOrderBackgroundSelected =
+    private val mColourOrderText = colourCFG.getTextColour("COLOUR_ORDER_TEXT")
+    private val mColourOrderBackgroundSelected =
         colourCFG.getBackgroundColour("COLOUR_ORDER_BACKGROUND_SELECTED")
-    private val m_colourOrderBackgroundOdd = colourCFG.getBackgroundColour("COLOUR_ORDER_BACKGROUND_ODD")
-    private val m_colourOrderBackgroundEven = colourCFG.getBackgroundColour("COLOUR_ORDER_BACKGROUND_EVEN")
+    private val mColourOrderBackgroundOdd = colourCFG.getBackgroundColour("COLOUR_ORDER_BACKGROUND_ODD")
+    private val mColourOrderBackgroundEven = colourCFG.getBackgroundColour("COLOUR_ORDER_BACKGROUND_EVEN")
 
-    private val m_colourOrderSelectedText = colourCFG.getBackgroundColour("COLOUR_ORDER_SELECTED_TEXT")
+    private val mColourOrderSelectedText = colourCFG.getBackgroundColour("COLOUR_ORDER_SELECTED_TEXT")
 
-    private val m_colourPage = colourCFG.getBackgroundColour("COLOUR_GROUP_BACKGROUND")
-    private val m_colourSelectedPage = colourCFG.getBackgroundColour("SELECTED_GROUP_BACKGROUND")
+    private val mColourPage = colourCFG.getBackgroundColour("COLOUR_GROUP_BACKGROUND")
+    private val mColourSelectedPage = colourCFG.getBackgroundColour("SELECTED_GROUP_BACKGROUND")
     var itemWidth = 24
     private val _orderTotal = MutableLiveData<CMoney>()
     val orderTotal: LiveData<CMoney> = _orderTotal
@@ -71,38 +71,38 @@ class PageOrderActivity : AppCompatActivity(), ModalDialogYesNo.MessageBoxYesNoL
     val groups = CFG.getValue("display_groups")
     val columns = CFG.getValue("display_groups_horizontal")
     val rows = (groups + columns - 1) / columns
-    private lateinit var m_menuPagesAdapter: MenuPagesAdapter
-    private lateinit var m_menuItemsAdapter: MenuItemsAdapter
-    private lateinit var m_transactionItemsAdapter: TransactionItemsAdapter
-    private lateinit var m_viewModel: TransactionViewModel
-    val clusterId: Short = -1
-    var m_fromBilling: Boolean = false
+    private lateinit var mMenuPagesAdapter: MenuPagesAdapter
+    private lateinit var mMenuItemsAdapter: MenuItemsAdapter
+    private lateinit var mTransactionItemsAdapter: TransactionItemsAdapter
+    private lateinit var mViewModel: TransactionViewModel
+    val mClusterId: Short = -1
+    var mFromBilling: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?)
     {
         super.onCreate(savedInstanceState)
-        binding = PageOrderActivityBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+        mBinding = PageOrderActivityBinding.inflate(layoutInflater)
+        setContentView(mBinding.root)
 
-        m_viewModel = ViewModelProvider(this, TransactionViewModelFactory)
+        mViewModel = ViewModelProvider(this, TransactionViewModelFactory)
             .get(TransactionViewModel::class.java)
 
         setupRecyclerView()
         // 3. OBSERVE the LiveData from the ViewModel
-        m_viewModel.transaction.observe(this) { transaction ->
+        mViewModel.transaction.observe(this) { transaction ->
             // This block will run automatically when the transaction is loaded.
             if (transaction != null) {
                 // --- THIS IS THE CORRECT PLACE TO CALL .updateData() ---
-                m_transactionItemsAdapter.updateData(transaction)
+                mTransactionItemsAdapter.updateData(transaction)
 
                 transaction.calculateTotalTransaction()
-                binding.totalPrice.text = transaction.getTotalTransaction().toString()
+                mBinding.totalPrice.text = transaction.getTotalTransaction().toString()
                 transaction.addListener(this)
                 // It's also the correct place to add the listener
-                transaction.addItemListener(m_transactionItemsAdapter)
+                transaction.addItemListener(mTransactionItemsAdapter)
             }
         }
-        m_viewModel.initializeTransaction(TransactionViewModel.InitMode.VIEW_PAGE_ORDER)
+        mViewModel.initializeTransaction(TransactionViewModel.InitMode.VIEW_PAGE_ORDER)
     }
 
     override fun onDestroy()
@@ -110,7 +110,7 @@ class PageOrderActivity : AppCompatActivity(), ModalDialogYesNo.MessageBoxYesNoL
         super.onDestroy() // Always call the superclass method first
 
         // Get the current transaction object
-        m_viewModel.resetIsChanged()
+        mViewModel.resetIsChanged()
     }
 
     override fun dispatchTouchEvent(ev: MotionEvent?): Boolean
@@ -128,7 +128,7 @@ class PageOrderActivity : AppCompatActivity(), ModalDialogYesNo.MessageBoxYesNoL
 
     private fun findClickedItem(x: Float, y: Float)
     {
-        val recyclerView = binding.layoutTransactionItems
+        val recyclerView = mBinding.layoutTransactionItems
         val layoutManager = recyclerView.layoutManager as LinearLayoutManager
 
         // Find which item position was clicked
@@ -157,6 +157,7 @@ class PageOrderActivity : AppCompatActivity(), ModalDialogYesNo.MessageBoxYesNoL
     override fun onResume()
     {
         super.onResume()
+        refreshButtons()
 //        // Refresh data when activity resumes
 //        if (global.transaction == null)
 //        {
@@ -174,14 +175,19 @@ class PageOrderActivity : AppCompatActivity(), ModalDialogYesNo.MessageBoxYesNoL
     @Suppress("UNUSED_PARAMETER")
     fun onButtonEnter(view: View)
     {
-        startActivity(Intent(this, BillOrderActivity::class.java).apply {
-        })
+        if (!mViewModel.isEmptyTransaction())
+        {
+            startActivity(
+                Intent(this,
+                    BillOrderActivity::class.java).apply {
+            })
+        }
     }
 
     private fun stopInCorrectMode()
     {
         // Check the boolean condition
-        if (m_fromBilling)
+        if (mFromBilling)
         {
             // If true, go to BillOrderActivity
             startActivity(Intent(this, BillOrderActivity::class.java))
@@ -205,13 +211,13 @@ class PageOrderActivity : AppCompatActivity(), ModalDialogYesNo.MessageBoxYesNoL
     @Suppress("UNUSED_PARAMETER")
     fun onButtonPlus1(view: View)
     {
-        m_viewModel.onButtonPlus1()
+        mViewModel.onButtonPlus1()
     }
 
     @Suppress("UNUSED_PARAMETER")
     fun onButtonMin1(view: View)
     {
-        m_viewModel.onButtonMin1()
+        mViewModel.onButtonMin1()
     }
 
     @Suppress("UNUSED_PARAMETER")
@@ -224,13 +230,13 @@ class PageOrderActivity : AppCompatActivity(), ModalDialogYesNo.MessageBoxYesNoL
     @Suppress("UNUSED_PARAMETER")
     fun onButtonPortion(view: View)
     {
-        m_viewModel.onButtonPortion()
+        mViewModel.onButtonPortion()
     }
 
     @Suppress("UNUSED_PARAMETER")
     fun onButtonRemove(view: View)
     {
-        m_viewModel.onButtonRemove()
+        mViewModel.onButtonRemove()
     }
 
     @Suppress("UNUSED_PARAMETER")
@@ -241,17 +247,17 @@ class PageOrderActivity : AppCompatActivity(), ModalDialogYesNo.MessageBoxYesNoL
 
     private fun escapeTransaction()
     {
-        if (!m_viewModel.isChanged())
+        if (!mViewModel.isChanged())
         {
             // No changes to table, simple to remove the time frame.
-            m_viewModel.closeTimeFrame()
+            mViewModel.closeTimeFrame()
 
             stopInCorrectMode()
-        } else if (m_viewModel.needToAskCancelReason())
+        } else if (mViewModel.needToAskCancelReason())
         {
             showAskCancelReasonDialog()
 
-        } else if (m_viewModel.hasAnyChanges())
+        } else if (mViewModel.hasAnyChanges())
         {
             showUndoChanges()
         } else
@@ -262,15 +268,21 @@ class PageOrderActivity : AppCompatActivity(), ModalDialogYesNo.MessageBoxYesNoL
 
     fun addOneToCursorPosition(): Boolean
     {
-        val currentTransaction = m_viewModel.transaction.value
+        val currentTransaction = mViewModel.transaction.value
         return currentTransaction?.addOneToCursorPosition() ?: false
     }
 
     private fun refreshAllData()
     {
-        m_transactionItemsAdapter.notifyDataSetChanged()
-        m_menuPagesAdapter.notifyDataSetChanged()
-        m_menuItemsAdapter.notifyDataSetChanged()
+        mTransactionItemsAdapter.notifyDataSetChanged()
+        mMenuPagesAdapter.notifyDataSetChanged()
+        mMenuItemsAdapter.notifyDataSetChanged()
+        refreshButtons()
+    }
+
+    private fun refreshButtons()
+    {
+        mBinding.pageOrderTableName.text = mViewModel.getTableName()
     }
 
     override fun onDialogPositiveClick(dialog: DialogFragment, requestCode: Int)
@@ -298,7 +310,7 @@ class PageOrderActivity : AppCompatActivity(), ModalDialogYesNo.MessageBoxYesNoL
         createMenuItemsAdapter()
 
         // 3. Add spacing between items
-        binding.layoutMenuPages.addItemDecoration(
+        mBinding.layoutMenuPages.addItemDecoration(
             object : RecyclerView.ItemDecoration()
             {
                 override fun getItemOffsets(
@@ -315,16 +327,16 @@ class PageOrderActivity : AppCompatActivity(), ModalDialogYesNo.MessageBoxYesNoL
     private fun createMenuPagesAdapter()
     {
         // 2. Initialize adapter
-        m_menuPagesAdapter = MenuPagesAdapter(
-            m_menuPages, columns, rows, m_colourPage, m_colourSelectedPage
+        mMenuPagesAdapter = MenuPagesAdapter(
+            mMenuPages, columns, rows, mColourPage, mColourSelectedPage
         )
         { selectedPage ->
             handlePageSelection(selectedPage)
         }.apply {
             // Set dynamic height based on screen size
-            binding.layoutMenuPages.setItemViewCacheSize(18)
+            mBinding.layoutMenuPages.setItemViewCacheSize(18)
         }
-        binding.layoutMenuPages.adapter = m_menuPagesAdapter
+        mBinding.layoutMenuPages.adapter = mMenuPagesAdapter
     }
 
     private fun createLinearLayoutTransactionItems()
@@ -335,13 +347,13 @@ class PageOrderActivity : AppCompatActivity(), ModalDialogYesNo.MessageBoxYesNoL
             LinearLayoutManager.VERTICAL, // Vertical scrolling
             false // Don't reverse layout
         )
-        binding.layoutTransactionItems.layoutManager = linearLayoutManager
+        mBinding.layoutTransactionItems.layoutManager = linearLayoutManager
 
         // Optional: Add the touch delay fix we discussed
-        binding.layoutTransactionItems.postDelayed({
-            binding.layoutTransactionItems.isClickable = true
-            binding.layoutTransactionItems.isFocusable = true
-            binding.layoutTransactionItems.isFocusableInTouchMode = true
+        mBinding.layoutTransactionItems.postDelayed({
+            mBinding.layoutTransactionItems.isClickable = true
+            mBinding.layoutTransactionItems.isFocusable = true
+            mBinding.layoutTransactionItems.isFocusableInTouchMode = true
             Log.d(tag, "Transaction items RecyclerView touch enabled")
         }, 1000)
     }
@@ -354,20 +366,20 @@ class PageOrderActivity : AppCompatActivity(), ModalDialogYesNo.MessageBoxYesNoL
             GridLayoutManager.HORIZONTAL, // Horizontal scrolling
             false
         )
-        binding.layoutMenuPages.layoutManager = gridLayoutManagerMenuPages
+        mBinding.layoutMenuPages.layoutManager = gridLayoutManagerMenuPages
     }
 
     private fun createMenuItemsAdapter()
     {
         // 2. Initialize adapter
-        m_menuItemsAdapter =
-            MenuItemsAdapter(m_menuItems, itemWidth) { selectedMenuItem ->
+        mMenuItemsAdapter =
+            MenuItemsAdapter(mMenuItems, itemWidth) { selectedMenuItem ->
                 handleMenuItem(selectedMenuItem)
             }.apply {
                 // Set dynamic height based on screen size
-                binding.layoutMenuItems.setItemViewCacheSize(28)
+                mBinding.layoutMenuItems.setItemViewCacheSize(28)
             }
-        binding.layoutMenuItems.adapter = m_menuItemsAdapter
+        mBinding.layoutMenuItems.adapter = mMenuItemsAdapter
     }
 
     private fun createGridLayoutMenuItems()
@@ -375,29 +387,29 @@ class PageOrderActivity : AppCompatActivity(), ModalDialogYesNo.MessageBoxYesNoL
         // 1b. GridLayoutManager for menu items with 8 rows (vertical span) and horizontal scrolling
         val gridLayoutManagerMenuItems = GridLayoutManager(
             this@PageOrderActivity,
-            m_menuItems.verticalSize, // Span count = number of rows (vertical)
+            mMenuItems.verticalSize, // Span count = number of rows (vertical)
             GridLayoutManager.HORIZONTAL, // Horizontal scrolling
             false
         )
-        binding.layoutMenuItems.layoutManager = gridLayoutManagerMenuItems
+        mBinding.layoutMenuItems.layoutManager = gridLayoutManagerMenuItems
     }
 
     private fun createTransactionItemsAdapter()
     {
         // 2. Initialize adapter
-        m_transactionItemsAdapter = TransactionItemsAdapter(
+        mTransactionItemsAdapter = TransactionItemsAdapter(
             { selectedTransactionItem -> onClickTransactionItem(selectedTransactionItem) },
-            m_colourOrderText,
-            m_colourOrderSelectedText,
-            m_colourOrderBackgroundSelected,
-            m_colourOrderBackgroundOdd,
-            m_colourOrderBackgroundEven
+            mColourOrderText,
+            mColourOrderSelectedText,
+            mColourOrderBackgroundSelected,
+            mColourOrderBackgroundOdd,
+            mColourOrderBackgroundEven
         )
             .apply {
                 // Set dynamic height based on screen size
-                binding.layoutMenuPages.setItemViewCacheSize(25)
+                mBinding.layoutMenuPages.setItemViewCacheSize(25)
             }
-        binding.layoutTransactionItems.adapter = m_transactionItemsAdapter
+        mBinding.layoutTransactionItems.adapter = mTransactionItemsAdapter
     }
 
     // Add this new function to PageOrderActivity
@@ -422,7 +434,7 @@ class PageOrderActivity : AppCompatActivity(), ModalDialogYesNo.MessageBoxYesNoL
     {
         if (selectedPage != global.menuPageId)
         {
-            m_menuPagesAdapter.selectPage(selectedPage)
+            mMenuPagesAdapter.selectPage(selectedPage)
             loadPageItems(selectedPage)
         }
     }
@@ -432,20 +444,20 @@ class PageOrderActivity : AppCompatActivity(), ModalDialogYesNo.MessageBoxYesNoL
         val oldPosition = global.cursor.position
 
         // Update the state
-        val newCursor = m_viewModel.getCursor(selectedTransactionItem)
+        val newCursor = mViewModel.getCursor(selectedTransactionItem)
         if (newCursor == global.cursor.position)
         {
             // Add one item
-            m_viewModel.onButtonPlus1()
-            m_transactionItemsAdapter.invalidate(newCursor)
+            mViewModel.onButtonPlus1()
+            mTransactionItemsAdapter.invalidate(newCursor)
         } else
         {
             // Set cursor
             global.cursor.set(newCursor)
-            m_transactionItemsAdapter.setCursor(global.cursor)
+            mTransactionItemsAdapter.setCursor(global.cursor)
         }
         // Also, scroll to the newly added item so the user can see it
-        binding.layoutTransactionItems.scrollToPosition(newCursor)
+        mBinding.layoutTransactionItems.scrollToPosition(newCursor)
         // Update UI minimum
         //m_transactionItemsAdapter.notifyItemChanged(oldPosition) // Redraw the old selected item
         //m_transactionItemsAdapter.notifyItemChanged(newCursor) // Redraw the new one
@@ -454,9 +466,9 @@ class PageOrderActivity : AppCompatActivity(), ModalDialogYesNo.MessageBoxYesNoL
     private fun handleMenuItem(selectedMenuItem: CMenuItem)
     {
         Log.d(tag, "MenuItem clicked: ${selectedMenuItem.localName}")
-        if (m_viewModel.addItem(selectedMenuItem, clusterId))
+        if (mViewModel.addItem(selectedMenuItem, mClusterId))
         {
-            m_transactionItemsAdapter.setCursor(global.cursor)
+            mTransactionItemsAdapter.setCursor(global.cursor)
            // m_menuItemsAdapter.notifyDataSetChanged()
             //m_transactionItemsAdapter.notifyDataSetChanged()
             /// binding.totalPrice.text = m_transaction.getTotalAmount().str()
@@ -477,12 +489,12 @@ class PageOrderActivity : AppCompatActivity(), ModalDialogYesNo.MessageBoxYesNoL
         // Implement your logic to load items for the selected page
         // This might involve another RecyclerView for the items in layout_items
         global.menuPageId = pageId
-        val previousRows = m_menuItems.verticalSize
-        m_menuPage = menuCard.getMenuPage(global.menuPageId)
-        itemWidth = m_menuPage.pageWidth
-        m_menuItems = m_menuPage.loadItems(SKIP_INVISIBLE_TRUE)
-        m_menuItemsAdapter.setNewItems(m_menuItems)
-        if (m_menuItems.verticalSize != previousRows)
+        val previousRows = mMenuItems.verticalSize
+        mMenuPage = menuCard.getMenuPage(global.menuPageId)
+        itemWidth = mMenuPage.pageWidth
+        mMenuItems = mMenuPage.loadItems(SKIP_INVISIBLE_TRUE)
+        mMenuItemsAdapter.setNewItems(mMenuItems)
+        if (mMenuItems.verticalSize != previousRows)
         {
             createGridLayoutMenuItems()
         }
@@ -525,7 +537,7 @@ class PageOrderActivity : AppCompatActivity(), ModalDialogYesNo.MessageBoxYesNoL
     override fun onReasonSelected(reason: String)
     {
         Log.i(tag, "Cancelled $reason")
-        m_viewModel.emptyTransaction(reason)
+        mViewModel.emptyTransaction(reason)
         finish()
     }
 

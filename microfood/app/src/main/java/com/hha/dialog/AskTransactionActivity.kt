@@ -1,48 +1,63 @@
 package com.hha.dialog
 
+import android.content.Intent
 import android.os.Bundle
-import android.widget.Button
-import android.widget.ImageButton
-import android.widget.TextView
+import android.util.Log
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.hha.adapter.FloorTablesAdapter
-import com.hha.adapter.TransactionListAdapter
+import com.hha.adapter.ShortTransactionListAdapter
 import com.hha.framework.CFloorTable
-import com.hha.framework.CItem
-import com.hha.framework.CPayment
+import com.hha.framework.CShortTransaction
 import com.hha.framework.CTransaction
+import com.hha.model.ShortTransactionViewModel
 import com.hha.resources.Global
 import com.hha.types.ETaal
 import tech.hha.microfood.databinding.AskTransactionActivityBinding
-import tech.hha.microfood.databinding.BillOrderActivityBinding
 
 class AskTransactionActivity : AppCompatActivity()
 {
 
     private val global = Global.getInstance()
     private val CFG = global.CFG
-    private lateinit var binding: AskTransactionActivityBinding
+    private lateinit var mBinding: AskTransactionActivityBinding
 
-    private lateinit var transactionListAdapter: TransactionListAdapter
-    private lateinit var floorTablesAdapter: FloorTablesAdapter
-    private lateinit var transaction: CTransaction
+    private lateinit var mShortTransactionListAdapter: ShortTransactionListAdapter
+    private lateinit var mFloorTablesAdapter: FloorTablesAdapter
+    private lateinit var mTransaction: CTransaction
+    private lateinit var mViewModel: ShortTransactionViewModel
 
     override fun onCreate(savedInstanceState: Bundle?)
     {
         super.onCreate(savedInstanceState)
-        binding = AskTransactionActivityBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+        mBinding = AskTransactionActivityBinding.inflate(layoutInflater)
+        setContentView(mBinding.root)
+
+        mViewModel = ViewModelProvider(this).get(ShortTransactionViewModel::class.java)
         setupRecyclerView()
+
+        // 3. --- THIS IS THE MISSING PIECE ---
+        //    Observe the LiveData from the ViewModel. This block of code will
+        //    automatically run whenever the transaction list changes.
+        mViewModel.shortTransactionList.observe(this) { transactions ->
+            // The 'transactions' parameter is the new List<CShortTransaction>
+            // We need a way to give this new list to the adapter.
+            // Let's assume your adapter has a method called `submitList`.
+            if (transactions != null)
+            {
+                mShortTransactionListAdapter.submitList(transactions)
+            }
+        }
     }
 
     private fun setupRecyclerView()
     {
         createGridLayoutFloorTables()
         createFloorTablesAdapter()
-        createGridLayoutTransactionList()
-        createTransactionsAdapter()
+        createGridLayoutShortTransactionList()
+        createShortTransactionsAdapter()
     }
 
     fun createGridLayoutFloorTables()
@@ -53,57 +68,71 @@ class AskTransactionActivity : AppCompatActivity()
             GridLayoutManager.VERTICAL, // Horizontal scrolling
             false
         )
-        binding.layoutFloorTables.layoutManager = gridLayoutFloorTables
+        mBinding.layoutFloorTables.layoutManager = gridLayoutFloorTables
     }
 
     fun createFloorTablesAdapter()
     {
         // 2. Initialize adapter
-        floorTablesAdapter = FloorTablesAdapter() { selectedFloorTable ->
+        mFloorTablesAdapter = FloorTablesAdapter() { selectedFloorTable ->
             onFloorTableSelected(selectedFloorTable)
         }.apply {
-            binding.layoutFloorTables.setItemViewCacheSize(28)
+            mBinding.layoutFloorTables.setItemViewCacheSize(64)
         }
-        binding.layoutFloorTables.adapter = floorTablesAdapter
+        mBinding.layoutFloorTables.adapter = mFloorTablesAdapter
     }
 
-    fun createGridLayoutTransactionList()
+    fun createGridLayoutShortTransactionList()
     {
-        val gridLayoutTransactions = GridLayoutManager(
+        val gridLayoutShortTransactions = GridLayoutManager(
             this@AskTransactionActivity,
             1,
             GridLayoutManager.VERTICAL, // Horizontal scrolling
             false
         )
-        binding.layoutTransactionList.layoutManager = gridLayoutTransactions
+        mBinding.layoutShortTransactionList.layoutManager = gridLayoutShortTransactions
     }
 
-    fun createTransactionsAdapter()
+    fun createShortTransactionsAdapter()
     {
         // 2. Initialize adapter
-        transactionListAdapter = TransactionListAdapter() { selectedTransaction ->
-            onTransactionSelected(selectedTransaction)
+        mShortTransactionListAdapter = ShortTransactionListAdapter() { selectedShortTransaction ->
+            onShortTransactionSelected(selectedShortTransaction)
         }.apply {
-            binding.layoutFloorTables.setItemViewCacheSize(28)
+            mBinding.layoutShortTransactionList.setItemViewCacheSize(28)
         }
-        binding.layoutFloorTables.adapter = floorTablesAdapter
+        mBinding.layoutShortTransactionList.adapter = mShortTransactionListAdapter
     }
-
-    private fun refreshAllData()
-    {
-        floorTablesAdapter.notifyDataSetChanged()
-        transactionListAdapter.notifyDataSetChanged()
-    }
-
 
     fun onFloorTableSelected(selectedFloorTable: CFloorTable)
     {
         // todo
     }
 
-    fun onTransactionSelected(selectedTransaction: CTransaction)
+    override fun onResume()
+    {
+        super.onResume()
+        refreshAllData()
+    }
+
+    private fun refreshAllData()
+    {
+        mFloorTablesAdapter.notifyDataSetChanged()
+        mShortTransactionListAdapter.notifyDataSetChanged()
+        mViewModel.refreshAllData()
+    }
+
+    @Suppress("UNUSED_PARAMETER")
+    fun onButtonLanguage(view: View)
+    {
+        Translation.nextLanguage()
+        refreshAllData()
+    }
+
+    fun onShortTransactionSelected(selectedTransaction: CShortTransaction)
     {
         // todo
+        // 2x click = start to edit for transaction...
     }
 
     private fun updateTexts()
@@ -135,6 +164,24 @@ class AskTransactionActivity : AppCompatActivity()
         // Update adapter data if needed
     }
 
+    fun MainMenuActivity()
+    {
+        Log.i("ASkTransactionActivity", "Navigating to Main.")
+
+        // Create an Intent to start the AskTransactionActivity
+        val intent = Intent(this, MainMenuActivity::class.java)
+
+        // Add flags to clear the task stack and start a new one.
+        // This ensures the user cannot press "Back" to return to BillOrderActivity.
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+
+        // Start the new activity
+        startActivity(intent)
+
+        // Close the current BillOrderActivity so it's removed from the back stack
+        finish()
+    }
+
     private fun getTransactionOptions(): List<String>
     {
         return when (global.language)
@@ -150,34 +197,35 @@ class AskTransactionActivity : AppCompatActivity()
         // Implement existing transaction logic
         if (global.transactionId > 0)
         {
-            transaction = CTransaction(global.transactionId)
+            mTransaction = CTransaction(global.transactionId)
         }
         finish()
     }
 
-    private fun onCancelClicked()
+    @Suppress("UNUSED_PARAMETER")
+    fun onButtonBack(view: View)
     {
-        finish()
+        MainMenuActivity()
     }
 
     private fun onSplitBillClicked()
     {
-        // Implement split bill logic
+        // @todo Implement split bill logic
     }
 
     private fun onAddDiscountClicked()
     {
-        // Implement add discount logic
+        // @todo Implement split bill logic
     }
 
     private fun onChangeTableClicked()
     {
-        // Implement change table logic
+        // @todo Implement split bill logic
     }
 
     private fun onPrintReceiptClicked()
     {
-        // Implement print receipt logic
+        // @todo Implement split bill logic
     }
 
     companion object

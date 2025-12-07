@@ -1,7 +1,6 @@
 package com.hha.model
 
 import android.util.Log
-import android.view.View
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -17,7 +16,11 @@ import com.hha.dialog.Translation.TextId
 import com.hha.framework.CPaymentTransaction
 import com.hha.framework.CPersonnel
 import com.hha.grpc.GrpcServiceFactory
+import com.hha.printer.BillPrinter
+import com.hha.printer.EBillExample
+import com.hha.printer.EPrinterLocation
 import com.hha.printer.PrintFrame
+import com.hha.printer.TakeawayNumber
 import com.hha.resources.CTimestamp
 import com.hha.resources.Global
 import com.hha.types.CMoney
@@ -61,7 +64,9 @@ class TransactionViewModel : ViewModel(), PaymentsListener, TransactionListener,
    private val _displayLines = MutableLiveData<List<BillDisplayLine>>()
    val global: Global = Global.getInstance()
    val CFG = global.CFG
+   val userCFG = global.userCFG
    private var mAlreadyPayed = false
+   private var mTransactionTotals = CPaymentTransaction()
 
    val mContinueWhenAmountEnough = CFG.getBoolean("bill_continue_when_enough")
    private val mAskBillConfirmation = CFG.getBoolean("bill_ask_confirmation")
@@ -160,35 +165,21 @@ class TransactionViewModel : ViewModel(), PaymentsListener, TransactionListener,
       return EInitAction.INIT_ACTION_NOTHING
    }
 
-   fun discountVisible(): Boolean
+   /**
+    * Adds a payment to the current transaction.
+    */
+   fun addPayment(method: EPaymentMethod, amount: CMoney)
    {
-      val currentTransaction = transaction.value
-      if (currentTransaction == null)
-      {
-         return false
-      }
-      if (currentTransaction.isTakeaway()
-         && CFG.getValue("takeaway_discount") == 0
-         && currentTransaction.getStatus() != EClientOrdersType.CLOSED
-      )
-      {
-         return false
-      } else
-      {
-         return true
-      }
+      val currentTransaction = _transaction.value
+      currentTransaction?.addPayment(method, amount)
    }
 
-   fun allowNewItems(allowNewItems: Boolean)
+   /**
+    * Adds a payment to the current transaction.
+    */
+   fun addPayment(payment: CPayment)
    {
-      //mAllowNewItem = allowNewItems
-      mAllowNewItem = allowNewItems;
-//        val currentTransaction = mViewModel.transaction.value
-//        if (currentTransaction == null)
-//        {
-//            return
-//        }
-//        currentTransaction.allowNewItems(allowNewItems)
+      addPayment(payment.paymentMethod, payment.total)
    }
 
    fun addReturnMoney()
@@ -211,6 +202,16 @@ class TransactionViewModel : ViewModel(), PaymentsListener, TransactionListener,
          addPayment(EPaymentMethod.PAYMENT_RETURN, total-totalPayments);
          //totalPayments =total;
       }
+   }
+
+   /**
+    * Adds an item to the current transaction.
+    */
+   fun addItem(item: CMenuItem, clusterId: Short): Boolean
+   {
+      val currentTransaction = _transaction.value
+      // The ViewModel tells the model to change. The listener will handle the UI update automatically.
+      return currentTransaction?.addTransactionItem(item, clusterId) ?: false
    }
 
    fun addToEmployee(rfidKey: Short, paymentStatus: EPaymentStatus)
@@ -238,6 +239,37 @@ class TransactionViewModel : ViewModel(), PaymentsListener, TransactionListener,
          allKitchen, kitchen2, drinks, bar, sushi, nonfood, others,
          cash, card,returns)
       employee.update(false)
+   }
+
+   fun allowNewItems(allowNewItems: Boolean)
+   {
+      //mAllowNewItem = allowNewItems
+      mAllowNewItem = allowNewItems;
+//        val currentTransaction = mViewModel.transaction.value
+//        if (currentTransaction == null)
+//        {
+//            return
+//        }
+//        currentTransaction.allowNewItems(allowNewItems)
+   }
+
+   fun discountVisible(): Boolean
+   {
+      val currentTransaction = transaction.value
+      if (currentTransaction == null)
+      {
+         return false
+      }
+      if (currentTransaction.isTakeaway()
+         && CFG.getValue("takeaway_discount") == 0
+         && currentTransaction.getStatus() != EClientOrdersType.CLOSED
+      )
+      {
+         return false
+      } else
+      {
+         return true
+      }
    }
 
    fun endTimeFrameAndPrintToBuffer(
@@ -271,6 +303,59 @@ class TransactionViewModel : ViewModel(), PaymentsListener, TransactionListener,
          global.rfidKeyId, prints2kitchen, 0, collectPrinter, false);
       pf.printTimeFrame( transactionId, timeFrame, CFG.getShort("pc_number"),
          global.rfidKeyId, prints2bill, 0, false, true);
+   }
+
+   fun getCursor(item: CItem): Int
+   {
+      val currentTransaction = _transaction.value
+      return currentTransaction?.getCursor(item) ?: 0
+   }
+
+
+   fun getRequiredAdditionalPayment() : CMoney
+   {
+      val currentTransaction = _transaction.value
+      if (currentTransaction == null)
+      {
+         return CMoney(0)
+      }
+      // return true if a payment should be requested.
+      if (!m_alreadyPayed && currentTransaction.transType != ETransType.TRANS_TYPE_WOK)
+      {
+         val returnTotal = m_customerTotal-m_cashTotal-m_cardTotal
+         if ( returnTotal > CMoney(0))
+         {
+            return returnTotal
+         }
+      }
+      return CMoney(0)
+   }
+
+   fun getTableName(): String
+   {
+      val currentTransaction = _transaction.value
+      if (currentTransaction == null)
+      {
+         return "--"
+      }
+      var type = when (currentTransaction.transType)
+      {
+         ETransType.TRANS_TYPE_EAT_INSIDE,
+         ETransType.TRANS_TYPE_WOK, ETransType.TRANS_TYPE_RECHAUD,
+         ETransType.TRANS_TYPE_SITIN -> Translation.get(TextId.TEXT_TABLE)
+         ETransType.TRANS_TYPE_DELIVERY -> Translation.get(TextId.TEXT_TELEPHONE)
+         ETransType.TRANS_TYPE_TAKEAWAY,
+         ETransType.TRANS_TYPE_TAKEAWAY_PHONE -> Translation.get(TextId.TEXT_TAKEAWAY)
+         else -> "--"
+      }
+      type = type + " " + currentTransaction.getName()
+      return type
+   }
+
+   fun hasAnyChanges(): Boolean
+   {
+      val currentTransaction = _transaction.value
+      return currentTransaction?.hasAnyChanges() ?: false
    }
 
    /**
@@ -321,6 +406,8 @@ class TransactionViewModel : ViewModel(), PaymentsListener, TransactionListener,
       m_isInitialized = true
    }
 
+   fun isChanged(): Boolean = m_isChanged
+
    // 3. INITIALIZATION
    init
    {
@@ -335,19 +422,26 @@ class TransactionViewModel : ViewModel(), PaymentsListener, TransactionListener,
      // onTransactionChanged(transaction)
    }
 
+   fun isEmptyTransaction(): Boolean
+   {
+      val currentTransaction = _transaction.value
+      return currentTransaction?.isEmpty() ?: false
+   }
+
    /*----------------------------------------------------------------------------*/
    /** Check if we can print a bill, also ask whether it is allowed
     *  @return true when allowed to print
     */
    fun isPrintBillAllowedAndConfirmed(
       currentTransaction: CTransaction, offer: Boolean,
-      type: EClientOrdersType, customerTotal: CMoney
+      customerTotal: CMoney
    ): EPrintBillAction
    {
-      var retVal = true
+      var printBill = true
       val transactionId = currentTransaction.transactionId
+      val type = currentTransaction.getStatus()
 
-      if (!currentTransaction.isValid())
+      if (!currentTransaction.isValid())  // 594
       {
          // Invalid transaction, should not happen
          Log.e("BillOrderActivity", "not valid transaction=$transactionId!!");
@@ -357,14 +451,14 @@ class TransactionViewModel : ViewModel(), PaymentsListener, TransactionListener,
             service.setTransactionTableAvailable(transactionId)
          }
          currentTransaction.cancelPayments(EPaymentStatus.PAY_STATUS_UNPAID)
-         return EPrintBillAction.NAVIGATE_TO_ASK_TRANSACTION
+         return EPrintBillAction.NAVIGATE_TO_ASK_TRANSACTION // 606
       } else if (!offer
          && (currentTransaction.transType == ETransType.TRANS_TYPE_WOK)
          && (type != EClientOrdersType.CLOSED)
          && CFG.getBoolean("floorplan_bill_first")
       )
       {
-         when (type)
+         when (type) // 614 wok
          {
             EClientOrdersType.OPEN_PAID ->
             {
@@ -373,21 +467,21 @@ class TransactionViewModel : ViewModel(), PaymentsListener, TransactionListener,
                   currentTransaction.setStatus(EClientOrdersType.OPEN)
                } else
                {
-                  return EPrintBillAction.ASK_CONFIRM_PRINT
+                  return EPrintBillAction.ASK_WOK_CONFIRM_CLEAN_TABLE
                }
             }
             else -> {}
          }
       } else if (!mAskBillConfirmation)
       {
-         retVal = true
+         printBill = true
       } else if (mAllowNewItem)
       {
          return EPrintBillAction.ASK_CONFIRM_PRINT
       }
-      if (!retVal)
+      if (!printBill)
       {
-         return EPrintBillAction.PRINT_BILL_NO
+         return EPrintBillAction.CANCEL_BILL_PRINT
       } else
       {
          return EPrintBillAction.PRINT_BILL_YES
@@ -408,47 +502,23 @@ class TransactionViewModel : ViewModel(), PaymentsListener, TransactionListener,
       prepareBillDisplayLines()
    }
 
+   fun payEuroButton(amount: CMoney)
+   {
+      payEuros(amount)
+   }
+
    fun resetIsChanged()
    {
       m_isChanged = false
    }
 
-   fun isChanged(): Boolean = m_isChanged
-
    // 5. PUBLIC ACTIONS
    // These are the functions that the UI (Activities/Fragments) will call to request state changes.
-
-   /**
-    * Adds an item to the current transaction.
-    */
-   fun addItem(item: CMenuItem, clusterId: Short): Boolean
-   {
-      val currentTransaction = _transaction.value
-      // The ViewModel tells the model to change. The listener will handle the UI update automatically.
-      return currentTransaction?.addTransactionItem(item, clusterId) ?: false
-   }
 
    fun refreshAllData()
    {
       // When changing the language
       prepareBillDisplayLines()
-   }
-
-   /**
-    * Adds a payment to the current transaction.
-    */
-   fun addPayment(method: EPaymentMethod, amount: CMoney)
-   {
-      val currentTransaction = _transaction.value
-      currentTransaction?.addPayment(method, amount)
-   }
-
-   /**
-    * Adds a payment to the current transaction.
-    */
-   fun addPayment(payment: CPayment)
-   {
-      addPayment(payment.paymentMethod, payment.total)
    }
 
    fun payAllUsing(paymentMethod: EPaymentMethod)
@@ -660,19 +730,6 @@ class TransactionViewModel : ViewModel(), PaymentsListener, TransactionListener,
       currentTransaction?.setMessage(text)
    }
 
-   fun hasAnyChanges(): Boolean
-   {
-      val currentTransaction = _transaction.value
-      return currentTransaction?.hasAnyChanges() ?: false
-   }
-
-
-   fun getCursor(item: CItem): Int
-   {
-      val currentTransaction = _transaction.value
-      return currentTransaction?.getCursor(item) ?: 0
-   }
-
    /**
     * Handles the logic for when a user presses a cash payment button (e.g., €5, €10).
     * It contains the business rule to clear previous payments if needed.
@@ -683,6 +740,106 @@ class TransactionViewModel : ViewModel(), PaymentsListener, TransactionListener,
       currentTransaction?.addPayment(EPaymentMethod.PAYMENT_CASH, amount)
    }
 
+   fun confirmPrintBill(offer: Boolean)
+   {
+      val currentTransaction = transaction.value
+      if (currentTransaction == null)
+      {
+         return
+      }
+      if (offer) // 687
+      {
+         currentTransaction.setStatus(EClientOrdersType.OPEN)
+      }
+      val orderType = currentTransaction.getStatus()
+      if (  orderType == EClientOrdersType.OPEN
+         || orderType == EClientOrdersType.OPEN_PAID
+         || orderType == EClientOrdersType.PAYING)
+      {
+//            if (!checkBillingKey())
+//            {
+//                CmessageBox cm( "mbx::print_bill_not_valid", BTN9+2, BTN1-2, BTN3+2, BTN1+2, getTranslation(_KEY_BAD), MB_BEEP
+//                | MB_TIME3 | MB_TEXT_CENTER);
+//                cancelNewPayments();
+//                stop( MODE_ASK_TABLE_BILL_DIALOG);
+//                return;
+//            }
+         currentTransaction.setEmployeeId(global.rfidKeyId)
+         val transType = currentTransaction.transType
+
+         // todo: phone_order_bill_direct
+         if (  transType == ETransType.TRANS_TYPE_TAKEAWAY
+            || transType == ETransType.TRANS_TYPE_EAT_INSIDE)
+         {
+            val number = TakeawayNumber()
+            number.printTakeawayNumber(currentTransaction)
+
+            val timeNow = CTimestamp()
+            // End transaction and print
+            val tfi = currentTransaction.getTimeFrameIndex()
+
+            endTimeFrameAndPrintToBuffer(
+               global.mKitchenPrints, global.mKitchenPrints2bill,
+               timeNow, tfi,false,
+               userCFG.getBoolean("user_print_collect"))
+
+            // End transaction and print
+//                if (CFG("bill_print_kitchen_first"))
+//                {
+//                    CprinterSpoolerProxy::Instance()->checkDatabase();
+//                }
+         }
+         var alreadyPayed = currentTransaction.getPartialTotal(-1);
+         val total: CMoney = currentTransaction.getItemTotal() - currentTransaction.getDiscount();
+
+         if (  (orderType != EClientOrdersType.OPEN_PAID)
+            && (transType == ETransType.TRANS_TYPE_WOK))
+         {
+            currentTransaction.addReturnMoney()
+            addToEmployee(global.rfidKeyId, EPaymentStatus.PAY_STATUS_UNPAID)
+            mTransactionTotals = currentTransaction.getTransactionPayments()
+            var newType = EClientOrdersType.CLOSED
+            if (CFG.getBoolean("floorplan_bill_first"))
+            {
+               if (alreadyPayed < total)
+               {
+                  newType = EClientOrdersType.OPEN
+               } else
+               {
+                  newType = when (orderType)
+                  {
+                     EClientOrdersType.OPEN_PAID -> EClientOrdersType.CLOSED
+                     else -> EClientOrdersType.OPEN_PAID;
+                  }
+               }
+            }
+            currentTransaction.closeTransaction(newType);
+         } else if (mBillPayingMode == EPayingMode.PAYING_MODE_MANUAL
+            || currentTransaction.isTakeaway()
+            || alreadyPayed >= total
+            || orderType == EClientOrdersType.PAYING
+            || orderType == EClientOrdersType.OPEN_PAID
+         )
+         {
+            addReturnMoney();
+            currentTransaction.addToEmployee(EPaymentStatus.PAY_STATUS_UNPAID)
+            mTransactionTotals = currentTransaction.getTransactionPayments()
+            currentTransaction.closeTransaction(EClientOrdersType.CLOSED)
+         }
+         else
+         {
+            currentTransaction.setPayingState()
+            mTransactionTotals = currentTransaction.getTransactionPayments();
+         }
+      }
+      val quantity = currentTransaction.getBillPrinterQuantity()
+      printBills(quantity, mTransactionTotals)
+
+//        if (!CFG("bill_print_kitchen_first"))
+//        {
+//            CprinterSpoolerProxy::Instance()->checkDatabase();
+//        }
+   }
    /**
     * The ViewModel is automatically cleared by the framework.
     * We should remove our listener to prevent memory leaks.
@@ -841,6 +998,33 @@ class TransactionViewModel : ViewModel(), PaymentsListener, TransactionListener,
       mPartialIndex = currentTransaction.getHighestPaymentIndex()
    }
 
+
+   /*----------------------------------------------------------------------------*/
+   /** Print the final bill after all key check and calculations
+    *  @param quantity [in] How many bills
+    *  @param transactionTotals [in] Totals to print
+    */
+   fun printBills(quantity: Int, transactionTotals: CPaymentTransaction)
+   {
+      val currentTransaction = transaction.value
+      if (currentTransaction == null)
+      {
+         return
+      }
+
+      // Local language bill print
+      val billPrinter = BillPrinter(currentTransaction.transactionId);
+      billPrinter.printBill(
+         global.euroLang,
+         EPrinterLocation.PRINTER_LOCATION_BILL_PRN,
+         EBillExample.BILL_NORMAL, quantity, -1,
+         transactionTotals, true);
+//        if ( m_slipPrints)
+//        {
+//            billPrinter.printBill( EuroLang, SLIP_PRN, BILL_NORMAL, m_slipPrints, -1, transactionTotals, false);
+//        }
+   }
+
    fun setMode(newMode: InitMode)
    {
       mMode = newMode
@@ -862,23 +1046,4 @@ class TransactionViewModel : ViewModel(), PaymentsListener, TransactionListener,
       return false
    }
 
-
-   fun getRequiredAdditionalPayment() : CMoney
-   {
-      val currentTransaction = _transaction.value
-      if (currentTransaction == null)
-      {
-         return CMoney(0)
-      }
-      // return true if a payment should be requested.
-      if (!m_alreadyPayed && currentTransaction.transType != ETransType.TRANS_TYPE_WOK)
-      {
-         val returnTotal = m_customerTotal-m_cashTotal-m_cardTotal
-         if ( returnTotal > CMoney(0))
-         {
-            return returnTotal
-         }
-      }
-      return CMoney(0)
-   }
 }

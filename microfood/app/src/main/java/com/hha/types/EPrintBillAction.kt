@@ -8,7 +8,7 @@ enum class EPrintBillAction {
    NAVIGATE_TO_ASK_TRANSACTION,
 
    /** The bill is settled, but the table needs to be cleaned. Ask the user for confirmation. */
-   ASK_CONFIRM_CLEAN_TABLE,
+   ASK_WOK_CONFIRM_CLEAN_TABLE,
 
    /** A general confirmation is required before printing the bill or offer. */
    ASK_CONFIRM_PRINT,
@@ -19,7 +19,7 @@ enum class EPrintBillAction {
    /** All checks passed. It is safe to proceed with finalizing and printing the bill. */
    PROCEED_TO_PRINT,
 
-   PRINT_BILL_NO,
+   CANCEL_BILL_PRINT,
 
    PRINT_BILL_YES
 }

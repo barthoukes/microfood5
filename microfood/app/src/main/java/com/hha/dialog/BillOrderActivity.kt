@@ -19,7 +19,6 @@ import com.hha.callback.TransactionListener
 import com.hha.framework.CItem
 import com.hha.framework.CPaymentTransaction
 import com.hha.framework.CTransaction
-import com.hha.grpc.GrpcServiceFactory
 import com.hha.modalDialog.ModalDialogPayment
 import com.hha.modalDialog.ModalDialogTextInput
 import com.hha.model.BillDisplayLine
@@ -31,9 +30,6 @@ import com.hha.types.ETaal
 import com.hha.types.CMoney
 import com.hha.types.EPaymentMethod
 import com.hha.modalDialog.ModalDialogYesNo
-import com.hha.printer.BillPrinter
-import com.hha.printer.EBillExample
-import com.hha.printer.EPrinterLocation
 import com.hha.printer.TakeawayNumber
 import com.hha.resources.CTimestamp
 import com.hha.types.EClientOrdersType
@@ -41,7 +37,6 @@ import com.hha.types.EInitAction
 import com.hha.types.EPayingMode
 import com.hha.types.EPaymentStatus
 import com.hha.types.EPrintBillAction
-import com.hha.types.ETimeFrameIndex
 import com.hha.types.ETransType
 import tech.hha.microfood.databinding.BillOrderActivityBinding
 
@@ -72,11 +67,13 @@ class BillOrderActivity : AppCompatActivity(),
     private val mPayText = colourCFG.getBackgroundColour("COLOUR_BILL_AMOUNT_TEXT1")
     private val mAskBillConfirmation = CFG.getBoolean("bill_ask_confirmation")
     private val mContinueWhenAmountEnough = CFG.getBoolean("bill_continue_when_enough")
-    private var mTransactionTotals = CPaymentTransaction()
     private var mPaidTotal = CMoney(0)
 
     private var mCustomerTotal = CMoney(0)
     private val mUserPrintCollect = userCFG.getBoolean("user_print_collect")
+
+    private val CLEAN_TABLE = 123
+    private val CONFIRM_BILL = 456
 
     fun onInit()
     {
@@ -98,6 +95,7 @@ class BillOrderActivity : AppCompatActivity(),
             mBinding.btnDiscount.visibility = View.GONE
         }
     }
+
     fun askTransactionActivity()
     {
         Log.i("BillOrderActivity", "Bill processed. Navigating to AskTransactionActivity.")
@@ -114,41 +112,6 @@ class BillOrderActivity : AppCompatActivity(),
 
         // Close the current BillOrderActivity so it's removed from the back stack
         finish()
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?)
-    {
-        super.onCreate(savedInstanceState)
-        mBinding = BillOrderActivityBinding.inflate(layoutInflater)
-        setContentView(mBinding.root)
-
-        mViewModel = ViewModelProvider(this, TransactionViewModelFactory)
-            .get(TransactionViewModel::class.java)
-
-        setupRecyclerView()
-        initializeViews()
-
-
-        mViewModel.transaction.observe(this) { transaction ->
-            // This block will run automatically when the activity starts
-            // and any time the transaction data changes.
-
-            if (transaction != null)
-            {
-                // --- THIS IS WHERE YOU CALL updateData ---
-                mBillItemsAdapter.updateData(transaction)
-
-                transaction.calculateTotalTransaction()
-                mBinding.totalBillPrice.text = transaction.getTotalTransaction().toString()
-            }
-        }
-        // OBSERVER 2: For the payments list (bottom RecyclerView)
-        mViewModel.billDisplayLines.observe(this) { paymentLines ->
-            // This block runs when the list of payment lines is ready.
-            mPaymentsAdapter.submitList(paymentLines)
-        }
-
-        mViewModel.initializeTransaction(TransactionViewModel.InitMode.VIEW_BILLING)
     }
 
     private fun createGridLayoutBillingItems()
@@ -172,6 +135,7 @@ class BillOrderActivity : AppCompatActivity(),
     override fun onResume()
     {
         super.onResume()
+        onInit()
     }
 
     /*----------------------------------------------------------------------------*/
@@ -248,6 +212,7 @@ class BillOrderActivity : AppCompatActivity(),
         createPaymentsAdapter()
     }
 
+
     fun createGridLayoutPayments()
     {
         // 1. GridLayoutManager for pages with 3 rows (vertical span) and horizontal scrolling
@@ -298,12 +263,13 @@ class BillOrderActivity : AppCompatActivity(),
     {
     }
 
-    // Empty button functions to be implemented
-    fun onButtonLanguage()
-    {
-        Translation.nextLanguage()
-        refreshAllData()
-    }
+//    // Empty button functions to be implemented
+//    fun onButtonLanguage()
+//    {
+//        Translation.nextLanguage()
+//        refreshAllData()
+//        mBillItemsAdapter.notifyDataSetChanged()
+//    }
 
     private fun refreshPrints()
     {
@@ -322,6 +288,8 @@ class BillOrderActivity : AppCompatActivity(),
         mBinding.txtBillPrints.text = Translation.get(Translation.TextId.TEXT_PRINT_SLIP)
         refreshPrints()
         mViewModel.refreshAllData()
+        mBillItemsAdapter.notifyDataSetChanged()
+        mBinding.tableName.text = mViewModel.getTableName()
     }
 
     @Suppress("UNUSED_PARAMETER")
@@ -352,32 +320,32 @@ class BillOrderActivity : AppCompatActivity(),
     @Suppress("UNUSED_PARAMETER")
     fun onButton5Euro(view: View)
     {
-        payEuroButton(CMoney(500))
+        mViewModel.payEuroButton(CMoney(500))
     }
 
     @Suppress("UNUSED_PARAMETER")
     fun onButton10Euro(view: View)
     {
         // Implement €10 payment logic
-        payEuroButton(CMoney(1000))
+        mViewModel.payEuroButton(CMoney(1000))
     }
 
     @Suppress("UNUSED_PARAMETER")
     fun onButton20Euro(view: View)
     {
-        payEuroButton(CMoney(2000))
+        mViewModel.payEuroButton(CMoney(2000))
     }
 
     @Suppress("UNUSED_PARAMETER")
     fun onButton50Euro(view: View)
     {
-        payEuroButton(CMoney(5000))
+        mViewModel.payEuroButton(CMoney(5000))
     }
 
     @Suppress("UNUSED_PARAMETER")
     fun onButton100Euro(view: View)
     {
-        payEuroButton(CMoney(10000))
+        mViewModel.payEuroButton(CMoney(10000))
     }
 
     @Suppress("UNUSED_PARAMETER")
@@ -412,6 +380,41 @@ class BillOrderActivity : AppCompatActivity(),
         finish()
     }
 
+    override fun onCreate(savedInstanceState: Bundle?)
+    {
+        super.onCreate(savedInstanceState)
+        mBinding = BillOrderActivityBinding.inflate(layoutInflater)
+        setContentView(mBinding.root)
+
+        mViewModel = ViewModelProvider(this, TransactionViewModelFactory)
+            .get(TransactionViewModel::class.java)
+
+        setupRecyclerView()
+        initializeViews()
+
+
+        mViewModel.transaction.observe(this) { transaction ->
+            // This block will run automatically when the activity starts
+            // and any time the transaction data changes.
+
+            if (transaction != null)
+            {
+                // --- THIS IS WHERE YOU CALL updateData ---
+                mBillItemsAdapter.updateData(transaction)
+
+                transaction.calculateTotalTransaction()
+                mBinding.totalBillPrice.text = transaction.getTotalTransaction().toString()
+            }
+        }
+        // OBSERVER 2: For the payments list (bottom RecyclerView)
+        mViewModel.billDisplayLines.observe(this) { paymentLines ->
+            // This block runs when the list of payment lines is ready.
+            mPaymentsAdapter.submitList(paymentLines)
+        }
+
+        mViewModel.initializeTransaction(TransactionViewModel.InitMode.VIEW_BILLING)
+    }
+
     // This is the new method you must implement
     override fun onPaymentEntered(
         paymentMethod: EPaymentMethod,
@@ -419,11 +422,6 @@ class BillOrderActivity : AppCompatActivity(),
     )
     {
         mViewModel.addPayment(paymentMethod, amount)
-    }
-
-    private fun payEuroButton(amount: CMoney)
-    {
-        mViewModel.payEuros(amount)
     }
 
     public fun payAllUsingPin()
@@ -475,11 +473,6 @@ class BillOrderActivity : AppCompatActivity(),
         mBinding.layoutBillingPayments.adapter = adapter
     }
 
-    override fun onTextEntered(text: String)
-    {
-        mViewModel.setMessage(text)
-    }
-
 // ... inside the BillOrderActivity class
 
     // Add this entire function. The system will now find this method when the button is clicked.
@@ -499,24 +492,40 @@ class BillOrderActivity : AppCompatActivity(),
         } else
         {
             // 4. If the bill is already paid (or has change), you can proceed to print.
-            Toast.makeText(this, "Bill is already fully paid. Printing...", Toast.LENGTH_SHORT).show()
+            //Toast.makeText(this, "Bill is already fully paid. Printing...", Toast.LENGTH_SHORT).show()
             onPrintBill(false)
         }
+    }
+
+    // YesNo dialog, press NO/CANCEL
+    override fun onDialogNegativeClick(dialog: DialogFragment, requestCode: Int)
+    {
+        when (requestCode)
+        {
+            CLEAN_TABLE,
+            CONFIRM_BILL -> cancelPaymentsAskOtherTable()
+            else -> {}
+        }
+    }
+
+    // YesNo dialog, press OK/CONFIRM
+    override fun onDialogPositiveClick(dialog: DialogFragment, requestCode: Int)
+    {
+        when (requestCode)
+        {
+            CLEAN_TABLE, CONFIRM_BILL -> confirmPrintBill()
+            else -> {}
+        }
+    }
+
+    override fun onTextEntered(text: String)
+    {
+        mViewModel.setMessage(text)
     }
 
     override fun onTransactionChanged(transaction: CTransaction)
     {
         // binding.totalBillPrice.text = transaction.getTotalTransaction().toString()
-    }
-
-    override fun onDialogPositiveClick(dialog: DialogFragment, requestCode: Int)
-    {
-        printBillYes()
-    }
-
-    override fun onDialogNegativeClick(dialog: DialogFragment, requestCode: Int)
-    {
-        printBillNo()
     }
 
     /**
@@ -535,56 +544,36 @@ class BillOrderActivity : AppCompatActivity(),
     }
 
     /*----------------------------------------------------------------------------*/
-    /** Print the final bill after all key check and calculations
-     *  @param quantity [in] How many bills
-     *  @param transactionTotals [in] Totals to print
-     */
-    fun printBills(quantity: Int, transactionTotals: CPaymentTransaction)
-    {
-        val currentTransaction = mViewModel.transaction.value
-        if (currentTransaction == null)
-        {
-            return
-        }
-
-        // Local language bill print
-        val billPrinter = BillPrinter(currentTransaction.transactionId);
-        billPrinter.printBill(
-            global.euroLang,
-            EPrinterLocation.PRINTER_LOCATION_BILL_PRN,
-            EBillExample.BILL_NORMAL, quantity, -1,
-            transactionTotals, true);
-//        if ( m_slipPrints)
-//        {
-//            billPrinter.printBill( EuroLang, SLIP_PRN, BILL_NORMAL, m_slipPrints, -1, transactionTotals, false);
-//        }
-    }
-
-    /*----------------------------------------------------------------------------*/
     /** Check if we can print a bill, also ask whether it is allowed
      *  @return true when
      */
     fun isPrintBillAllowedAndConfirmed(
-        currentTransaction: CTransaction, offer: Boolean,
-        type: EClientOrdersType
-    ): EPrintBillAction
+        currentTransaction: CTransaction, offer: Boolean
+    )
     {
         val action = mViewModel.isPrintBillAllowedAndConfirmed(
-            currentTransaction, offer, type, mCustomerTotal)
+            currentTransaction, offer, mCustomerTotal
+        )
+        runAction(currentTransaction, offer, action)
+    }
+
+    fun runAction(
+        currentTransaction: CTransaction, offer: Boolean, action: EPrintBillAction)
+    {
         when(action)
         {
             EPrintBillAction.NAVIGATE_TO_ASK_TRANSACTION -> askTransactionActivity()
-            EPrintBillAction.ASK_CONFIRM_CLEAN_TABLE -> {
+            EPrintBillAction.ASK_WOK_CONFIRM_CLEAN_TABLE -> {
+                // 627 wok
                 val title = Translation.get(Translation.TextId.TEXT_CLEAN_TABLE)
                 // Ask to confirm the bill printing
-                val dlg = ModalDialogYesNo.newInstance(title, "", 1)
+                val dlg = ModalDialogYesNo.newInstance(title, "", CLEAN_TABLE)
                 dlg.show(supportFragmentManager, "ConfirmationDialog") }
-            EPrintBillAction.ASK_CONFIRM_PRINT -> showConfirmation(offer)
-            EPrintBillAction.PRINT_BILL_NO -> printBillNo()
-            EPrintBillAction.PRINT_BILL_YES -> printBillYes()
+            EPrintBillAction.ASK_CONFIRM_PRINT -> askConfirmationBill(offer)
+            EPrintBillAction.CANCEL_BILL_PRINT -> cancelPaymentsAskOtherTable()
+            EPrintBillAction.PRINT_BILL_YES -> confirmPrintBill()
             else -> {}
         }
-        return action
     }
 
     fun onPrintBill(offer: Boolean)
@@ -595,16 +584,10 @@ class BillOrderActivity : AppCompatActivity(),
             return
         }
         Log.i("model", "onPrintBill  transaction=${currentTransaction.transactionId}")
-//      var bp = BillPrinter(currentTransaction.transactionId)
-//      bp.printBill(ETaal.currentTransaction.getLanguage(),
-
-        //  val totalPaid: CMoney = currentTransaction.getTotalAlreadyPaid();
-        val orderType: EClientOrdersType = currentTransaction.getStatus();
-
-        isPrintBillAllowedAndConfirmed(currentTransaction, offer, orderType)
+        isPrintBillAllowedAndConfirmed(currentTransaction, offer) // 675
     }
 
-    fun showConfirmation(offer: Boolean)
+    fun askConfirmationBill(offer: Boolean)
     {
         mOffer = offer
         val title = when (offer)
@@ -612,161 +595,74 @@ class BillOrderActivity : AppCompatActivity(),
             false -> Translation.get(Translation.TextId.TEXT_FINISH_BILL)
             true -> Translation.get(Translation.TextId.TEXT_PRINT_OFFER)
         }
-        val dlg = ModalDialogYesNo.newInstance(title, "", 0)
+        val dlg = ModalDialogYesNo.newInstance(title, "", CONFIRM_BILL)
         dlg.show(supportFragmentManager, "ConfirmationDialog")
+        // Continue in onDialogPositiveClick and onDialogNegativeClick
     }
 
-    fun printBillNo()
+    fun cancelPaymentsAskOtherTable()
     {
-        val currentTransaction = mViewModel.transaction.value
+        val currentTransaction = mViewModel.transaction.value // 678
         if (currentTransaction == null)
         {
             return
         }
-        val transType: ETransType = currentTransaction.transType
 
-        if (transType != ETransType.TRANS_TYPE_SHOP)
-        {
-            val transactionId = currentTransaction.transactionId
-            Log.i(
-                "MODEL",
-                "CbillingDialog::onPrintBill not valid = $transactionId!!"
-            )
-            currentTransaction.cancelPayments(EPaymentStatus.PAY_STATUS_UNPAID)
-            askTransactionActivity()
-        }
+        val transactionId = currentTransaction.transactionId
+        Log.i(
+            "MODEL",
+            "CbillingDialog::onPrintBill not valid = $transactionId!!"
+        )
+        currentTransaction.cancelPayments(EPaymentStatus.PAY_STATUS_UNPAID)
+        askTransactionActivity()
     }
 
-    fun printBillYes()
+    fun confirmPrintBill()
     {
-        val currentTransaction = mViewModel.transaction.value
-        if (currentTransaction == null)
-        {
-            return
-        }
-        if (mAskBillConfirmation && mAllowNewItem)
-        {
-            showConfirmation(mOffer)
-            val orderType: EClientOrdersType = currentTransaction.getStatus();
-            if (orderType == EClientOrdersType.OPEN
-                || orderType == EClientOrdersType.OPEN_PAID
-                || orderType == EClientOrdersType.PAYING
-            )
-            {
-//            if (!checkBillingKey())
-//            {
-//                Toast(Translation.get(TEXT_KEY_BAD))
-//                currentTransaction.cancelPayments(EPaymentStatus.PAY_STATUS_UNPAID)
-//                askTransactionActivity()
-//                return;
-//            }
-                currentTransaction.setEmployeeId(global.rfidKeyId)
-                val transType: ETransType = currentTransaction.transType
+        mViewModel.confirmPrintBill(mOffer)
 
-                // todo: phone_order_bill_direct
-                if (transType == ETransType.TRANS_TYPE_TAKEAWAY
-                    || transType == ETransType.TRANS_TYPE_EAT_INSIDE
-                )
-                {
-                    val number = TakeawayNumber()
-                    number.printTakeawayNumber(currentTransaction)
-
-                    val timeNow = CTimestamp()
-                    // End transaction and print
-                    val tfi = currentTransaction.getTimeFrameIndex()
-
-                    mViewModel.endTimeFrameAndPrintToBuffer(
-                        global.mKitchenPrints, global.mKitchenPrints2bill,
-                        timeNow, tfi,false,
-                        userCFG.getBoolean("user_print_collect")
-                    );
-                }
-                var alreadyPayed = currentTransaction.getPartialTotal(-1);
-                val total: CMoney = currentTransaction.getItemTotal() - currentTransaction.getDiscount();
-
-                if ((orderType != EClientOrdersType.OPEN_PAID)
-                    && (transType == ETransType.TRANS_TYPE_WOK)
-                )
-                {
-                    mViewModel.addReturnMoney()
-                    mViewModel.addToEmployee(global.rfidKeyId, EPaymentStatus.PAY_STATUS_UNPAID)
-                    mTransactionTotals = currentTransaction.getTransactionPayments()
-                    var newType = EClientOrdersType.CLOSED
-                    if (CFG.getBoolean("floorplan_bill_first"))
-                    {
-                        if (alreadyPayed < total)
-                        {
-                            newType = EClientOrdersType.OPEN;
-                        } else
-                        {
-                            newType = when (orderType)
-                            {
-                                EClientOrdersType.OPEN_PAID -> EClientOrdersType.CLOSED
-                                else -> EClientOrdersType.OPEN_PAID;
-                            }
-                        }
-                        currentTransaction.closeTransaction(newType);
-                    } else if (mViewModel.mBillPayingMode == EPayingMode.PAYING_MODE_MANUAL
-                        || currentTransaction.isTakeaway()
-                        || alreadyPayed >= total
-                        || orderType == EClientOrdersType.PAYING
-                        || orderType == EClientOrdersType.OPEN_PAID
-                    )
-                    {
-                        mViewModel.addReturnMoney();
-                        currentTransaction.addToEmployee(EPaymentStatus.PAY_STATUS_UNPAID)
-                        mTransactionTotals = currentTransaction.getTransactionPayments()
-                        currentTransaction.closeTransaction(EClientOrdersType.CLOSED)
-                    } else
-                    {
-                        currentTransaction.setPayingState()
-                        mTransactionTotals = currentTransaction.getTransactionPayments();
-                    }
-                }
-                val quantity = currentTransaction.getBillPrinterQuantity()
-                printBills(quantity, mTransactionTotals)
-
-                //  nextDialog()
-
-//        if ( CFG("bill_finish_show_floorplan"))
+//        if (!CFG("bill_print_kitchen_first"))
 //        {
-//            astop( MODE_ASK_TABLE_MAP_DIALOG );
-//        } else
-                askTransactionActivity()
-            }
+//            CprinterSpoolerProxy::Instance()->checkDatabase();
+//        }
+        askTransactionActivity()
+    }
 
-            /*----------------------------------------------------------------------------*/
-            /** Check for valid billing key, delete payments and notify when wrong.
-             *  Also when the wrong key is used, notify to use the proper key
-             *  @return true if ok to continue billing
-             */
-            fun checkBillingKey(): Boolean
-            {
-                var retVal = true
-                val employeeId = currentTransaction.getEmployeeId()
-                if (!currentTransaction.isTakeaway()
-                    && CFG.getValue("waiter_per_table") != 0
-                    && employeeId != global.rfidKeyId
-                )
-                {
-                    // Table has different waiter !
-                    val txt = Translation.get(Translation.TextId.TEXT_EMPLOYEE)
-                    Toast.makeText(this@BillOrderActivity, txt, Toast.LENGTH_LONG).show()
-                    retVal = false;
-                }
+    /*----------------------------------------------------------------------------*/
+    /** Check for valid billing key, delete payments and notify when wrong.
+     *  Also when the wrong key is used, notify to use the proper key
+     *  @return true if ok to continue billing
+     */
+    fun checkBillingKey(): Boolean
+    {
+        val currentTransaction = mViewModel.transaction.value // 678
+        if (currentTransaction == null)
+        {
+            return false
+        }
+        var retVal = true
+        val employeeId = currentTransaction.getEmployeeId()
+        if (!currentTransaction.isTakeaway()
+            && CFG.getValue("waiter_per_table") != 0
+            && employeeId != global.rfidKeyId
+        )
+        {
+            // Table has different waiter !
+            val txt = Translation.get(Translation.TextId.TEXT_EMPLOYEE)
+            Toast.makeText(this@BillOrderActivity, txt, Toast.LENGTH_LONG).show()
+            retVal = false;
+        }
 //            else if (CFG("restaurant_map"))
 //        {
 //            long transactionId = m_transactionItemModel->getTransactionId();
 //            CsqlFloorTableIterator(-1).setTransactionTableAvailable(transactionId);
 //        }
 
-                if (!retVal)
-                {
-                    currentTransaction.cancelNewPayments()
-                    askTransactionActivity()
-                }
-                return retVal;
-            }
+        if (!retVal)
+        {
+            currentTransaction.cancelNewPayments()
+            askTransactionActivity()
         }
+        return retVal;
     }
 }
