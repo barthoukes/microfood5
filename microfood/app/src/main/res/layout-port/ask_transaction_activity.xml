@@ -43,11 +43,13 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <TextView
-            android:layout_width="wrap_content"
+            android:id="@+id/header_button"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Restaurant POS"
+            android:gravity="center"
             android:textColor="@android:color/white"
-            android:textSize="20sp" />
+            android:textSize="24sp" />
 
         <ImageButton
             android:id="@+id/btn_back"

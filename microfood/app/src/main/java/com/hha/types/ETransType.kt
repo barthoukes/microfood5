@@ -1,7 +1,9 @@
 package com.hha.types
 
 import com.hha.common.TransType
+import com.hha.dialog.Translation
 import java.util.EnumSet
+import tech.hha.microfood.R
 
 /**
  * Defines transaction types for restaurant operations
@@ -19,6 +21,40 @@ enum class ETransType {
     TRANS_TYPE_WOK,          // Wok station
     TRANS_TYPE_ALL;          // Special case for queries
 
+    /**
+     * Converts the enum value to its user-facing, translated text representation.
+     */
+    override fun toString(): String {
+        return when (this) {
+            TRANS_TYPE_UNDEFINED -> "UNDEFINED" // Or Translation.get(TextId.TEXT_UNDEFINED)
+            TRANS_TYPE_NOCHANGE -> "NO CHANGE"   // Or a translated equivalent
+            TRANS_TYPE_SITIN -> Translation.get(Translation.TextId.TEXT_TABLE)
+            TRANS_TYPE_DELIVERY -> Translation.get(Translation.TextId.TEXT_ORDER_TELEPHONE)
+            TRANS_TYPE_SHOP -> Translation.get(Translation.TextId.TEXT_SHOP)
+            TRANS_TYPE_TAKEAWAY -> Translation.get(Translation.TextId.TEXT_TAKEAWAY)
+            TRANS_TYPE_TAKEAWAY_PHONE -> Translation.get(Translation.TextId.TEXT_ORDER_TELEPHONE)
+            TRANS_TYPE_EAT_INSIDE -> Translation.get(Translation.TextId.TEXT_EAT_INSIDE)
+            TRANS_TYPE_RECHAUD -> Translation.get(Translation.TextId.TEXT_RECHAUD)
+            TRANS_TYPE_WOK -> Translation.get(Translation.TextId.TEXT_WOK)
+            else -> ""
+        }
+    }
+
+    fun toImageResource(): Int {
+        return when (this) {
+            TRANS_TYPE_UNDEFINED, TRANS_TYPE_NOCHANGE -> 0
+            TRANS_TYPE_SITIN -> R.drawable.sitin_yellow
+            TRANS_TYPE_DELIVERY -> R.drawable.icon_takephone_yellow
+            TRANS_TYPE_SHOP -> R.drawable.bag_yellow
+            TRANS_TYPE_TAKEAWAY -> R.drawable.bag_yellow
+            TRANS_TYPE_TAKEAWAY_PHONE -> R.drawable.icon_takephone_yellow
+            TRANS_TYPE_RECHAUD -> R.drawable.icon_wok_yellow
+            TRANS_TYPE_WOK -> R.drawable.icon_wok_yellow
+            TRANS_TYPE_EAT_INSIDE -> R.drawable.icon_inside_yellow
+            else -> R.drawable.bag_yellow
+        }
+    }
+
     companion object {
         private val TAKEAWAY_PRICE_TYPES = EnumSet.of(
             TRANS_TYPE_TAKEAWAY,
@@ -26,7 +62,6 @@ enum class ETransType {
             TRANS_TYPE_EAT_INSIDE,
             TRANS_TYPE_TAKEAWAY_PHONE
         )
-
 
         /**
          * Converts from TransType to ETransType
@@ -52,7 +87,8 @@ enum class ETransType {
          * Safe conversion from ordinal/Int with fallback to UNDEFINED
          */
         fun fromInt(value: Int): ETransType {
-            return values().getOrElse(value) { TRANS_TYPE_UNDEFINED }
+            return ETransType.entries.toTypedArray()
+                .getOrElse(value) { TRANS_TYPE_UNDEFINED }
         }
 
        fun useTakeawayPrices(value: ETransType): Boolean = TAKEAWAY_PRICE_TYPES.contains(value)

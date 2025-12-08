@@ -32,8 +32,8 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModelProvider
 import com.hha.callback.TransactionListener
-import com.hha.model.TransactionViewModel
-import com.hha.model.TransactionViewModelFactory
+import com.hha.model.TransactionPaymentModel
+import com.hha.model.TransactionPaymentModelFactory
 import com.hha.types.CMoney
 
 import tech.hha.microfood.databinding.PageOrderActivityBinding
@@ -74,7 +74,7 @@ class PageOrderActivity : AppCompatActivity(), ModalDialogYesNo.MessageBoxYesNoL
     private lateinit var mMenuPagesAdapter: MenuPagesAdapter
     private lateinit var mMenuItemsAdapter: MenuItemsAdapter
     private lateinit var mTransactionItemsAdapter: TransactionItemsAdapter
-    private lateinit var mViewModel: TransactionViewModel
+    private lateinit var mViewModel: TransactionPaymentModel
     val mClusterId: Short = -1
     var mFromBilling: Boolean = false
 
@@ -84,8 +84,8 @@ class PageOrderActivity : AppCompatActivity(), ModalDialogYesNo.MessageBoxYesNoL
         mBinding = PageOrderActivityBinding.inflate(layoutInflater)
         setContentView(mBinding.root)
 
-        mViewModel = ViewModelProvider(this, TransactionViewModelFactory)
-            .get(TransactionViewModel::class.java)
+        mViewModel = ViewModelProvider(this, TransactionPaymentModelFactory)
+            .get(TransactionPaymentModel::class.java)
 
         setupRecyclerView()
         // 3. OBSERVE the LiveData from the ViewModel
@@ -102,7 +102,7 @@ class PageOrderActivity : AppCompatActivity(), ModalDialogYesNo.MessageBoxYesNoL
                 transaction.addItemListener(mTransactionItemsAdapter)
             }
         }
-        mViewModel.initializeTransaction(TransactionViewModel.InitMode.VIEW_PAGE_ORDER)
+        mViewModel.initializeTransaction(TransactionPaymentModel.InitMode.VIEW_PAGE_ORDER)
     }
 
     override fun onDestroy()

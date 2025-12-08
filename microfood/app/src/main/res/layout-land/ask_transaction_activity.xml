@@ -8,97 +8,107 @@
     <!-- Vertical Button Bar (Right Side) -->
     <LinearLayout
         android:id="@+id/button_bar"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="0dp"
         android:background="@color/ANDROID_BUTTON_BACKGROUND"
         android:orientation="vertical"
-        android:padding="8dp"
+        android:padding="4dp"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@id/guideline_vertical_90"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <!-- All ImageButtons for the button bar go here... -->
-        <ImageButton
-            android:id="@+id/btn_floor_plan"
-            android:layout_width="48dp"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Floor Plan"
-            android:src="@drawable/floorplan_yellow" />
-        <ImageButton
-            android:id="@+id/btn_calculator"
-            android:layout_width="48dp"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Calculator"
-            android:src="@drawable/icon_calculator_yellow" />
+        <!-- ... Your buttons inside the bar ... -->
         <ImageButton
             android:id="@+id/btn_language"
-            android:layout_width="48dp"
+            android:layout_width="64dp"
             android:layout_height="0dp"
             android:layout_weight="1"
+            android:layout_gravity="center"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="Change Language"
             android:onClick="onButtonLanguage"
             android:src="@drawable/languages_yellow" />
         <ImageButton
             android:id="@+id/btn_takeaway"
-            android:layout_width="48dp"
+            android:layout_width="64dp"
             android:layout_height="0dp"
             android:layout_weight="1"
+            android:layout_gravity="center"
+            android:onClick="onButtonTakeaway"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="Takeaway"
             android:src="@drawable/bag_yellow" />
         <ImageButton
             android:id="@+id/btn_phone_order"
-            android:layout_width="48dp"
+            android:layout_width="64dp"
             android:layout_height="0dp"
             android:layout_weight="1"
+            android:layout_gravity="center"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="Phone Order"
             android:src="@drawable/icon_takephone_yellow" />
         <ImageButton
             android:id="@+id/btn_open_drawer"
-            android:layout_width="48dp"
+            android:layout_width="64dp"
             android:layout_height="0dp"
             android:layout_weight="1"
+            android:layout_gravity="center"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="Open Drawer"
             android:src="@drawable/drawer_yellow" />
     </LinearLayout>
+
+    <View
+        android:id="@+id/header_background"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@color/COLOUR_HEADER_BACKGROUND"
+        android:elevation="4dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/guideline_horizontal_10"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/guideline_vertical_90" />
 
     <!-- Toolbar -->
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:background="@color/COLOUR_HEADER_BACKGROUND"
         android:elevation="4dp"
         android:textColor="@color/COLOUR_HEADER_TEXT"
         app:layout_constraintBottom_toTopOf="@id/guideline_horizontal_10"
+        app:layout_constraintEnd_toStartOf="@+id/btn_back"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/guideline_vertical_90">  <!-- CHANGED -->
+        app:layout_constraintTop_toTopOf="parent">
 
         <TextView
-            android:layout_width="wrap_content"
+            android:id="@+id/header_button"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="center"
             android:text="Restaurant POS"
             android:textColor="@android:color/white"
-            android:textSize="20sp" />
+            android:textSize="24sp" />
 
-        <ImageButton
-            android:id="@+id/btn_back"
-            android:layout_width="wrap_content"
-            android:layout_height="48dp"
-            android:layout_gravity="right"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="back button"
-            android:onClick="onButtonBack"
-            android:src="@drawable/back_yellow" />
+        <!-- The ImageButton has been moved out of the Toolbar -->
+
     </androidx.appcompat.widget.Toolbar>
+
+    <!-- Back Button - MOVED and now constrained independently -->
+    <ImageButton
+        android:id="@+id/btn_back"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:contentDescription="back button"
+        android:onClick="onButtonBack"
+        android:elevation="4dp"
+        android:layout_marginRight="8dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:src="@drawable/back_yellow"
+        app:layout_constraintBottom_toTopOf="@+id/guideline_horizontal_10"
+        app:layout_constraintEnd_toStartOf="@+id/guideline_vertical_90"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <!-- A Guideline to split the two RecyclerViews 50/50 -->
     <androidx.constraintlayout.widget.Guideline
@@ -107,8 +117,8 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         app:layout_constraintGuide_percent="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/button_bar"/>
+        app:layout_constraintEnd_toStartOf="@+id/button_bar"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <!-- Horizontal Guideline at 10% from the top -->
     <androidx.constraintlayout.widget.Guideline
@@ -118,7 +128,7 @@
         android:orientation="horizontal"
         app:layout_constraintGuide_percent="0.1" />
 
-    <!-- NEW: Vertical Guideline at 90% -->
+    <!-- Vertical Guideline at 90% -->
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline_vertical_90"
         android:layout_width="wrap_content"
@@ -153,7 +163,9 @@
         android:paddingHorizontal="2dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/button_bar"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toEndOf="@+id/guideline_vertical_middle"
-        app:layout_constraintTop_toBottomOf="@id/guideline_horizontal_10" />
+        app:layout_constraintTop_toBottomOf="@id/guideline_horizontal_10"
+        app:layout_constraintVertical_bias="0.0" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

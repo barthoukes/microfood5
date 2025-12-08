@@ -42,7 +42,7 @@ import com.hha.types.ETransType
  * It acts as the single source of truth for the entire order and payment process.
  * It implements TransactionListener to react to any changes in the underlying CTransaction object.
  */
-class TransactionViewModel : ViewModel(), PaymentsListener, TransactionListener,
+class TransactionPaymentModel : ViewModel(), PaymentsListener, TransactionListener,
    TransactionItemListener
 {
    // Define different initialization modes

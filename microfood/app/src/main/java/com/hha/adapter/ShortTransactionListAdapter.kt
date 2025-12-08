@@ -1,7 +1,9 @@
 package com.hha.adapter
 
+import android.graphics.drawable.GradientDrawable
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.hha.callback.ShortTransactionListener
@@ -9,6 +11,10 @@ import com.hha.framework.CShortTransaction
 
 import tech.hha.microfood.databinding.AdapterShortTransactionBinding
 import com.hha.resources.Global
+import com.hha.types.EClientOrdersType
+import com.hha.types.ETransType
+import com.hha.util.ColourUtils
+import tech.hha.microfood.R
 
 class ShortTransactionListAdapter(
     private val onShortTransactionSelected: (CShortTransaction) -> Unit
@@ -16,7 +22,9 @@ class ShortTransactionListAdapter(
     ShortTransactionListener
 {
     val global = Global.getInstance()
+    val colourCFG = global.colourCFG
     private var clientList: List<CShortTransaction> = mutableListOf()
+    val mCursor = 1
 
     inner class TransactionViewHolder(val binding: AdapterShortTransactionBinding) :
         RecyclerView.ViewHolder(binding.root)
@@ -63,7 +71,75 @@ class ShortTransactionListAdapter(
         }
         if (transaction != null)
         {
-            holder.binding.tableId.text = transaction.name
+            val colour = calculateBackgroundColour(position, transaction)
+            holder.binding.lineItem.background = createBackgroundGradient(colour, 0.35f)
+            holder.binding.tableId.text = getTransactionName(transaction)
+            holder.binding.priceId.text = transaction.total.toString()
+            val resource = getIcon(transaction)
+            holder.binding.iconKindof.setImageResource(resource)
+            holder.binding.tableDuration.progress = transaction.minutes
+        }
+        else {
+            holder.binding.tableId.text = "--"
+            holder.binding.lineItem.background = createBackgroundGradient(0x404040, 0.35f)
+            holder.binding.priceId.text = ""
+            holder.binding.iconKindof.visibility = View.GONE
+            holder.binding.tableDuration.visibility = View.GONE
+        }
+    }
+
+    private fun getIcon(transaction: CShortTransaction): Int
+    {
+        val icon = transaction.transType.toImageResource()
+        return icon
+    }
+
+    private fun getTransactionName(transaction: CShortTransaction): String
+    {
+        return transaction.transType.toString() + " " + transaction.name
+    }
+
+    private fun createBackgroundGradient(color1: Int, factor: Float = 0.35f): GradientDrawable =
+        ColourUtils.createPyramidGradient(color1, factor)
+
+    fun calculateBackgroundColour(position: Int, transaction: CShortTransaction): Int
+    {
+        val highlight = position == mCursor
+        val odd = when (position and 1) { 0 -> "1" else -> "2" }
+        return when (transaction.status)
+        {
+            EClientOrdersType.INIT, EClientOrdersType.EMPTY -> 0
+            EClientOrdersType.ALL, EClientOrdersType.OPEN ->
+                when (highlight)
+                {
+                    true -> colourCFG.getColour("COLOUR_SELECTED_TABLE")
+                    false -> colourCFG.getColour("COLOUR_OPEN_TABLE$odd")
+                }
+            EClientOrdersType.OPEN_PAID, EClientOrdersType.PAYING ->
+                when (highlight)
+                {
+                    true -> colourCFG.getColour("COLOUR_SELECTED_TABLE")
+                    false -> colourCFG.getColour("COLOUR_PAYING_TABLE$odd")
+                }
+            EClientOrdersType.CLOSED ->
+                when (highlight)
+                {
+                    true -> colourCFG.getColour("COLOUR_SELECTED_TABLE")
+                    false -> colourCFG.getColour("COLOUR_CLOSED_TABLE$odd")
+                }
+            EClientOrdersType.PERSONNEL ->
+                when (highlight)
+                {
+                    true -> colourCFG.getColour("COLOUR_SELECTED_TABLE")
+                    false -> colourCFG.getColour("COLOUR_PERSONNEL_TABLE$odd")
+                }
+            EClientOrdersType.CREDIT, EClientOrdersType.CLOSED_CREDIT ->
+                when (highlight)
+                {
+                    true -> colourCFG.getColour("COLOUR_CREDIT_TABLE")
+                    false -> colourCFG.getColour("COLOUR_CREDIT_TABLE$odd")
+                }
+            else -> 0
         }
     }
 

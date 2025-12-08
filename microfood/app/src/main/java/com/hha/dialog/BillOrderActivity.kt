@@ -17,27 +17,21 @@ import com.hha.adapter.PaymentsAdapter
 import com.hha.callback.PaymentEnteredListener
 import com.hha.callback.TransactionListener
 import com.hha.framework.CItem
-import com.hha.framework.CPaymentTransaction
 import com.hha.framework.CTransaction
 import com.hha.modalDialog.ModalDialogPayment
 import com.hha.modalDialog.ModalDialogTextInput
 import com.hha.model.BillDisplayLine
-import com.hha.model.TransactionViewModel
-import com.hha.model.TransactionViewModelFactory
+import com.hha.model.TransactionPaymentModel
+import com.hha.model.TransactionPaymentModelFactory
 import com.hha.resources.Configuration
 import com.hha.resources.Global
 import com.hha.types.ETaal
 import com.hha.types.CMoney
 import com.hha.types.EPaymentMethod
 import com.hha.modalDialog.ModalDialogYesNo
-import com.hha.printer.TakeawayNumber
-import com.hha.resources.CTimestamp
-import com.hha.types.EClientOrdersType
 import com.hha.types.EInitAction
-import com.hha.types.EPayingMode
 import com.hha.types.EPaymentStatus
 import com.hha.types.EPrintBillAction
-import com.hha.types.ETransType
 import tech.hha.microfood.databinding.BillOrderActivityBinding
 
 class BillOrderActivity : AppCompatActivity(),
@@ -52,7 +46,7 @@ class BillOrderActivity : AppCompatActivity(),
     private lateinit var mBinding: BillOrderActivityBinding
     private lateinit var mBillItemsAdapter: BillItemsAdapter
     private lateinit var mPaymentsAdapter: PaymentsAdapter
-    private lateinit var mViewModel: TransactionViewModel
+    private lateinit var mViewModel: TransactionPaymentModel
     private var mSlipPrints = 1
 
     private var mOffer = false
@@ -373,7 +367,7 @@ class BillOrderActivity : AppCompatActivity(),
     {
         // Tell the ViewModel to switch its mode back to ordering.
         // This is important for when PageOrderActivity resumes.
-        mViewModel.setMode(TransactionViewModel.InitMode.VIEW_PAGE_ORDER)
+        mViewModel.setMode(TransactionPaymentModel.InitMode.VIEW_PAGE_ORDER)
 
         // Finish the current activity (BillOrderActivity).
         // This will automatically return the user to the previous activity (PageOrderActivity).
@@ -386,8 +380,8 @@ class BillOrderActivity : AppCompatActivity(),
         mBinding = BillOrderActivityBinding.inflate(layoutInflater)
         setContentView(mBinding.root)
 
-        mViewModel = ViewModelProvider(this, TransactionViewModelFactory)
-            .get(TransactionViewModel::class.java)
+        mViewModel = ViewModelProvider(this, TransactionPaymentModelFactory)
+            .get(TransactionPaymentModel::class.java)
 
         setupRecyclerView()
         initializeViews()
@@ -412,7 +406,7 @@ class BillOrderActivity : AppCompatActivity(),
             mPaymentsAdapter.submitList(paymentLines)
         }
 
-        mViewModel.initializeTransaction(TransactionViewModel.InitMode.VIEW_BILLING)
+        mViewModel.initializeTransaction(TransactionPaymentModel.InitMode.VIEW_BILLING)
     }
 
     // This is the new method you must implement

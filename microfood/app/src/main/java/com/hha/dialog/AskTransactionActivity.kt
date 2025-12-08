@@ -10,12 +10,15 @@ import androidx.recyclerview.widget.GridLayoutManager
 import com.hha.adapter.FloorTablesAdapter
 import com.hha.adapter.ShortTransactionListAdapter
 import com.hha.framework.CFloorTable
+import com.hha.framework.CMenuCards
+import com.hha.framework.COpenClientsHandler.createNewTakeawayTransaction
 import com.hha.framework.CShortTransaction
 import com.hha.framework.CTransaction
-import com.hha.model.ShortTransactionViewModel
+import com.hha.model.TransactionSelectionModel
 import com.hha.resources.Global
-import com.hha.types.ETaal
 import tech.hha.microfood.databinding.AskTransactionActivityBinding
+import com.hha.dialog.Translation
+import com.hha.dialog.Translation.TextId
 
 class AskTransactionActivity : AppCompatActivity()
 {
@@ -27,7 +30,7 @@ class AskTransactionActivity : AppCompatActivity()
     private lateinit var mShortTransactionListAdapter: ShortTransactionListAdapter
     private lateinit var mFloorTablesAdapter: FloorTablesAdapter
     private lateinit var mTransaction: CTransaction
-    private lateinit var mViewModel: ShortTransactionViewModel
+    private lateinit var mTransactionSelectionModel: TransactionSelectionModel
 
     override fun onCreate(savedInstanceState: Bundle?)
     {
@@ -35,13 +38,13 @@ class AskTransactionActivity : AppCompatActivity()
         mBinding = AskTransactionActivityBinding.inflate(layoutInflater)
         setContentView(mBinding.root)
 
-        mViewModel = ViewModelProvider(this).get(ShortTransactionViewModel::class.java)
+        mTransactionSelectionModel = ViewModelProvider(this).get(TransactionSelectionModel::class.java)
         setupRecyclerView()
 
         // 3. --- THIS IS THE MISSING PIECE ---
         //    Observe the LiveData from the ViewModel. This block of code will
         //    automatically run whenever the transaction list changes.
-        mViewModel.shortTransactionList.observe(this) { transactions ->
+        mTransactionSelectionModel.shortTransactionList.observe(this) { transactions ->
             // The 'transactions' parameter is the new List<CShortTransaction>
             // We need a way to give this new list to the adapter.
             // Let's assume your adapter has a method called `submitList`.
@@ -119,7 +122,8 @@ class AskTransactionActivity : AppCompatActivity()
     {
         mFloorTablesAdapter.notifyDataSetChanged()
         mShortTransactionListAdapter.notifyDataSetChanged()
-        mViewModel.refreshAllData()
+        mTransactionSelectionModel.refreshAllData()
+        mBinding.headerButton.text = Translation.get(TextId.TEXT_CHOOSE_TO_ORDER)
     }
 
     @Suppress("UNUSED_PARAMETER")
@@ -129,39 +133,43 @@ class AskTransactionActivity : AppCompatActivity()
         refreshAllData()
     }
 
+    @Suppress("UNUSED_PARAMETER")
+    fun onButtonTakeaway(view: View)
+    {
+        navigateToTakeaway()
+    }
+
+    private fun navigateToTakeaway()
+    {
+        // Todo new takeaway
+        val useBag = true
+        val user = Global.getInstance().currentKeyIndex
+        val transactionId: Int =
+            createNewTakeawayTransaction(
+                0, useBag, user, false
+            );
+
+        if (transactionId <= 0)
+        {
+            return
+        }
+        Global.getInstance().transactionId = transactionId
+        CMenuCards.getInstance().loadTakeaway()
+        navigateToPageOrderActivity()
+    }
+
+    private fun navigateToPageOrderActivity()
+    {
+        startActivity(Intent(this, PageOrderActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        })
+        // finish()
+    }
+
     fun onShortTransactionSelected(selectedTransaction: CShortTransaction)
     {
         // todo
         // 2x click = start to edit for transaction...
-    }
-
-    private fun updateTexts()
-    {
-//        when (global.language) {
-//            ETaal.LANG_ENGLISH -> {
-//                titleLabel.text = "Transaction Options"
-//                descriptionLabel.text = "Select an option to continue:"
-//                btnNewTransaction.text = "NEW TRANSACTION"
-//                btnExistingTransaction.text = "EXISTING TRANSACTION"
-//                btnCancel.text = "CANCEL"
-//            }
-//            ETaal.LANG_SIMPLIFIED, ETaal.LANG_TRADITIONAL -> {
-//                titleLabel.text = "交易选项"
-//                descriptionLabel.text = "请选择一个选项继续:"
-//                btnNewTransaction.text = "新交易"
-//                btnExistingTransaction.text = "现有交易"
-//                btnCancel.text = "取消"
-//            }
-//            else -> {
-//                titleLabel.text = "Transactie Opties"
-//                descriptionLabel.text = "Selecteer een optie om door te gaan:"
-//                btnNewTransaction.text = "NIEUWE TRANSACTIE"
-//                btnExistingTransaction.text = "BESTAANDE TRANSACTIE"
-//                btnCancel.text = "ANNULEREN"
-//            }
-//         }
-
-        // Update adapter data if needed
     }
 
     fun MainMenuActivity()
@@ -180,16 +188,6 @@ class AskTransactionActivity : AppCompatActivity()
 
         // Close the current BillOrderActivity so it's removed from the back stack
         finish()
-    }
-
-    private fun getTransactionOptions(): List<String>
-    {
-        return when (global.language)
-        {
-            ETaal.LANG_ENGLISH -> listOf("Split Bill", "Add Discount", "Change Table", "Print Receipt")
-            ETaal.LANG_SIMPLIFIED, ETaal.LANG_TRADITIONAL -> listOf("分单", "添加折扣", "换桌", "打印收据")
-            else -> listOf("Rekening splitsen", "Korting toevoegen", "Tafel veranderen", "Bon afdrukken")
-        }
     }
 
     private fun onExistingTransactionClicked()

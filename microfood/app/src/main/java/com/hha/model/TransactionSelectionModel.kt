@@ -1,6 +1,5 @@
 package com.hha.model
 
-import androidx.activity.result.launch
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -15,12 +14,14 @@ import kotlinx.coroutines.withContext
  * ViewModel responsible for fetching and managing a list of short transactions.
  * This is typically used for overview screens like a floor plan or a list of open orders.
  */
-class ShortTransactionViewModel : ViewModel()
+class TransactionSelectionModel : ViewModel()
 {
 
    // 1. LIVE DATA
    // The private MutableLiveData that can be modified within the ViewModel.
    private val _shortTransactionList = MutableLiveData<List<CShortTransaction>>()
+   private var mBill = false
+   private var mShowAllTransactions = false
 
    // The public LiveData that is exposed to the UI for observation. It's read-only from the outside.
    val shortTransactionList: LiveData<List<CShortTransaction>> = _shortTransactionList
@@ -29,7 +30,7 @@ class ShortTransactionViewModel : ViewModel()
    private val _isLoading = MutableLiveData<Boolean>()
    val isLoading: LiveData<Boolean> = _isLoading
 
-   fun loadOpenTransactions()
+   fun listOpen()
    {
       // Launch a coroutine in the ViewModel's lifecycle scope.
       // This ensures the task is cancelled if the ViewModel is destroyed.
@@ -50,7 +51,8 @@ class ShortTransactionViewModel : ViewModel()
       }
    }
 
-   fun loadAllTransactions(sortOnTime: Boolean = true) {
+   fun listAll(sortOnTime: Boolean = true)
+   {
       viewModelScope.launch {
          _isLoading.value = true
          val resultList = withContext(Dispatchers.IO) {
@@ -65,7 +67,19 @@ class ShortTransactionViewModel : ViewModel()
 
    fun refreshAllData()
    {
-      loadOpenTransactions()
+      if (mBill || mShowAllTransactions)
+      {
+         listAll(true);
+         //m_tableSelection.scrollToPixel( m_offsetBill, 0);
+      }
+      else
+      {
+         listOpen();
+         //m_tableSelection.scrollToPixel( m_offsetOrder, 0);
+      }
+
+
+      listOpen()
 //      val currentShortTransactionList = _shortTransactionList.value
 //      if (currentShortTransactionList != null)
 //      {

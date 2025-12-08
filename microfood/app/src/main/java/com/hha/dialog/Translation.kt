@@ -29,6 +29,7 @@ object Translation {
         TEXT_CASH,
         TEXT_CASH_OUT,
         TEXT_CHANGE_LANGUAGE,
+        TEXT_CHOOSE_TO_ORDER,
         TEXT_CLEAN_TABLE,
         TEXT_CLIENT_AMOUNT,
         TEXT_CLIENT_PAYS_WITH,
@@ -49,6 +50,7 @@ object Translation {
         TEXT_NAME,
         TEXT_MORE,
         TEXT_OK,
+        TEXT_ORDER_TELEPHONE,
         TEXT_PAID,
         TEXT_PAY,
         TEXT_PAYED,
@@ -62,6 +64,7 @@ object Translation {
         TEXT_PRINT_ROLL,
         TEXT_RECHAUD,
         TEXT_REMARK,
+        TEXT_SHOP,
         TEXT_TABLE,
         TEXT_TABLE_OVERVIEW,
         TEXT_TAKEAWAY,
@@ -76,13 +79,15 @@ object Translation {
         TEXT_STOP,
         TEXT_STOP_PROGRAM,
         TEXT_SUBTOTAL,
+        TEXT_TOTAL,
         TEXT_UPDATE,
         TEXT_UPDATE_MENU,
-        TEXT_TOTAL,
+        TEXT_WOK,
         MAX_TEXT
     }
 
     private val m_lin = mapOf(
+        TextId.TEXT_ABOUT_US to listOf("关于", "OVER ONS", "ABOUT US", "WIR SIND", "TENTANG", "HAKKIMIZDA"),
         TextId.TEXT_ALREADY_PAYED to listOf("一切都付了", "ALLES REEDS BETAALD", "ALL IS PAYED", "ALLES IST BEZAHLT",
             "SEMUA DIBAYARKAN", "TAMAMI ÖDENDİ"),
         TextId.TEXT_ASAP to listOf("尽快", "SNEL", "ASAP", "SCHNELL", "SEPAT", "HEMEN"),
@@ -92,7 +97,8 @@ object Translation {
         TextId.TEXT_BILL_HEADER to listOf("买单", "AFREKENEN", "BILL MODE", "RECHNUNG", "BON", "HESAP MODU"),
         TextId.TEXT_BILL_PAYMENTS to listOf("付款", "BETAALWIJZE", "PAY METHOD", "BEZAHLUNG", "UANG", "ÖDEME YÖNTEMİ"),
         TextId.TEXT_CHOOSE_TABLE to listOf("输入单", "KIES TAFEL BESTELLEN", "CHOOSE TABLE TO ORDER", "TISCH NAME", "PILIH MEJA PESANAN", "SİPARİŞ İÇİN MASA SEÇ"),
-        TextId.TEXT_ABOUT_US to listOf("关于", "OVER ONS", "ABOUT US", "WIR SIND", "TENTANG", "HAKKIMIZDA"),
+        TextId.TEXT_CHOOSE_TO_ORDER to listOf("输入单", "KIES BESTELWIJZE", "CHOOSE TO ORDER", "BESTELLEN", "PILIH " +
+           "PESANAN", "SİPARİŞ VERMEK İÇİN SEÇ"),
         TextId.TEXT_CALCULATOR to listOf("计算器", "CALCULATOR", "CALCULATOR", "RECHNEN", "KALKULATOR", "HESAP MAKİNESİ"),
         TextId.TEXT_CANCEL to listOf("取消", "STOP", "STOP", "STOP", "BATAL", "İPTAL"),
         TextId.TEXT_CANCEL_REASON to listOf("取消原因", "REDEN WAAROM DE BESTELLING STOPT", "REASON WHY THE ORDER IS " +
@@ -144,6 +150,8 @@ object Translation {
         TextId.TEXT_NAME to listOf("换菜单名字", "NAMEN VERANDEREN", "MENU NAMES CHANGE", "MENU NAMEN ANDERN", "NAMA MENU GANTI", "MENÜ ADI DEĞİŞTİR"),
         TextId.TEXT_MORE to listOf("加餐", "MEER", "MORE", "MEHR", "LEBIH", "DAHA FAZLA"),
         TextId.TEXT_OK to listOf("好 !", "OK !", "OK !", "GUT !", "OK !", "TAMAM !"),
+        TextId.TEXT_ORDER_TELEPHONE to listOf("送食物", "INFORMEER KLANT", "INFORM CUSTOMER", "INFORMIER KUNDE", "INFORM" +
+           " PELANGGAN", "MÜŞTERİYİ BİLGİLENDİR"),
         TextId.TEXT_PAID to listOf("一切都付了", "AL BETAALD", "PAID", "BEZAHLT", "DIBAYARKAN", "ÖDENDİ"),
         TextId.TEXT_PAY to listOf("埋单", "BETALEN", "PAY", "BEZAHLEN", "BAYAR", "ÖDE"),
         TextId.TEXT_PAYED to listOf("已付账单", "BETAALD", "BEZAHLT", "PAYED", "DIBAYAR", "ÖDENDİ"),
@@ -170,11 +178,14 @@ object Translation {
         TextId.TEXT_SEND_BILL to listOf("银行", "OP REKENING", "ACCOUNT", "ACCOUNT", "POS", "HESABA GÖNDER"),
         TextId.TEXT_SENDING_TABLES to listOf("互联网，请稍候", "BEZIG MET INTERNET\nWACHT TOT DE TAFEL VERSTUURD IS.", "SEND ORDERS, PLEASE WAIT", "WARTEN BITTE", "TUNGGU,INTERNET", "SİPARİŞ GÖNDERİLİYOR, LÜTFEN BEKLEYİN"),
         TextId.TEXT_SETTINGS to listOf("改变配置", "VERANDER CONFIGURATIE", "CHANGE CONFIGURATION", "ANDERN EINSTELLUNGEN", "GANTI KONFIGURASI", "AYARLAR"),
+        TextId.TEXT_SHOP to listOf("商店", "WINKEL", "SHOP", "GESCHÄFT", "TOKO", "MAĞAZA"),
         TextId.TEXT_STOP to listOf("停止", "STOP", "STOP", "STOP", "STOP", "DUR"),
         TextId.TEXT_STOP_PROGRAM to listOf("停止软件", "STOP PROGRAMMA", "STOP PROGRAM", "PROGRAM STOP", "STOP PROGRAM", "PROGRAMI DURDUR"),
         TextId.TEXT_SUBTOTAL to listOf("合计", "SUBTOTAAL", "SUBTOTAL", "SUBTOTAL", "KHUSUS", "ARA TOPLAM"),
         TextId.TEXT_UPDATE to listOf("更新", "UPDATE", "UPDATE", "UPDATE", "UPDATE", "GÜNCELLE"),
-        TextId.TEXT_UPDATE_MENU to listOf("菜单更新", "UPDATE MENU KAART", "UPDATE MENU CARD", "MENU UPDATE", "MENU PEMBARUAN", "MENÜYÜ GÜNCELLE")
+        TextId.TEXT_UPDATE_MENU to listOf("菜单更新", "UPDATE MENU KAART", "UPDATE MENU CARD", "MENU UPDATE", "MENU " +
+           "PEMBARUAN", "MENÜYÜ GÜNCELLE"),
+        TextId.TEXT_WOK to listOf("炒锅", "WOK", "WOK", "WOK", "WAJAN", "WOK")
     )
 
     private const val DEFAULT_STRING = "??";
