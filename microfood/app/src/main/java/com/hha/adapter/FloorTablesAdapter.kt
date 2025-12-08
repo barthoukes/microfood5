@@ -13,14 +13,16 @@ import com.hha.framework.CFloorTable
 
 class FloorTablesAdapter(
     private val onFloorTableSelected: (CFloorTable) -> Unit
-) : RecyclerView.Adapter<FloorTablesAdapter.FloorTableViewHolder>() {
+) : RecyclerView.Adapter<FloorTablesAdapter.FloorTableViewHolder>()
+{
     val global = Global.getInstance()
-    val floorTables = CFloorTables()
+    var mFloorTables = CFloorTables()
 
     inner class FloorTableViewHolder(val binding: AdapterFloorTableBinding) :
         RecyclerView.ViewHolder(binding.root)
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FloorTableViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FloorTableViewHolder
+    {
         val binding = AdapterFloorTableBinding.inflate(
             LayoutInflater.from(parent.context),
             parent,
@@ -29,14 +31,17 @@ class FloorTablesAdapter(
         return FloorTableViewHolder(binding)
     }
 
-    override fun getItemCount(): Int {
-        return floorTables.size
+    override fun getItemCount(): Int
+    {
+        return mFloorTables.size
     }
 
-    override fun onBindViewHolder(holder: FloorTableViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: FloorTableViewHolder, position: Int)
+    {
         holder.binding.floorTableName.setOnClickListener {
-            val floorTable = floorTables.getFloorTable(position)
-            if (floorTable != null) {
+            val floorTable = mFloorTables.getFloorTable(position)
+            if (floorTable != null)
+            {
                 Log.d(
                     "CLICK_TEST",
                     "FloorTableName clicked at position $position"
@@ -51,12 +56,24 @@ class FloorTablesAdapter(
             ) // Add this for testing
         }
 
-        val floorTable = floorTables.getFloorTable(position)
-        if (floorTable != null) {
+        val floorTable = mFloorTables.getFloorTable(position)
+        if (floorTable != null)
+        {
             // Update selected state
             holder.binding.floorTableName.text = "123"
             holder.binding.floorTableAmount.text = "123€"
         }
 
+    }
+
+    /**
+     *  --- THIS IS THE NEW, IMPORTANT METHOD ---
+     *  Call this from your Activity/Fragment to update the data in the adapter.
+     */
+    fun updateData(newFloorTables: CFloorTables)
+    {
+        mFloorTables = newFloorTables
+        // Notify the RecyclerView that the entire dataset has changed and it needs to redraw.
+        notifyDataSetChanged()
     }
 }

@@ -577,6 +577,8 @@ class CTransaction : Iterable<CSortedItem>,
 
     fun hasAnyChanges() : Boolean = mItems.hasAnyChanges()
 
+    fun isEmpty(): Boolean = (itemSize() == 0)
+
     fun isRechaud(): Boolean
     {
         return data.transType == ETransType.TRANS_TYPE_RECHAUD

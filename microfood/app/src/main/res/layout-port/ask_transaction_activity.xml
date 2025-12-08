@@ -1,18 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:layout_height="match_parent">
 
-    <!-- Toolbar (Title Only) -->
+    <!-- Guideline at 10% from the top -->
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline_horizontal_10"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.1" />
+
+    <!-- Guideline at 90% from the top -->
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline_horizontal_90"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.9" />
+
+    <!-- Guideline at 50% vertically to split the RecyclerViews -->
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline_vertical_50"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.5" />
+
+    <!-- Toolbar -->
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="?attr/colorPrimary"
-        android:elevation="4dp">
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@color/COLOUR_HEADER_BACKGROUND"
+        android:elevation="4dp"
+        android:textColor="@color/COLOUR_HEADER_TEXT"
+        app:layout_constraintBottom_toTopOf="@id/guideline_horizontal_10"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <TextView
             android:layout_width="wrap_content"
@@ -21,122 +49,114 @@
             android:textColor="@android:color/white"
             android:textSize="20sp" />
 
-        <!-- Back button -->
         <ImageButton
             android:id="@+id/btn_back"
             android:layout_width="wrap_content"
             android:layout_height="48dp"
             android:layout_gravity="right"
-            android:src="@drawable/back_yellow"
+            android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="back button"
-            android:background="?attr/selectableItemBackgroundBorderless" />
+            android:onClick="onButtonBack"
+            android:src="@drawable/back_yellow" />
     </androidx.appcompat.widget.Toolbar>
-
-    <!-- Split Layout for Transactions & Tables -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:orientation="horizontal"
-        android:weightSum="2">
-
-        <!-- Transactions RecyclerView -->
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/layoutTransactionList"
-            android:background="@color/BLACK"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="match_parent"
-            android:layout_marginLeft="1dp"
-            android:layout_marginTop="1dp"
-            android:layout_marginRight="1dp"
-            android:layout_marginBottom="1dp"
-            android:orientation="horizontal"
-            android:paddingHorizontal="2dp">
-        </androidx.recyclerview.widget.RecyclerView>
-
-        <!-- Tables RecyclerView -->
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/layout_floor_tables"
-            android:background="@color/BLACK"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="match_parent"
-            android:layout_marginLeft="1dp"
-            android:layout_marginTop="1dp"
-            android:layout_marginRight="1dp"
-            android:layout_marginBottom="1dp"
-            android:orientation="horizontal"
-            android:paddingHorizontal="2dp">
-        </androidx.recyclerview.widget.RecyclerView>
-    </LinearLayout>
 
     <!-- Bottom Button Bar -->
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@android:color/darker_gray"
+        android:id="@+id/bottom_button_bar"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@color/ANDROID_BUTTON_BACKGROUND"
         android:orientation="horizontal"
-        android:padding="8dp">
+        android:padding="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/guideline_horizontal_90">
 
         <!-- Floor Plan -->
         <ImageButton
             android:id="@+id/btn_floor_plan"
             android:layout_width="0dp"
-            android:layout_height="48dp"
+            android:layout_height="match_parent"
             android:layout_weight="1"
-            android:src="@drawable/floorplan_yellow"
+            android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="Floor Plan"
-            android:background="?attr/selectableItemBackgroundBorderless" />
+            android:src="@drawable/floorplan_yellow" />
 
         <!-- Calculator -->
         <ImageButton
             android:id="@+id/btn_calculator"
             android:layout_width="0dp"
-            android:layout_height="48dp"
+            android:layout_height="match_parent"
             android:layout_weight="1"
-            android:src="@drawable/icon_calculator_yellow"
+            android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="Calculator"
-            android:background="?attr/selectableItemBackgroundBorderless" />
+            android:src="@drawable/icon_calculator_yellow" />
 
         <!-- Change Language -->
         <ImageButton
             android:id="@+id/btn_language"
             android:layout_width="0dp"
-            android:layout_height="48dp"
+            android:layout_height="match_parent"
             android:layout_weight="1"
-            android:src="@drawable/languages_yellow"
+            android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="Change Language"
-            android:background="?attr/selectableItemBackgroundBorderless" />
+            android:onClick="onButtonLanguage"
+            android:src="@drawable/languages_yellow" />
 
         <!-- Takeaway Bag -->
         <ImageButton
             android:id="@+id/btn_takeaway"
             android:layout_width="0dp"
-            android:layout_height="48dp"
+            android:layout_height="match_parent"
             android:layout_weight="1"
-            android:src="@drawable/bag_yellow"
+            android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="Takeaway"
-            android:background="?attr/selectableItemBackgroundBorderless" />
+            android:src="@drawable/bag_yellow" />
 
         <!-- Phone Takeaway -->
         <ImageButton
             android:id="@+id/btn_phone_order"
             android:layout_width="0dp"
-            android:layout_height="48dp"
+            android:layout_height="match_parent"
             android:layout_weight="1"
-            android:src="@drawable/icon_takephone_yellow"
+            android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="Phone Order"
-            android:background="?attr/selectableItemBackgroundBorderless" />
+            android:src="@drawable/icon_takephone_yellow" />
 
         <!-- Open Drawer -->
         <ImageButton
             android:id="@+id/btn_open_drawer"
             android:layout_width="0dp"
-            android:layout_height="48dp"
+            android:layout_height="match_parent"
             android:layout_weight="1"
-            android:src="@drawable/drawer_yellow"
+            android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="Open Drawer"
-            android:background="?attr/selectableItemBackgroundBorderless" />
+            android:src="@drawable/drawer_yellow" />
     </LinearLayout>
-</LinearLayout>
+
+    <!-- Left Transactions RecyclerView -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/layoutShortTransactionList"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@color/COLOUR_GROUP_BACKGROUND"
+        android:paddingHorizontal="2dp"
+        app:layout_constraintBottom_toTopOf="@id/bottom_button_bar"
+        app:layout_constraintEnd_toStartOf="@id/guideline_vertical_50"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/guideline_horizontal_10" />
+
+    <!-- Right Tables RecyclerView -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/layout_floor_tables"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@color/BLACK"
+        android:paddingHorizontal="2dp"
+        app:layout_constraintBottom_toTopOf="@id/bottom_button_bar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/guideline_vertical_50"
+        app:layout_constraintTop_toBottomOf="@id/guideline_horizontal_10" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -6,15 +6,15 @@ import androidx.lifecycle.ViewModelProvider
 /**
  * A Singleton Factory for providing the same instance of TransactionViewModel to all Activities.
  */
-object TransactionViewModelFactory : ViewModelProvider.Factory
+object TransactionPaymentModelFactory : ViewModelProvider.Factory
 {
 
    // The single, shared instance of the ViewModel
-   private val viewModel = TransactionViewModel()
+   private val viewModel = TransactionPaymentModel()
 
    override fun <T : ViewModel> create(modelClass: Class<T>): T
    {
-      if (modelClass.isAssignableFrom(TransactionViewModel::class.java))
+      if (modelClass.isAssignableFrom(TransactionPaymentModel::class.java))
       {
          @Suppress("UNCHECKED_CAST")
          return viewModel as T

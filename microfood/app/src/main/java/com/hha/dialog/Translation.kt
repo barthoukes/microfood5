@@ -49,6 +49,7 @@ object Translation {
         TEXT_NAME,
         TEXT_MORE,
         TEXT_OK,
+        TEXT_ORDER_TELEPHONE,
         TEXT_PAID,
         TEXT_PAY,
         TEXT_PAYED,
@@ -62,6 +63,7 @@ object Translation {
         TEXT_PRINT_ROLL,
         TEXT_RECHAUD,
         TEXT_REMARK,
+        TEXT_SHOP,
         TEXT_TABLE,
         TEXT_TABLE_OVERVIEW,
         TEXT_TAKEAWAY,
@@ -76,9 +78,10 @@ object Translation {
         TEXT_STOP,
         TEXT_STOP_PROGRAM,
         TEXT_SUBTOTAL,
+        TEXT_TOTAL,
         TEXT_UPDATE,
         TEXT_UPDATE_MENU,
-        TEXT_TOTAL,
+        TEXT_WOK,
         MAX_TEXT
     }
 
@@ -144,6 +147,8 @@ object Translation {
         TextId.TEXT_NAME to listOf("换菜单名字", "NAMEN VERANDEREN", "MENU NAMES CHANGE", "MENU NAMEN ANDERN", "NAMA MENU GANTI", "MENÜ ADI DEĞİŞTİR"),
         TextId.TEXT_MORE to listOf("加餐", "MEER", "MORE", "MEHR", "LEBIH", "DAHA FAZLA"),
         TextId.TEXT_OK to listOf("好 !", "OK !", "OK !", "GUT !", "OK !", "TAMAM !"),
+        TextId.TEXT_ORDER_TELEPHONE to listOf("送食物", "INFORMEER KLANT", "INFORM CUSTOMER", "INFORMIER KUNDE", "INFORM" +
+           " PELANGGAN", "MÜŞTERİYİ BİLGİLENDİR"),
         TextId.TEXT_PAID to listOf("一切都付了", "AL BETAALD", "PAID", "BEZAHLT", "DIBAYARKAN", "ÖDENDİ"),
         TextId.TEXT_PAY to listOf("埋单", "BETALEN", "PAY", "BEZAHLEN", "BAYAR", "ÖDE"),
         TextId.TEXT_PAYED to listOf("已付账单", "BETAALD", "BEZAHLT", "PAYED", "DIBAYAR", "ÖDENDİ"),
@@ -170,11 +175,14 @@ object Translation {
         TextId.TEXT_SEND_BILL to listOf("银行", "OP REKENING", "ACCOUNT", "ACCOUNT", "POS", "HESABA GÖNDER"),
         TextId.TEXT_SENDING_TABLES to listOf("互联网，请稍候", "BEZIG MET INTERNET\nWACHT TOT DE TAFEL VERSTUURD IS.", "SEND ORDERS, PLEASE WAIT", "WARTEN BITTE", "TUNGGU,INTERNET", "SİPARİŞ GÖNDERİLİYOR, LÜTFEN BEKLEYİN"),
         TextId.TEXT_SETTINGS to listOf("改变配置", "VERANDER CONFIGURATIE", "CHANGE CONFIGURATION", "ANDERN EINSTELLUNGEN", "GANTI KONFIGURASI", "AYARLAR"),
+        TextId.TEXT_SHOP to listOf("商店", "WINKEL", "SHOP", "GESCHÄFT", "TOKO", "MAĞAZA"),
         TextId.TEXT_STOP to listOf("停止", "STOP", "STOP", "STOP", "STOP", "DUR"),
         TextId.TEXT_STOP_PROGRAM to listOf("停止软件", "STOP PROGRAMMA", "STOP PROGRAM", "PROGRAM STOP", "STOP PROGRAM", "PROGRAMI DURDUR"),
         TextId.TEXT_SUBTOTAL to listOf("合计", "SUBTOTAAL", "SUBTOTAL", "SUBTOTAL", "KHUSUS", "ARA TOPLAM"),
         TextId.TEXT_UPDATE to listOf("更新", "UPDATE", "UPDATE", "UPDATE", "UPDATE", "GÜNCELLE"),
-        TextId.TEXT_UPDATE_MENU to listOf("菜单更新", "UPDATE MENU KAART", "UPDATE MENU CARD", "MENU UPDATE", "MENU PEMBARUAN", "MENÜYÜ GÜNCELLE")
+        TextId.TEXT_UPDATE_MENU to listOf("菜单更新", "UPDATE MENU KAART", "UPDATE MENU CARD", "MENU UPDATE", "MENU " +
+           "PEMBARUAN", "MENÜYÜ GÜNCELLE"),
+        TextId.TEXT_WOK to listOf("炒锅", "WOK", "WOK", "WOK", "WAJAN", "WOK")
     )
 
     private const val DEFAULT_STRING = "??";

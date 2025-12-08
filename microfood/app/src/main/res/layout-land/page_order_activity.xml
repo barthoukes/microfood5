@@ -51,6 +51,7 @@
 		android:background="@color/COLOUR_SELECTED_BACKGROUND"
 		android:gravity="center"
 		android:text="TAFEL 15"
+		android:textSize="20sp"
 		android:textColor="@color/COLOUR_SELECTED_TEXT"
 		app:layout_constraintBottom_toTopOf="@id/guideline_top"
 		app:layout_constraintEnd_toStartOf="@id/guideline_left"
