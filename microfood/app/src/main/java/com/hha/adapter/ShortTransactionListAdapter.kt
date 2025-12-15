@@ -25,6 +25,7 @@ class ShortTransactionListAdapter(
     val colourCFG = global.colourCFG
     private var clientList: List<CShortTransaction> = mutableListOf()
     val mCursor = 1
+    var mTransactionId = 108
 
     inner class TransactionViewHolder(val binding: AdapterShortTransactionBinding) :
         RecyclerView.ViewHolder(binding.root)
@@ -104,7 +105,7 @@ class ShortTransactionListAdapter(
 
     fun calculateBackgroundColour(position: Int, transaction: CShortTransaction): Int
     {
-        val highlight = position == mCursor
+        val highlight = transaction.transactionId == mTransactionId
         val odd = when (position and 1) { 0 -> "1" else -> "2" }
         return when (transaction.status)
         {
@@ -191,4 +192,36 @@ class ShortTransactionListAdapter(
         //clientList.clear()
         notifyItemRangeRemoved(0, oldSize)
     }
+
+    fun getSelectedTransaction(): Int = mTransactionId
+
+    fun selectTransactionId(transactionId: Int)
+    {
+        // Store the ID of the previously selected item
+        val previousTransactionId = mTransactionId
+
+        // Find the adapter position of the previously selected item
+        val previousIndex = clientList.indexOfFirst { it.transactionId == previousTransactionId }
+
+        // Update the transaction ID to the new one
+        mTransactionId = transactionId
+
+        // Find the adapter position of the newly selected item
+        val newIndex = clientList.indexOfFirst { it.transactionId == mTransactionId }
+
+        // If the old item was found in the list, notify the adapter to redraw it.
+        // This will cause onBindViewHolder to run for this specific item, removing its "selected" state.
+        if (previousIndex != -1)
+        {
+            notifyItemChanged(previousIndex)
+        }
+
+        // If the new item was found in the list, notify the adapter to redraw it.
+        // This will cause onBindViewHolder to run, applying the "selected" state.
+        if (newIndex != -1)
+        {
+            notifyItemChanged(newIndex)
+        }
+    }
+
 }

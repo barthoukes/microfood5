@@ -21,7 +21,6 @@ class Global private constructor() {
     var menuCardId = 1
     var menuPageId = 1
     var rfidKeyId: Short = 31
-    var currentKeyIndex = 2
     var cursor = CCursor(0)
     var language: ETaal = ETaal.LANG_SIMPLIFIED
     var euroLang: ETaal = ETaal.LANG_DUTCH
@@ -40,6 +39,7 @@ class Global private constructor() {
     var clusterNoItems = false
     var showAllprices = false
     var showAllTimes = false
+    var floorPlanId: Int = 1
     var access = EAccess.ACCESS_EMPLOYEE_KEY
     public val CFG: Configuration = Configuration()
     val userCFG: Configuration = Configuration()

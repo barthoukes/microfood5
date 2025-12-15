@@ -4,12 +4,13 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import com.hha.dialog.BaseActivity
 import com.hha.dialog.MainMenuActivity
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import tech.hha.microfood.databinding.ActivityAboutBinding
 
-class AboutActivity  : AppCompatActivity() {
+class AboutActivity  : BaseActivity() {
 
     private lateinit var binding: ActivityAboutBinding
     private val ABOUT_DISPLAY_DURATION_MS = 20000L // 2 seconds minimum display time

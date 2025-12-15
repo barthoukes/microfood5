@@ -7,7 +7,6 @@ import android.view.View
 import android.widget.Toast
 
 import androidx.lifecycle.ViewModelProvider
-import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.DialogFragment
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -21,8 +20,8 @@ import com.hha.framework.CTransaction
 import com.hha.modalDialog.ModalDialogPayment
 import com.hha.modalDialog.ModalDialogTextInput
 import com.hha.model.BillDisplayLine
-import com.hha.model.TransactionPaymentModel
-import com.hha.model.TransactionPaymentModelFactory
+import com.hha.model.TransactionModel
+import com.hha.model.TransactionModelFactory
 import com.hha.resources.Configuration
 import com.hha.resources.Global
 import com.hha.types.ETaal
@@ -34,7 +33,7 @@ import com.hha.types.EPaymentStatus
 import com.hha.types.EPrintBillAction
 import tech.hha.microfood.databinding.BillOrderActivityBinding
 
-class BillOrderActivity : AppCompatActivity(),
+class BillOrderActivity : BaseActivity(),
     ModalDialogTextInput.OnTextEnteredListener,
     PaymentEnteredListener, TransactionListener,
     ModalDialogYesNo.MessageBoxYesNoListener
@@ -46,7 +45,7 @@ class BillOrderActivity : AppCompatActivity(),
     private lateinit var mBinding: BillOrderActivityBinding
     private lateinit var mBillItemsAdapter: BillItemsAdapter
     private lateinit var mPaymentsAdapter: PaymentsAdapter
-    private lateinit var mViewModel: TransactionPaymentModel
+    private lateinit var mViewModel: TransactionModel
     private var mSlipPrints = 1
 
     private var mOffer = false
@@ -281,7 +280,7 @@ class BillOrderActivity : AppCompatActivity(),
         mBinding.txtKitchenPrints.text = Translation.get(Translation.TextId.TEXT_PRINT_ROLL)
         mBinding.txtBillPrints.text = Translation.get(Translation.TextId.TEXT_PRINT_SLIP)
         refreshPrints()
-        mViewModel.refreshAllData()
+        mViewModel.refreshAllPayments()
         mBillItemsAdapter.notifyDataSetChanged()
         mBinding.tableName.text = mViewModel.getTableName()
     }
@@ -367,7 +366,7 @@ class BillOrderActivity : AppCompatActivity(),
     {
         // Tell the ViewModel to switch its mode back to ordering.
         // This is important for when PageOrderActivity resumes.
-        mViewModel.setMode(TransactionPaymentModel.InitMode.VIEW_PAGE_ORDER)
+        mViewModel.setMode(TransactionModel.InitMode.VIEW_PAGE_ORDER)
 
         // Finish the current activity (BillOrderActivity).
         // This will automatically return the user to the previous activity (PageOrderActivity).
@@ -380,8 +379,8 @@ class BillOrderActivity : AppCompatActivity(),
         mBinding = BillOrderActivityBinding.inflate(layoutInflater)
         setContentView(mBinding.root)
 
-        mViewModel = ViewModelProvider(this, TransactionPaymentModelFactory)
-            .get(TransactionPaymentModel::class.java)
+        mViewModel = ViewModelProvider(this, TransactionModelFactory)
+            .get(TransactionModel::class.java)
 
         setupRecyclerView()
         initializeViews()
@@ -406,7 +405,7 @@ class BillOrderActivity : AppCompatActivity(),
             mPaymentsAdapter.submitList(paymentLines)
         }
 
-        mViewModel.initializeTransaction(TransactionPaymentModel.InitMode.VIEW_BILLING)
+        mViewModel.initializeTransaction(TransactionModel.InitMode.VIEW_BILLING)
     }
 
     // This is the new method you must implement

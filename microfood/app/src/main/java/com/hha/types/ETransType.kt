@@ -21,6 +21,25 @@ enum class ETransType {
     TRANS_TYPE_WOK,          // Wok station
     TRANS_TYPE_ALL;          // Special case for queries
 
+    /** Opposite of fromTransType */
+    fun toTransType(): TransType
+    {
+        return when(this)
+        {
+            TRANS_TYPE_UNDEFINED -> TransType.TRANS_TYPE_UNDEFINED
+            TRANS_TYPE_RECHAUD -> TransType.TRANS_TYPE_RECHAUD
+            TRANS_TYPE_WOK -> TransType.TRANS_TYPE_WOK
+            TRANS_TYPE_EAT_INSIDE -> TransType.TRANS_TYPE_EAT_INSIDE
+            TRANS_TYPE_TAKEAWAY_PHONE -> TransType.TRANS_TYPE_TAKEAWAY_PHONE
+            TRANS_TYPE_TAKEAWAY -> TransType.TRANS_TYPE_TAKEAWAY
+            TRANS_TYPE_SHOP -> TransType.TRANS_TYPE_SHOP
+            TRANS_TYPE_DELIVERY -> TransType.TRANS_TYPE_DELIVERY
+            TRANS_TYPE_SITIN -> TransType.TRANS_TYPE_SITIN
+            TRANS_TYPE_NOCHANGE -> TransType.TRANS_TYPE_NOCHANGE
+            TRANS_TYPE_ALL -> TransType.TRANS_TYPE_ALL
+        }
+    }
+
     /**
      * Converts the enum value to its user-facing, translated text representation.
      */

@@ -7,7 +7,6 @@ import android.view.View
 import android.content.res.Resources
 import android.util.Log
 import android.view.MotionEvent
-import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.DialogFragment
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -32,13 +31,13 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModelProvider
 import com.hha.callback.TransactionListener
-import com.hha.model.TransactionPaymentModel
-import com.hha.model.TransactionPaymentModelFactory
+import com.hha.model.TransactionModel
+import com.hha.model.TransactionModelFactory
 import com.hha.types.CMoney
 
 import tech.hha.microfood.databinding.PageOrderActivityBinding
 
-class PageOrderActivity : AppCompatActivity(), ModalDialogYesNo.MessageBoxYesNoListener,
+class PageOrderActivity : BaseActivity(), ModalDialogYesNo.MessageBoxYesNoListener,
    ModalDialogCancelReason.MessageBoxCancelReasonListener,
    ModalDialogUndoChanges.MessageBoxUndoChangesListener,
     TransactionListener
@@ -74,7 +73,7 @@ class PageOrderActivity : AppCompatActivity(), ModalDialogYesNo.MessageBoxYesNoL
     private lateinit var mMenuPagesAdapter: MenuPagesAdapter
     private lateinit var mMenuItemsAdapter: MenuItemsAdapter
     private lateinit var mTransactionItemsAdapter: TransactionItemsAdapter
-    private lateinit var mViewModel: TransactionPaymentModel
+    private lateinit var mViewModel: TransactionModel
     val mClusterId: Short = -1
     var mFromBilling: Boolean = false
 
@@ -84,8 +83,8 @@ class PageOrderActivity : AppCompatActivity(), ModalDialogYesNo.MessageBoxYesNoL
         mBinding = PageOrderActivityBinding.inflate(layoutInflater)
         setContentView(mBinding.root)
 
-        mViewModel = ViewModelProvider(this, TransactionPaymentModelFactory)
-            .get(TransactionPaymentModel::class.java)
+        mViewModel = ViewModelProvider(this, TransactionModelFactory)
+            .get(TransactionModel::class.java)
 
         setupRecyclerView()
         // 3. OBSERVE the LiveData from the ViewModel
@@ -102,7 +101,7 @@ class PageOrderActivity : AppCompatActivity(), ModalDialogYesNo.MessageBoxYesNoL
                 transaction.addItemListener(mTransactionItemsAdapter)
             }
         }
-        mViewModel.initializeTransaction(TransactionPaymentModel.InitMode.VIEW_PAGE_ORDER)
+        mViewModel.initializeTransaction(TransactionModel.InitMode.VIEW_PAGE_ORDER)
     }
 
     override fun onDestroy()
@@ -283,6 +282,7 @@ class PageOrderActivity : AppCompatActivity(), ModalDialogYesNo.MessageBoxYesNoL
     private fun refreshButtons()
     {
         mBinding.pageOrderTableName.text = mViewModel.getTableName()
+        mBinding.poeHeaderText.text = Translation.get(Translation.TextId.TEXT_PAGE_ORDER)
     }
 
     override fun onDialogPositiveClick(dialog: DialogFragment, requestCode: Int)
