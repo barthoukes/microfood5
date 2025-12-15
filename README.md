@@ -21,6 +21,13 @@ This project serves as a robust example for:
     Using gRPC as a high-performance communication layer between different programming languages (C++ and Kotlin)
 
 # Getting Started for Developers
+
+## Some screenshots
+![Tablet with page order entry](https://www.kassaku.nl/wp-content/uploads/2025/12/tablet_poe.png)
+![Tablet ask transaction](https://www.kassaku.nl/wp-content/uploads/2025/12/tablet_ask_table.png)
+![Tablet Billing](https://www.kassaku.nl/wp-content/uploads/2025/12/tablet_billing_80.png)
+![Tablet Chinese ordering](https://www.kassaku.nl/wp-content/uploads/2025/12/portrait-poe.png)
+
 ## Prerequisites
 
     Kotlin & Android Studio
