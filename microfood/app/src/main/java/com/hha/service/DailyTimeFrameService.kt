@@ -4,7 +4,6 @@ import com.hha.common.Empty
 import com.hha.common.TimeFrameList
 import com.hha.common.Timestamp
 import com.hha.common.CookingState
-import com.hha.common.timeFrame
 import com.hha.daily.timeframe.DailyTimeFrameServiceGrpcKt
 import com.hha.daily.timeframe.DelayRequest
 import com.hha.daily.timeframe.DeliverTimeRequest
@@ -106,6 +105,25 @@ class DailyTimeFrameService(channel: ManagedChannel) : BaseGrpcService<DailyTime
         }
     }
 
+    fun changeDeliverTime(
+        transactionId: Int,
+        timeFrameIndex: Int,
+        deviceId: Short,
+        deliverTime: String): Boolean = runBlocking {
+        try {
+            // Build the gRPC request object inside the function
+            val request = DeliverTimeRequest.newBuilder()
+                .setTransactionId(transactionId)
+                .setDeviceId(deviceId.toInt())
+                .setTimeFrameIndex(timeFrameIndex)
+                .setDelayedTime(deliverTime)
+                .build()
+            stub.changeDeliverTime(request)
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
     fun changeDeliverTime(request: DeliverTimeRequest): Boolean = runBlocking {
         try {
             stub.changeDeliverTime(request)

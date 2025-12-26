@@ -15,6 +15,33 @@
         <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
     </style>
 
+    <!-- In app/src/main/res/values/styles.xml -->
+    <style name="Widget.App.QuantitiesButton" parent="Widget.Material3.Button">
+        <!-- ... other items like textSize, etc. -->
+
+        <!-- This is the new, important line -->
+        <item name="backgroundTint">@color/button_quantities_selector</item>
+    </style>Merge
+
+    <style name="Widget.App.QuantityButton" parent="Widget.Material3.Button">
+        <!-- Make the text larger and more legible for a dialog -->
+        <item name="android:textSize">22sp</item>
+
+        <!-- Increase the vertical padding to make the buttons taller and easier to tap -->
+        <item name="android:paddingTop">16dp</item>
+        <item name="android:paddingBottom">16dp</item>
+
+        <!-- Make the text bold to stand out -->
+        <item name="android:textStyle">bold</item>
+
+        <!--
+           Optional: Set the corner radius. Here we use Material 3's "Full"
+           style, which makes the button a pill shape. This is great for
+           prominent, distinct actions.
+        -->
+        <item name="shapeAppearanceOverlay">@style/ShapeAppearance.Material3.Corner.Full</item>
+    </style>
+
     <!-- Order Table Header Style -->
     <style name="OrderTableHeader">
         <item name="android:layout_width">match_parent</item>

@@ -7,16 +7,71 @@ import com.hha.resources.Global
 import com.hha.dialog.Translation.TextId
 import com.hha.grpc.GrpcServiceFactory
 import com.hha.modalDialog.ModalDialogStringEdit
+import com.hha.types.ETransType
 
 
 object COpenClientsHandler : ModalDialogStringEdit.StringListener {
-    private val CFG = Global.getInstance().CFG
+    private val global = Global.getInstance()
+    private val CFG = global.CFG
     val service = GrpcServiceFactory.createDailyTransactionService()
     var stringTyped = ""
     var stringValid = false
 
+    fun createNewRestaurantTransaction(name: String, floorTableId: Int, minutes: Int): Int
+    {
+        if (CFG.getBoolean("takeaway_only"))
+            return -1
+        if (!CFG.getBoolean("sitin_only") && name == "0")
+        {
+            return createNewTakeawayTransaction(-1, true, -1, false)
+        }
+        else
+        {
+            var type = ETransType.TRANS_TYPE_SITIN
+            val n = name.length
+            //CsqlFloorTableIterator floorTables(CFG("remove_time"));
+            //CsqlDailyTransactionIterator clientOrders
+
+            // If long number, then probably a phone number
+            if ( n > 6 && name[0].isDigit() && name[n-1].isDigit())
+            {
+                if (CFG.getBoolean("telephone_order"))
+                {
+                    type = ETransType.TRANS_TYPE_DELIVERY
+                }
+                else
+                {
+                    type = ETransType.TRANS_TYPE_TAKEAWAY
+                }
+            }
+            else if (CFG.getBoolean("floorplan_bill_first")) // Wok table option
+            {
+                type = ETransType.TRANS_TYPE_WOK
+            }
+            val service2 = GrpcServiceFactory.createDailyTransactionService()
+            val orderId: Int = service2.insertTransaction(
+                name, -1,global.rfidKeyId,
+                type.toTransType()) ?: -1
+
+            if (CFG.getBoolean("restaurant_map") &&
+                (type == ETransType.TRANS_TYPE_WOK || type == ETransType.TRANS_TYPE_SITIN))
+            {
+                val service = GrpcServiceFactory.createFloorTableService()
+                service.connectTableToTransaction(floorTableId, orderId, CFG.getValue("maximum_time"));
+                service.updateDrinksMinutes()
+            }
+            return orderId
+        }
+    }
+
+    fun createNewTransactionForTable(tableId: Int, minutes: Int)
+    {
+
+
+    }
+
     fun createNewTakeawayTransaction(
-        client_id: Int, use_bag: Boolean, user: Int, ask_remark: Boolean
+        client_id: Int, use_bag: Boolean, user: Short, askRemark: Boolean
     ): Int {
         if (CFG.getOption("sitin_only")) {
             return -1;
@@ -24,7 +79,7 @@ object COpenClientsHandler : ModalDialogStringEdit.StringListener {
 
         var remark: String? = null
 
-        if (ask_remark) {
+        if (askRemark) {
             remark = askRemark(
                 CFG.getOption("telephone_remark"),
                 TextId.TEXT_NAME

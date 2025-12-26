@@ -2,6 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@drawable/backrepeat"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -20,6 +21,14 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         app:layout_constraintGuide_percent="0.9" />
+
+    <!-- Guideline at 90% from the top -->
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline_horizontal_80"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.8" />
 
     <!-- Guideline at 50% vertically to split the RecyclerViews -->
     <androidx.constraintlayout.widget.Guideline
@@ -42,24 +51,32 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <TextView
-            android:id="@+id/header_button"
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Restaurant POS"
-            android:gravity="center"
-            android:textColor="@android:color/white"
-            android:textSize="24sp" />
+            android:layout_height="match_parent">
 
-        <ImageButton
-            android:id="@+id/btn_back"
-            android:layout_width="wrap_content"
-            android:layout_height="48dp"
-            android:layout_gravity="right"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="back button"
-            android:onClick="onButtonBack"
-            android:src="@drawable/back_yellow" />
+            <TextView
+                android:id="@+id/header_button"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="Restaurant POS"
+                android:gravity="center"
+                android:onClick="onHeaderButton"
+                android:textColor="@android:color/white"
+                android:textSize="24sp" />
+
+            <ImageButton
+                android:id="@+id/btn_back"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_alignParentEnd="true"
+                android:layout_marginEnd="16dp"
+                android:layout_gravity="right"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="back button"
+                android:onClick="onButtonBack"
+                android:src="@drawable/back_yellow" />
+        </RelativeLayout>
     </androidx.appcompat.widget.Toolbar>
 
     <!-- Bottom Button Bar -->
@@ -112,6 +129,7 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
+            android:onClick="onButtonTakeaway"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="Takeaway"
             android:src="@drawable/bag_yellow" />
@@ -142,6 +160,8 @@
         android:id="@+id/layoutShortTransactionList"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:layout_marginStart="0dp"
+        android:layout_marginEnd="4dp"
         android:background="@color/COLOUR_GROUP_BACKGROUND"
         android:paddingHorizontal="2dp"
         app:layout_constraintBottom_toTopOf="@id/bottom_button_bar"
@@ -154,11 +174,31 @@
         android:id="@+id/layout_floor_tables"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:background="@color/BLACK"
-        android:paddingHorizontal="2dp"
-        app:layout_constraintBottom_toTopOf="@id/bottom_button_bar"
+        android:padding="1dp"
+        android:layout_marginBottom="4dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginEnd="0dp"
+        android:background="@color/COLOUR_GROUP_BACKGROUND"
+        app:layout_constraintBottom_toTopOf="@id/guideline_horizontal_80"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/guideline_vertical_50"
         app:layout_constraintTop_toBottomOf="@id/guideline_horizontal_10" />
+
+    <Button
+        android:id="@+id/btn_floorplan"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="0dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginEnd="0dp"
+        android:layout_marginBottom="4dp"
+        android:text="Floorplan"
+        android:textSize="16sp"
+        android:onClick="onButtonFloorPlanNext"
+        android:backgroundTint="@color/ANDROID_BUTTON_BACKGROUND"
+        app:layout_constraintTop_toBottomOf="@id/guideline_horizontal_80"
+        app:layout_constraintBottom_toTopOf="@id/guideline_horizontal_90"
+        app:layout_constraintStart_toEndOf="@+id/guideline_vertical_50"
+        app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

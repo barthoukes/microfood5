@@ -39,7 +39,7 @@ object ColourUtils
       return colour
    }
 
-   fun createGradient(color1: Int, factor: Float = 0.45f): GradientDrawable
+   fun createGradient(color1: Int, factor: Float = 0.15f): GradientDrawable
    {
       val color2 = brighten(color1, factor)
 
@@ -50,7 +50,7 @@ object ColourUtils
       return gradientDrawable
    }
 
-   fun createPyramidGradient(color1: Int, factor: Float = 0.45f): GradientDrawable
+   fun createPyramidGradient(color1: Int, factor: Float = 0.15f): GradientDrawable
    {
       val color2 = brighten(color1, factor) or 0xff000000.toInt()
       val col1 = (color1 or 0xff000000.toInt())

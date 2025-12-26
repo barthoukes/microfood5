@@ -4,54 +4,25 @@ import com.hha.floor.FloorPlanList
 import com.hha.grpc.GrpcServiceFactory
 import com.hha.floor.Table
 import com.hha.floor.TableList
+import com.hha.resources.Global
 
-class CFloorTables {
-    private var floorTables: MutableList<CFloorTable> = mutableListOf<CFloorTable>()
-    private var floorPlans: MutableList<Int> = mutableListOf()
+class CFloorTables: Iterable<CFloorTable>
+{
+    var mTables: MutableList<CFloorTable> = mutableListOf()
 
-    fun load() {
-        loadFloorPlans()
-        val floorTableService = GrpcServiceFactory.createFloorTableService()
+    fun add(floorTable: CFloorTable) = mTables.add(floorTable)
 
-        for (plan in floorPlans) {
-            val list :TableList? = floorTableService.getFloorTables(
-                plan, 0,false)
-            if (list != null) {
-                for (table: Table in list.tablesList) {
-                    val tab = CFloorTable(table)
-                    floorTables[table.tableId] = tab
-                }
-            }
-        }
-    }
+    override fun iterator(): Iterator<CFloorTable> = mTables.iterator()
 
-    fun getFloorTable(position: Int): CFloorTable? {
-        try {
-            return floorTables[position]
-        }
-        catch (e: Exception) {
-            return null
-        }
+    fun getFloorTable(index: Int): CFloorTable? = mTables.getOrNull(index)
+
+    fun setTransactionAvailable(transactionId: Int)
+    {
+        val service = GrpcServiceFactory.createFloorTableService()
+        service.setTransactionTableAvailable(transactionId)
     }
 
     val size: Int
-        get() {
-            return floorTables.size
-        }
-
-    fun loadFloorPlans() {
-        val floorPlanService = GrpcServiceFactory.createFloorPlanService()
-        floorPlans.clear()
-        val list : FloorPlanList? = floorPlanService.getFloorPlans(-1, false)
-
-        if (list != null) {
-            for (plan in list.floorPlansList) {
-                if (plan.enabled) {
-                    floorPlans.add(plan.floorPlanId)
-                }
-            }
-        }
-    }
-
+        get() = mTables.size
 
 }

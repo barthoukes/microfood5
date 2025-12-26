@@ -36,7 +36,7 @@ class CTransaction : Iterable<CSortedItem>,
 
     companion object
     {
-        private const val TAG = "TRANS"
+        private const val TAG = "CTransaction"
     }
 
     var global = Global.getInstance()
@@ -69,6 +69,9 @@ class CTransaction : Iterable<CSortedItem>,
 
     val size: Int
         get() = mItems.itemLines()
+
+    val empty: Boolean
+        get() = mItems.empty
 
     override var transactionId: Int = 0
         get() = data.transactionId
@@ -243,6 +246,13 @@ class CTransaction : Iterable<CSortedItem>,
         mPayments.cancelNewPayments()
     }
 
+    fun changeDeliverTime(timer: CTimestamp)
+    {
+        val timeFrameIndex = mTimeFrame.getValidTimeFrame()
+        mTimeFrame.changeDeliverTime(
+            transactionId, global.deviceId, timeFrameIndex, timer)
+    }
+
     fun cleanCurrentTransaction()
     {
         data.rfidKeyId = global.rfidKeyId
@@ -398,9 +408,6 @@ class CTransaction : Iterable<CSortedItem>,
     {
         mPayments.cancelPayments(index, paymentStatus)
     }
-
-    val empty: Boolean
-        get() = mItems.empty
 
     fun emptyTransaction(reason: String)
     {
@@ -576,8 +583,6 @@ class CTransaction : Iterable<CSortedItem>,
     }
 
     fun hasAnyChanges() : Boolean = mItems.hasAnyChanges()
-
-    fun isEmpty(): Boolean = (itemSize() == 0)
 
     fun isRechaud(): Boolean
     {

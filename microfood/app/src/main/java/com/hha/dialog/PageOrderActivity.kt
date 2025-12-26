@@ -7,7 +7,6 @@ import android.view.View
 import android.content.res.Resources
 import android.util.Log
 import android.view.MotionEvent
-import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.DialogFragment
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -24,6 +23,7 @@ import com.hha.framework.CMenuPage
 import com.hha.framework.CTransaction
 import com.hha.modalDialog.ModalDialogCancelReason
 import com.hha.modalDialog.ModalDialogUndoChanges
+import com.hha.modalDialog.ModalDialogQuantity
 import com.hha.modalDialog.ModalDialogYesNo
 import com.hha.resources.Configuration
 import com.hha.resources.Global
@@ -32,16 +32,22 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModelProvider
 import com.hha.callback.TransactionListener
-import com.hha.model.TransactionPaymentModel
-import com.hha.model.TransactionPaymentModelFactory
+import com.hha.dialog.Translation.str
+import com.hha.modalDialog.ModalDialogQuantities
+import com.hha.model.TransactionModel
+import com.hha.model.TransactionModelFactory
+import com.hha.resources.CTimestamp
 import com.hha.types.CMoney
+import com.hha.types.EFinalizerAction
+import com.hha.types.EModalDialogQuantity
 
 import tech.hha.microfood.databinding.PageOrderActivityBinding
 
-class PageOrderActivity : AppCompatActivity(), ModalDialogYesNo.MessageBoxYesNoListener,
-   ModalDialogCancelReason.MessageBoxCancelReasonListener,
+class PageOrderActivity : BaseActivity(), ModalDialogYesNo.MessageBoxYesNoListener,
+   ModalDialogCancelReason.ModalDialogCancelReasonListener,
    ModalDialogUndoChanges.MessageBoxUndoChangesListener,
-    TransactionListener
+    ModalDialogQuantity.ModalDialogQuantityListener,
+    TransactionListener, ModalDialogQuantities.ModalDialogQuantitiesListener
 {
     private final var tag = "POE"
     private lateinit var mBinding: PageOrderActivityBinding
@@ -64,17 +70,21 @@ class PageOrderActivity : AppCompatActivity(), ModalDialogYesNo.MessageBoxYesNoL
 
     private val mColourPage = colourCFG.getBackgroundColour("COLOUR_GROUP_BACKGROUND")
     private val mColourSelectedPage = colourCFG.getBackgroundColour("SELECTED_GROUP_BACKGROUND")
+    private val mFloorplanBillFirst = CFG.getBoolean("floorplan_bill_first")
+    lateinit private var mTimestamp : CTimestamp
+
     var itemWidth = 24
+    var mChangedTime = false
     private val _orderTotal = MutableLiveData<CMoney>()
     val orderTotal: LiveData<CMoney> = _orderTotal
-
+    var mEnterPressed = false
     val groups = CFG.getValue("display_groups")
     val columns = CFG.getValue("display_groups_horizontal")
     val rows = (groups + columns - 1) / columns
     private lateinit var mMenuPagesAdapter: MenuPagesAdapter
     private lateinit var mMenuItemsAdapter: MenuItemsAdapter
     private lateinit var mTransactionItemsAdapter: TransactionItemsAdapter
-    private lateinit var mViewModel: TransactionPaymentModel
+    private lateinit var mTransactionModel: TransactionModel
     val mClusterId: Short = -1
     var mFromBilling: Boolean = false
 
@@ -84,14 +94,16 @@ class PageOrderActivity : AppCompatActivity(), ModalDialogYesNo.MessageBoxYesNoL
         mBinding = PageOrderActivityBinding.inflate(layoutInflater)
         setContentView(mBinding.root)
 
-        mViewModel = ViewModelProvider(this, TransactionPaymentModelFactory)
-            .get(TransactionPaymentModel::class.java)
+        mTransactionModel = ViewModelProvider(this, TransactionModelFactory)
+            .get(TransactionModel::class.java)
 
         setupRecyclerView()
         // 3. OBSERVE the LiveData from the ViewModel
-        mViewModel.transaction.observe(this) { transaction ->
+        mTransactionModel.activeTransaction.observe(this)
+        { transaction ->
             // This block will run automatically when the transaction is loaded.
-            if (transaction != null) {
+            if (transaction != null)
+            {
                 // --- THIS IS THE CORRECT PLACE TO CALL .updateData() ---
                 mTransactionItemsAdapter.updateData(transaction)
 
@@ -102,15 +114,14 @@ class PageOrderActivity : AppCompatActivity(), ModalDialogYesNo.MessageBoxYesNoL
                 transaction.addItemListener(mTransactionItemsAdapter)
             }
         }
-        mViewModel.initializeTransaction(TransactionPaymentModel.InitMode.VIEW_PAGE_ORDER)
+        mTransactionModel.initializeTransaction(TransactionModel.InitMode.VIEW_PAGE_ORDER)
     }
 
     override fun onDestroy()
     {
-        super.onDestroy() // Always call the superclass method first
-
         // Get the current transaction object
-        mViewModel.resetIsChanged()
+        mTransactionModel.resetIsChanged()
+        super.onDestroy() // Always call the superclass method first
     }
 
     override fun dispatchTouchEvent(ev: MotionEvent?): Boolean
@@ -154,6 +165,12 @@ class PageOrderActivity : AppCompatActivity(), ModalDialogYesNo.MessageBoxYesNoL
         }
     }
 
+    @Suppress("UNUSED_PARAMETER")
+    fun onButtonPlus1(view: View)
+    {
+        mTransactionModel.onButtonPlus1()
+    }
+
     override fun onResume()
     {
         super.onResume()
@@ -175,13 +192,56 @@ class PageOrderActivity : AppCompatActivity(), ModalDialogYesNo.MessageBoxYesNoL
     @Suppress("UNUSED_PARAMETER")
     fun onButtonEnter(view: View)
     {
-        if (!mViewModel.isEmptyTransaction())
+        val action: EFinalizerAction = mTransactionModel.finishTransaction(mFromBilling)
+        handleAction(action)
+    }
+
+    private fun handleAction(action: EFinalizerAction)
+    {
+        when (action)
         {
-            startActivity(
-                Intent(this,
-                    BillOrderActivity::class.java).apply {
-            })
+            EFinalizerAction.FINALIZE_NO_ACTION,
+            EFinalizerAction.FINALIZE_NOT_IDENTIFIED
+                -> return
+            EFinalizerAction.FINALIZE_MODE_ASK_TABLE -> askTransactionActivity()
+            EFinalizerAction.FINALIZE_MODE_BILLING -> BillOrderActivity()
+            EFinalizerAction.FINALIZE_RESET_CHANGES -> mTransactionModel.resetChanges()
+            EFinalizerAction.FINALIZE_SET_ENTER_PRESSED -> mEnterPressed = true
+            EFinalizerAction.FINALIZE_ASK_CANCEL_REASON -> askCancelReasonAndClearTransaction()
+            EFinalizerAction.FINALIZE_TO_BE_IMPLEMENTED ->
+            {
+                TODO("Not implemented")
+            }
+            EFinalizerAction.FINALIZE_TA_ASK_DELAY_CONTINUE -> takeawayAskDelayContinue()
+            EFinalizerAction.FINALIZE_TA_ASK_DELAY_MINUTES -> takeawayAskDelayMinutes()
+            EFinalizerAction.FINALIZE_MODAL_DIALOG_QUANTITY -> {
+                val txt = Translation.TextId.TEXT_QUANTITY.str()
+                ModalDialogQuantity.newInstance(txt)
+            }
+            EFinalizerAction.FINALIZE_MODAL_DIALOG_QUANTITIES -> {
+                val txt = Translation.TextId.TEXT_QUANTITY.str()
+                ModalDialogQuantities.newInstance(txt)
+                // Fun handleFinishQuantiesAfterAskingQuantities will be called after the dialog.
+            }
         }
+    }
+
+    private fun askCancelReasonAndClearTransaction()
+    {
+        Log.i(tag, "askCancelReasonAndClearTransaction")
+        val dialog = ModalDialogCancelReason()
+        dialog.show(supportFragmentManager, "MessageBoxCancelReason")
+    }
+
+    fun takeawayAskDelayContinue()
+    {
+        toast("Not implemented")
+        throw IllegalStateException("Not implemented")
+    }
+
+    fun takeawayAskDelayMinutes()
+    {
+       dialog ask delay minutes...
     }
 
     private fun stopInCorrectMode()
@@ -191,33 +251,20 @@ class PageOrderActivity : AppCompatActivity(), ModalDialogYesNo.MessageBoxYesNoL
         {
             // If true, go to BillOrderActivity
             startActivity(Intent(this, BillOrderActivity::class.java))
-
-//                .apply {
-//                // Optional: Add flags if you need to clear the back stack
-//                flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
-//            })
         } else
         {
             // If false, go to AskTransactionActivity
-            // Note: Make sure AskTransactionActivity exists in your project
             startActivity(Intent(this, AskTransactionActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
             })
         }
-        // Finish the current activity so the user can't navigate back to it
         //finish()
-    }
-
-    @Suppress("UNUSED_PARAMETER")
-    fun onButtonPlus1(view: View)
-    {
-        mViewModel.onButtonPlus1()
     }
 
     @Suppress("UNUSED_PARAMETER")
     fun onButtonMin1(view: View)
     {
-        mViewModel.onButtonMin1()
+        mTransactionModel.onButtonMin1()
     }
 
     @Suppress("UNUSED_PARAMETER")
@@ -230,13 +277,13 @@ class PageOrderActivity : AppCompatActivity(), ModalDialogYesNo.MessageBoxYesNoL
     @Suppress("UNUSED_PARAMETER")
     fun onButtonPortion(view: View)
     {
-        mViewModel.onButtonPortion()
+        mTransactionModel.onButtonPortion()
     }
 
     @Suppress("UNUSED_PARAMETER")
     fun onButtonRemove(view: View)
     {
-        mViewModel.onButtonRemove()
+        mTransactionModel.onButtonRemove()
     }
 
     @Suppress("UNUSED_PARAMETER")
@@ -247,17 +294,17 @@ class PageOrderActivity : AppCompatActivity(), ModalDialogYesNo.MessageBoxYesNoL
 
     private fun escapeTransaction()
     {
-        if (!mViewModel.isChanged())
+        if (!mTransactionModel.isChanged())
         {
             // No changes to table, simple to remove the time frame.
-            mViewModel.closeTimeFrame()
+            mTransactionModel.closeTimeFrame()
 
             stopInCorrectMode()
-        } else if (mViewModel.needToAskCancelReason())
+        } else if (mTransactionModel.needToAskCancelReason())
         {
             showAskCancelReasonDialog()
 
-        } else if (mViewModel.hasAnyChanges())
+        } else if (mTransactionModel.hasAnyChanges())
         {
             showUndoChanges()
         } else
@@ -268,7 +315,7 @@ class PageOrderActivity : AppCompatActivity(), ModalDialogYesNo.MessageBoxYesNoL
 
     fun addOneToCursorPosition(): Boolean
     {
-        val currentTransaction = mViewModel.transaction.value
+        val currentTransaction = mTransactionModel.activeTransaction.value
         return currentTransaction?.addOneToCursorPosition() ?: false
     }
 
@@ -282,7 +329,8 @@ class PageOrderActivity : AppCompatActivity(), ModalDialogYesNo.MessageBoxYesNoL
 
     private fun refreshButtons()
     {
-        mBinding.pageOrderTableName.text = mViewModel.getTableName()
+        mBinding.pageOrderTableName.text = mTransactionModel.getTableName()
+        mBinding.poeHeaderText.text = Translation.get(Translation.TextId.TEXT_PAGE_ORDER)
     }
 
     override fun onDialogPositiveClick(dialog: DialogFragment, requestCode: Int)
@@ -430,6 +478,21 @@ class PageOrderActivity : AppCompatActivity(), ModalDialogYesNo.MessageBoxYesNoL
     fun Int.dpToPx(): Int = (this * Resources.getSystem()
         .displayMetrics.density).toInt()
 
+    override fun handleFinishQuantiesAfterAskingQuantities(
+        kitchenQuantity: Int,
+        billQuantity: Int,
+        action: ModalDialogQuantities.Action,
+    )
+    {
+        val ts = CTimestamp()
+        val isBilling = (action == ModalDialogQuantities.Action.BILL)
+        val action = mTransactionModel.handleFinishQuantiesAfterAskingQuantities(
+            mFromBilling,kitchenQuantity,
+            billQuantity,
+            mChangedTime, ts, isBilling)
+        handleAction(action)
+    }
+
     private fun handlePageSelection(selectedPage: Int)
     {
         if (selectedPage != global.menuPageId)
@@ -444,11 +507,11 @@ class PageOrderActivity : AppCompatActivity(), ModalDialogYesNo.MessageBoxYesNoL
         val oldPosition = global.cursor.position
 
         // Update the state
-        val newCursor = mViewModel.getCursor(selectedTransactionItem)
+        val newCursor = mTransactionModel.getCursor(selectedTransactionItem)
         if (newCursor == global.cursor.position)
         {
             // Add one item
-            mViewModel.onButtonPlus1()
+            mTransactionModel.onButtonPlus1()
             mTransactionItemsAdapter.invalidate(newCursor)
         } else
         {
@@ -466,7 +529,7 @@ class PageOrderActivity : AppCompatActivity(), ModalDialogYesNo.MessageBoxYesNoL
     private fun handleMenuItem(selectedMenuItem: CMenuItem)
     {
         Log.d(tag, "MenuItem clicked: ${selectedMenuItem.localName}")
-        if (mViewModel.addItem(selectedMenuItem, mClusterId))
+        if (mTransactionModel.addItem(selectedMenuItem, mClusterId))
         {
             mTransactionItemsAdapter.setCursor(global.cursor)
            // m_menuItemsAdapter.notifyDataSetChanged()
@@ -519,39 +582,52 @@ class PageOrderActivity : AppCompatActivity(), ModalDialogYesNo.MessageBoxYesNoL
         dialog.show(supportFragmentManager, "MessageBoxYesNo")
     }
 
-    private fun showUndoChanges()
+    fun billOrderActivity()
     {
-        val dialog = ModalDialogYesNo.newInstance(
-            "Undo Changes",
-            "Undo the changes made to the order?",
-            1)
-        dialog.show(supportFragmentManager, "MessageBoxYesNo")
-    }
-
-    private fun showAskCancelReasonDialog()
-    {
-        val dialog = ModalDialogCancelReason()
-        dialog.show(supportFragmentManager, "MessageBoxCancelReason")
-    }
-
-    override fun onReasonSelected(reason: String)
-    {
-        Log.i(tag, "Cancelled $reason")
-        mViewModel.emptyTransaction(reason)
+        // Change to billing with the same transaction.
+        mTransactionModel.initializeTransaction(TransactionModel.InitMode.VIEW_BILLING)
+        val intent = Intent(this, BillOrderActivity::class.java)
+        startActivity(intent)
         finish()
     }
 
-    override fun onDialogCancelled()
+    fun askTransactionActivity()
     {
-        Log.i(tag, "Cancel order cancelled")
+        Log.i("PageOrder", "Bill processed. Navigating to AskTransactionActivity.")
+
+        // Create an Intent to start the AskTransactionActivity
+        val intent = Intent(this, AskTransactionActivity::class.java)
+
+        // Add flags to clear the task stack and start a new one.
+        // This ensures the user cannot press "Back" to return to BillOrderActivity.
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+
+        // Start the new activity
+        startActivity(intent)
+
+        // Close the current PageOrderActivity so it's removed from the back stack
+        finish()
     }
 
-    override fun onDialogUndoChanges(dialog: DialogFragment)
+    override fun onCancelReasonSelected(reason: String)
+    {
+        Log.i(tag, "Cancelled $reason")
+        mTransactionModel.emptyTransaction(reason)
+        handleAction(EFinalizerAction.FINALIZE_MODE_ASK_TABLE)
+    }
+
+    override fun onDialogCancelReasonCancelled()
+    {
+        Log.i(tag, "Cancel order cancelled")
+        handleAction(EFinalizerAction.FINALIZE_NO_ACTION)
+    }
+
+    override fun onDialogUndoChangesYes(dialog: DialogFragment)
     {
         TODO("Not yet implemented")
     }
 
-    override fun onDialogContinueOrder(dialog: DialogFragment)
+    override fun onDialogUndoChangesNo(dialog: DialogFragment)
     {
         TODO("Not yet implemented")
     }
@@ -562,4 +638,24 @@ class PageOrderActivity : AppCompatActivity(), ModalDialogYesNo.MessageBoxYesNoL
         //binding.totalPrice.text = transaction.getTotalTransaction().toString()
     }
 
+    private fun showAskCancelReasonDialog()
+    {
+        val dialog = ModalDialogCancelReason()
+        dialog.show(supportFragmentManager, "MessageBoxCancelReason")
+    }
+
+    private fun showUndoChanges()
+    {
+        val dialog = ModalDialogYesNo.newInstance(
+            "Undo Changes",
+            "Undo the changes made to the order?",
+            1)
+        dialog.show(supportFragmentManager, "MessageBoxYesNo")
+    }
+
+    override fun onQuantitySelected(modalDialogQuantity: EModalDialogQuantity)
+    {
+        val action = mTransactionModel.handleFinishWokQuantity(mFromBilling, modalDialogQuantity)
+        handleAction(action)
+    }
 }

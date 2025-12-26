@@ -12,6 +12,7 @@ object Translation {
         TEXT_ASAP,
         TEXT_KEY_BAD,
         TEXT_BILL_HEADER,
+        TEXT_BILL_OPTION,
         TEXT_BILL_PAYMENTS,
         TEXT_CALCULATOR,
         TEXT_CANCEL,
@@ -42,6 +43,7 @@ object Translation {
         TEXT_EXIT_PROGRAM,
         TEXT_EXTRA,
         TEXT_FINISH_BILL,
+        TEXT_FLOOR_PLAN,
         TEXT_ITEM_DRINKS,
         TEXT_ITEM_KITCHEN,
         TEXT_KEY,
@@ -51,6 +53,7 @@ object Translation {
         TEXT_MORE,
         TEXT_OK,
         TEXT_ORDER_TELEPHONE,
+        TEXT_PAGE_ORDER,
         TEXT_PAID,
         TEXT_PAY,
         TEXT_PAYED,
@@ -62,16 +65,17 @@ object Translation {
         TEXT_PRINT_QUANTITY,
         TEXT_PRINT_SLIP,
         TEXT_PRINT_ROLL,
+        TEXT_QUANTITY,
         TEXT_RECHAUD,
         TEXT_REMARK,
+        TEXT_REMOVE_ITEM,
+        TEXT_REPRINT,
         TEXT_SHOP,
         TEXT_TABLE,
         TEXT_TABLE_OVERVIEW,
         TEXT_TAKEAWAY,
         TEXT_TELEPHONE,
         TEXT_TRANSPORT,
-        TEXT_REMOVE_ITEM,
-        TEXT_REPRINT,
         TEXT_SEND_ALL,
         TEXT_SEND_BILL,
         TEXT_SENDING_TABLES,
@@ -86,6 +90,11 @@ object Translation {
         MAX_TEXT
     }
 
+    fun TextId.str(): String
+    {
+        return get(this)
+    }
+
     private val m_lin = mapOf(
         TextId.TEXT_ABOUT_US to listOf("关于", "OVER ONS", "ABOUT US", "WIR SIND", "TENTANG", "HAKKIMIZDA"),
         TextId.TEXT_ALREADY_PAYED to listOf("一切都付了", "ALLES REEDS BETAALD", "ALL IS PAYED", "ALLES IST BEZAHLT",
@@ -95,6 +104,8 @@ object Translation {
             " PLEASE USE OTHER KEY!", "NICHT MEHR DIESE SCHLÜSSEL!",
             "MOHON GUNAKAN, KUNCI LAINNYA", "LÜTFEN BAŞKA ANAHTAR KULLANIN!"),
         TextId.TEXT_BILL_HEADER to listOf("买单", "AFREKENEN", "BILL MODE", "RECHNUNG", "BON", "HESAP MODU"),
+        TextId.TEXT_BILL_OPTION to listOf("哪里买单", "KIES AFREKENEN", "CHOOSE BILL",
+            "ZUR KASSE", "PILIH NOTA", "ÖDEME YERİ"),
         TextId.TEXT_BILL_PAYMENTS to listOf("付款", "BETAALWIJZE", "PAY METHOD", "BEZAHLUNG", "UANG", "ÖDEME YÖNTEMİ"),
         TextId.TEXT_CHOOSE_TABLE to listOf("输入单", "KIES TAFEL BESTELLEN", "CHOOSE TABLE TO ORDER", "TISCH NAME", "PILIH MEJA PESANAN", "SİPARİŞ İÇİN MASA SEÇ"),
         TextId.TEXT_CHOOSE_TO_ORDER to listOf("输入单", "KIES BESTELWIJZE", "CHOOSE TO ORDER", "BESTELLEN", "PILIH " +
@@ -142,6 +153,8 @@ object Translation {
         TextId.TEXT_EXTRA to listOf("改餐", "EXTRA", "EXTRA", "EXTRA", "EXTRA", "EKSTRA"),
         TextId.TEXT_FINISH_BILL to listOf("打印票据", "REKENING KLAAR AFDRUK ?",
             "FINISH BILL ?", "RECHNUNG FERTIG AFDRUKKEN ?", "NOTA OKE ADRUKKEN? ", "FATURAYI TAMAMLA?"),
+        TextId.TEXT_FLOOR_PLAN to listOf("平面图", "PLATTEGROND", "FLOORPLAN", "GRUNDRISS", "PLATTEGROND RESTORAN",
+            "KAT PLANI"),
         TextId.TEXT_ITEM_DRINKS to listOf("饮料", "DRANK", "DRANK", "DRANK", "DRANK", "İÇECEKLER"),
         TextId.TEXT_KEY to listOf( "匙", "SLEUTEL", "KEY", "SCHLÜSSEL", "KUNCI", "ANAHTAR"),
         TextId.TEXT_ITEM_KITCHEN to listOf("厨房", "KEUKEN", "KITCHEN", "KUCHE", "DAPUR", "MUTFAK"),
@@ -152,6 +165,8 @@ object Translation {
         TextId.TEXT_OK to listOf("好 !", "OK !", "OK !", "GUT !", "OK !", "TAMAM !"),
         TextId.TEXT_ORDER_TELEPHONE to listOf("送食物", "INFORMEER KLANT", "INFORM CUSTOMER", "INFORMIER KUNDE", "INFORM" +
            " PELANGGAN", "MÜŞTERİYİ BİLGİLENDİR"),
+        TextId.TEXT_PAGE_ORDER to listOf("餐类入单", "BESTELLEN MET KEUZEPAGINA", "ORDER WITH PAGES", "ORDER MIT PAGINA",
+            "ORDER DENGAN PESANAN", "SAYFALARLA SİPARİŞ"),
         TextId.TEXT_PAID to listOf("一切都付了", "AL BETAALD", "PAID", "BEZAHLT", "DIBAYARKAN", "ÖDENDİ"),
         TextId.TEXT_PAY to listOf("埋单", "BETALEN", "PAY", "BEZAHLEN", "BAYAR", "ÖDE"),
         TextId.TEXT_PAYED to listOf("已付账单", "BETAALD", "BEZAHLT", "PAYED", "DIBAYAR", "ÖDENDİ"),
@@ -164,6 +179,7 @@ object Translation {
         TextId.TEXT_PRINT_QUANTITY to listOf("打印多少?", "AANTAL AFDRUKKEN?", "PRINT HOW,MANY TIMES?", "DRUCK ANZAHL", "PRINTER BERAPA KALI?", "KAÇ TANE YAZDIRILSIN?"),
         TextId.TEXT_PRINT_SLIP to listOf("打印单", "SLIP PRINTER", "SLIP BILL", "SLIP DRUCKER", "PRINTER SLIP", "FİŞ YAZDIR"),
         TextId.TEXT_PRINT_ROLL to listOf("卷打印机", "REKENING ROL PRINTER" , "PRINT ROLL BILL", "ROLL DRUCKER", "PRINTER PERAN NOTA", "RULO YAZDIR"),
+        TextId.TEXT_QUANTITY to listOf("数量", "HOEVEELHEID", "QUANTITY", "QUANTITAT", "KUANTITAS", "MİKTAR"),
         TextId.TEXT_RECHAUD to listOf("炭烧盘", "RECHAUD", "RECHAUD", "RECHAUD", "RECHAUD", "REŞO"),
         TextId.TEXT_REMARK to listOf("写备注", "OPMERKING", "REMARK", "NOTITZEN", "KETERANGAN", "NOT"),
         TextId.TEXT_REPRINT to listOf("重印", "HERDRUK", "REPRINT", "NEUDRUCK", "PRINT LAGI", "YENİDEN YAZDIR"),

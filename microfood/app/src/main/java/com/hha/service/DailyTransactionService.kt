@@ -401,11 +401,12 @@ class DailyTransactionService(channel: ManagedChannel) : BaseGrpcService<DailyTr
         }
     }
 
-    fun insertTransaction(tableName: String, customerId: Int, rfidKeyId: Int, transType: TransType): Int? = runBlocking {
+    fun insertTransaction(tableName: String, customerId: Int, rfidKeyId: Short, transType: TransType): Int? =
+        runBlocking {
         try {
             val request = InsertTransactionRequest.newBuilder()
                 .setTableName(tableName)
-                .setRfidKeyId(rfidKeyId)
+                .setRfidKeyId(rfidKeyId.toInt())
                 .setTransType(transType)
                 .setCustomerId(customerId)
                 .build()

@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import com.hha.dialog.BaseActivity
 import com.hha.framework.CMenuCards
 import com.hha.resources.MenuRepository
 import kotlinx.coroutines.delay
@@ -12,7 +13,7 @@ import tech.hha.microfood.databinding.ActivitySplashBinding
 import tech.hha.microfood.databinding.ActivityAboutBinding
 import kotlinx.coroutines.launch
 
-class SplashActivity : AppCompatActivity() {
+class SplashActivity : BaseActivity() {
 
     private lateinit var binding: ActivitySplashBinding
     private val SPLASH_DISPLAY_DURATION_MS = 2000L // 2 seconds minimum display time

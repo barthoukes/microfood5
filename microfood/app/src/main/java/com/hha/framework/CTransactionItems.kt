@@ -494,8 +494,6 @@ class CTransactionItems : Iterable<CSortedItem>
     fun touchItem(menuItem: CMenuItem, clusterId: Short): Boolean
     {
         Log.i("CTransactionItems", "touchItem")
-//        IclientOrdersHandlerPtr clientOrdersHandler(m_transactionItemModel.getClientOrdersHandler());
-//
 //        /** @brief Ask the twin item */
 //        int twin_item_id = 0;
 //        int menuCardId =clientOrdersHandler->getMenuCardId();
@@ -525,7 +523,6 @@ class CTransactionItems : Iterable<CSortedItem>
 //        }
         val twinItem: CMenuItem? = null
         val retVal = touchItem(menuItem, clusterId, twinItem);
-//        LOG_FUNC_EXIT << Endl;
         return retVal
     }
 

@@ -12,13 +12,13 @@ import androidx.fragment.app.DialogFragment
 import com.hha.callback.PaymentEnteredListener
 import com.hha.types.CMoney
 import tech.hha.microfood.R
-import tech.hha.microfood.databinding.MessageboxPaymentBinding
+import tech.hha.microfood.databinding.ModalDialogPaymentBinding
 
 class ModalDialogPayment : DialogFragment()
 {
    var listener: PaymentEnteredListener? = null
 
-   private var _binding: MessageboxPaymentBinding? = null
+   private var _binding: ModalDialogPaymentBinding? = null
    private val binding get() = _binding!!
 
    // Use a companion object to pass arguments safely
@@ -35,7 +35,7 @@ class ModalDialogPayment : DialogFragment()
 
    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View
    {
-      _binding = MessageboxPaymentBinding.inflate(inflater, container, false)
+      _binding = ModalDialogPaymentBinding.inflate(inflater, container, false)
       return binding.root
    }
 

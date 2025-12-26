@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:backgroundTint="@color/COLOUR_MESSAGEBOX_BACKGROUND"
+    android:padding="16dp"
+    android:background="@drawable/dialog_background_rounded_corners">
+
+    <!-- Title TextView -->
+    <TextView
+        android:id="@+id/quantity_dialog_title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="title"
+        android:textAppearance="@style/TextAppearance.Material3.TitleLarge"
+        android:textColor="?attr/colorOnSurface"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Select Quantity" />
+
+    <!-- Horizontal chain of number buttons -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/button_quantity_0"
+        style="@style/Widget.App.QuantityButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="0"
+        android:onClick="onButton0"
+        app:layout_constraintEnd_toStartOf="@+id/button_quantity_1"
+        app:layout_constraintHorizontal_chainStyle="spread"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/quantity_dialog_title" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/button_quantity_1"
+        style="@style/Widget.App.QuantityButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="1"
+        android:onClick="onButton1"
+        app:layout_constraintBottom_toBottomOf="@id/button_quantity_0"
+        app:layout_constraintEnd_toStartOf="@+id/button_quantity_2"
+        app:layout_constraintStart_toEndOf="@+id/button_quantity_0"
+        app:layout_constraintTop_toTopOf="@id/button_quantity_0" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/button_quantity_2"
+        style="@style/Widget.App.QuantityButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="2"
+        android:onClick="onButton2"
+        app:layout_constraintBottom_toBottomOf="@id/button_quantity_1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/button_quantity_1"
+        app:layout_constraintTop_toTopOf="@id/button_quantity_1" />
+
+    <!-- Divider line -->
+    <View
+        android:id="@+id/divider"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:layout_marginTop="24dp"
+        android:background="?attr/colorOutline"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/button_quantity_0" />
+
+    <!-- Bottom row with Icon Buttons -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/button_bill"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="bill"
+        android:layout_marginTop="24dp"
+        app:icon="@drawable/euro_yellow"
+        android:onClick="onButtonBill"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/button_escape"
+        app:layout_constraintHorizontal_chainStyle="spread_inside"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/divider"
+        tools:ignore="MissingPrefix" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/button_escape"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="cancel"
+        android:onClick="onButtonCancel"
+        app:icon="@drawable/icon_cancel_yellow"
+        app:layout_constraintBottom_toBottomOf="@id/button_bill"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/button_bill"
+        app:layout_constraintTop_toTopOf="@id/button_bill"
+        tools:ignore="MissingPrefix" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

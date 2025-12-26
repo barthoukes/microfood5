@@ -2,7 +2,7 @@ plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
     // STEP 1: Using a stable version of the plugin that works with the modern config.
-    id 'com.google.protobuf' version "0.9.4"
+    id 'com.google.protobuf' version "0.9.5"
 }
 
 android {

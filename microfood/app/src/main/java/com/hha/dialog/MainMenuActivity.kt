@@ -26,7 +26,7 @@ import com.hha.resources.Global
 import com.hha.service.AddressService
 
 
-class MainMenuActivity : AppCompatActivity() {
+class MainMenuActivity : BaseActivity() {
     // View binding
     private lateinit var binding: DialogMainActivityBinding
 
@@ -162,7 +162,7 @@ class MainMenuActivity : AppCompatActivity() {
     private fun navigateToTakeaway() {
         // Todo new takeaway
         val useBag = true
-        val user = Global.getInstance().currentKeyIndex
+        val user = Global.getInstance().rfidKeyId
         val transactionId : Int =
             createNewTakeawayTransaction(
                 0, useBag, user, false);

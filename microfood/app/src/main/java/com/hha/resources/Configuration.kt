@@ -178,7 +178,7 @@ class Configuration {
         }
     }
 
-    fun getTextColour(name: String) : Int = getValue(name) or 0xFF000000.toInt()
+    fun getTextColour(name: String) : Int = getColour(name) or 0xFF000000.toInt()
 
     /**
      * Removes a configuration by name
