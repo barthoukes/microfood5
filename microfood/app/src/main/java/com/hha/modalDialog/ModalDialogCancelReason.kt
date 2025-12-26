@@ -28,10 +28,10 @@ class ModalDialogCancelReason : DialogFragment()
       TextId.TEXT_CANCEL_REASON_TOO_LATE)
 
    // Define a listener interface to send the result back to the Activity
-   interface MessageBoxCancelReasonListener
+   interface ModalDialogCancelReasonListener
    {
-      fun onReasonSelected(reason: String)
-      fun onDialogCancelled()
+      fun onCancelReasonSelected(reason: String)
+      fun onDialogCancelReasonCancelled()
    }
 
    override fun onCreateView(
@@ -59,7 +59,7 @@ class ModalDialogCancelReason : DialogFragment()
       // --- Setup RecyclerView ---
       val adapter = CancelReasonAdapter(reasonStrings) { selectedReason ->
          // A reason was clicked, send it back to the activity and dismiss
-         (activity as? MessageBoxCancelReasonListener)?.onReasonSelected(selectedReason)
+         (activity as? ModalDialogCancelReasonListener)?.onCancelReasonSelected(selectedReason)
          dismiss()
       }
       binding.reasonsRecyclerview.adapter = adapter
@@ -67,7 +67,7 @@ class ModalDialogCancelReason : DialogFragment()
       // --- Setup Cancel Button ---
          binding.buttonCancel.setOnClickListener {
             // The cancel button was clicked
-            (activity as? MessageBoxCancelReasonListener)?.onDialogCancelled()
+            (activity as? ModalDialogCancelReasonListener)?.onDialogCancelReasonCancelled()
             dismiss()
          }.toString()
    }

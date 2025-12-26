@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:backgroundTint="@color/COLOUR_MESSAGEBOX_BACKGROUND"
+    android:padding="16dp"
+    android:background="@drawable/dialog_background_rounded_corners">
+
+    <!-- Title TextView -->
+    <TextView
+        android:id="@+id/quantity_dialog_title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="print_quantities"
+        android:textAppearance="@style/TextAppearance.Material3.TitleLarge"
+        android:textColor="?attr/colorOnSurface"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Print Quantities" />
+
+    <!-- Kitchen Prints Section -->
+    <TextView
+        android:id="@+id/kitchen_prints_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="kitchen_prints"
+        android:textAppearance="@style/TextAppearance.Material3.LabelLarge"
+        android:textColor="?attr/colorOnSurfaceVariant"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/quantity_dialog_title"
+        tools:text="Kitchen Prints:" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/button_kitchen_0"
+        style="@style/Widget.App.QuantityButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="0x"
+        app:layout_constraintEnd_toStartOf="@+id/button_kitchen_1"
+        app:layout_constraintHorizontal_chainStyle="spread"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/kitchen_prints_label" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/button_kitchen_1"
+        style="@style/Widget.App.QuantityButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="1x"
+        app:layout_constraintEnd_toStartOf="@+id/button_kitchen_2"
+        app:layout_constraintStart_toEndOf="@+id/button_kitchen_0"
+        app:layout_constraintTop_toTopOf="@id/button_kitchen_0" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/button_kitchen_2"
+        style="@style/Widget.App.QuantityButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="2x"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/button_kitchen_1"
+        app:layout_constraintTop_toTopOf="@id/button_kitchen_1" />
+
+
+    <!-- Bill Prints Section -->
+    <TextView
+        android:id="@+id/bill_prints_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="bill_prints"
+        android:textAppearance="@style/TextAppearance.Material3.LabelLarge"
+        android:textColor="?attr/colorOnSurfaceVariant"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/button_kitchen_0"
+        tools:text="Bill Prints:" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/button_bill_q_0"
+        style="@style/Widget.App.QuantityButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="0x"
+        app:layout_constraintEnd_toStartOf="@+id/button_bill_q_1"
+        app:layout_constraintHorizontal_chainStyle="spread"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/bill_prints_label" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/button_bill_q_1"
+        style="@style/Widget.App.QuantityButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="1x"
+        app:layout_constraintEnd_toStartOf="@+id/button_bill_q_2"
+        app:layout_constraintStart_toEndOf="@+id/button_bill_q_0"
+        app:layout_constraintTop_toTopOf="@id/button_bill_q_0" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/button_bill_q_2"
+        style="@style/Widget.App.QuantityButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="2x"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/button_bill_q_1"
+        app:layout_constraintTop_toTopOf="@id/button_bill_q_1" />
+
+
+    <!-- Divider line -->
+    <View
+        android:id="@+id/divider"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:layout_marginTop="12dp"
+        android:background="?attr/colorOutline"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/button_bill_q_0" />
+
+    <!-- Bottom Action Buttons -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/button_bill"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        app:icon="@drawable/euro_yellow"
+        app:layout_constraintEnd_toStartOf="@+id/button_time"
+        app:layout_constraintHorizontal_chainStyle="spread"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/divider"/>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/button_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        app:icon="@drawable/icon_time_yellow"
+        app:layout_constraintEnd_toStartOf="@+id/button_print"
+        app:layout_constraintHorizontal_chainStyle="spread"
+        app:layout_constraintStart_toEndOf="@id/button_bill"
+        app:layout_constraintTop_toBottomOf="@id/divider"/>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/button_print"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        app:icon="@drawable/printer_yellow"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_chainStyle="spread"
+        app:layout_constraintStart_toEndOf="@id/button_time"
+        app:layout_constraintTop_toBottomOf="@id/divider"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

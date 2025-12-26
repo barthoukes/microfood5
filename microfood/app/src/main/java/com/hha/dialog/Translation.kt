@@ -65,16 +65,17 @@ object Translation {
         TEXT_PRINT_QUANTITY,
         TEXT_PRINT_SLIP,
         TEXT_PRINT_ROLL,
+        TEXT_QUANTITY,
         TEXT_RECHAUD,
         TEXT_REMARK,
+        TEXT_REMOVE_ITEM,
+        TEXT_REPRINT,
         TEXT_SHOP,
         TEXT_TABLE,
         TEXT_TABLE_OVERVIEW,
         TEXT_TAKEAWAY,
         TEXT_TELEPHONE,
         TEXT_TRANSPORT,
-        TEXT_REMOVE_ITEM,
-        TEXT_REPRINT,
         TEXT_SEND_ALL,
         TEXT_SEND_BILL,
         TEXT_SENDING_TABLES,
@@ -87,6 +88,11 @@ object Translation {
         TEXT_UPDATE_MENU,
         TEXT_WOK,
         MAX_TEXT
+    }
+
+    fun TextId.str(): String
+    {
+        return get(this)
     }
 
     private val m_lin = mapOf(
@@ -173,6 +179,7 @@ object Translation {
         TextId.TEXT_PRINT_QUANTITY to listOf("打印多少?", "AANTAL AFDRUKKEN?", "PRINT HOW,MANY TIMES?", "DRUCK ANZAHL", "PRINTER BERAPA KALI?", "KAÇ TANE YAZDIRILSIN?"),
         TextId.TEXT_PRINT_SLIP to listOf("打印单", "SLIP PRINTER", "SLIP BILL", "SLIP DRUCKER", "PRINTER SLIP", "FİŞ YAZDIR"),
         TextId.TEXT_PRINT_ROLL to listOf("卷打印机", "REKENING ROL PRINTER" , "PRINT ROLL BILL", "ROLL DRUCKER", "PRINTER PERAN NOTA", "RULO YAZDIR"),
+        TextId.TEXT_QUANTITY to listOf("数量", "HOEVEELHEID", "QUANTITY", "QUANTITAT", "KUANTITAS", "MİKTAR"),
         TextId.TEXT_RECHAUD to listOf("炭烧盘", "RECHAUD", "RECHAUD", "RECHAUD", "RECHAUD", "REŞO"),
         TextId.TEXT_REMARK to listOf("写备注", "OPMERKING", "REMARK", "NOTITZEN", "KETERANGAN", "NOT"),
         TextId.TEXT_REPRINT to listOf("重印", "HERDRUK", "REPRINT", "NEUDRUCK", "PRINT LAGI", "YENİDEN YAZDIR"),

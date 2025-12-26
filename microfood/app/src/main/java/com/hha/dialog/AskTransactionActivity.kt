@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.observe
 import androidx.recyclerview.widget.GridLayoutManager
 import com.hha.adapter.ShortTransactionListAdapter
 import com.hha.framework.CFloorTable
@@ -19,6 +18,7 @@ import tech.hha.microfood.databinding.AskTransactionActivityBinding
 import com.hha.dialog.Translation.TextId
 import com.hha.floor.FloorTablesAdapter
 import com.hha.model.TransactionModel
+import com.hha.model.TransactionModelFactory
 import tech.hha.microfood.R
 
 
@@ -41,12 +41,15 @@ class AskTransactionActivity : BaseActivity()
         mBinding = AskTransactionActivityBinding.inflate(layoutInflater)
         setContentView(mBinding.root)
 
-        mTransactionModel = ViewModelProvider(this).get(TransactionModel::class.java)
+
+        mTransactionModel = ViewModelProvider(this, TransactionModelFactory)
+            .get(TransactionModel::class.java)
+        //mTransactionModel = ViewModelProvider(this).get(TransactionModel::class.java)
         mFloorTableModel = ViewModelProvider(this).get(FloorTableModel::class.java)
 
         setupRecyclerView()
 
-        mTransactionModel.transaction
+        mTransactionModel.activeTransaction
             .observe(this) { transaction ->
                 if (transaction != null)
                 {
@@ -191,8 +194,8 @@ class AskTransactionActivity : BaseActivity()
             // Also highlight the corresponding transaction in the left-hand list if it exists
             mShortTransactionListAdapter.selectTransactionId(selectedFloorTable.transactionId)
         }
-        // Second click on the same table: Create a new transaction and navigate.
-        else if (mBill)
+        // Second click on the s(ame table: Create a new transaction and navigate.
+        else if (mBill && (selectedFloorTable.transactionId > 0))
         {
             // Change to billing activity for this transaction.
             mTransactionModel.selectTransaction(selectedFloorTable.transactionId)

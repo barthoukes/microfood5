@@ -53,9 +53,41 @@ class CTimeFrame
       end_time = "1980-01-01 00:00:00"
    }
 
-   fun previous()
+   /// @brief create a new time frame.
+   constructor(idd: Int, tfi: ETimeFrameIndex, transactionId: Int)
    {
-      time_frame_index = time_frame_index.previous()
+      id = idd
+      time_frame_index = tfi
+      waiter = 0
+
+      val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+      val output = dateFormat.format(Date())
+      start_time = output
+      end_time = "0"
+   }
+
+   fun changeDeliverTime(transactionId: Int, pcNumber: Short,
+                         timeFrameIndex: ETimeFrameIndex, timer: CTimestamp)
+   {
+      val service = GrpcServiceFactory.createDailyTimeFrameService()
+      service.changeDeliverTime(
+         transactionId, timeFrameIndex.toInt(),
+         pcNumber,
+         timer.getDateTime())
+   }
+
+   fun closeTimeFrame()
+   {
+      // With timestamp added
+      val service = GrpcServiceFactory.createDailyTimeFrameService()
+      val now = CTimestamp()
+      service.endTimeFrame(
+         m_operations.transactionId,
+         time_frame_index.index,
+         m_operations.getDeviceId(),
+         now.getDateTime(), false,
+         CookingState.COOKING_DONE
+      )
    }
 
    fun end()
@@ -88,40 +120,25 @@ class CTimeFrame
          timeChanged, state)
    }
 
-   fun closeTimeFrame()
+   fun getTimeFrameIndex(): ETimeFrameIndex
    {
-      // With timestamp added
-      val service = GrpcServiceFactory.createDailyTimeFrameService()
-      val now = CTimestamp()
-      service.endTimeFrame(
-         m_operations.transactionId,
-         time_frame_index.index,
-         m_operations.getDeviceId(),
-         now.getDateTime(), false,
-         CookingState.COOKING_DONE
-      )
+      return time_frame_index
    }
 
-   /// @brief create a new time frame.
-   constructor(idd: Int, tfi: ETimeFrameIndex, transactionId: Int)
+   fun getValidTimeFrame(): ETimeFrameIndex
    {
-      id = idd
-      time_frame_index = tfi
-      waiter = 0
+      if (time_frame_index.toInt() <= 1)
+         return ETimeFrameIndex(ETimeFrameIndex.TIME_FRAME1)
+      return time_frame_index
+   }
 
-      val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-      val output = dateFormat.format(Date())
-      start_time = output
-      end_time = "0"
+   fun previous()
+   {
+      time_frame_index = time_frame_index.previous()
    }
 
    fun toInt(): Int
    {
       return time_frame_index.toInt()
-   }
-
-   fun getTimeFrameIndex(): ETimeFrameIndex
-   {
-      return time_frame_index
    }
 }

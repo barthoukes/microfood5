@@ -12,8 +12,8 @@ class ModalDialogUndoChanges : DialogFragment()
    // 1. Listener Interface: Activities will implement this to get the result.
    interface MessageBoxUndoChangesListener
    {
-      fun onDialogUndoChanges(dialog: DialogFragment) // "Yes" was clicked
-      fun onDialogContinueOrder(dialog: DialogFragment) // "No" was clicked
+      fun onDialogUndoChangesYes(dialog: DialogFragment) // "Yes" was clicked
+      fun onDialogUndoChangesNo(dialog: DialogFragment) // "No" was clicked
    }
 
    private lateinit var listener: MessageBoxUndoChangesListener
@@ -49,11 +49,11 @@ class ModalDialogUndoChanges : DialogFragment()
          builder.setMessage(message)
             // Set the "Yes" button and its click listener
             .setPositiveButton("Yes") { _, _ ->
-               listener.onDialogUndoChanges(this)
+               listener.onDialogUndoChangesYes(this)
             }
             // Set the "No" button and its click listener
             .setNegativeButton("No") { _, _ ->
-               listener.onDialogContinueOrder(this)
+               listener.onDialogUndoChangesNo(this)
             }
          // Create the AlertDialog object and return it.
          builder.create()

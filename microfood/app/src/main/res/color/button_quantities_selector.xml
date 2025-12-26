@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- State when button is activated (our "selected" state) -->
+    <item android:color="?attr/colorPrimary" android:state_activated="true" />
+    <!-- Default, unselected state -->
+    <item android:color="?attr/colorPrimaryContainer" />
+</selector>
+

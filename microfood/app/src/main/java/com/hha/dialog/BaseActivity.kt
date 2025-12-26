@@ -1,6 +1,8 @@
 package com.hha.dialog
 
 import android.os.Bundle
+import android.widget.Toast
+import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -36,5 +38,15 @@ open class BaseActivity : AppCompatActivity()
          WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
       // Hide both status and navigation bars
       windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
+   }
+
+   private fun toast(@StringRes messageRes: Int)
+   {
+      Toast.makeText(this, messageRes, Toast.LENGTH_SHORT).show()
+   }
+
+   fun toast(message: String)
+   {
+      Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
    }
 }

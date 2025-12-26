@@ -5,7 +5,8 @@ import com.hha.types.EClientOrdersType
 import com.hha.types.ETransType
 import com.hha.daily.transaction.TransactionListItem
 
-class CShortTransaction {
+class CShortTransaction
+{
    var transactionId: Int = 0
    var name: String = ""
    var total: CMoney = CMoney(0)
@@ -22,7 +23,8 @@ class CShortTransaction {
       transactionId: Int, name: String, timeCustomer: String,
       status: EClientOrdersType, customerId: Int,
       total: CMoney, minutes: Int, transType: ETransType,
-      timeStart: String, message: String, archived: Boolean)
+      timeStart: String, message: String, archived: Boolean
+   )
    {
       this.name = name
       this.total = total

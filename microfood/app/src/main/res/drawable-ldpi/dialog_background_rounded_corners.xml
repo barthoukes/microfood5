@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+
+    <!--
+    This color is a modern Material 3 theme attribute. It will automatically
+    pick a suitable background color for both light and dark themes,
+    making your dialog look consistent with the rest of the system.
+    -->
+    <solid android:color="?attr/colorSurfaceContainer" />
+
+    <!--
+    This sets the radius for all four corners. 28dp is the standard
+    corner radius for dialogs in Google's Material Design 3 guidelines,
+    giving it a clean, modern look.
+    -->
+    <corners android:radius="28dp" />
+
+</shape>

@@ -16,6 +16,13 @@ class CFloorTables: Iterable<CFloorTable>
 
     fun getFloorTable(index: Int): CFloorTable? = mTables.getOrNull(index)
 
+    fun setTransactionAvailable(transactionId: Int)
+    {
+        val service = GrpcServiceFactory.createFloorTableService()
+        service.setTransactionTableAvailable(transactionId)
+    }
+
     val size: Int
         get() = mTables.size
+
 }

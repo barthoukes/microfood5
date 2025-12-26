@@ -45,7 +45,7 @@ class BillOrderActivity : BaseActivity(),
     private lateinit var mBinding: BillOrderActivityBinding
     private lateinit var mBillItemsAdapter: BillItemsAdapter
     private lateinit var mPaymentsAdapter: PaymentsAdapter
-    private lateinit var mViewModel: TransactionModel
+    private lateinit var mTransactionModel: TransactionModel
     private var mSlipPrints = 1
 
     private var mOffer = false
@@ -70,7 +70,7 @@ class BillOrderActivity : BaseActivity(),
 
     fun onInit()
     {
-        val action = mViewModel.onInit()
+        val action = mTransactionModel.onInit()
         when (action)
         {
             EInitAction.INIT_ACTION_BILL_PAYMENTS -> finish() // @todo
@@ -80,7 +80,7 @@ class BillOrderActivity : BaseActivity(),
             else -> {}
         }
 
-        if (mViewModel.discountVisible())
+        if (mTransactionModel.discountVisible())
         {
             mBinding.btnDiscount.visibility = View.VISIBLE
         } else
@@ -280,9 +280,9 @@ class BillOrderActivity : BaseActivity(),
         mBinding.txtKitchenPrints.text = Translation.get(Translation.TextId.TEXT_PRINT_ROLL)
         mBinding.txtBillPrints.text = Translation.get(Translation.TextId.TEXT_PRINT_SLIP)
         refreshPrints()
-        mViewModel.refreshAllPayments()
+        mTransactionModel.refreshAllPayments()
         mBillItemsAdapter.notifyDataSetChanged()
-        mBinding.tableName.text = mViewModel.getTableName()
+        mBinding.tableName.text = mTransactionModel.getTableName()
     }
 
     @Suppress("UNUSED_PARAMETER")
@@ -313,32 +313,32 @@ class BillOrderActivity : BaseActivity(),
     @Suppress("UNUSED_PARAMETER")
     fun onButton5Euro(view: View)
     {
-        mViewModel.payEuroButton(CMoney(500))
+        mTransactionModel.payEuroButton(CMoney(500))
     }
 
     @Suppress("UNUSED_PARAMETER")
     fun onButton10Euro(view: View)
     {
         // Implement €10 payment logic
-        mViewModel.payEuroButton(CMoney(1000))
+        mTransactionModel.payEuroButton(CMoney(1000))
     }
 
     @Suppress("UNUSED_PARAMETER")
     fun onButton20Euro(view: View)
     {
-        mViewModel.payEuroButton(CMoney(2000))
+        mTransactionModel.payEuroButton(CMoney(2000))
     }
 
     @Suppress("UNUSED_PARAMETER")
     fun onButton50Euro(view: View)
     {
-        mViewModel.payEuroButton(CMoney(5000))
+        mTransactionModel.payEuroButton(CMoney(5000))
     }
 
     @Suppress("UNUSED_PARAMETER")
     fun onButton100Euro(view: View)
     {
-        mViewModel.payEuroButton(CMoney(10000))
+        mTransactionModel.payEuroButton(CMoney(10000))
     }
 
     @Suppress("UNUSED_PARAMETER")
@@ -366,7 +366,7 @@ class BillOrderActivity : BaseActivity(),
     {
         // Tell the ViewModel to switch its mode back to ordering.
         // This is important for when PageOrderActivity resumes.
-        mViewModel.setMode(TransactionModel.InitMode.VIEW_PAGE_ORDER)
+        mTransactionModel.setMode(TransactionModel.InitMode.VIEW_PAGE_ORDER)
 
         // Finish the current activity (BillOrderActivity).
         // This will automatically return the user to the previous activity (PageOrderActivity).
@@ -379,14 +379,14 @@ class BillOrderActivity : BaseActivity(),
         mBinding = BillOrderActivityBinding.inflate(layoutInflater)
         setContentView(mBinding.root)
 
-        mViewModel = ViewModelProvider(this, TransactionModelFactory)
+        mTransactionModel = ViewModelProvider(this, TransactionModelFactory)
             .get(TransactionModel::class.java)
 
         setupRecyclerView()
         initializeViews()
 
 
-        mViewModel.transaction.observe(this) { transaction ->
+        mTransactionModel.activeTransaction.observe(this) { transaction ->
             // This block will run automatically when the activity starts
             // and any time the transaction data changes.
 
@@ -400,12 +400,12 @@ class BillOrderActivity : BaseActivity(),
             }
         }
         // OBSERVER 2: For the payments list (bottom RecyclerView)
-        mViewModel.billDisplayLines.observe(this) { paymentLines ->
+        mTransactionModel.billDisplayLines.observe(this) { paymentLines ->
             // This block runs when the list of payment lines is ready.
             mPaymentsAdapter.submitList(paymentLines)
         }
 
-        mViewModel.initializeTransaction(TransactionModel.InitMode.VIEW_BILLING)
+        mTransactionModel.initializeTransaction(TransactionModel.InitMode.VIEW_BILLING)
     }
 
     // This is the new method you must implement
@@ -414,12 +414,12 @@ class BillOrderActivity : BaseActivity(),
         amount: CMoney,
     )
     {
-        mViewModel.addPayment(paymentMethod, amount)
+        mTransactionModel.addPayment(paymentMethod, amount)
     }
 
     public fun payAllUsingPin()
     {
-        mViewModel.payAllUsingPin()
+        mTransactionModel.payAllUsingPin()
         if (mContinueWhenAmountEnough)
         {
             onPrintBill(false);
@@ -428,7 +428,7 @@ class BillOrderActivity : BaseActivity(),
 
     public fun payAllUsingCash()
     {
-        mViewModel.payAllUsingCash()
+        mTransactionModel.payAllUsingCash()
         if (mContinueWhenAmountEnough)
         {
             onPrintBill(false);
@@ -473,7 +473,7 @@ class BillOrderActivity : BaseActivity(),
     fun onButtonConfirmBill(view: View)
     {
         // 1. Get the remaining amount that needs to be paid from the ViewModel.
-        val requiredAmount = mViewModel.getRequiredAdditionalPayment()
+        val requiredAmount = mTransactionModel.getRequiredAdditionalPayment()
 
         // 2. Check if payment is actually needed.
         if (requiredAmount > CMoney(0))
@@ -513,7 +513,7 @@ class BillOrderActivity : BaseActivity(),
 
     override fun onTextEntered(text: String)
     {
-        mViewModel.setMessage(text)
+        mTransactionModel.setMessage(text)
     }
 
     override fun onTransactionChanged(transaction: CTransaction)
@@ -544,7 +544,7 @@ class BillOrderActivity : BaseActivity(),
         currentTransaction: CTransaction, offer: Boolean
     )
     {
-        val action = mViewModel.isPrintBillAllowedAndConfirmed(
+        val action = mTransactionModel.isPrintBillAllowedAndConfirmed(
             currentTransaction, offer, mCustomerTotal
         )
         runAction(currentTransaction, offer, action)
@@ -571,7 +571,7 @@ class BillOrderActivity : BaseActivity(),
 
     fun onPrintBill(offer: Boolean)
     {
-        val currentTransaction = mViewModel.transaction.value
+        val currentTransaction = mTransactionModel.activeTransaction.value
         if (currentTransaction == null)
         {
             return
@@ -595,7 +595,7 @@ class BillOrderActivity : BaseActivity(),
 
     fun cancelPaymentsAskOtherTable()
     {
-        val currentTransaction = mViewModel.transaction.value // 678
+        val currentTransaction = mTransactionModel.activeTransaction.value // 678
         if (currentTransaction == null)
         {
             return
@@ -612,7 +612,7 @@ class BillOrderActivity : BaseActivity(),
 
     fun confirmPrintBill()
     {
-        mViewModel.confirmPrintBill(mOffer)
+        mTransactionModel.confirmPrintBill(mOffer)
 
 //        if (!CFG("bill_print_kitchen_first"))
 //        {
@@ -628,7 +628,7 @@ class BillOrderActivity : BaseActivity(),
      */
     fun checkBillingKey(): Boolean
     {
-        val currentTransaction = mViewModel.transaction.value // 678
+        val currentTransaction = mTransactionModel.activeTransaction.value // 678
         if (currentTransaction == null)
         {
             return false
