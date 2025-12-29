@@ -746,6 +746,19 @@ class CTransaction : Iterable<CSortedItem>,
         return mTimeFrame
     }
 
+    fun startTimeFrame()
+    {
+        val waiter = global.rfidKeyId
+        if (mTimeFrame.time_frame_index.index == ETimeFrameIndex.TIME_FRAME_ALL &&
+            data.transactionId >0)
+        {
+            mTimeFrame.getLatestTimeFrameIndex(data.transactionId)
+        }
+        mTimeFrame.next();
+        val deviceId = global.pcNumber
+        mTimeFrame.startTimeFrame(deviceId, data.transactionId, waiter)
+    }
+
     fun selectTransactionId(transactionId: Int)
     {
         data.transactionId = transactionId

@@ -1,6 +1,7 @@
 package com.hha.framework
 
 import com.hha.floor.Table
+import com.hha.types.CMoney
 import com.hha.types.EClientOrdersType
 import com.hha.types.ETableStatus
 import com.hha.types.ETableType
@@ -13,7 +14,7 @@ data class CFloorTable(
     var tableId: Int,                   // Id for the table
     var keybutton: Int,                 // Which key represents on display.
     var name: String,                   // Name of table
-    var amount: Int,                    // Amount in cents
+    var amount: CMoney,                 // Amount in cents
     var minutes: Int,                   // Time in minutes
     var endTime: String,                // End time
     var days: Int,                      // Days
@@ -43,7 +44,7 @@ data class CFloorTable(
         tableId = table.tableId,
         keybutton = table.keybutton,
         name = table.name,
-        amount = table.amount,
+        amount = CMoney(table.amount),
         minutes = table.minutes,
         endTime = table.endTime,
         days = table.days,

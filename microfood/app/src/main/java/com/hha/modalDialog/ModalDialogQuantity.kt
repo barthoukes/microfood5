@@ -7,7 +7,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.DialogFragment
 import com.hha.types.EFinalizerAction
-import com.hha.types.EModalDialogQuantity
 import tech.hha.microfood.databinding.ModalDialogQuantityBinding
 
 class ModalDialogQuantity : DialogFragment()
@@ -16,7 +15,7 @@ class ModalDialogQuantity : DialogFragment()
       // This interface defines how the dialog sends the result back.
       interface ModalDialogQuantityListener
       {
-         fun onQuantitySelected(action: EModalDialogQuantity)
+         fun onQuantitySelected(quantity: Int, toBilling: Boolean, stop: Boolean)
       }
 
       private var _binding: ModalDialogQuantityBinding? = null
@@ -68,27 +67,28 @@ class ModalDialogQuantity : DialogFragment()
 
          // Set up click listeners for all the buttons
          binding.buttonQuantity0.setOnClickListener {
-            listener?.onQuantitySelected(EModalDialogQuantity.FINALIZE_KEY_0)
+            listener?.onQuantitySelected(0, false, false)
             dismiss()
          }
 
          binding.buttonQuantity1.setOnClickListener {
-            listener?.onQuantitySelected(EModalDialogQuantity.FINALIZE_KEY_1)
+            listener?.onQuantitySelected(1, false, false)
             dismiss()
          }
 
          binding.buttonQuantity2.setOnClickListener {
-            listener?.onQuantitySelected(EModalDialogQuantity.FINALIZE_KEY_2)
+            listener?.onQuantitySelected(2, true, false)
             dismiss()
          }
 
          binding.buttonBill.setOnClickListener {
-            listener?.onQuantitySelected(EModalDialogQuantity.FINALIZE_KEY_BILL) // Using CR for "Carriage Return"/Enter/OK
+            listener?.onQuantitySelected(0, true, false)
+            // Return"/Enter/OK
             dismiss()
          }
 
          binding.buttonEscape.setOnClickListener {
-            listener?.onQuantitySelected(EModalDialogQuantity.FINALIZE_KEY_ESCAPE)
+            listener?.onQuantitySelected(0, false, true)
             dismiss()
          }
       }

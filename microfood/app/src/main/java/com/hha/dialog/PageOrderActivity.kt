@@ -33,13 +33,13 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModelProvider
 import com.hha.callback.TransactionListener
 import com.hha.dialog.Translation.str
+import com.hha.modalDialog.ModalDialogDelay
 import com.hha.modalDialog.ModalDialogQuantities
 import com.hha.model.TransactionModel
 import com.hha.model.TransactionModelFactory
 import com.hha.resources.CTimestamp
 import com.hha.types.CMoney
 import com.hha.types.EFinalizerAction
-import com.hha.types.EModalDialogQuantity
 
 import tech.hha.microfood.databinding.PageOrderActivityBinding
 
@@ -47,6 +47,7 @@ class PageOrderActivity : BaseActivity(), ModalDialogYesNo.MessageBoxYesNoListen
    ModalDialogCancelReason.ModalDialogCancelReasonListener,
    ModalDialogUndoChanges.MessageBoxUndoChangesListener,
     ModalDialogQuantity.ModalDialogQuantityListener,
+    ModalDialogDelay.ModalDialogDelayListener,
     TransactionListener, ModalDialogQuantities.ModalDialogQuantitiesListener
 {
     private final var tag = "POE"
@@ -67,6 +68,7 @@ class PageOrderActivity : BaseActivity(), ModalDialogYesNo.MessageBoxYesNoListen
     private val mColourOrderBackgroundEven = colourCFG.getBackgroundColour("COLOUR_ORDER_BACKGROUND_EVEN")
 
     private val mColourOrderSelectedText = colourCFG.getBackgroundColour("COLOUR_ORDER_SELECTED_TEXT")
+    private val mAskQuantityZero = CFG.getBoolean("ask_quantity_zero")
 
     private val mColourPage = colourCFG.getBackgroundColour("COLOUR_GROUP_BACKGROUND")
     private val mColourSelectedPage = colourCFG.getBackgroundColour("SELECTED_GROUP_BACKGROUND")
@@ -241,7 +243,9 @@ class PageOrderActivity : BaseActivity(), ModalDialogYesNo.MessageBoxYesNoListen
 
     fun takeawayAskDelayMinutes()
     {
-       dialog ask delay minutes...
+        ModalDialogDelay.newInstance(0)
+        handleAction(EFinalizerAction.FINALIZE_NO_ACTION)
+        // AFter the dialog, onDelayFinalized() is called.
     }
 
     private fun stopInCorrectMode()
@@ -653,9 +657,25 @@ class PageOrderActivity : BaseActivity(), ModalDialogYesNo.MessageBoxYesNoListen
         dialog.show(supportFragmentManager, "MessageBoxYesNo")
     }
 
-    override fun onQuantitySelected(modalDialogQuantity: EModalDialogQuantity)
+    override fun onQuantitySelected(
+        quantity: Int, billingMode: Boolean, stop: Boolean)
     {
-        val action = mTransactionModel.handleFinishWokQuantity(mFromBilling, modalDialogQuantity)
+        // Modal dialog pressed a button.
+        val action = mTransactionModel.handleFinishWokQuantity(
+            quantity, billingMode, stop)
+        handleAction(action)
+    }
+
+    override fun onDelayFinalized(action: ModalDialogDelay.DelayAction, finalDelay: Int)
+    {
+        // We typed the delay in steps of 10 minutes.
+        if ( action == ModalDialogDelay.DelayAction.STOP)
+        {
+            handleAction(EFinalizerAction.FINALIZE_NO_ACTION)
+        }
+        val ts = CTimestamp()
+        ts.addMinutes(finalDelay)
+        val action = mTransactionModel.handleFinishTakeawayQuantity(ts)
         handleAction(action)
     }
 }
