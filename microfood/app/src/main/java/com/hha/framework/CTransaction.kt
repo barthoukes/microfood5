@@ -36,7 +36,7 @@ class CTransaction : Iterable<CSortedItem>,
 
     companion object
     {
-        private const val TAG = "CTransaction"
+        var tag = "CTransaction"
     }
 
     var global = Global.getInstance()
@@ -88,6 +88,7 @@ class CTransaction : Iterable<CSortedItem>,
         total: CMoney
     )
     {
+        Log.d(tag, "constructor ${transactionId} ${name} ${status} ${total}")
         mItems.addListener(this)
         mPayments.addListener(this)
 
@@ -121,6 +122,7 @@ class CTransaction : Iterable<CSortedItem>,
 
     constructor(transactionId: Int)
     {
+        Log.d(tag, "constructor $transactionId")
         selectTransactionId(transactionId)
 
         mItems.addListener(this)
@@ -135,6 +137,7 @@ class CTransaction : Iterable<CSortedItem>,
 
     constructor(source: TransactionData?)
     {
+        Log.d(tag, "constructor data")
         //m_items.addListener(this)
         mPayments.addListener(this)
         hasOrders = false
@@ -172,6 +175,8 @@ class CTransaction : Iterable<CSortedItem>,
 
     fun addOneToCursorPosition(): Boolean
     {
+        Log.d(tag, "addOneToCursorPosition")
+
         if (size == 0) return false
         var y = global.cursor.position
         var item = get(y) ?: get(--y) ?: return false
@@ -182,11 +187,13 @@ class CTransaction : Iterable<CSortedItem>,
 
     fun addPaymentListener(listener: PaymentsListener)
     {
+        Log.d(tag, "addPaymentListener")
         mPayments.addListener(listener)
     }
 
     fun addReturnMoney()
     {
+        Log.d(tag, "addReturnMoney")
         mPayments.addReturnMoney()
     }
 
@@ -196,6 +203,7 @@ class CTransaction : Iterable<CSortedItem>,
      */
     fun addToEmployee(payStatus: EPaymentStatus)
     {
+        Log.d(tag, "addToEmployee")
         val cash = getCashTotal(payStatus)
         val card = getCardTotal(payStatus)
         val returns = getReturnTotal(payStatus)
@@ -218,7 +226,7 @@ class CTransaction : Iterable<CSortedItem>,
     fun addTransactionItem(selectedMenuItem: CMenuItem, clusterId: Short): Boolean
     {
         Log.d(
-            "CTransaction", "add transaction item: " +
+            tag, "addTransactionItem " +
                "${selectedMenuItem.menuItemId} cursor ${global.cursor.position}"
         )
         return mItems.touchItem(selectedMenuItem, clusterId)
@@ -226,6 +234,8 @@ class CTransaction : Iterable<CSortedItem>,
 
     fun calculateTotalTransaction(): CMoney
     {
+        Log.d(tag, "calculateTotalTransaction")
+        val data = CTransactionData()
         val previousTotal = data.total.toMoney()
         data.subTotal = mItems.calculateTotalItems()
         data.total = data.subTotal - data.discount + data.tips
@@ -243,11 +253,13 @@ class CTransaction : Iterable<CSortedItem>,
 
     fun cancelNewPayments()
     {
+        Log.d(tag, "cancelNewPayments")
         mPayments.cancelNewPayments()
     }
 
     fun changeDeliverTime(timer: CTimestamp)
     {
+        Log.d(tag, "changeDeliverTime")
         val timeFrameIndex = mTimeFrame.getValidTimeFrame()
         mTimeFrame.changeDeliverTime(
             transactionId, global.deviceId, timeFrameIndex, timer)
@@ -255,6 +267,7 @@ class CTransaction : Iterable<CSortedItem>,
 
     fun cleanCurrentTransaction()
     {
+        Log.d(tag, "cleanCurrentTransaction")
         data.rfidKeyId = global.rfidKeyId
         val service = GrpcServiceFactory.createDailyTransactionService()
         service.updateTotal(data.transactionId)
@@ -264,18 +277,21 @@ class CTransaction : Iterable<CSortedItem>,
 
     fun cleanTransaction()
     {
+        Log.d(tag, "cleanTransaction")
         GrpcServiceFactory.createDailyTransactionService().cleanTransaction(transactionId)
         data.cleanTransaction()
     }
 
     fun closeTimeFrame()
     {
+        Log.d(tag, "closeTimeFrame")
         mTimeFrame.closeTimeFrame()
         mTimeFrame.previous()
     }
 
     fun closeTransaction(why: EClientOrdersType)
     {
+        Log.d(tag, "closeTransaction")
         val service = GrpcServiceFactory.createDailyTransactionService()
         //service.closeTransaction(transactionId, why.value)
         val paymentServices = GrpcServiceFactory.createDailyTransactionPaymentService()
@@ -343,11 +359,13 @@ class CTransaction : Iterable<CSortedItem>,
 
     fun cancelPayments(status: EPaymentStatus)
     {
+        Log.d(tag, "cancelPayments")
         mPayments.cancelPayments(status)
     }
 
     fun cancelPayments(index: Int, status: EPaymentStatus)
     {
+        Log.d(tag, "cancelPayments")
         mPayments.cancelPayments(index, status)
     }
 
@@ -359,6 +377,7 @@ class CTransaction : Iterable<CSortedItem>,
         newState: ECookingState
     )
     {
+        Log.d(tag, "endTimeFrame")
         val strTime = newTime.getDateTime()
         mTimeFrame.endTimeFrame(
             transactionId,
@@ -376,6 +395,7 @@ class CTransaction : Iterable<CSortedItem>,
 
     fun getBillPrinterQuantity(): Int
     {
+        Log.d(tag, "getBillPrinterQuantity")
         var quantity = userCFG.getValue("user_print_bills")
         if ( quantity == 0 && CFG.getBoolean("bill_always_print_delivery"))
         {
@@ -400,6 +420,7 @@ class CTransaction : Iterable<CSortedItem>,
 
     fun getEmployeeName(): String
     {
+        Log.d(tag, "getEmployeeName")
         val key = data.rfidKeyId
         return CPersonnel().getEmployeeName(key)
     }
@@ -411,6 +432,7 @@ class CTransaction : Iterable<CSortedItem>,
 
     fun emptyTransaction(reason: String)
     {
+        Log.d(tag, "emptyTransaction")
         // No printing of kitchen, just go to billing...
         val itemSum = itemSum()
         if (itemSum != 0)
@@ -478,6 +500,7 @@ class CTransaction : Iterable<CSortedItem>,
     fun getAllKitchenTotal(
         payStatus: EPaymentStatus, isWithStatiegeld: Boolean): CMoney
     {
+        Log.d(tag, "getAllKitchenTotal")
         return mItems.getAllKitchenTotal(payStatus, isWithStatiegeld);
     }
 
@@ -505,6 +528,7 @@ class CTransaction : Iterable<CSortedItem>,
 
     fun getMinutes(): Int
     {
+        Log.d(tag, "getMinutes")
         return try
         {
             val inputFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US)
@@ -629,6 +653,7 @@ class CTransaction : Iterable<CSortedItem>,
 
     fun minus1()
     {
+        Log.d(tag, "minus1")
         if (size == 0) return
         var y = global.cursor.position
         var item = get(y) ?: get(--y) ?: return
@@ -638,6 +663,7 @@ class CTransaction : Iterable<CSortedItem>,
 
     fun nextPortion()
     {
+        Log.d(tag, "nextPortion")
         if (size == 0) return
         var y = global.cursor.position
         var item = get(y) ?: get(--y) ?: return
@@ -648,6 +674,7 @@ class CTransaction : Iterable<CSortedItem>,
     // A single method to notify any external listeners that something has changed.
     private fun notifyListeners()
     {
+        Log.d(tag, "notifyListeners")
         for (listener in mListeners)
         {
             listener.onTransactionChanged(this)
@@ -703,6 +730,7 @@ class CTransaction : Iterable<CSortedItem>,
 
     public fun remove()
     {
+        Log.d(tag, "remove")
         if (size == 0) return
         var y = global.cursor.position
         var item = get(y) ?: get(--y) ?: return
@@ -734,13 +762,15 @@ class CTransaction : Iterable<CSortedItem>,
 
     fun setMessage(message: String)
     {
+        Log.d(tag, "setMessage")
         data.message = message
         val service = GrpcServiceFactory.createDailyTransactionService()
-        service.setMessage(global.transactionId, message)
+        service.setMessage(data.transactionId, message)
     }
 
     fun startNextTimeFrame(): CTimeFrame
     {
+        Log.d(tag, "startNextTimeFrame")
         Log.i("Ctransaction", "Start next TimeFrame")
         mTimeFrame = CTimeFrame(data.transactionId, this)
         return mTimeFrame
@@ -748,6 +778,7 @@ class CTransaction : Iterable<CSortedItem>,
 
     fun startTimeFrame()
     {
+        Log.d(tag, "startTimeFrame")
         val waiter = global.rfidKeyId
         if (mTimeFrame.time_frame_index.index == ETimeFrameIndex.TIME_FRAME_ALL &&
             data.transactionId >0)
@@ -761,6 +792,7 @@ class CTransaction : Iterable<CSortedItem>,
 
     fun selectTransactionId(transactionId: Int)
     {
+        Log.d(tag, "selectTransactionId $transactionId")
         data.transactionId = transactionId
         mPayments.setTransactionId()
         val service = GrpcServiceFactory.createDailyTransactionService()
@@ -771,6 +803,7 @@ class CTransaction : Iterable<CSortedItem>,
 
     fun setDiscount(discount: CMoney)
     {
+        Log.d(tag, "setDiscount")
         val high = data.subTotal.taxHigh.cents()
         val low = data.subTotal.taxLow.cents()
 
@@ -813,6 +846,7 @@ class CTransaction : Iterable<CSortedItem>,
     fun setDiscount(discountHigh: Int, discountLow: Int, discountTaxFree: Int,
                     factorHigh: Double, factorLow: Double)
     {
+        Log.d(tag, "setDiscount")
         val service = GrpcServiceFactory.createDailyTransactionService()
         val iter = service.setDiscount(
             data.transactionId, discountHigh, discountLow, discountTaxFree,
@@ -826,6 +860,7 @@ class CTransaction : Iterable<CSortedItem>,
 
     fun setTips(tips: CMoney)
     {
+        Log.d(tag, "setTips")
         data.tips.taxLow = CMoney(0)
         data.tips.taxHigh = CMoney(0)
         data.tips.taxFree = CMoney(0)
@@ -859,6 +894,7 @@ class CTransaction : Iterable<CSortedItem>,
 
     fun setStatus(status : EClientOrdersType)
     {
+        Log.d(tag, "setStatus")
         data.status = status
         val pType = status.toClientOrdersType()
         val service = GrpcServiceFactory.createDailyTransactionService()
@@ -882,6 +918,7 @@ class CTransaction : Iterable<CSortedItem>,
 
     fun updateTotal()
     {
+        Log.d(tag, "updateTotal")
         val service = GrpcServiceFactory.createDailyTransactionService()
         service.updateTotal(data.transactionId)
         selectTransactionId(data.transactionId)

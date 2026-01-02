@@ -1,9 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	xmlns:app="http://schemas.android.com/apk/res-auto"	android:layout_width="match_parent"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	android:layout_width="match_parent"
 	android:layout_height="match_parent"
+	xmlns:tools="http://schemas.android.com/tools"
 	android:background="@drawable/backrepeat"
 	android:fitsSystemWindows="true">
+
+	<ProgressBar
+		android:id="@+id/loading_spinner"
+		style="?android:attr/progressBarStyleLarge"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:indeterminate="true"
+		android:visibility="gone"
+		app:layout_constraintBottom_toTopOf="@id/guideline_price_top"
+		app:layout_constraintEnd_toStartOf="@id/guideline_left"
+		app:layout_constraintStart_toStartOf="parent"
+		app:layout_constraintTop_toBottomOf="@id/guideline_top"
+		tools:visibility="visible" />  <!-- 'tools:visibility' makes it visible in the preview -->
 
 	<androidx.constraintlayout.widget.Guideline
 		android:id="@+id/guideline_top"
@@ -13,7 +28,7 @@
 		app:layout_constraintGuide_percent="0.083" />
 
 	<androidx.constraintlayout.widget.Guideline
-		android:id="@+id/guideline_vertical_main"
+		android:id="@+id/guideline_left"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:orientation="vertical"
@@ -52,7 +67,7 @@
 		android:textSize="24sp"
 		android:textColor="@color/COLOUR_SELECTED_TEXT"
 		app:layout_constraintBottom_toTopOf="@id/guideline_top"
-		app:layout_constraintEnd_toStartOf="@id/guideline_vertical_main"
+		app:layout_constraintEnd_toStartOf="@id/guideline_left"
 		app:layout_constraintStart_toStartOf="parent"
 		app:layout_constraintTop_toTopOf="parent" />
 
@@ -67,7 +82,7 @@
 		android:textSize="24sp"
 		android:textColor="@color/COLOUR_TOTAL_TEXT"
 		app:layout_constraintBottom_toTopOf="@id/guideline_bottom_bar_top"
-		app:layout_constraintEnd_toStartOf="@id/guideline_vertical_main"
+		app:layout_constraintEnd_toStartOf="@id/guideline_left"
 		app:layout_constraintStart_toStartOf="parent"
 		app:layout_constraintTop_toBottomOf="@id/guideline_price_top" />
 
@@ -77,7 +92,7 @@
 		android:layout_height="0dp"
 		android:background="@color/COLOUR_ORDER_BACKGROUND_EMPTY"
 		app:layout_constraintBottom_toTopOf="@id/guideline_price_top"
-		app:layout_constraintEnd_toStartOf="@id/guideline_vertical_main"
+		app:layout_constraintEnd_toStartOf="@id/guideline_left"
 		app:layout_constraintStart_toStartOf="parent"
 		app:layout_constraintTop_toBottomOf="@id/guideline_top" />
 
@@ -95,7 +110,7 @@
 		app:layout_constraintTop_toTopOf="parent"
 		app:layout_constraintBottom_toBottomOf="@id/guideline_top"
 		app:layout_constraintEnd_toStartOf="@id/btn_back"
-		app:layout_constraintStart_toStartOf="@id/guideline_vertical_main" />
+		app:layout_constraintStart_toStartOf="@id/guideline_left" />
 
 	<ImageButton
 		android:id="@+id/btn_back"
@@ -119,7 +134,7 @@
 		android:orientation="horizontal"
 		app:layout_constraintBottom_toTopOf="@id/guideline_horizontal_menu"
 		app:layout_constraintEnd_toEndOf="parent"
-		app:layout_constraintStart_toEndOf="@id/guideline_vertical_main"
+		app:layout_constraintStart_toEndOf="@id/guideline_left"
 		app:layout_constraintTop_toBottomOf="@id/guideline_top" />
 
 	<androidx.recyclerview.widget.RecyclerView
@@ -134,7 +149,7 @@
 		android:padding="0dp"
 		app:layout_constraintBottom_toTopOf="@id/guideline_bottom_bar_top"
 		app:layout_constraintEnd_toEndOf="parent"
-		app:layout_constraintStart_toEndOf="@id/guideline_vertical_main"
+		app:layout_constraintStart_toEndOf="@id/guideline_left"
 		app:layout_constraintTop_toBottomOf="@id/guideline_horizontal_menu" />
 
 

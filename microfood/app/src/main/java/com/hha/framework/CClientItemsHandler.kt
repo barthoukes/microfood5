@@ -1,37 +1,27 @@
 package com.hha.framework
 
 import android.util.Log
-import com.hha.framework.CItem
 import com.hha.common.Payed
 import com.hha.grpc.GrpcServiceFactory
 import com.hha.resources.Global
 import com.hha.common.DeletedStatus
-import com.hha.service.DailyTransactionItemService
 import com.hha.types.EOrderLevel
 import com.hha.types.EItemSort
-import com.hha.types.EItemLocation
-import com.hha.resources.Configuration
 import com.hha.types.CMoney
 import com.hha.types.EDeletedStatus
 import com.hha.types.ESubItems
 import com.hha.types.ETimeFrameIndex
-import kotlin.collections.ArrayList
 
 class CclientItemsHandler {
-    private val m_pItemsDb = GrpcServiceFactory.createDailyTransactionItemService()
-    private var m_itemList = CItemList(emptyList<CItem>())
-    private var m_subItems: ESubItems = ESubItems.ORDER_ITEMS
-    private var global = Global.getInstance()
-    private var CFG = global.CFG
-    private var m_transactionId: Long = 0
-    private var m_timeFrameIndex : ETimeFrameIndex =
+    private val mItemsDb = GrpcServiceFactory.createDailyTransactionItemService()
+    private var mItemList = CItemList(emptyList<CItem>())
+    private var mSubItems: ESubItems = ESubItems.ORDER_ITEMS
+    private val global = Global.getInstance()
+    private var mTransactionId = -1
+    private val CFG = global.CFG
+    private var mTimeFrameIndex : ETimeFrameIndex =
         ETimeFrameIndex(ETimeFrameIndex.TIME_FRAME_LATEST)
-    private val m_freeItems = CFG.getOption("bill_print_free_items")
-    private val m_giftItems = CFG.getOption("bill_print_gift_items")
-    private val m_customerDisplayAlignName = CFG.getOption("customer_display_align_name")
-    private var m_pTransactionSequencer = CTransactionSequencer()
-    private var m_sortedItems = CSortedItemList() ///< List of items
-
+    private var mTransactionSequencer = CTransactionSequencer()
 
     companion object {
         private const val FIRST_SEQUENCE_ID = 1
@@ -40,20 +30,20 @@ class CclientItemsHandler {
     }
 
     init {
-        m_pTransactionSequencer = CTransactionSequencer()
+        mTransactionSequencer = CTransactionSequencer()
     }
 
-    fun selectTransaction(transactionId: Long, sort: EItemSort, timeFrameIndex: ETimeFrameIndex) {
-        m_timeFrameIndex = timeFrameIndex
-        m_transactionId = transactionId
-        val itemsDb = m_pItemsDb.selectTransactionId(
+    fun selectTransaction(transactionId: Int, sort: EItemSort, timeFrameIndex: ETimeFrameIndex) {
+        mTimeFrameIndex = timeFrameIndex
+        mTransactionId = transactionId
+        val itemsDb = mItemsDb.selectTransactionId(
             transactionId, EItemSort.toItemSort(sort), timeFrameIndex.index.toInt(), -1)
-        m_subItems = if (CFG.getOption("entry_show_deleted"))
+        mSubItems = if (CFG.getOption("entry_show_deleted"))
             ESubItems.ORDER_ITEMS_AND_DELETED_AND_EXTRA
         else ESubItems.ORDER_ITEMS_AND_EXTRA
 
         if (transactionId <= 0) {
-            m_itemList.clear()
+            mItemList.clear()
             return
         }
 
@@ -62,49 +52,49 @@ class CclientItemsHandler {
 
         val cil = CSortedItemList()
         if (itemsDb != null) {
-            m_itemList = cil.convert(sort, itemsDb)
+            mItemList = cil.convert(sort, itemsDb)
         }
-        m_pTransactionSequencer = cil.getTransactionSequencer()
+        mTransactionSequencer = cil.getTransactionSequencer()
     }
 
-    fun selectTimeFrame(transactionId: Long, timeFrameIndex: ETimeFrameIndex) {
-        m_timeFrameIndex = timeFrameIndex
-        m_transactionId = transactionId
+    fun selectTimeFrame(transactionId: Int, timeFrameIndex: ETimeFrameIndex) {
+        mTimeFrameIndex = timeFrameIndex
+        mTransactionId = transactionId
         // @TODO Implement selectTimeFrame
-        m_subItems = if (CFG.getOption("entry_show_deleted"))
+        mSubItems = if (CFG.getOption("entry_show_deleted"))
             ESubItems.ORDER_ITEMS_AND_DELETED_AND_EXTRA else ESubItems.ORDER_ITEMS_AND_EXTRA
 
         if (transactionId <= 0) {
-            m_itemList.clear()
+            mItemList.clear()
             return
         }
 
         val cil = CSortedItemList()
         // @TODO Implement cil.convert
-        m_pTransactionSequencer = cil.getTransactionSequencer()
+        mTransactionSequencer = cil.getTransactionSequencer()
     }
 
-    fun getNewSequence(): Int = m_pTransactionSequencer.getNewSequence()
+    fun getNewSequence(): Int = mTransactionSequencer.getNewSequence()
 
     fun push_back(item: CItem) {
-        m_itemList.add(item)
+        mItemList.add(item)
     }
 
     operator fun get(index: Int): CItem {
         val invalid = CItem()
-        if (index < 0 || index >= m_itemList.size) {
+        if (index < 0 || index >= mItemList.size) {
             return invalid
         }
-        return m_itemList[index]
+        return mItemList[index]
     }
 
     fun nextPortion(cursor: Int, timeFrameId: ETimeFrameIndex): Boolean {
-        if (cursor < 0 || cursor >= m_itemList.size) {
+        if (cursor < 0 || cursor >= mItemList.size) {
             Log.e("ERROR", "CclientItemsHandler::nextPortion  Cursor overflow!!")
             return false
         }
 
-        val item = m_itemList[cursor]
+        val item = mItemList[cursor]
         val nextPortion = if (item.parts == 2) 1 else 2
         var price = item.originalAmount
         val halfPrice = item.originalHalfAmount
@@ -118,8 +108,8 @@ class CclientItemsHandler {
         else EDeletedStatus.DELETE_PORTION_IMMEDIATE
         var unitPrice : CMoney = item.getUnitPrice()
 
-        m_pItemsDb.createItem(
-            item.menuItemId, m_transactionId, sequence,
+        mItemsDb.createItem(
+            item.menuItemId, mTransactionId, sequence,
             subSequence, subSubSequence, -quantity,
             EOrderLevel.toOrderLevel(item.level),
             item.group, item.page, item.parts,
@@ -151,8 +141,8 @@ class CclientItemsHandler {
         unitPrice = item.getUnitPrice()
         quantity = item.getQuantity()
 
-        m_pItemsDb.createItem(
-            item.menuItemId, m_transactionId, sequence,
+        mItemsDb.createItem(
+            item.menuItemId, mTransactionId, sequence,
             subSequence, subSubSequence, quantity,
             EOrderLevel.toOrderLevel(item.level),
             item.group, item.page, item.parts,

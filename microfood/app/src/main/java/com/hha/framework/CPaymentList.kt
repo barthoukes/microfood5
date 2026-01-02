@@ -78,7 +78,8 @@ class CPaymentList(transactionOperations: TransactionOperations)
         var service = GrpcServiceFactory.createDailyTransactionPaymentService()
 
         // Only close if all payments together are bigger or equal to the total.
-        val paymentDetailsList: PaymentDetailsList? = service.getTransactionPaymentTotals(global.transactionId, false);
+        val paymentDetailsList: PaymentDetailsList? = service.getTransactionPaymentTotals(
+            mTransaction.transactionId, false)
         val paymentTransaction = CPaymentTransaction(paymentDetailsList)
 
         val totalPayments: CMoney = paymentTransaction.getTotal(EPaymentStatus.PAY_STATUS_ANY);

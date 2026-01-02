@@ -159,7 +159,8 @@ class MainMenuActivity : BaseActivity() {
         //startActivity(Intent(this, TableOverviewActivity::class.java))
     }
 
-    private fun navigateToTakeaway() {
+    private fun navigateToTakeaway()
+    {
         // Todo new takeaway
         val useBag = true
         val user = Global.getInstance().rfidKeyId
@@ -170,13 +171,15 @@ class MainMenuActivity : BaseActivity() {
         if (transactionId <= 0) {
             return
         }
-        Global.getInstance().transactionId = transactionId
         CMenuCards.getInstance().loadTakeaway()
-        navigateToPageOrderActivity()
+        navigateToPageOrderActivity(transactionId)
     }
 
-    private fun navigateToPageOrderActivity() {
-        startActivity(Intent(this, PageOrderActivity::class.java).apply {
+    private fun navigateToPageOrderActivity(transactionId: Int)
+    {
+        val intent = Intent(this, PageOrderActivity::class.java)
+        intent.putExtra("TRANSACTION_ID", transactionId)
+        startActivity(intent.apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         })
        // finish()
@@ -209,6 +212,7 @@ class MainMenuActivity : BaseActivity() {
     }
 
     private fun confirmExit() {
+        finish()
 //        MaterialAlertDialogBuilder(this)
 //            .setTitle(R.string.confirm_exit_title)
 //            .setMessage(R.string.confirm_exit_message)
