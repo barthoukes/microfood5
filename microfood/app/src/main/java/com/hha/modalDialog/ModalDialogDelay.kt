@@ -3,7 +3,9 @@ package com.hha.modalDialog
 import android.app.Dialog
 import android.content.Context
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import androidx.fragment.app.DialogFragment
 import tech.hha.microfood.databinding.ModalDialogDelayBinding
 import java.util.Locale
@@ -15,15 +17,18 @@ import java.util.Locale
  * value provided upon creation. The dialog closes when the user presses "OK" or "Stop",
  * returning the final delay value and the action taken.
  */
-class ModalDialogDelay : DialogFragment() {
+class ModalDialogDelay : DialogFragment()
+{
 
    // 1. Listener interface to communicate the result back
-   interface ModalDialogDelayListener {
-      fun onDelayFinalized(action: Action, finalDelay: Int)
+   interface ModalDialogDelayListener
+   {
+      fun onDelayFinalized(action: DelayAction, finalDelay: Int)
    }
 
    // 2. Enum to define the possible closing actions
-   enum class Action {
+   enum class DelayAction
+   {
       OK, STOP
    }
 
@@ -39,16 +44,19 @@ class ModalDialogDelay : DialogFragment() {
 
    // --- Dialog Lifecycle and Setup ---
 
-   override fun onAttach(context: Context) {
+   override fun onAttach(context: Context)
+   {
       super.onAttach(context)
       // Attach the listener from the host (Activity or parent Fragment)
       listener = parentFragment as? ModalDialogDelayListener ?: activity as? ModalDialogDelayListener
-      if (listener == null) {
+      if (listener == null)
+      {
          throw ClassCastException("$context must implement ModalDialogDelayListener")
       }
    }
 
-   override fun onCreate(savedInstanceState: Bundle?) {
+   override fun onCreate(savedInstanceState: Bundle?)
+   {
       super.onCreate(savedInstanceState)
       // Retrieve the initial delay value from the arguments bundle
       currentDelay = arguments?.getInt(ARG_INITIAL_DELAY) ?: 0
@@ -57,18 +65,21 @@ class ModalDialogDelay : DialogFragment() {
    override fun onCreateView(
       inflater: LayoutInflater, container: ViewGroup?,
       savedInstanceState: Bundle?
-   ): View {
+   ): View
+   {
       _binding = ModalDialogDelayBinding.inflate(inflater, container, false)
       return binding.root
    }
 
-   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+   override fun onViewCreated(view: View, savedInstanceState: Bundle?)
+   {
       super.onViewCreated(view, savedInstanceState)
       setupClickListeners()
       updateDelayDisplay()
    }
 
-   private fun setupClickListeners() {
+   private fun setupClickListeners()
+   {
       // --- Delay Adjustment Buttons ---
       binding.buttonPlus10.setOnClickListener {
          currentDelay += 10
@@ -83,12 +94,12 @@ class ModalDialogDelay : DialogFragment() {
       // --- Final Action Buttons ---
       binding.buttonStop.setOnClickListener {
          // "Stop" is interpreted as setting the delay to 0
-         listener?.onDelayFinalized(Action.STOP, 0)
+         listener?.onDelayFinalized(DelayAction.STOP, 0)
          dismiss()
       }
 
       binding.buttonOk.setOnClickListener {
-         listener?.onDelayFinalized(Action.OK, currentDelay)
+         listener?.onDelayFinalized(DelayAction.OK, currentDelay)
          dismiss()
       }
    }
@@ -97,14 +108,17 @@ class ModalDialogDelay : DialogFragment() {
     * Updates the central TextView to display the current delay value.
     * Formats the text to show "+X min", "Y min", or "0 min".
     */
-   private fun updateDelayDisplay() {
+   private fun updateDelayDisplay()
+   {
       val sign = if (currentDelay > 0) "+" else ""
-      binding.delayTimeDisplay.text = String.format(Locale.getDefault(), "%s%d min", sign, currentDelay)
+      binding.delayTimeDisplay.text = String.format(
+         Locale.getDefault(), "%s%d min", sign, currentDelay)
    }
 
    // --- Boilerplate for DialogFragment ---
 
-   override fun onDestroyView() {
+   override fun onDestroyView()
+   {
       super.onDestroyView()
       _binding = null // Avoid memory leaks
    }
@@ -120,7 +134,7 @@ class ModalDialogDelay : DialogFragment() {
    // 3. Companion object with a newInstance pattern for safe argument passing
    companion object
    {
-      const val TAG = "ModalDialogDelay"
+      const val tag = "ModalDialogDelay"
       private const val ARG_INITIAL_DELAY = "initial_delay"
 
       /**

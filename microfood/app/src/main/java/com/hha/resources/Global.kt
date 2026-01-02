@@ -6,7 +6,7 @@ import com.hha.framework.CPersonnel
 import java.io.File
 
 import com.hha.framework.CTimeFrame
-import com.hha.framework.CTransaction
+// import com.hha.framework.CTransaction
 import com.hha.grpc.GrpcServiceFactory
 import com.hha.types.EAccess
 import com.hha.types.ETaal
@@ -28,7 +28,7 @@ class Global private constructor() {
     // ... existing properties
     var serverIp: String = "localhost"
     var pageOffset = 0
-    var transactionId = 0
+    //var transactionId = 0
     var selectedItem = 10
     var personnel  = CPersonnel()
     var taxPercentageLow = 6.0

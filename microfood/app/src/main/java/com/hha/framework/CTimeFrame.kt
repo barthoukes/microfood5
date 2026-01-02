@@ -10,6 +10,7 @@ import com.hha.common.CookingState
 import com.hha.resources.CTimestamp
 import com.hha.types.ECookingState
 import com.hha.types.ETimeFrameIndex
+import kotlinx.coroutines.runBlocking
 
 class CTimeFrame
 {
@@ -120,6 +121,13 @@ class CTimeFrame
          timeChanged, state)
    }
 
+   fun getLatestTimeFrameIndex(transactionId: Int)
+   {
+      val service = GrpcServiceFactory.createDailyTimeFrameService()
+      this.time_frame_index = ETimeFrameIndex(
+         service.getLatestTimeFrameIndex(transactionId))
+   }
+
    fun getTimeFrameIndex(): ETimeFrameIndex
    {
       return time_frame_index
@@ -132,9 +140,20 @@ class CTimeFrame
       return time_frame_index
    }
 
+   fun next()
+   {
+      time_frame_index = time_frame_index.next()
+   }
+
    fun previous()
    {
       time_frame_index = time_frame_index.previous()
+   }
+
+   fun startTimeFrame(deviceId: Short, transactionId: Int, personId: Short)
+   {
+      val service = GrpcServiceFactory.createDailyTimeFrameService()
+      service.startTimeFrame(deviceId, transactionId, personId, time_frame_index.index)
    }
 
    fun toInt(): Int

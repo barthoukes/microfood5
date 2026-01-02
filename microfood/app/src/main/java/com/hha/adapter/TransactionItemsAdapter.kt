@@ -49,6 +49,10 @@ class TransactionItemsAdapter(
         // We don't need to store it, as we can rely on the global,
         // but we MUST tell the RecyclerView to redraw itself completely.
         m_transaction = newTransaction
+
+        // 2. Tell the RecyclerView to completely redraw itself.
+        //    This is the line that makes the UI update.
+        notifyDataSetChanged()
     }
 
     fun setCursor(cursor: CCursor)

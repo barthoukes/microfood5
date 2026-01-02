@@ -170,7 +170,7 @@
         android:layout_marginEnd="8dp"
         android:layout_marginStart="4dp"
         android:layout_marginBottom="4dp"
-        android:background="@color/COLOUR_BUTTON_BACKGROUND"
+        android:background="@drawable/vloer11"
         android:orientation="horizontal"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintTop_toBottomOf="@id/guideline_horizontal_10"

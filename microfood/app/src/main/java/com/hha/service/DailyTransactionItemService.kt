@@ -86,11 +86,11 @@ class DailyTransactionItemService(channel: ManagedChannel) : BaseGrpcService<Dai
         }
     }
 
-    fun selectTransactionId(transactionId: Long, sorted: ItemSort,
+    fun selectTransactionId(transactionId: Int, sorted: ItemSort,
                             timeFrameId: Int, deviceId: Int): ItemList? = runBlocking {
         try {
             val request = SelectTransactionSort.newBuilder()
-                .setTransactionId(transactionId)
+                .setTransactionId(transactionId.toLong())
                 .setSorted(sorted)
                 .setTimeFrameId(timeFrameId)
                 .setDeviceId(deviceId)
@@ -103,7 +103,7 @@ class DailyTransactionItemService(channel: ManagedChannel) : BaseGrpcService<Dai
 
     fun createItem(
         itemId: Int,
-        transactionId: Long,
+        transactionId: Int,
         sequence: Int,
         subSequence: Int,
         subSubSequence: Int,
@@ -128,7 +128,7 @@ class DailyTransactionItemService(channel: ManagedChannel) : BaseGrpcService<Dai
         try {
         val request = CreateItemRequest.newBuilder()
             .setItemId(itemId.toLong())
-            .setTransactionId(transactionId)
+            .setTransactionId(transactionId.toLong())
             .setSequence(sequence)
             .setSubSequence(subSequence)
             .setSubSubSequence(subSubSequence)
@@ -385,7 +385,7 @@ class DailyTransactionItemService(channel: ManagedChannel) : BaseGrpcService<Dai
     }
 
     fun setTwinQuantity(
-        transactionId: Long,
+        transactionId: Int,
         sequence: Int,
         subQuantity: Int,
         subSubQuantity: Int,
@@ -394,7 +394,7 @@ class DailyTransactionItemService(channel: ManagedChannel) : BaseGrpcService<Dai
     ): Boolean = runBlocking {
         try {
             val request = SetTwinQuantityRequest.newBuilder()
-                .setTransactionId(transactionId)
+                .setTransactionId(transactionId.toLong())
                 .setSequence(sequence)
                 .setSubQuantity(subQuantity)
                 .setSubSubQuantity(subSubQuantity)
@@ -410,7 +410,7 @@ class DailyTransactionItemService(channel: ManagedChannel) : BaseGrpcService<Dai
 
     fun deleteTwinItem(
         twinItemId: Long,
-        transactionId: Long,
+        transactionId: Int,
         sequence: Int,
         subSequence: Int,
         subSubSequence: Int,
@@ -419,7 +419,7 @@ class DailyTransactionItemService(channel: ManagedChannel) : BaseGrpcService<Dai
         try {
             val request = DeleteTwinItemRequest.newBuilder()
                 .setTwinItemId(twinItemId)
-                .setTransactionId(transactionId)
+                .setTransactionId(transactionId.toLong())
                 .setSequence(sequence)
                 .setSubSequence(subSequence)
                 .setSubSubSequence(subSubSequence)

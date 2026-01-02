@@ -12,9 +12,10 @@ import com.hha.util.ColourUtils
 import com.hha.util.TimeArcDrawable
 import tech.hha.microfood.databinding.AdapterFloorTableBinding
 import tech.hha.microfood.R
+import androidx.core.graphics.toColorInt
 
 class FloorTablesAdapter(
-    private val onFloorTableSelected: (com.hha.framework.CFloorTable) -> Unit
+   private val onFloorTableSelected: (com.hha.framework.CFloorTable) -> Unit,
 ) : RecyclerView.Adapter<FloorTablesAdapter.FloorTableViewHolder>()
 {
     private var mTransactionName = "123"
@@ -22,7 +23,10 @@ class FloorTablesAdapter(
     private val global = Global.getInstance()
     private val CFG = global.CFG
     private val colourCFG = global.colourCFG
+    private val  mRedTime = CFG.getValue("red_time")
     private val colTableText = colourCFG.getTextColour("COLOUR_TABLE_TEXT")
+    private val colTableFloorPlanBorderTimeout = colourCFG.getTextColour("COLOUR_FLOORPLAN_BORDER_TIMEOUT")
+    private val colTableReserved = colourCFG.getTextColour("COLOUR_TABLE_RESERVED")
     private val colTableUnused = colourCFG.getTextColour("COLOUR_TABLE_UNUSED")
     private val colOpenTableFloorPlan = colourCFG.getTextColour("COLOUR_OPEN_TABLE_FLOORPLAN")
     private val colOpenTableFloorPlanSelected = colourCFG.getTextColour("COLOUR_OPEN_TABLE_FLOORPLAN_SELECTED")
@@ -80,7 +84,7 @@ class FloorTablesAdapter(
             // --- This is the new logic for updating the background ---
 
             // 4. Define your colors (example colors)
-            var colour = Color.parseColor("#FF6347") // A reddish color
+            //var colour = Color.parseColor("#FF6347") // A reddish color
 
             // 5. Calculate the progress angle
 //            val progressPercentage = if (mMaximumTimeTimer > 0) {
@@ -107,26 +111,28 @@ class FloorTablesAdapter(
                 /** Todo base on endtime */
                 val minutes: Int = floorTable.minutes + floorTable.days * 24 * 60
                 val corner: Float = minutes * 360.0f / maximumTimeTimer
-                timeArcDrawable.progressAngle = 60.0f
-
+                timeArcDrawable.progressAngle = corner
             }
-            if (floorTable.maxPersonCount == 0)
+            val colour = when
             {
-                colour = colTableUnused
-            } else if (floorTable.tableStatus == ETableStatus.TABLE_OK ||
-                floorTable.tableStatus == ETableStatus.TABLE_OPEN_PAID ||
-                floorTable.tableStatus == ETableStatus.TABLE_OPEN_NOT_PAID ||
+                floorTable.maxPersonCount == 0 -> colTableUnused
+                (floorTable.minutesLeft >= mRedTime &&
+                   floorTable.transactionId > 0) -> colTableFloorPlanBorderTimeout
+                floorTable.tableStatus == ETableStatus.TABLE_OK ||
+                   floorTable.tableStatus == ETableStatus.TABLE_OPEN_NOT_PAID ||
+                   floorTable.tableStatus == ETableStatus.TABLE_OPEN_PAID-> {
+                    if (floorTable.name != mTransactionName) colOpenTableFloorPlan
+                    else colOpenTableFloorPlanSelected
+                }
                 floorTable.tableStatus == ETableStatus.TABLE_BUSY ||
-                floorTable.tableStatus == ETableStatus.TABLE_EMPTY)
-            {
-                if (floorTable.name == mTransactionName) colour = colOpenTableFloorPlan
-                else colour = colOpenTableFloorPlanSelected
-            } else
-            {
-                if (floorTable.name == mTransactionName) colour = colTableFloorPlan
-                else colour = colTableFloorPlanSelected
+                   floorTable.tableStatus == ETableStatus.TABLE_EXIST -> {
+                    if (floorTable.name != mTransactionName) colTableFloorPlan
+                    else colTableFloorPlanSelected
+                }
+                floorTable.tableStatus == ETableStatus.TABLE_RESERVED -> colTableReserved
+                else -> "#FF6347".toColorInt() // A reddish color
             }
-            var col2 = ColourUtils.brighten(colour, 0.15f) or 0xff000000.toInt()
+            val col2 = ColourUtils.brighten(colour, 0.15f) or 0xff000000.toInt()
 
             // 6. Set the calculated colors and angle on the drawable
             timeArcDrawable.setColors(colour, col2)
@@ -160,7 +166,8 @@ class FloorTablesAdapter(
 
             // --- Your existing logic to set text and click listeners ---
             holder.binding.floorTableName.text = name
-            holder.binding.floorTableAmount.text = "€${floorTable.amount / 100.0f}" // Example formatting
+            if (floorTable.amount.empty()) holder.binding.floorTableAmount.text = ""
+            else holder.binding.floorTableAmount.text = floorTable.amount.toString()
 
             holder.binding.root.setOnClickListener {
                 onFloorTableSelected(floorTable)

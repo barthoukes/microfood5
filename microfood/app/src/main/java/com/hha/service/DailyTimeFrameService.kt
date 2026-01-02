@@ -94,12 +94,12 @@ class DailyTimeFrameService(channel: ManagedChannel) : BaseGrpcService<DailyTime
         }
     }
 
-    fun getLatestTimeFrameIndex(transactionId: Int): Int = runBlocking {
+    fun getLatestTimeFrameIndex(transactionId: Int): Short = runBlocking {
         try {
             val request = TransactionId.newBuilder()
                 .setTransactionId(transactionId)
                 .build()
-            stub.getLatestTimeFrameIndex(request).timeFrameIndex
+            stub.getLatestTimeFrameIndex(request).timeFrameIndex.toShort()
         } catch (e: Exception) {
             0
         }
@@ -166,8 +166,16 @@ class DailyTimeFrameService(channel: ManagedChannel) : BaseGrpcService<DailyTime
         }
     }
 
-    fun startTimeFrame(request: StartTimeFrameRequest): Boolean = runBlocking {
+    fun startTimeFrame(
+        deviceId: Short, transactionId: Int, personId: Short,
+        timeFrameIndex: Short): Boolean = runBlocking {
         try {
+            val request = StartTimeFrameRequest.newBuilder()
+                .setTransactionId(transactionId)
+                .setTimeFrameIndex(timeFrameIndex.toInt())
+                .setPersonId(personId.toInt())
+                .setDeviceId(deviceId.toInt())
+                .build()
             stub.startTimeFrame(request)
             true
         } catch (e: Exception) {

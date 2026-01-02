@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.Toast
+import androidx.activity.viewModels
 
 import androidx.lifecycle.ViewModelProvider
 import androidx.fragment.app.DialogFragment
@@ -21,7 +22,6 @@ import com.hha.modalDialog.ModalDialogPayment
 import com.hha.modalDialog.ModalDialogTextInput
 import com.hha.model.BillDisplayLine
 import com.hha.model.TransactionModel
-import com.hha.model.TransactionModelFactory
 import com.hha.resources.Configuration
 import com.hha.resources.Global
 import com.hha.types.ETaal
@@ -29,9 +29,11 @@ import com.hha.types.CMoney
 import com.hha.types.EPaymentMethod
 import com.hha.modalDialog.ModalDialogYesNo
 import com.hha.types.EInitAction
+import com.hha.types.EInitMode
 import com.hha.types.EPaymentStatus
 import com.hha.types.EPrintBillAction
 import tech.hha.microfood.databinding.BillOrderActivityBinding
+import kotlin.getValue
 
 class BillOrderActivity : BaseActivity(),
     ModalDialogTextInput.OnTextEnteredListener,
@@ -45,7 +47,8 @@ class BillOrderActivity : BaseActivity(),
     private lateinit var mBinding: BillOrderActivityBinding
     private lateinit var mBillItemsAdapter: BillItemsAdapter
     private lateinit var mPaymentsAdapter: PaymentsAdapter
-    private lateinit var mTransactionModel: TransactionModel
+    private val mTransactionModel: TransactionModel by viewModels()
+
     private var mSlipPrints = 1
 
     private var mOffer = false
@@ -67,6 +70,7 @@ class BillOrderActivity : BaseActivity(),
 
     private val CLEAN_TABLE = 123
     private val CONFIRM_BILL = 456
+    private val tag = "BillOrderActivity"
 
     fun onInit()
     {
@@ -91,7 +95,7 @@ class BillOrderActivity : BaseActivity(),
 
     fun askTransactionActivity()
     {
-        Log.i("BillOrderActivity", "Bill processed. Navigating to AskTransactionActivity.")
+        Log.i(tag, "Bill processed. Navigating to AskTransactionActivity.")
 
         // Create an Intent to start the AskTransactionActivity
         val intent = Intent(this, AskTransactionActivity::class.java)
@@ -244,7 +248,8 @@ class BillOrderActivity : BaseActivity(),
     fun createBillingItemsAdapter()
     {
         // --- FIX 3a: Assign to the class property 'm_billItemsAdapter' ---
-        mBillItemsAdapter = BillItemsAdapter() { selectedBillItem ->
+        mBillItemsAdapter = BillItemsAdapter(
+            mTransactionModel.mCursor) { selectedBillItem ->
             handleBillItemSelection(selectedBillItem)
         }.apply {
             mBinding.layoutBillingItems.setItemViewCacheSize(18)
@@ -366,7 +371,7 @@ class BillOrderActivity : BaseActivity(),
     {
         // Tell the ViewModel to switch its mode back to ordering.
         // This is important for when PageOrderActivity resumes.
-        mTransactionModel.setMode(TransactionModel.InitMode.VIEW_PAGE_ORDER)
+        mTransactionModel.setMode(EInitMode.VIEW_PAGE_ORDER)
 
         // Finish the current activity (BillOrderActivity).
         // This will automatically return the user to the previous activity (PageOrderActivity).
@@ -379,13 +384,20 @@ class BillOrderActivity : BaseActivity(),
         mBinding = BillOrderActivityBinding.inflate(layoutInflater)
         setContentView(mBinding.root)
 
-        mTransactionModel = ViewModelProvider(this, TransactionModelFactory)
-            .get(TransactionModel::class.java)
+//        mTransactionModel = ViewModelProvider(this, TransactionModelFactory)
+//            .get(TransactionModel::class.java)
 
         setupRecyclerView()
         initializeViews()
 
-
+        val transactionId = intent.getIntExtra("TRANSACTION_ID", -1) // Use a constant for the key
+        // 2. Check if the ID is valid
+        if (transactionId == -1) {
+            Log.e(tag, "No TRANSACTION_ID found in Intent. Finishing activity.")
+            Toast.makeText(this, "Error: Transaction not found", Toast.LENGTH_LONG).show()
+            finish() // Exit the activity if no ID is provided
+            return
+        }
         mTransactionModel.activeTransaction.observe(this) { transaction ->
             // This block will run automatically when the activity starts
             // and any time the transaction data changes.
@@ -405,7 +417,7 @@ class BillOrderActivity : BaseActivity(),
             mPaymentsAdapter.submitList(paymentLines)
         }
 
-        mTransactionModel.initializeTransaction(TransactionModel.InitMode.VIEW_BILLING)
+        mTransactionModel.initializeTransaction(EInitMode.VIEW_BILLING)
     }
 
     // This is the new method you must implement
@@ -576,7 +588,7 @@ class BillOrderActivity : BaseActivity(),
         {
             return
         }
-        Log.i("model", "onPrintBill  transaction=${currentTransaction.transactionId}")
+        Log.i(tag, "onPrintBill  transaction=${currentTransaction.transactionId}")
         isPrintBillAllowedAndConfirmed(currentTransaction, offer) // 675
     }
 
@@ -603,8 +615,7 @@ class BillOrderActivity : BaseActivity(),
 
         val transactionId = currentTransaction.transactionId
         Log.i(
-            "MODEL",
-            "CbillingDialog::onPrintBill not valid = $transactionId!!"
+            tag, "CbillingDialog::onPrintBill not valid = $transactionId!!"
         )
         currentTransaction.cancelPayments(EPaymentStatus.PAY_STATUS_UNPAID)
         askTransactionActivity()
@@ -643,12 +654,12 @@ class BillOrderActivity : BaseActivity(),
             // Table has different waiter !
             val txt = Translation.get(Translation.TextId.TEXT_EMPLOYEE)
             Toast.makeText(this@BillOrderActivity, txt, Toast.LENGTH_LONG).show()
-            retVal = false;
+            retVal = false
         }
 //            else if (CFG("restaurant_map"))
 //        {
-//            long transactionId = m_transactionItemModel->getTransactionId();
-//            CsqlFloorTableIterator(-1).setTransactionTableAvailable(transactionId);
+//            long transactionId = m_transactionItemModel->getTransactionId()
+//            CsqlFloorTableIterator(-1).setTransactionTableAvailable(transactionId)
 //        }
 
         if (!retVal)
