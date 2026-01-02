@@ -67,14 +67,10 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
    // 1. SINGLE SOURCE OF TRUTH
    private val _transaction = MutableLiveData<CTransaction?>()
    val activeTransaction: LiveData<CTransaction?> = _transaction
-   private val _shortTransactionList = MutableLiveData<List<CShortTransaction>>()
 
    // This line will now be correct and have no errors
    private val _navigateToPageOrder = MutableLiveData<MyEvent<Int>>()
    val navigateToPageOrder: LiveData<MyEvent<Int>> = _navigateToPageOrder
-
-   // The public LiveData that is exposed to the UI for observation. It's read-only from the outside.
-   val shortTransactionList: LiveData<List<CShortTransaction>> = _shortTransactionList
 
    // LiveData to signal when data is being loaded, allowing the UI to show a progress indicator.
    private val _isLoading = MutableLiveData<Boolean>()
@@ -108,8 +104,6 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
    var mAllowNewItem = false
    private val mMinutes = 0
    private var mAutomaticPayments = false // @todo Inspect
-   private var mBill = false
-   private var mShowAllTransactions = false
    private val mFloorplanBillFirst = CFG.getBoolean("floorplan_bill_first")
    private var mIsUpdating = false // Add this flag to your class
 
@@ -1135,45 +1129,6 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
       }
    }
 
-   fun listOpen()
-   {
-      Log.i(tag, "listOpen")
-      // Launch a coroutine in the ViewModel's lifecycle scope.
-      // This ensures the task is cancelled if the ViewModel is destroyed.
-      viewModelScope.launch {
-         // 1. Set loading state to TRUE on the main thread before starting the background task.
-         _isLoading.value = true
-         val list = CShortTransactionList()
-
-         // 2. Switch to a background thread (Dispatchers.IO) for the blocking call.
-         val resultList = withContext(Dispatchers.IO) {
-            list.loadOpenTransactions() // This now runs safely in the background
-            list.getList() // Return the result from the background task
-         }
-
-         // 3. Back on the main thread, post the result and set loading state to FALSE.
-         _shortTransactionList.value = resultList
-         _isLoading.value = false
-         Log.i(tag, "listOpen loaded")
-      }
-   }
-
-   fun listAll(sortOnTime: Boolean = true)
-   {
-      Log.i(tag, "listAll")
-      viewModelScope.launch {
-         _isLoading.value = true
-         val resultList = withContext(Dispatchers.IO) {
-            val list = CShortTransactionList()
-            list.loadAllTransactions(sortOnTime)
-            list.getList()
-         }
-         _shortTransactionList.value = resultList
-         _isLoading.value = false
-         Log.i(tag, "listAll loaded")
-      }
-   }
-
    fun needToAskCancelReason(): Boolean
    {
       Log.i(tag, "needToAskCancelReason")
@@ -1657,18 +1612,6 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
    {
       // When changing the language
       prepareBillDisplayLines()
-   }
-
-   fun refreshAllShortTransactions()
-   {
-      Log.i(tag, "refreshAllShortTransactions")
-      if (mBill || mShowAllTransactions)
-      {
-         listAll(true)
-      } else
-      {
-         listOpen()
-      }
    }
 
    fun resetChanges()

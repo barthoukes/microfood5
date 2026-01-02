@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import androidx.activity.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import com.hha.adapter.ShortTransactionListAdapter
@@ -17,8 +18,8 @@ import com.hha.resources.Global
 import tech.hha.microfood.databinding.AskTransactionActivityBinding
 import com.hha.dialog.Translation.TextId
 import com.hha.floor.FloorTablesAdapter
+import com.hha.model.ShortTransactionsModel
 import com.hha.model.TransactionModel
-import com.hha.model.TransactionModelFactory
 import tech.hha.microfood.R
 
 
@@ -30,9 +31,12 @@ class AskTransactionActivity : BaseActivity()
 
     private lateinit var mShortTransactionListAdapter: ShortTransactionListAdapter
     private lateinit var mFloorTablesAdapter: FloorTablesAdapter
-    private lateinit var mFloorTableModel: FloorTableModel
-    private lateinit var mTransaction: CTransaction
-    private lateinit var mTransactionModel: TransactionModel
+    private val mFloorTableModel: FloorTableModel by viewModels()
+    //private lateinit var mTransaction: CTransaction
+
+    private val mTransactionModel: TransactionModel by viewModels()
+    private val mShortTransactionsModel: ShortTransactionsModel by viewModels()
+
     private var mBill = false
     private val tag = "AskTransaction"
 
@@ -43,10 +47,13 @@ class AskTransactionActivity : BaseActivity()
         mBinding = AskTransactionActivityBinding.inflate(layoutInflater)
         setContentView(mBinding.root)
 
-        mTransactionModel = ViewModelProvider(this, TransactionModelFactory)
-            .get(TransactionModel::class.java)
-        //mTransactionModel = ViewModelProvider(this).get(TransactionModel::class.java)
-        mFloorTableModel = ViewModelProvider(this).get(FloorTableModel::class.java)
+//        mTransactionModel = ViewModelProvider(this, TransactionModelFactory)
+//            .get(TransactionModel::class.java)
+//        // Initialize the variable before you use it
+//        mShortTransactionsModel = ShortTransactionsModel()
+//
+//        //mTransactionModel = ViewModelProvider(this).get(TransactionModel::class.java)
+//        mFloorTableModel = ViewModelProvider(this).get(FloorTableModel::class.java)
 
         setupRecyclerView()
         setupNavigationPageOrderObserver()
@@ -75,15 +82,15 @@ class AskTransactionActivity : BaseActivity()
         // 3. --- THIS IS THE MISSING PIECE ---
         //    Observe the LiveData from the ViewModel. This block of code will
         //    automatically run whenever the transaction list changes.
-        mTransactionModel.shortTransactionList
+        mShortTransactionsModel.shortTransactionList
             .observe(this)
-            { transactions ->
+            { shortTransactions ->
                 // The 'transactions' parameter is the new List<CShortTransaction>
                 // We need a way to give this new list to the adapter.
                 // Let's assume your adapter has a method called `submitList`.
-                if (transactions != null)
+                if (shortTransactions != null)
                 {
-                    mShortTransactionListAdapter.submitList(transactions)
+                    mShortTransactionListAdapter.submitList(shortTransactions)
                 }
             }
 
@@ -253,7 +260,7 @@ class AskTransactionActivity : BaseActivity()
     {
         Log.i(tag, "onResume")
         super.onResume()
-        mTransactionModel.refreshAllShortTransactions()
+        mShortTransactionsModel.refreshAllShortTransactions()
         mFloorTableModel.refreshAllData()
         //refreshAllData()
     }
@@ -269,7 +276,7 @@ class AskTransactionActivity : BaseActivity()
     {
         Log.i(tag, "refreshShortTransaction")
         mShortTransactionListAdapter.notifyDataSetChanged()
-        mTransactionModel.refreshAllShortTransactions()
+        mShortTransactionsModel.refreshAllShortTransactions()
     }
 
     private fun refreshFloorPlan()

@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.Toast
+import androidx.activity.viewModels
 
 import androidx.lifecycle.ViewModelProvider
 import androidx.fragment.app.DialogFragment
@@ -21,7 +22,6 @@ import com.hha.modalDialog.ModalDialogPayment
 import com.hha.modalDialog.ModalDialogTextInput
 import com.hha.model.BillDisplayLine
 import com.hha.model.TransactionModel
-import com.hha.model.TransactionModelFactory
 import com.hha.resources.Configuration
 import com.hha.resources.Global
 import com.hha.types.ETaal
@@ -33,6 +33,7 @@ import com.hha.types.EInitMode
 import com.hha.types.EPaymentStatus
 import com.hha.types.EPrintBillAction
 import tech.hha.microfood.databinding.BillOrderActivityBinding
+import kotlin.getValue
 
 class BillOrderActivity : BaseActivity(),
     ModalDialogTextInput.OnTextEnteredListener,
@@ -46,7 +47,8 @@ class BillOrderActivity : BaseActivity(),
     private lateinit var mBinding: BillOrderActivityBinding
     private lateinit var mBillItemsAdapter: BillItemsAdapter
     private lateinit var mPaymentsAdapter: PaymentsAdapter
-    private lateinit var mTransactionModel: TransactionModel
+    private val mTransactionModel: TransactionModel by viewModels()
+
     private var mSlipPrints = 1
 
     private var mOffer = false
@@ -382,8 +384,8 @@ class BillOrderActivity : BaseActivity(),
         mBinding = BillOrderActivityBinding.inflate(layoutInflater)
         setContentView(mBinding.root)
 
-        mTransactionModel = ViewModelProvider(this, TransactionModelFactory)
-            .get(TransactionModel::class.java)
+//        mTransactionModel = ViewModelProvider(this, TransactionModelFactory)
+//            .get(TransactionModel::class.java)
 
         setupRecyclerView()
         initializeViews()

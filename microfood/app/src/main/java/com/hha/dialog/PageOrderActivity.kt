@@ -29,6 +29,7 @@ import com.hha.resources.Configuration
 import com.hha.resources.Global
 import MenuItemsAdapter
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModelProvider
@@ -36,13 +37,13 @@ import com.hha.dialog.Translation.str
 import com.hha.modalDialog.ModalDialogDelay
 import com.hha.modalDialog.ModalDialogQuantities
 import com.hha.model.TransactionModel
-import com.hha.model.TransactionModelFactory
 import com.hha.resources.CTimestamp
 import com.hha.types.CMoney
 import com.hha.types.EFinalizerAction
 import com.hha.types.EInitMode
 
 import tech.hha.microfood.databinding.PageOrderActivityBinding
+import kotlin.getValue
 
 class PageOrderActivity : BaseActivity(), ModalDialogYesNo.MessageBoxYesNoListener,
     ModalDialogCancelReason.ModalDialogCancelReasonListener,
@@ -87,7 +88,7 @@ class PageOrderActivity : BaseActivity(), ModalDialogYesNo.MessageBoxYesNoListen
     private lateinit var mMenuPagesAdapter: MenuPagesAdapter
     private lateinit var mMenuItemsAdapter: MenuItemsAdapter
     private lateinit var mTransactionItemsAdapter: TransactionItemsAdapter
-    private lateinit var mTransactionModel: TransactionModel
+    private val mTransactionModel: TransactionModel by viewModels()
     val mClusterId: Short = -1
     var mFromBilling: Boolean = false
 
@@ -97,8 +98,8 @@ class PageOrderActivity : BaseActivity(), ModalDialogYesNo.MessageBoxYesNoListen
         mBinding = PageOrderActivityBinding.inflate(layoutInflater)
         setContentView(mBinding.root)
 
-        mTransactionModel = ViewModelProvider(this, TransactionModelFactory)
-            .get(TransactionModel::class.java)
+//        mTransactionModel = ViewModelProvider(this, TransactionModelFactory)
+//            .get(TransactionModel::class.java)
 
         setupRecyclerViews()
 

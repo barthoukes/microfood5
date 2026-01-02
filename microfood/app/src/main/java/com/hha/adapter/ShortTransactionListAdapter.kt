@@ -34,9 +34,9 @@ class ShortTransactionListAdapter(
     * Updates the list of transactions in the adapter and notifies the
     * RecyclerView that the data has changed.
     */
-    fun submitList(newTransactions: List<CShortTransaction>)
+    fun submitList(shortTransactions: List<CShortTransaction>)
     {
-        clientList = newTransactions
+        clientList = shortTransactions
         // This tells the RecyclerView to completely redraw itself with the new data.
         notifyDataSetChanged()
     }
