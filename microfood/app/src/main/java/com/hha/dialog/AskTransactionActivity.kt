@@ -4,20 +4,18 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.Toast
 import androidx.activity.viewModels
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import com.hha.adapter.ShortTransactionListAdapter
 import com.hha.framework.CFloorTable
-import com.hha.framework.CMenuCards
 import com.hha.model.FloorTableModel
-import com.hha.framework.COpenClientsHandler.createNewTakeawayTransaction
 import com.hha.framework.CShortTransaction
-import com.hha.framework.CTransaction
 import com.hha.resources.Global
 import tech.hha.microfood.databinding.AskTransactionActivityBinding
 import com.hha.dialog.Translation.TextId
 import com.hha.floor.FloorTablesAdapter
+import com.hha.framework.CFloorTables
 import com.hha.model.ShortTransactionsModel
 import com.hha.model.TransactionModel
 import tech.hha.microfood.R
@@ -29,109 +27,25 @@ class AskTransactionActivity : BaseActivity()
     private val CFG = global.CFG
     private lateinit var mBinding: AskTransactionActivityBinding
 
-    private lateinit var mShortTransactionListAdapter: ShortTransactionListAdapter
-    private lateinit var mFloorTablesAdapter: FloorTablesAdapter
+    private val mShortTransactionListAdapter: ShortTransactionListAdapter = ShortTransactionListAdapter { selectedShortTransaction ->
+        onShortTransactionSelected(selectedShortTransaction)
+    }
+    private val mFloorTablesAdapter: FloorTablesAdapter = FloorTablesAdapter { selectedFloorTable ->
+        onFloorTableSelected(selectedFloorTable)
+    }
+
     private val mFloorTableModel: FloorTableModel by viewModels()
     //private lateinit var mTransaction: CTransaction
 
     private val mTransactionModel: TransactionModel by viewModels()
     private val mShortTransactionsModel: ShortTransactionsModel by viewModels()
-
+    private var isShowingFloorPlanOnPhone = true
     private var mBill = false
+    private var isTablet: Boolean = false
     private val tag = "AskTransaction"
 
-    override fun onCreate(savedInstanceState: Bundle?)
+    fun createGridLayoutFloorTables()
     {
-        Log.i(tag, "onCreate")
-        super.onCreate(savedInstanceState)
-        mBinding = AskTransactionActivityBinding.inflate(layoutInflater)
-        setContentView(mBinding.root)
-
-//        mTransactionModel = ViewModelProvider(this, TransactionModelFactory)
-//            .get(TransactionModel::class.java)
-//        // Initialize the variable before you use it
-//        mShortTransactionsModel = ShortTransactionsModel()
-//
-//        //mTransactionModel = ViewModelProvider(this).get(TransactionModel::class.java)
-//        mFloorTableModel = ViewModelProvider(this).get(FloorTableModel::class.java)
-
-        setupRecyclerView()
-        setupNavigationPageOrderObserver()
-
-        mTransactionModel.activeTransaction
-            .observe(this) { transaction ->
-                if (transaction != null)
-                {
-                    val intent = if (mBill)
-                    {
-                        Intent(this, BillOrderActivity::class.java)
-                    } else
-                    {
-                        Intent(this, PageOrderActivity::class.java)
-                    }
-                    intent.putExtra("TRANSACTION_ID", transaction.transactionId)
-
-                    startActivity(intent)
-
-                    // IMPORTANT: Tell the ViewModel that navigation is complete
-                    // to prevent re-navigating if the screen rotates.
-                    mTransactionModel.onNavigationComplete()
-                }
-            }
-
-        // 3. --- THIS IS THE MISSING PIECE ---
-        //    Observe the LiveData from the ViewModel. This block of code will
-        //    automatically run whenever the transaction list changes.
-        mShortTransactionsModel.shortTransactionList
-            .observe(this)
-            { shortTransactions ->
-                // The 'transactions' parameter is the new List<CShortTransaction>
-                // We need a way to give this new list to the adapter.
-                // Let's assume your adapter has a method called `submitList`.
-                if (shortTransactions != null)
-                {
-                    mShortTransactionListAdapter.submitList(shortTransactions)
-                }
-            }
-
-        mFloorTableModel.floorTables.observe(this) { floorTables ->
-            if (floorTables != null)
-            {
-                mFloorTablesAdapter.submitList(floorTables)
-            }
-        }
-    }
-
-    private fun setupNavigationPageOrderObserver() {
-        // 1. OBSERVE THE CORRECT EVENT: navigateToPageOrder
-        mTransactionModel.navigateToPageOrder.observe(this) { event ->
-            // 2. Use the MyEvent wrapper to handle this as a one-time event
-            event.getContentIfNotHandled()?.let { transactionId ->
-                // This block now runs ONLY when a NEW transaction is created
-                Log.i(tag, "Navigating via navigateToPageOrder event with NEW ID: $transactionId")
-
-                val intent = Intent(this, PageOrderActivity::class.java)
-
-                // 3. Add the new transactionId to the intent
-                intent.putExtra("TRANSACTION_ID", transactionId)
-
-                startActivity(intent)
-            }
-        }
-    }
-
-    private fun setupRecyclerView()
-    {
-        createGridLayoutFloorTables()
-        createFloorTablesAdapter()
-
-        createGridLayoutShortTransactionList()
-        createShortTransactionsAdapter()
-    }
-
-// ... inside AskTransactionActivity class
-
-    fun createGridLayoutFloorTables() {
         // 1. Get the screen width in pixels
         Log.i(tag, "createGridLayoutFloorTables")
         val displayMetrics = resources.displayMetrics
@@ -153,18 +67,6 @@ class AskTransactionActivity : BaseActivity()
         mBinding.layoutFloorTables.layoutManager = gridLayoutFloorTables
     }
 
-    fun createFloorTablesAdapter()
-    {
-        Log.i(tag, "createFloorTablesAdapter")
-        // 2. Initialize adapter
-        mFloorTablesAdapter = FloorTablesAdapter() { selectedFloorTable ->
-            onFloorTableSelected(selectedFloorTable)
-        }.apply {
-            mBinding.layoutFloorTables.setItemViewCacheSize(64)
-        }
-        mBinding.layoutFloorTables.adapter = mFloorTablesAdapter
-    }
-
     fun createGridLayoutShortTransactionList()
     {
         Log.i(tag, "createGridLayoutShortTransactionList")
@@ -177,35 +79,55 @@ class AskTransactionActivity : BaseActivity()
         mBinding.layoutShortTransactionList.layoutManager = gridLayoutShortTransactions
     }
 
-    fun createShortTransactionsAdapter()
+    override fun onCreate(savedInstanceState: Bundle?)
     {
-        Log.i(tag, "createShortTransactionsAdapter")
-        // 2. Initialize adapter
-        mShortTransactionListAdapter = ShortTransactionListAdapter() { selectedShortTransaction ->
-            onShortTransactionSelected(selectedShortTransaction)
-        }.apply {
-            mBinding.layoutShortTransactionList.setItemViewCacheSize(28)
-        }
-        mBinding.layoutShortTransactionList.adapter = mShortTransactionListAdapter
+        Log.i(tag, "onCreate")
+        super.onCreate(savedInstanceState)
+        isTablet = resources.getBoolean(R.bool.is_tablet)
+        mBinding = AskTransactionActivityBinding.inflate(layoutInflater)
+        setContentView(mBinding.root)
+
+        setupRecyclerView()
+        setupNavigationPageOrderObserver()
+
+        // Setup observers BEFORE refreshing data
+        setupObservers()
+
+        // Initialize with empty adapters
+        mShortTransactionListAdapter.submitList(emptyList())
+        mFloorTablesAdapter.submitList(CFloorTables())
+
+        updateViewVisibility()
     }
+
+    override fun onDestroy()
+    {
+        Log.i(tag, "onDestroy")
+        super.onDestroy()
+        // Optional: Clear cache if needed
+        // mFloorTableModel.clearCache()
+    }
+
 
     fun onShortTransactionSelected(selectedTransaction: CShortTransaction)
     {
-        Log.i(tag, "onShortTransactionSelected ${selectedTransaction.name} ${selectedTransaction
-            .transactionId}")
+        Log.i(
+            tag, "onShortTransactionSelected ${selectedTransaction.name} ${
+                selectedTransaction
+                    .transactionId
+            }"
+        )
 
         if (mFloorTablesAdapter.getSelectedTransactionName() != selectedTransaction.name)
         {
             mFloorTablesAdapter.selectTransactionName(selectedTransaction.name)
             mShortTransactionListAdapter.selectTransactionId(selectedTransaction.transactionId)
-        }
-        else if (mBill)
+        } else if (mBill)
         {
             // Change to billing activity for this transaction.
             mTransactionModel.selectTransaction(selectedTransaction.transactionId)
 
-        }
-        else
+        } else
         {
             // Same name chosen,
             mShortTransactionListAdapter.selectTransactionId(selectedTransaction.transactionId)
@@ -218,8 +140,10 @@ class AskTransactionActivity : BaseActivity()
      */
     fun onFloorTableSelected(selectedFloorTable: CFloorTable)
     {
-        Log.i(tag, "onFloorTableSelected: ${selectedFloorTable.name}, current selected: " +
-           "${mFloorTablesAdapter.getSelectedTransactionName()}")
+        Log.i(
+            tag, "onFloorTableSelected: ${selectedFloorTable.name}, current selected: " +
+               "${mFloorTablesAdapter.getSelectedTransactionName()}"
+        )
 
         // First click: Just select the item visually in both lists.
         if (mFloorTablesAdapter.getSelectedTransactionName() != selectedFloorTable.name)
@@ -234,17 +158,21 @@ class AskTransactionActivity : BaseActivity()
             // Change to billing activity for this transaction.
             mTransactionModel.selectTransaction(selectedFloorTable.transactionId)
 
-        }
-        else
+        } else
         {
-            Log.i(tag, "onFloorTableSelected: Second click: Creating NEW transaction for table: ${selectedFloorTable
-                .name}")
+            Log.i(
+                tag, "onFloorTableSelected: Second click: Creating NEW transaction for table: ${
+                    selectedFloorTable
+                        .name
+                }"
+            )
             // Tell the ViewModel to create a new transaction for this table.
             // The observer for 'mFloorTableModel.navigateToTransaction' will handle navigation.
             val minutes = CFG.getValue("maximum_time")
             mTransactionModel.createTransactionForTable(
                 selectedFloorTable.name, selectedFloorTable.tableId,
-                minutes)
+                minutes
+            )
         }
     }
 //    fun onFloorTableSelected(selectedFloorTable: CFloorTable)
@@ -260,10 +188,97 @@ class AskTransactionActivity : BaseActivity()
     {
         Log.i(tag, "onResume")
         super.onResume()
+        updateViewVisibility()
         mShortTransactionsModel.refreshAllShortTransactions()
         mFloorTableModel.refreshAllData()
         //refreshAllData()
     }
+
+    private fun setupNavigationPageOrderObserver()
+    {
+        // 1. OBSERVE THE CORRECT EVENT: navigateToPageOrder
+        mTransactionModel.navigateToPageOrder.observe(this) { event ->
+            // 2. Use the MyEvent wrapper to handle this as a one-time event
+            event.getContentIfNotHandled()?.let { transactionId ->
+                // This block now runs ONLY when a NEW transaction is created
+                Log.i(tag, "Navigating via navigateToPageOrder event with NEW ID: $transactionId")
+
+                val intent = Intent(this, PageOrderActivity::class.java).apply {
+                    // These flags are crucial
+                    flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
+
+                    putExtra("TRANSACTION_ID", transactionId)
+                }
+                startActivity(intent)
+            }
+        }
+    }
+
+    private fun setupObservers()
+    {
+        // Observe loading state
+        mFloorTableModel.isLoading.observe(this) { isLoading ->
+            mBinding.mainProgressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+        }
+
+//        // Observe error messages
+//        mFloorTableModel.errorMessage.observe(this) { error ->
+//            error?.let {
+//                Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
+//                // Clear error after showing
+//                mFloorTableModel.errorMessage.value = null
+//            }
+//        }
+
+        mFloorTableModel.floorTables.observe(this) { floorTables ->
+            Log.i(tag, "Floor tables observed, size: ${floorTables?.size}")
+            if (floorTables != null)
+            {
+                mFloorTablesAdapter.submitList(floorTables)
+                // Force layout update
+                mBinding.layoutFloorTables.requestLayout()
+            }
+        }
+
+        mShortTransactionsModel.shortTransactionList.observe(this) { shortTransactions ->
+            Log.i(tag, "Short transactions observed, size: ${shortTransactions?.size}")
+            if (shortTransactions != null)
+            {
+                mShortTransactionListAdapter.submitList(shortTransactions)
+            }
+        }
+
+        mTransactionModel.activeTransaction.observe(this) { transaction ->
+            if (transaction != null)
+            {
+                val intent = if (mBill)
+                {
+                    Intent(this, BillOrderActivity::class.java)
+                } else
+                {
+                    Intent(this, PageOrderActivity::class.java)
+                }
+                intent.putExtra("TRANSACTION_ID", transaction.transactionId)
+                startActivity(intent)
+                mTransactionModel.onNavigationComplete()
+            }
+        }
+    }
+
+    private fun setupRecyclerView()
+    {
+        // Set the adapters that were already created
+        mBinding.layoutFloorTables.adapter = mFloorTablesAdapter
+        mBinding.layoutShortTransactionList.adapter = mShortTransactionListAdapter
+
+        createGridLayoutFloorTables()
+        createGridLayoutShortTransactionList()
+
+        mBinding.layoutFloorTables.setItemViewCacheSize(64)
+        mBinding.layoutShortTransactionList.setItemViewCacheSize(64)
+    }
+
+// ... inside AskTransactionActivity class
 
     private fun refreshAllData()
     {
@@ -284,7 +299,8 @@ class AskTransactionActivity : BaseActivity()
         Log.i(tag, "refreshFloorPlan")
         mFloorTablesAdapter.refreshAllData()
         mFloorTableModel.refreshAllData()
-        val chooseToOrder = when(mBill) {
+        val chooseToOrder = when (mBill)
+        {
             false -> Translation.get(TextId.TEXT_CHOOSE_TO_ORDER)
             true -> Translation.get(TextId.TEXT_BILL_OPTION)
         }
@@ -307,10 +323,28 @@ class AskTransactionActivity : BaseActivity()
     fun onButtonFloorPlanNext(view: View)
     {
         Log.i(tag, "onButtonFloorPlanNext")
-        mFloorTablesAdapter.clear()
-        global.floorPlanId = (global.floorPlanId+1) % mFloorTableModel.nrFloorPlans()
-        refreshFloorPlan()
-     }
+
+        if (mFloorTableModel.nrFloorPlans() > 0)
+        {
+            mFloorTablesAdapter.clear()
+            global.floorPlanId = (global.floorPlanId + 1) % mFloorTableModel.nrFloorPlans()
+            refreshFloorPlan()
+        } else
+        {
+            Log.i(tag, "onButtonFloorPlanNext  No floorPlans found!!")
+        }
+    }
+
+    @Suppress("UNUSED_PARAMETER")
+    fun onButtonFloorPlanOnOff(view: View)
+    {
+        Log.i(tag, "onButtonFloorPlanOnOff")
+        if (!isTablet)
+        {
+            isShowingFloorPlanOnPhone = !isShowingFloorPlanOnPhone
+            updateViewVisibility()
+        }
+    }
 
     @Suppress("UNUSED_PARAMETER")
     fun onButtonTakeaway(view: View)
@@ -352,21 +386,16 @@ class AskTransactionActivity : BaseActivity()
         refreshAllData()
     }
 
+    private fun onAddDiscountClicked()
+    {
+        // @todo Implement split bill logic
+    }
+
     @Suppress("UNUSED_PARAMETER")
     fun onButtonBack(view: View)
     {
         Log.i(tag, "onButtonBack")
         MainMenuActivity()
-    }
-
-    private fun onSplitBillClicked()
-    {
-        // @todo Implement split bill logic
-    }
-
-    private fun onAddDiscountClicked()
-    {
-        // @todo Implement split bill logic
     }
 
     private fun onChangeTableClicked()
@@ -380,4 +409,32 @@ class AskTransactionActivity : BaseActivity()
         Log.i(tag, "onPrintReceiptClicked")
         // @todo Implement split bill logic
     }
+
+    private fun onSplitBillClicked()
+    {
+        // @todo Implement split bill logic
+    }
+
+    private fun updateViewVisibility()
+    {
+        if (isTablet)
+        {
+            // On a tablet, ALWAYS show both.
+            mBinding.layoutFloorTables.visibility = View.VISIBLE
+            mBinding.layoutShortTransactionList.visibility = View.VISIBLE
+        } else
+        {
+            // On a phone, toggle between the two views.
+            if (isShowingFloorPlanOnPhone)
+            {
+                mBinding.layoutFloorTables.visibility = View.VISIBLE
+                mBinding.layoutShortTransactionList.visibility = View.GONE
+            } else
+            {
+                mBinding.layoutFloorTables.visibility = View.GONE
+                mBinding.layoutShortTransactionList.visibility = View.VISIBLE
+            }
+        }
+    }
+
 }

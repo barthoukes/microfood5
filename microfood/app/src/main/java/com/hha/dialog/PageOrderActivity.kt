@@ -41,6 +41,7 @@ import com.hha.resources.CTimestamp
 import com.hha.types.CMoney
 import com.hha.types.EFinalizerAction
 import com.hha.types.EInitMode
+import tech.hha.microfood.R
 
 import tech.hha.microfood.databinding.PageOrderActivityBinding
 import kotlin.getValue
@@ -75,7 +76,7 @@ class PageOrderActivity : BaseActivity(), ModalDialogYesNo.MessageBoxYesNoListen
     private val mColourPage = colourCFG.getBackgroundColour("COLOUR_GROUP_BACKGROUND")
     private val mColourSelectedPage = colourCFG.getBackgroundColour("SELECTED_GROUP_BACKGROUND")
     private val mFloorplanBillFirst = CFG.getBoolean("floorplan_bill_first")
-    lateinit private var mTimestamp : CTimestamp
+    lateinit private var mTimestamp: CTimestamp
 
     var itemWidth = 24
     var mChangedTime = false
@@ -105,7 +106,8 @@ class PageOrderActivity : BaseActivity(), ModalDialogYesNo.MessageBoxYesNoListen
 
         val transactionId = intent.getIntExtra("TRANSACTION_ID", -1)
         // 2. Validate the ID. If it's missing, the activity cannot function.
-        if (transactionId == -1) {
+        if (transactionId == -1)
+        {
             Log.e(tag, "FATAL: No TRANSACTION_ID found in Intent. Finishing activity.")
             Toast.makeText(this, "Error: Transaction not found", Toast.LENGTH_LONG).show()
             finish() // Exit immediately
@@ -114,14 +116,25 @@ class PageOrderActivity : BaseActivity(), ModalDialogYesNo.MessageBoxYesNoListen
         // 3. Set up observers to react to data changes from the ViewModel.
         //    This is where you connect the data to your UI.
         observeViewModel()
-       // setupNavigationObserver()
+        setupClickListeners()
 
         // 2. Tell the ViewModel to start loading the transaction data.
         //    The ViewModel will handle background threads and state updates.
         mTransactionModel.initializeTransaction(transactionId, EInitMode.VIEW_PAGE_ORDER)
     }
 
-    private fun setupNavigationObserver() {
+    private fun setupClickListeners()
+    {
+        // Table overview button
+        mBinding.OK.apply {
+            setOnClickListener {
+                onButtonEnter()
+            }
+        }
+    }
+
+    private fun setupNavigationObserver()
+    {
         mTransactionModel.navigateToPageOrder.observe(this) { event ->
             // Use the MyEvent wrapper to ensure navigation happens only once
             event.getContentIfNotHandled()?.let { transactionId ->
@@ -167,6 +180,7 @@ class PageOrderActivity : BaseActivity(), ModalDialogYesNo.MessageBoxYesNoListen
 
     override fun onDestroy()
     {
+        Log.i(tag, "onDestroy")
         // Get the current transaction object
         mTransactionModel.resetIsChanged()
         super.onDestroy() // Always call the superclass method first
@@ -216,6 +230,7 @@ class PageOrderActivity : BaseActivity(), ModalDialogYesNo.MessageBoxYesNoListen
     @Suppress("UNUSED_PARAMETER")
     fun onButtonPlus1(view: View)
     {
+        Log.i(tag, "onButtonPlus1")
         mTransactionModel.onButtonPlus1()
     }
 
@@ -236,21 +251,22 @@ class PageOrderActivity : BaseActivity(), ModalDialogYesNo.MessageBoxYesNoListen
         //transactionItemsAdapter.notifyDataSetChanged()
     }
 
-    // Add this new function to handle language changes
-    @Suppress("UNUSED_PARAMETER")
-    fun onButtonEnter(view: View)
+    fun onButtonEnter()
     {
+        Log.i(tag, "onButtonEnter")
         val action: EFinalizerAction = mTransactionModel.finishTransaction(mFromBilling)
         handleAction(action)
     }
 
     private fun handleAction(action: EFinalizerAction)
     {
+        Log.i(tag, "handleAction $action")
         when (action)
         {
             EFinalizerAction.FINALIZE_NO_ACTION,
             EFinalizerAction.FINALIZE_NOT_IDENTIFIED,
                 -> return
+
             EFinalizerAction.FINALIZE_MODE_ASK_TABLE -> askTransactionActivity()
             EFinalizerAction.FINALIZE_MODE_BILLING -> BillOrderActivity()
             EFinalizerAction.FINALIZE_RESET_CHANGES -> mTransactionModel.resetChanges()
@@ -260,18 +276,36 @@ class PageOrderActivity : BaseActivity(), ModalDialogYesNo.MessageBoxYesNoListen
             {
                 TODO("Not implemented")
             }
+
             EFinalizerAction.FINALIZE_TA_ASK_DELAY_CONTINUE -> takeawayAskDelayContinue()
             EFinalizerAction.FINALIZE_TA_ASK_DELAY_MINUTES -> takeawayAskDelayMinutes()
-            EFinalizerAction.FINALIZE_MODAL_DIALOG_QUANTITY -> {
-                val txt = Translation.TextId.TEXT_QUANTITY.str()
-                ModalDialogQuantity.newInstance(txt)
+            EFinalizerAction.FINALIZE_MODAL_DIALOG_QUANTITY ->
+            {
+                //askCancelReasonAndClearTransaction()
+                askQuantityDialog()
             }
-            EFinalizerAction.FINALIZE_MODAL_DIALOG_QUANTITIES -> {
+
+            EFinalizerAction.FINALIZE_MODAL_DIALOG_QUANTITIES ->
+            {
                 val txt = Translation.TextId.TEXT_QUANTITY.str()
                 ModalDialogQuantities.newInstance(txt)
                 // Fun handleFinishQuantiesAfterAskingQuantities will be called after the dialog.
             }
+
+            EFinalizerAction.FINALIZE_SI_ASK_DELAY_MINUTES -> ModalDialogDelay.newInstance(0)
+            EFinalizerAction.FINALIZE_SI_ASK_DELAY_CONTINUE -> finalizeSiAskDelayContinue()
+            else -> finalizeSiAskDelayContinue()
         }
+    }
+
+    private fun finalizeSiAskDelayContinue()
+    {
+        Log.i(tag, "finalizeSiAskDelayContinue")
+        // REMOVE THIS LINE: throw IllegalStateException("Not implemented")
+
+        // Instead, log it or show a Toast for now
+        Log.w(tag, "Action FINALIZE_SI_ASK_DELAY_CONTINUE is not yet implemented.")
+        toast("Delay/Continue is not implemented yet.")
     }
 
     private fun askCancelReasonAndClearTransaction()
@@ -279,6 +313,25 @@ class PageOrderActivity : BaseActivity(), ModalDialogYesNo.MessageBoxYesNoListen
         Log.i(tag, "askCancelReasonAndClearTransaction")
         val dialog = ModalDialogCancelReason()
         dialog.show(supportFragmentManager, "MessageBoxCancelReason")
+    }
+
+    private fun askQuantityDialog() {
+        Log.i(tag, "askQuantityDialog")
+        try {
+            val txt = Translation.TextId.TEXT_QUANTITY.str()
+            val dialog = ModalDialogQuantity.newInstance(txt)
+
+            // Check fragment manager state
+            if (!isFinishing && !isDestroyed) {
+                dialog.show(supportFragmentManager, "ModalDialogQuantity")
+                Log.i(tag, "Dialog shown")
+            } else {
+                Log.e(tag, "Activity is finishing or destroyed, cannot show dialog")
+            }
+        } catch (e: Exception) {
+            Log.e(tag, "Error showing dialog: ${e.message}", e)
+            Toast.makeText(this, "Error showing dialog: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
     }
 
     fun takeawayAskDelayContinue()
@@ -304,7 +357,8 @@ class PageOrderActivity : BaseActivity(), ModalDialogYesNo.MessageBoxYesNoListen
         intent.putExtra("TRANSACTION_ID", mTransactionModel.getTransactionId())
         startActivity(intent.apply {
             flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or
-               Intent.FLAG_ACTIVITY_SINGLE_TOP })
+               Intent.FLAG_ACTIVITY_SINGLE_TOP
+        })
         //finish()
     }
 
@@ -534,9 +588,10 @@ class PageOrderActivity : BaseActivity(), ModalDialogYesNo.MessageBoxYesNoListen
         val ts = CTimestamp()
         val isBilling = (action == ModalDialogQuantities.Action.BILL)
         val newAction = mTransactionModel.handleFinishQuantiesAfterAskingQuantities(
-            mFromBilling,kitchenQuantity,
+            mFromBilling, kitchenQuantity,
             billQuantity,
-            mChangedTime, ts, isBilling)
+            mChangedTime, ts, isBilling
+        )
         handleAction(newAction)
     }
 
@@ -579,7 +634,7 @@ class PageOrderActivity : BaseActivity(), ModalDialogYesNo.MessageBoxYesNoListen
         if (mTransactionModel.addItem(selectedMenuItem, mClusterId))
         {
             mTransactionItemsAdapter.setCursor(global.cursor)
-           // m_menuItemsAdapter.notifyDataSetChanged()
+            // m_menuItemsAdapter.notifyDataSetChanged()
             //m_transactionItemsAdapter.notifyDataSetChanged()
             /// binding.totalPrice.text = m_transaction.getTotalAmount().str()
             //m_transactionItemsAdapter.setCursor(global.cursor)
@@ -625,7 +680,8 @@ class PageOrderActivity : BaseActivity(), ModalDialogYesNo.MessageBoxYesNoListen
         val dialog = ModalDialogYesNo.newInstance(
             "Confirm Action",
             "Are you sure you want to proceed?",
-            0)
+            0
+        )
         dialog.show(supportFragmentManager, "MessageBoxYesNo")
     }
 
@@ -646,9 +702,8 @@ class PageOrderActivity : BaseActivity(), ModalDialogYesNo.MessageBoxYesNoListen
         // Create an Intent to start the AskTransactionActivity
         val intent = Intent(this, AskTransactionActivity::class.java)
 
-        // Add flags to clear the task stack and start a new one.
-        // This ensures the user cannot press "Back" to return to BillOrderActivity.
-        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        // Add these flags
+        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
 
         // Start the new activity
         startActivity(intent)
@@ -691,7 +746,8 @@ class PageOrderActivity : BaseActivity(), ModalDialogYesNo.MessageBoxYesNoListen
         val dialog = ModalDialogYesNo.newInstance(
             "Undo Changes",
             "Undo the changes made to the order?",
-            1)
+            1
+        )
         dialog.show(supportFragmentManager, "MessageBoxYesNo")
     }
 
@@ -700,7 +756,7 @@ class PageOrderActivity : BaseActivity(), ModalDialogYesNo.MessageBoxYesNoListen
     )
     {
         // Modal dialog pressed a button.
-        val action = mTransactionModel.handleFinishWokQuantity(
+        val action = mTransactionModel.handleFinishQuantity(
             quantity, billingMode, stop)
         handleAction(action)
     }
@@ -708,7 +764,7 @@ class PageOrderActivity : BaseActivity(), ModalDialogYesNo.MessageBoxYesNoListen
     override fun onDelayFinalized(action: ModalDialogDelay.DelayAction, finalDelay: Int)
     {
         // We typed the delay in steps of 10 minutes.
-        if ( action == ModalDialogDelay.DelayAction.STOP)
+        if (action == ModalDialogDelay.DelayAction.STOP)
         {
             handleAction(EFinalizerAction.FINALIZE_NO_ACTION)
         }

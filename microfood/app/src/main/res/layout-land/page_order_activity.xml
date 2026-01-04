@@ -228,7 +228,6 @@
 		android:layout_height="0dp"
 		android:background="@color/ANDROID_BUTTON_BACKGROUND"
 		android:gravity="center"
-		android:onClick="onButtonEnter"
 		android:src="@drawable/enter_yellow"
 		app:layout_constraintVertical_chainStyle="packed"
 		app:layout_constraintBottom_toBottomOf="parent"
