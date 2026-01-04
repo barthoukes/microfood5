@@ -369,45 +369,52 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
       }
    }
 
+// In TransactionModel.kt
+
    fun endTimeFrameAndPrintToBuffer(
       prints2kitchen: Int, prints2bill: Int, newTime: CTimestamp,
       timeChanged: Boolean, collectPrinter: Boolean
-   )
-   {
+   ) {
       Log.i(tag, "endTimeFrameAndPrintToBuffer")
       val currentTransaction = activeTransaction.value
-      if (currentTransaction == null)
-      {
+      if (currentTransaction == null) {
          return
       }
-      val tfi = currentTransaction.getTimeFrameIndex()
 
-      currentTransaction.updateTotal()
-      val transactionId = currentTransaction.transactionId
+      // --- SOLUTION: Launch a coroutine on an I/O thread ---
+      viewModelScope.launch(Dispatchers.IO) {
+         Log.i(tag, "Executing endTimeFrameAndPrintToBuffer on a background thread.")
 
-      var newState = ECookingState.COOKING_DONE
-      if (CFG.getBoolean("prepare_display_enable"))
-      {
-         val kitchen: Int = currentTransaction.numberKitchenItems()
-         if (kitchen > 0)
-         {
-            newState = ECookingState.COOKING_IN_KITCHEN
+         val tfi = currentTransaction.getTimeFrameIndex()
+
+         currentTransaction.updateTotal() // Assuming this is safe to do on a BG thread
+         val transactionId = currentTransaction.transactionId
+
+         var newState = ECookingState.COOKING_DONE
+         if (CFG.getBoolean("prepare_display_enable")) {
+            val kitchen: Int = currentTransaction.numberKitchenItems()
+            if (kitchen > 0) {
+               newState = ECookingState.COOKING_IN_KITCHEN
+            }
          }
-      }
-      currentTransaction.endTimeFrame(
-         transactionId, CFG.getValue("pc_number"),
-         newTime, timeChanged, newState
-      )
 
-      val pf = PrintFrame()
-      pf.printTimeFrame(
-         transactionId, tfi, CFG.getShort("pc_number"),
-         global.rfidKeyId, prints2kitchen, 0, collectPrinter, false
-      )
-      pf.printTimeFrame(
-         transactionId, tfi, CFG.getShort("pc_number"),
-         global.rfidKeyId, prints2bill, 0, false, true
-      )
+         // This is now safely called on a background thread
+         currentTransaction.endTimeFrame(
+            transactionId, CFG.getValue("pc_number"),
+            newTime, timeChanged, newState
+         )
+
+         // These print buffer calls are also executed on the background thread
+         val pf = PrintFrame()
+         pf.printTimeFrame(
+            transactionId, tfi, CFG.getShort("pc_number"),
+            global.rfidKeyId, prints2kitchen, 0, collectPrinter, false
+         )
+         pf.printTimeFrame(
+            transactionId, tfi, CFG.getShort("pc_number"),
+            global.rfidKeyId, prints2bill, 0, false, true
+         )
+      }
    }
 
    fun finishTransaction(fromBilling: Boolean): EFinalizerAction
