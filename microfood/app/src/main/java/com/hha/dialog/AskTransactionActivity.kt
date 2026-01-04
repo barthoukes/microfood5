@@ -221,15 +221,6 @@ class AskTransactionActivity : BaseActivity()
             mBinding.mainProgressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
         }
 
-//        // Observe error messages
-//        mFloorTableModel.errorMessage.observe(this) { error ->
-//            error?.let {
-//                Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
-//                // Clear error after showing
-//                mFloorTableModel.errorMessage.value = null
-//            }
-//        }
-
         mFloorTableModel.floorTables.observe(this) { floorTables ->
             Log.i(tag, "Floor tables observed, size: ${floorTables?.size}")
             if (floorTables != null)
@@ -245,22 +236,6 @@ class AskTransactionActivity : BaseActivity()
             if (shortTransactions != null)
             {
                 mShortTransactionListAdapter.submitList(shortTransactions)
-            }
-        }
-
-        mTransactionModel.activeTransaction.observe(this) { transaction ->
-            if (transaction != null)
-            {
-                val intent = if (mBill)
-                {
-                    Intent(this, BillOrderActivity::class.java)
-                } else
-                {
-                    Intent(this, PageOrderActivity::class.java)
-                }
-                intent.putExtra("TRANSACTION_ID", transaction.transactionId)
-                startActivity(intent)
-                mTransactionModel.onNavigationComplete()
             }
         }
     }
@@ -322,17 +297,14 @@ class AskTransactionActivity : BaseActivity()
     @Suppress("UNUSED_PARAMETER")
     fun onButtonFloorPlanNext(view: View)
     {
-        Log.i(tag, "onButtonFloorPlanNext")
+       Log.i(tag, "onButtonFloorPlanNext")
 
-        if (mFloorTableModel.nrFloorPlans() > 0)
-        {
-            mFloorTablesAdapter.clear()
-            global.floorPlanId = (global.floorPlanId + 1) % mFloorTableModel.nrFloorPlans()
-            refreshFloorPlan()
-        } else
-        {
-            Log.i(tag, "onButtonFloorPlanNext  No floorPlans found!!")
-        }
+       global.floorPlanId = mFloorTableModel.getNextFloorPlanId(global.floorPlanId)
+       refreshFloorPlan()
+       if (global.floorPlanId > 0)
+       {
+          Log.i(tag, "onButtonFloorPlanNext  No floorPlans found!!")
+       }
     }
 
     @Suppress("UNUSED_PARAMETER")

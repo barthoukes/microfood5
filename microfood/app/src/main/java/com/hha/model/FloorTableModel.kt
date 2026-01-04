@@ -128,7 +128,8 @@ class FloorTableModel : ViewModel() {
    fun floorPlanName(): String {
       return try {
          val floorPlans = _floorPlans.value
-         if (floorPlans != null && floorPlans.size > 0) {
+         if (floorPlans != null && floorPlans.size > 0)
+         {
             floorPlans.getFloorName(global.floorPlanId.coerceAtLeast(0))
          } else {
             cachedFloorPlans?.getFloorName(global.floorPlanId.coerceAtLeast(0)) ?: "--"
@@ -207,6 +208,17 @@ class FloorTableModel : ViewModel() {
          Log.e(tag, "Error loading floor tables: ${e.message}")
          CFloorTables()
       }
+   }
+
+   fun getNextFloorPlanId(floorPlanId: Int): Int
+   {
+      var nextFloorPlan = -1
+      val currentFloorPlans = _floorPlans.value
+      if (currentFloorPlans != null)
+      {
+         nextFloorPlan = currentFloorPlans.getNextFloorPlanId(floorPlanId)
+      }
+      return nextFloorPlan
    }
 
    // Clear cached data (call this when activity is destroyed)
