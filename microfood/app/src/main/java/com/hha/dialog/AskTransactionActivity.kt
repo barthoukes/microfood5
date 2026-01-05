@@ -175,14 +175,6 @@ class AskTransactionActivity : BaseActivity()
             )
         }
     }
-//    fun onFloorTableSelected(selectedFloorTable: CFloorTable)
-//    {
-//        Log.i("AskTransaction", "onFloorTableSelected ${selectedFloorTable.name} ${selectedFloorTable
-//            .transactionId}")
-//        // Select this in the list
-//        mFloorTablesAdapter.selectTransactionName(selectedFloorTable.name)
-//        mShortTransactionListAdapter.selectTransactionId(selectedFloorTable.transactionId)
-//    }
 
     override fun onResume()
     {
