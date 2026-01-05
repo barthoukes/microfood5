@@ -43,7 +43,7 @@ class TransactionItemsAdapter(
     }
 
     // Add this new function to your adapter
-    fun updateData(newTransaction: CTransaction)
+    fun submitList(newTransaction: CTransaction)
     {
         // The adapter now knows about the new data.
         // We don't need to store it, as we can rely on the global,

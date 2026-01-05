@@ -16,6 +16,9 @@ object COpenClientsHandler : ModalDialogStringEdit.StringListener {
     val service = GrpcServiceFactory.createDailyTransactionService()
     var stringTyped = ""
     var stringValid = false
+    val mMaximumTime = CFG.getValue("maximum_time")
+    val mRestaurantMap = CFG.getBoolean("restaurant_map")
+    val mFloorplanBillFirst = CFG.getBoolean("floorplan_bill_first")
 
     fun createNewRestaurantTransaction(name: String, floorTableId: Int, minutes: Int): Int
     {
@@ -44,7 +47,7 @@ object COpenClientsHandler : ModalDialogStringEdit.StringListener {
                     type = ETransType.TRANS_TYPE_TAKEAWAY
                 }
             }
-            else if (CFG.getBoolean("floorplan_bill_first")) // Wok table option
+            else if (mFloorplanBillFirst) // Wok table option
             {
                 type = ETransType.TRANS_TYPE_WOK
             }
@@ -53,11 +56,13 @@ object COpenClientsHandler : ModalDialogStringEdit.StringListener {
                 name, -1,global.rfidKeyId,
                 type.toTransType()) ?: -1
 
-            if (CFG.getBoolean("restaurant_map") &&
-                (type == ETransType.TRANS_TYPE_WOK || type == ETransType.TRANS_TYPE_SITIN))
+            if (mRestaurantMap &&
+                (type == ETransType.TRANS_TYPE_WOK
+                   || type == ETransType.TRANS_TYPE_SITIN))
             {
                 val service = GrpcServiceFactory.createFloorTableService()
-                service.connectTableToTransaction(floorTableId, orderId, CFG.getValue("maximum_time"));
+                service.connectTableToTransaction(
+                    floorTableId, orderId,mMaximumTime)
                 service.updateDrinksMinutes()
             }
             return orderId

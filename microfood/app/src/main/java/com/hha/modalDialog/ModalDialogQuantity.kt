@@ -2,11 +2,12 @@ package com.hha.modalDialog
 
 import android.app.Dialog
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import androidx.fragment.app.DialogFragment
-import com.hha.types.EFinalizerAction
 import tech.hha.microfood.databinding.ModalDialogQuantityBinding
 
 class ModalDialogQuantity : DialogFragment()
@@ -18,11 +19,9 @@ class ModalDialogQuantity : DialogFragment()
          fun onQuantitySelected(quantity: Int, toBilling: Boolean, stop: Boolean)
       }
 
+      private val tag = "ModalDialogQuantity"
       private var _binding: ModalDialogQuantityBinding? = null
       private val binding get() = _binding!!
-
-      // The listener instance. The calling activity will set this.
-      private var listener: ModalDialogQuantityListener? = null
 
       // A simple way to pass the title to the dialog
       private var dialogTitle: String? = null
@@ -40,26 +39,42 @@ class ModalDialogQuantity : DialogFragment()
          }
       }
 
-      override fun onCreate(savedInstanceState: Bundle?)
-      {
-         super.onCreate(savedInstanceState)
-         dialogTitle = arguments?.getString("dialog_title")
-         // Try to get the listener from the parent fragment or activity
-         listener = parentFragment as? ModalDialogQuantityListener ?: activity as? ModalDialogQuantityListener
-      }
-
       override fun onCreateView(
          inflater: LayoutInflater,
          container: ViewGroup?,
          savedInstanceState: Bundle?,
       ): View
       {
+         Log.i(tag, "onCreateView")
          _binding = ModalDialogQuantityBinding.inflate(inflater, container, false)
          return binding.root
       }
 
-      override fun onViewCreated(view: View, savedInstanceState: Bundle?)
+   /**
+    * This method is called after the dialog is created and is the best place
+    * to set the size and position of the dialog's window.
+    */
+   override fun onStart() {
+      super.onStart()
+
+      // Get the dialog's window
+      dialog?.window?.let { window ->
+         // Get the screen's width
+         val displayMetrics = resources.displayMetrics
+         val width = displayMetrics.widthPixels
+
+         // Set the dialog's width to 50% of the screen width
+         // You can adjust the percentage (0.5) as needed
+         val dialogWidth = (width * 0.50).toInt()
+
+         // Apply the new layout parameters
+         window.setLayout(dialogWidth, WindowManager.LayoutParams.WRAP_CONTENT)
+      }
+   }
+
+   override fun onViewCreated(view: View, savedInstanceState: Bundle?)
       {
+         Log.i(tag, "onViewCreated")
          super.onViewCreated(view, savedInstanceState)
 
          // Set the title
@@ -67,42 +82,40 @@ class ModalDialogQuantity : DialogFragment()
 
          // Set up click listeners for all the buttons
          binding.buttonQuantity0.setOnClickListener {
-            listener?.onQuantitySelected(0, false, false)
+            Log.i(tag, "buttonQuantity0")
+            (activity as? ModalDialogQuantityListener)?.onQuantitySelected(0, false, false)
             dismiss()
          }
 
          binding.buttonQuantity1.setOnClickListener {
-            listener?.onQuantitySelected(1, false, false)
+            Log.i(tag, "buttonQuantity1")
+            (activity as? ModalDialogQuantityListener)?.onQuantitySelected(1, false, false)
             dismiss()
          }
 
          binding.buttonQuantity2.setOnClickListener {
-            listener?.onQuantitySelected(2, true, false)
+            Log.i(tag, "buttonQuantity2")
+            (activity as? ModalDialogQuantityListener)?.onQuantitySelected(2, false, false)
             dismiss()
          }
 
          binding.buttonBill.setOnClickListener {
-            listener?.onQuantitySelected(0, true, false)
+            Log.i(tag, "buttonBill")
+            (activity as? ModalDialogQuantityListener)?.onQuantitySelected(1, true, false)
             // Return"/Enter/OK
             dismiss()
          }
 
          binding.buttonEscape.setOnClickListener {
-            listener?.onQuantitySelected(0, false, true)
+            Log.i(tag, "buttonEscape")
+            (activity as? ModalDialogQuantityListener)?.onQuantitySelected(0, false, true)
             dismiss()
          }
       }
 
-      // This is called to make the dialog have rounded corners and not be full screen
-      override fun onCreateDialog(savedInstanceState: Bundle?): Dialog
-      {
-         val dialog = super.onCreateDialog(savedInstanceState)
-         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-         return dialog
-      }
-
       override fun onDestroyView()
       {
+         Log.i(tag, "onDestroyView")
          super.onDestroyView()
          _binding = null
       }

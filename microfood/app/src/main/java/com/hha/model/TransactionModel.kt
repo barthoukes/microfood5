@@ -9,7 +9,6 @@ import com.hha.callback.PaymentsListener
 import com.hha.callback.TransactionItemListener
 import com.hha.callback.TransactionListener
 import com.hha.framework.CItem
-import com.hha.model.MyEvent
 import com.hha.framework.CMenuItem
 import com.hha.framework.CPayment
 import com.hha.framework.CTransaction
@@ -19,14 +18,9 @@ import com.hha.framework.CCursor
 import com.hha.framework.CFloorTables
 import com.hha.framework.CMenuCards
 import com.hha.framework.COpenClientsHandler
-import com.hha.framework.COpenClientsHandler.askRemark
 import com.hha.framework.COpenClientsHandler.createNewTakeawayTransaction
-import com.hha.framework.COpenClientsHandler.createNewTransactionName
-import com.hha.framework.COpenClientsHandler.service
 import com.hha.framework.CPaymentTransaction
 import com.hha.framework.CPersonnel
-import com.hha.framework.CShortTransaction
-import com.hha.framework.CShortTransactionList
 import com.hha.grpc.GrpcServiceFactory
 import com.hha.printer.BillPrinter
 import com.hha.printer.EBillExample
@@ -96,6 +90,7 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
    private val mAskTime = CFG.getValue("ask_time_delay_takeaway")
    private val mAskQuantity = CFG.getValue("ask_quantity")
    private val mAskQuantityZero = CFG.getBoolean("ask_quantity_zero")
+   private val mAskTimeDelaySitin = CFG.getValue("ask_time_delay_sitin")
    private val mAskSitinQuantities = CFG.getValue("ask_sitin_quantities")
    private val mUserPrintCollect = userCFG.getBoolean("user_print_collect")
    private val mAskTakeawayQuantity = CFG.getValue("ask_takeaway_quantity")
@@ -374,49 +369,57 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
       }
    }
 
+// In TransactionModel.kt
+
    fun endTimeFrameAndPrintToBuffer(
       prints2kitchen: Int, prints2bill: Int, newTime: CTimestamp,
       timeChanged: Boolean, collectPrinter: Boolean
-   )
-   {
+   ) {
       Log.i(tag, "endTimeFrameAndPrintToBuffer")
       val currentTransaction = activeTransaction.value
-      if (currentTransaction == null)
-      {
+      if (currentTransaction == null) {
          return
       }
-      val tfi = currentTransaction.getTimeFrameIndex()
 
-      currentTransaction.updateTotal()
-      val transactionId = currentTransaction.transactionId
+      // --- SOLUTION: Launch a coroutine on an I/O thread ---
+      viewModelScope.launch(Dispatchers.IO) {
+         Log.i(tag, "Executing endTimeFrameAndPrintToBuffer on a background thread.")
 
-      var newState = ECookingState.COOKING_DONE
-      if (CFG.getBoolean("prepare_display_enable"))
-      {
-         val kitchen: Int = currentTransaction.numberKitchenItems()
-         if (kitchen > 0)
-         {
-            newState = ECookingState.COOKING_IN_KITCHEN
+         val tfi = currentTransaction.getTimeFrameIndex()
+
+         currentTransaction.updateTotal() // Assuming this is safe to do on a BG thread
+         val transactionId = currentTransaction.transactionId
+
+         var newState = ECookingState.COOKING_DONE
+         if (CFG.getBoolean("prepare_display_enable")) {
+            val kitchen: Int = currentTransaction.numberKitchenItems()
+            if (kitchen > 0) {
+               newState = ECookingState.COOKING_IN_KITCHEN
+            }
          }
-      }
-      currentTransaction.endTimeFrame(
-         transactionId, CFG.getValue("pc_number"),
-         newTime, timeChanged, newState
-      )
 
-      val pf = PrintFrame()
-      pf.printTimeFrame(
-         transactionId, tfi, CFG.getShort("pc_number"),
-         global.rfidKeyId, prints2kitchen, 0, collectPrinter, false
-      )
-      pf.printTimeFrame(
-         transactionId, tfi, CFG.getShort("pc_number"),
-         global.rfidKeyId, prints2bill, 0, false, true
-      )
+         // This is now safely called on a background thread
+         currentTransaction.endTimeFrame(
+            transactionId, CFG.getValue("pc_number"),
+            newTime, timeChanged, newState
+         )
+
+         // These print buffer calls are also executed on the background thread
+         val pf = PrintFrame()
+         pf.printTimeFrame(
+            transactionId, tfi, CFG.getShort("pc_number"),
+            global.rfidKeyId, prints2kitchen, 0, collectPrinter, false
+         )
+         pf.printTimeFrame(
+            transactionId, tfi, CFG.getShort("pc_number"),
+            global.rfidKeyId, prints2bill, 0, false, true
+         )
+      }
    }
 
    fun finishTransaction(fromBilling: Boolean): EFinalizerAction
    {
+      Log.i(tag, "finishTransaction")
       mFromBilling = fromBilling
       mPrintKitchen2PosQuantity = userCFG.getValue("user_print_kitchen2pos_quantity")
       val currentTransaction = _transaction.value
@@ -435,7 +438,7 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
 
          ETransType.TRANS_TYPE_TAKEAWAY_PHONE -> action = handleFinishTakeawayPhone(fromBilling)
          ETransType.TRANS_TYPE_WOK -> action = handleFinishWok(fromBilling)
-         ETransType.TRANS_TYPE_SITIN, ETransType.TRANS_TYPE_SHOP -> action = handleFinishShop(fromBilling)
+         ETransType.TRANS_TYPE_SITIN, ETransType.TRANS_TYPE_SHOP -> action = handleFinishSitin(fromBilling)
          else ->
          {
          }
@@ -563,6 +566,48 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
       return EFinalizerAction.FINALIZE_TO_BE_IMPLEMENTED
    }
 
+   /*----------------------------------------------------------------------------*/
+   /** @brief Ask the delay in minutes and close the transaction.
+    *  @return Status for finish function
+    */
+   private fun handleFinishSitin(fromBilling: Boolean): EFinalizerAction
+   {
+      Log.i(tag, "handleFinishSitin")
+
+      val currentTransaction = _transaction.value
+      if (currentTransaction == null)
+      {
+         return EFinalizerAction.FINALIZE_NOT_IDENTIFIED
+      }
+      //////////////////// ASK QUANTIES SITIN ///////////////////////////
+      var action: EFinalizerAction = handleFinishQuantiesTimeSitin(fromBilling)
+      if (action != EFinalizerAction.FINALIZE_NOT_IDENTIFIED)
+      {
+         return action;
+      }
+
+      ///////////////////////// ASK TIME ////////////////////////////////
+      if (mAskTimeDelaySitin > 0 && currentTransaction.hasAnyChanges())
+      {
+         return EFinalizerAction.FINALIZE_SI_ASK_DELAY_MINUTES
+      }
+      ///////////////////////// ASK QUANTITY ////////////////////////////////
+      if (mAskQuantity != 0)
+      {
+         action = EFinalizerAction.FINALIZE_NO_ACTION
+         if (currentTransaction.hasAnyChanges())
+         {
+            return EFinalizerAction.FINALIZE_MODAL_DIALOG_QUANTITY
+         }
+      }
+      val ts = CTimestamp()
+      ts.addMinutes(mMinutes)
+      endTimeFrameAndPrintToBuffer(
+         1, 0, ts,
+         mMinutes != 0, false)
+      return EFinalizerAction.FINALIZE_MODE_ASK_TABLE
+   }
+
    fun handleFinishTakeawayPhone(fromBilling: Boolean): EFinalizerAction
    {
       // @TODO implement
@@ -599,6 +644,55 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
          action = EFinalizerAction.FINALIZE_SET_ENTER_PRESSED
       }
       return action
+   }
+
+   fun handleFinishQuantity(
+      quantity: Int, billingMode: Boolean, stop: Boolean): EFinalizerAction
+   {
+      val currentTransaction = _transaction.value
+      if (currentTransaction == null)
+      {
+         return EFinalizerAction.FINALIZE_NOT_IDENTIFIED
+      }
+      when (currentTransaction.transType)
+      {
+         ETransType.TRANS_TYPE_WOK -> return handleFinishWokQuantity(quantity, billingMode, stop)
+         ETransType.TRANS_TYPE_TAKEAWAY -> return EFinalizerAction.FINALIZE_NO_ACTION
+         ETransType.TRANS_TYPE_SITIN -> return handleFinishSitinQuantity(quantity, billingMode, stop)
+
+         else -> {
+            Log.w(tag, "handleFinishQuantity: unknown transaction type ${currentTransaction.transType}")
+            return EFinalizerAction.FINALIZE_NOT_IDENTIFIED
+         }
+      }
+   }
+
+   fun handleFinishSitinQuantity(
+      quantity: Int, toBilling: Boolean, stop: Boolean
+   ): EFinalizerAction
+   {
+      Log.i(tag, "handleFinishSitinQuantity")
+
+      var action = EFinalizerAction.FINALIZE_NO_ACTION
+
+      if (stop)
+      {
+         return EFinalizerAction.FINALIZE_NO_ACTION
+      }
+      if (quantity==0 && !mAskQuantityZero)
+      {
+         return EFinalizerAction.FINALIZE_NO_ACTION
+      }
+      val ts = CTimestamp()
+      ts.addMinutes(mMinutes)
+      endTimeFrameAndPrintToBuffer(
+         quantity,0, ts,
+         mMinutes!=0, false)
+      return when (toBilling)
+      {
+         true -> EFinalizerAction.FINALIZE_MODE_BILLING
+         else -> EFinalizerAction.FINALIZE_MODE_ASK_TABLE
+      }
    }
 
    fun handleFinishWokQuantity(
@@ -1188,10 +1282,22 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
 
    override fun onItemRemoved(position: Int, newSize: Int)
    {
+      val currentTransaction = _transaction.value
+      if (currentTransaction != null)
+      {
+         // Call the main update function to notify all observers.
+         onTransactionChanged(currentTransaction)
+      }
    }
 
    override fun onItemUpdated(position: Int, item: CItem)
    {
+      val currentTransaction = _transaction.value
+      if (currentTransaction != null)
+      {
+         // Call the main update function to notify all observers.
+         onTransactionChanged(currentTransaction)
+      }
    }
 
    /**
@@ -1229,6 +1335,7 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
       if (mMode == EInitMode.VIEW_PAGE_ORDER && currentTransaction != null)
       {
          currentTransaction.addOneToCursorPosition()
+         onTransactionChanged(currentTransaction)
          mIsChanged = true
       }
    }
@@ -1240,6 +1347,7 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
       if (mMode == EInitMode.VIEW_PAGE_ORDER && currentTransaction != null)
       {
          currentTransaction.minus1()
+         onTransactionChanged(currentTransaction)
          mIsChanged = true
       }
    }
@@ -1251,6 +1359,7 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
       if (mMode == EInitMode.VIEW_PAGE_ORDER && currentTransaction != null)
       {
          currentTransaction.nextPortion()
+         onTransactionChanged(currentTransaction)
          mIsChanged = true
       }
    }
@@ -1262,6 +1371,7 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
       if (mMode == EInitMode.VIEW_PAGE_ORDER && currentTransaction != null)
       {
          currentTransaction.remove()
+         onTransactionChanged(currentTransaction)
          mIsChanged = true
       }
    }
@@ -1634,7 +1744,7 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
     */
    fun selectTransaction(transactionId: Int)
    {
-      Log.i(tag, "selectTransaction")
+      Log.i(tag, "selectTransaction $transactionId")
       // Don't do anything if an invalid ID is passed.
       if (transactionId <= 0)
       {

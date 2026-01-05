@@ -384,9 +384,6 @@ class BillOrderActivity : BaseActivity(),
         mBinding = BillOrderActivityBinding.inflate(layoutInflater)
         setContentView(mBinding.root)
 
-//        mTransactionModel = ViewModelProvider(this, TransactionModelFactory)
-//            .get(TransactionModel::class.java)
-
         setupRecyclerView()
         initializeViews()
 

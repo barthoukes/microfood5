@@ -232,7 +232,6 @@
 			android:background="@color/ANDROID_BUTTON_BACKGROUND"
 			android:gravity="center"
 			app:layout_constraintDimensionRatio="1:1"
-			android:onClick="onButtonEnter"
 			android:src="@drawable/enter_yellow"
 			android:textColor="@color/ANDROID_BUTTON_TEXT" />
 	</LinearLayout>

@@ -6,6 +6,19 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <ProgressBar
+        android:id="@+id/main_progress_bar"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:indeterminate="true"
+        android:visibility="gone"
+        android:elevation="5dp"
+        app:layout_constraintTop_toBottomOf="@id/guideline_horizontal_10"
+        app:layout_constraintBottom_toTopOf="@id/guideline_horizontal_90"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/guideline_vertical_50" />
+
     <!-- Guideline at 10% from the top -->
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline_horizontal_10"
@@ -37,6 +50,14 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         app:layout_constraintGuide_percent="0.5" />
+
+    <!-- Guideline at 50% vertically to split the RecyclerViews -->
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline_vertical_10"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.1" />
 
     <!-- Toolbar -->
     <androidx.appcompat.widget.Toolbar
@@ -92,6 +113,17 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/guideline_horizontal_90">
 
+        <!-- Change Language -->
+        <ImageButton
+            android:id="@+id/btn_language"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Change Language"
+            android:onClick="onButtonLanguage"
+            android:src="@drawable/languages_yellow" />
+
         <!-- Floor Plan -->
         <ImageButton
             android:id="@+id/btn_floor_plan"
@@ -99,6 +131,7 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="?attr/selectableItemBackgroundBorderless"
+            android:onClick="onButtonFloorPlanOnOff"
             android:contentDescription="Floor Plan"
             android:src="@drawable/floorplan_yellow" />
 
@@ -111,17 +144,6 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="Calculator"
             android:src="@drawable/icon_calculator_yellow" />
-
-        <!-- Change Language -->
-        <ImageButton
-            android:id="@+id/btn_language"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Change Language"
-            android:onClick="onButtonLanguage"
-            android:src="@drawable/languages_yellow" />
 
         <!-- Takeaway Bag -->
         <ImageButton

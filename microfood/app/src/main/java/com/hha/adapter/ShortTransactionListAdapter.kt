@@ -77,6 +77,7 @@ class ShortTransactionListAdapter(
             holder.binding.tableId.text = getTransactionName(transaction)
             holder.binding.priceId.text = transaction.total.toString()
             val resource = getIcon(transaction)
+            holder.binding.startTime.text = removeSeconds(transaction.timeStart)
             holder.binding.iconKindof.setImageResource(resource)
             holder.binding.tableDuration.progress = transaction.minutes
         }
@@ -84,9 +85,30 @@ class ShortTransactionListAdapter(
             holder.binding.tableId.text = "--"
             holder.binding.lineItem.background = createBackgroundGradient(0x404040, 0.35f)
             holder.binding.priceId.text = ""
+            holder.binding.startTime.text = ""
             holder.binding.iconKindof.visibility = View.GONE
             holder.binding.tableDuration.visibility = View.GONE
         }
+    }
+
+    private fun removeSeconds(time: String): String
+    {
+        val firstColonIndex = time.indexOf(':')
+        // If no colon is found, there's nothing to do.
+        if (firstColonIndex == -1)
+        {
+            return time
+        }    // Check if there is a second colon (implying seconds are present)
+        val secondColonIndex = time.indexOf(':', startIndex = firstColonIndex + 1)
+
+        // If there is no second colon, the seconds are already removed.
+        if (secondColonIndex == -1)
+        {
+            return time
+        }
+
+        // If we get here, it means seconds are present, so we remove them.
+        return time.substring(0, secondColonIndex)
     }
 
     private fun getIcon(transaction: CShortTransaction): Int

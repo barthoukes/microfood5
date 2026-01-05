@@ -235,7 +235,6 @@ class CTransaction : Iterable<CSortedItem>,
     fun calculateTotalTransaction(): CMoney
     {
         Log.d(tag, "calculateTotalTransaction")
-        val data = CTransactionData()
         val previousTotal = data.total.toMoney()
         data.subTotal = mItems.calculateTotalItems()
         data.total = data.subTotal - data.discount + data.tips

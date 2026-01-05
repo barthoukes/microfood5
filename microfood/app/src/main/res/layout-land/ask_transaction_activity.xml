@@ -6,6 +6,18 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <ProgressBar
+        android:id="@+id/main_progress_bar"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:indeterminate="true"
+        android:visibility="gone"
+        android:elevation="5dp"
+        app:layout_constraintTop_toBottomOf="@id/guideline_horizontal_10"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/guideline_vertical_90" />
+
     <!-- Vertical Button Bar (Right Side) -->
     <LinearLayout
         android:id="@+id/button_bar"
@@ -30,6 +42,19 @@
             android:contentDescription="Change Language"
             android:onClick="onButtonLanguage"
             android:src="@drawable/languages_yellow" />
+
+        <!-- Floor Plan -->
+        <ImageButton
+            android:id="@+id/btn_floor_plan"
+            android:layout_width="64dp"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:layout_gravity="center"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:onClick="onButtonFloorPlanOnOff"
+            android:contentDescription="Floor Plan"
+            android:src="@drawable/floorplan_yellow" />
+
         <ImageButton
             android:id="@+id/btn_takeaway"
             android:layout_width="64dp"
