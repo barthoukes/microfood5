@@ -25,6 +25,8 @@ import com.hha.types.ETransType
 import com.hha.types.EPaymentStatus
 import com.hha.types.ETaxType
 import com.hha.types.ETimeFrameIndex
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -37,6 +39,19 @@ class CTransaction : Iterable<CSortedItem>,
     companion object
     {
         var tag = "CTransaction"
+
+        suspend fun findOpenTable(name: String): Int
+        {
+            try {
+                val service = GrpcServiceFactory.createDailyTransactionService()
+                // Assume getOpenTransactionByName returns a simple response with an ID.
+                val transactionId = service.findOpenTable(name)
+                return transactionId ?: -1 // Return ID or -1 if not found
+            } catch (e: Exception) {
+                Log.e(tag, "gRPC error finding open table for $name", e)
+                return -1 // Return -1 on error
+            }
+        }
     }
 
     var global = Global.getInstance()
@@ -173,7 +188,7 @@ class CTransaction : Iterable<CSortedItem>,
         mPayments.addPayment(payment, amount)
     }
 
-    fun addOneToCursorPosition(): Boolean
+    suspend fun addOneToCursorPosition(): Boolean
     {
         Log.d(tag, "addOneToCursorPosition")
 
@@ -223,7 +238,7 @@ class CTransaction : Iterable<CSortedItem>,
     }
 
 
-    fun addTransactionItem(selectedMenuItem: CMenuItem, clusterId: Short): Boolean
+    suspend fun addTransactionItem(selectedMenuItem: CMenuItem, clusterId: Short): Boolean
     {
         Log.d(
             tag, "addTransactionItem " +
@@ -235,7 +250,6 @@ class CTransaction : Iterable<CSortedItem>,
     fun calculateTotalTransaction(): CMoney
     {
         Log.d(tag, "calculateTotalTransaction")
-        val data = CTransactionData()
         val previousTotal = data.total.toMoney()
         data.subTotal = mItems.calculateTotalItems()
         data.total = data.subTotal - data.discount + data.tips
@@ -651,7 +665,7 @@ class CTransaction : Iterable<CSortedItem>,
     // Add this iterator implementation
     override fun iterator(): Iterator<CSortedItem> = mItems.iterator()
 
-    fun minus1()
+    suspend fun minus1()
     {
         Log.d(tag, "minus1")
         if (size == 0) return
@@ -661,7 +675,7 @@ class CTransaction : Iterable<CSortedItem>,
         mItems.addQuantity(CCursor(y), -1)
     }
 
-    fun nextPortion()
+    suspend fun nextPortion()
     {
         Log.d(tag, "nextPortion")
         if (size == 0) return
@@ -723,12 +737,27 @@ class CTransaction : Iterable<CSortedItem>,
         notifyListeners();
     }
 
+    fun open()
+    {
+        setStatus(EClientOrdersType.OPEN)
+    }
+
     override fun onTransactionCleared()
     {
         notifyListeners();
     }
 
-    public fun remove()
+    override fun onBeginLoading()
+    {
+        TODO("Not yet implemented")
+    }
+
+    override fun onEndLoading()
+    {
+        TODO("Not yet implemented")
+    }
+
+    suspend fun remove()
     {
         Log.d(tag, "remove")
         if (size == 0) return

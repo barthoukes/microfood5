@@ -20,7 +20,6 @@ import com.hha.framework.CMenuCards
 import com.hha.framework.CMenuItem
 import com.hha.framework.CMenuItems
 import com.hha.framework.CMenuPage
-import com.hha.framework.CTransaction
 import com.hha.modalDialog.ModalDialogCancelReason
 import com.hha.modalDialog.ModalDialogUndoChanges
 import com.hha.modalDialog.ModalDialogQuantity
@@ -32,7 +31,6 @@ import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModelProvider
 import com.hha.dialog.Translation.str
 import com.hha.modalDialog.ModalDialogDelay
 import com.hha.modalDialog.ModalDialogQuantities
@@ -41,7 +39,6 @@ import com.hha.resources.CTimestamp
 import com.hha.types.CMoney
 import com.hha.types.EFinalizerAction
 import com.hha.types.EInitMode
-import tech.hha.microfood.R
 
 import tech.hha.microfood.databinding.PageOrderActivityBinding
 import kotlin.getValue
@@ -83,6 +80,7 @@ class PageOrderActivity : BaseActivity(), ModalDialogYesNo.MessageBoxYesNoListen
     private val _orderTotal = MutableLiveData<CMoney>()
     val orderTotal: LiveData<CMoney> = _orderTotal
     var mEnterPressed = false
+    var mFirstTime = false
     val groups = CFG.getValue("display_groups")
     val columns = CFG.getValue("display_groups_horizontal")
     val rows = (groups + columns - 1) / columns
@@ -115,7 +113,7 @@ class PageOrderActivity : BaseActivity(), ModalDialogYesNo.MessageBoxYesNoListen
         }
         // 3. Set up observers to react to data changes from the ViewModel.
         //    This is where you connect the data to your UI.
-        observeViewModel()
+        setupObservers()
         setupClickListeners()
 
         // 2. Tell the ViewModel to start loading the transaction data.
@@ -152,7 +150,7 @@ class PageOrderActivity : BaseActivity(), ModalDialogYesNo.MessageBoxYesNoListen
         }
     }
 
-    private fun observeViewModel()
+    private fun setupObservers()
     {
         // Observe loading state to show/hide a spinner
         mTransactionModel.isLoading.observe(this) { isLoading ->
@@ -163,8 +161,15 @@ class PageOrderActivity : BaseActivity(), ModalDialogYesNo.MessageBoxYesNoListen
         mTransactionModel.activeTransaction.observe(this) { transaction ->
             if (transaction != null)
             {
+                if (mFirstTime)
+                {
+                    mFirstTime = false
+                    mTransactionModel.initPageOrder()
+                }
+                mBinding.pageOrderTableName.text = mTransactionModel.getTableName()
+
                 // When the transaction is ready, update the adapter.
-                mTransactionItemsAdapter.updateData(transaction)
+                mTransactionItemsAdapter.submitList(transaction)
             } else
             {
                 // Handle the case where the transaction failed to load.
@@ -174,6 +179,12 @@ class PageOrderActivity : BaseActivity(), ModalDialogYesNo.MessageBoxYesNoListen
             }
         }
 
+        // This block will run every time _orderTotal is updated in the ViewModel.
+        mTransactionModel.orderTotal.observe(this) { newTotal ->
+            // The 'newTotal' is the CMoney object from the LiveData.
+            // We format it and set it on the TextView.
+            mBinding.totalPrice.text = newTotal.toString()
+        }
         // Observe other LiveData like total price, display lines, etc.
         // mTransactionModel.orderTotal.observe(this) { total -> ... }
     }
@@ -236,6 +247,7 @@ class PageOrderActivity : BaseActivity(), ModalDialogYesNo.MessageBoxYesNoListen
 
     override fun onResume()
     {
+        mFirstTime = true
         super.onResume()
         refreshButtons()
 //        // Refresh data when activity resumes
@@ -414,7 +426,7 @@ class PageOrderActivity : BaseActivity(), ModalDialogYesNo.MessageBoxYesNoListen
         }
     }
 
-    fun addOneToCursorPosition(): Boolean
+    suspend fun addOneToCursorPosition(): Boolean
     {
         val currentTransaction = mTransactionModel.activeTransaction.value
         return currentTransaction?.addOneToCursorPosition() ?: false
@@ -430,7 +442,6 @@ class PageOrderActivity : BaseActivity(), ModalDialogYesNo.MessageBoxYesNoListen
 
     private fun refreshButtons()
     {
-        mBinding.pageOrderTableName.text = mTransactionModel.getTableName()
         mBinding.poeHeaderText.text = Translation.get(Translation.TextId.TEXT_PAGE_ORDER)
     }
 

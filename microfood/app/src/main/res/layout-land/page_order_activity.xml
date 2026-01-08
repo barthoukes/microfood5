@@ -8,16 +8,17 @@
 
 	<ProgressBar
 		android:id="@+id/loading_spinner"
-		style="?android:attr/progressBarStyleLarge"
+		style="?android:attr/progressBarStyle"
 		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
+		android:layout_height="0dp"
 		android:indeterminate="true"
 		android:visibility="gone"
-		app:layout_constraintBottom_toTopOf="@id/guideline_price_top"
-		app:layout_constraintEnd_toStartOf="@id/guideline_left"
-		app:layout_constraintStart_toStartOf="parent"
-		app:layout_constraintTop_toBottomOf="@id/guideline_top"
-		tools:visibility="visible" />  <!-- 'tools:visibility' makes it visible in the preview -->
+		android:background="@color/COLOUR_HEADER_BACKGROUND"
+		app:layout_constraintBottom_toBottomOf="@id/guideline_top"
+		app:layout_constraintStart_toEndOf="@id/guideline_left"
+		app:layout_constraintTop_toTopOf="parent"
+		app:layout_constraintEnd_toStartOf="@+id/poe_header_text"
+		tools:visibility="visible" />
 
 	<!-- GUIDELINES -->
 	<androidx.constraintlayout.widget.Guideline
@@ -109,8 +110,8 @@
 		app:layout_constraintTop_toTopOf="parent"
 		app:layout_constraintBottom_toBottomOf="@id/guideline_top"
 		app:layout_constraintEnd_toStartOf="@id/btn_back"
-		app:layout_constraintStart_toStartOf="@id/guideline_left" />
-
+		app:layout_constraintStart_toEndOf="@id/loading_spinner" />
+-+
 	<!-- MIDDLE COLUMN VIEWS -->
 	<ImageButton
 		android:id="@+id/btn_back"

@@ -5,6 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.hha.archive.transactionId
 import com.hha.callback.PaymentsListener
 import com.hha.callback.TransactionItemListener
 import com.hha.callback.TransactionListener
@@ -25,6 +26,7 @@ import com.hha.grpc.GrpcServiceFactory
 import com.hha.printer.BillPrinter
 import com.hha.printer.EBillExample
 import com.hha.printer.EPrinterLocation
+import com.hha.printer.OrderNumberPrinter
 import com.hha.printer.PrintFrame
 import com.hha.printer.TakeawayNumber
 import com.hha.resources.CTimestamp
@@ -97,7 +99,7 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
    private val mTakeawayContinueUntilCr = CFG.getBoolean("takeaway_continue_until_cr")
    private var mChangedTime = false
    var mAllowNewItem = false
-   private val mMinutes = 0
+   private var mMinutes = 0 // @todo Check when it is really used?
    private var mAutomaticPayments = false // @todo Inspect
    private val mFloorplanBillFirst = CFG.getBoolean("floorplan_bill_first")
    private var mIsUpdating = false // Add this flag to your class
@@ -176,7 +178,10 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
          Log.e(tag, "addItem: currentTransaction is null!!")
          return false
       }
-      return currentTransaction.addTransactionItem(item, clusterId)
+      viewModelScope.launch {
+         currentTransaction.addTransactionItem(item, clusterId)
+      }
+      return true
    }
 
    fun addToEmployee(rfidKey: Short, paymentStatus: EPaymentStatus)
@@ -267,7 +272,8 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
          )
          {
             val number = TakeawayNumber()
-            number.printTakeawayNumber(currentTransaction)
+            viewModelScope.launch {
+               number.printTakeawayNumber(currentTransaction) }
 
             val timeNow = CTimestamp()
             // End transaction and print
@@ -366,6 +372,19 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
             Log.e(tag, "Failed to create new transaction for table: $tableName (ID: $tableId)")
             // _showToast.value = MyEvent("Failed to create order")
          }
+      }
+   }
+
+   fun navigateToExistingTransaction(transactionId: Int)
+   {
+      Log.i(tag, "navigateToExistingTransaction ${transactionId}")
+      if (transactionId > 0)
+      {
+         // 3. --- THIS IS THE FIX ---
+         // Creation was successful. Immediately post the ID as a navigation event.
+         // We no longer create a CTransaction object here.
+         Log.d(tag, "Posting navigation event for transaction ID: $transactionId")
+         _navigateToPageOrder.value = MyEvent(transactionId)
       }
    }
 
@@ -514,6 +533,50 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
       return setTakeawayFinalQuantity(
          0, true, false, ts, false
       )
+   }
+
+   fun initPageOrder(): Boolean
+   {
+      val currentTransaction = _transaction.value
+      if (currentTransaction == null)
+      {
+         return false
+      }
+      if (currentTransaction.isValid() == false)
+      {
+         return false
+      }
+      when (currentTransaction.getStatus())
+      {
+         EClientOrdersType.INIT -> {
+            Log.d(tag, "initPageOrder  open table!")
+            currentTransaction.open()
+            if (userCFG.getBoolean("user_print_ta_number")
+               && userCFG.getBoolean("order_number_first")
+               && currentTransaction.isTakeaway())
+            {
+               val name = currentTransaction.getName()
+               if (name != global.lastPrintedBillNumer)
+               {
+                  global.lastPrintedBillNumer = name
+                  viewModelScope.launch {
+                     val prn = OrderNumberPrinter(name)
+                     prn.print() }
+               }
+            }
+         }
+         EClientOrdersType.OPEN, EClientOrdersType.OPEN_PAID ->
+            Log.d(tag, "open, open_paid -> do nothing")
+         EClientOrdersType.PAYING ->
+         {
+            if (CFG.getValue("bill_paying_add") <= 0)
+               return false
+         }
+         EClientOrdersType.CLOSED -> return false
+         else -> {}
+      }
+      mMinutes = 0
+      return true
    }
 
    /*----------------------------------------------------------------------------*/
@@ -904,11 +967,10 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
       {
          val clusterId: Short = -1
          //Log.d(tag, "MenuItem clicked: ${selectedMenuItem.localName}")
-         if (currentTransaction.addTransactionItem(selectedMenuItem, clusterId))
-         {
-            mIsChanged = true
-            return true
-         }
+         viewModelScope.launch {
+            currentTransaction.addTransactionItem(selectedMenuItem, clusterId) }
+         mIsChanged = true
+         return true
       }
       return false
    }
@@ -1282,10 +1344,22 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
 
    override fun onItemRemoved(position: Int, newSize: Int)
    {
+      val currentTransaction = _transaction.value
+      if (currentTransaction != null)
+      {
+         // Call the main update function to notify all observers.
+         onTransactionChanged(currentTransaction)
+      }
    }
 
    override fun onItemUpdated(position: Int, item: CItem)
    {
+      val currentTransaction = _transaction.value
+      if (currentTransaction != null)
+      {
+         // Call the main update function to notify all observers.
+         onTransactionChanged(currentTransaction)
+      }
    }
 
    /**
@@ -1322,7 +1396,9 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
       val currentTransaction = _transaction.value
       if (mMode == EInitMode.VIEW_PAGE_ORDER && currentTransaction != null)
       {
-         currentTransaction.addOneToCursorPosition()
+         viewModelScope.launch {
+            currentTransaction.addOneToCursorPosition() }
+         onTransactionChanged(currentTransaction)
          mIsChanged = true
       }
    }
@@ -1333,7 +1409,9 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
       val currentTransaction = _transaction.value
       if (mMode == EInitMode.VIEW_PAGE_ORDER && currentTransaction != null)
       {
-         currentTransaction.minus1()
+         viewModelScope.launch {
+            currentTransaction.minus1() }
+         onTransactionChanged(currentTransaction)
          mIsChanged = true
       }
    }
@@ -1344,7 +1422,9 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
       val currentTransaction = _transaction.value
       if (mMode == EInitMode.VIEW_PAGE_ORDER && currentTransaction != null)
       {
-         currentTransaction.nextPortion()
+         viewModelScope.launch {
+            currentTransaction.nextPortion() }
+         onTransactionChanged(currentTransaction)
          mIsChanged = true
       }
    }
@@ -1355,7 +1435,9 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
       val currentTransaction = _transaction.value
       if (mMode == EInitMode.VIEW_PAGE_ORDER && currentTransaction != null)
       {
-         currentTransaction.remove()
+         viewModelScope.launch {
+            currentTransaction.remove() }
+         onTransactionChanged(currentTransaction)
          mIsChanged = true
       }
    }
@@ -1432,6 +1514,16 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
 
    override fun onTransactionCleared()
    {
+   }
+
+   override fun onBeginLoading()
+   {
+      TODO("Not yet implemented")
+   }
+
+   override fun onEndLoading()
+   {
+      TODO("Not yet implemented")
    }
 
    // 4. LISTENER IMPLEMENTATION
@@ -1728,7 +1820,7 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
     */
    fun selectTransaction(transactionId: Int)
    {
-      Log.i(tag, "selectTransaction")
+      Log.i(tag, "selectTransaction $transactionId")
       // Don't do anything if an invalid ID is passed.
       if (transactionId <= 0)
       {

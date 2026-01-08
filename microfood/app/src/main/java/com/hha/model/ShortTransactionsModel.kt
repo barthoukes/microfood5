@@ -144,6 +144,10 @@ class ShortTransactionsModel : ViewModel()
    fun listOpen()
    {
       Log.i(tag, "listOpen")
+      if (_isLoading.value) {
+         Log.i(tag, "listOpen called but a load is already in progress. Aborting.")
+         return
+      }
       // Launch a coroutine in the ViewModel's lifecycle scope.
       // This ensures the task is cancelled if the ViewModel is destroyed.
       viewModelScope.launch {
@@ -168,6 +172,11 @@ class ShortTransactionsModel : ViewModel()
    fun listAll(sortOnTime: Boolean = true)
    {
       Log.i(tag, "listAll")
+
+      if (_isLoading.value) {
+         Log.i(tag, "listAll called but a load is already in progress. Aborting.")
+         return
+      }
       viewModelScope.launch {
          _isLoading.value = true
          val resultList = withContext(Dispatchers.IO) {

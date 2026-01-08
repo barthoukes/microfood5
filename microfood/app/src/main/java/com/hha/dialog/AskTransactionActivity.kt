@@ -4,8 +4,10 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import android.widget.Toast
 import androidx.activity.viewModels
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.viewModelScope
 import androidx.recyclerview.widget.GridLayoutManager
 import com.hha.adapter.ShortTransactionListAdapter
 import com.hha.framework.CFloorTable
@@ -16,8 +18,12 @@ import tech.hha.microfood.databinding.AskTransactionActivityBinding
 import com.hha.dialog.Translation.TextId
 import com.hha.floor.FloorTablesAdapter
 import com.hha.framework.CFloorTables
+import com.hha.framework.CTransaction
 import com.hha.model.ShortTransactionsModel
 import com.hha.model.TransactionModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import tech.hha.microfood.R
 
 
@@ -27,9 +33,10 @@ class AskTransactionActivity : BaseActivity()
     private val CFG = global.CFG
     private lateinit var mBinding: AskTransactionActivityBinding
 
-    private val mShortTransactionListAdapter: ShortTransactionListAdapter = ShortTransactionListAdapter { selectedShortTransaction ->
-        onShortTransactionSelected(selectedShortTransaction)
-    }
+    private val mShortTransactionListAdapter: ShortTransactionListAdapter =
+        ShortTransactionListAdapter { selectedShortTransaction ->
+            onShortTransactionSelected(selectedShortTransaction)
+        }
     private val mFloorTablesAdapter: FloorTablesAdapter = FloorTablesAdapter { selectedFloorTable ->
         onFloorTableSelected(selectedFloorTable)
     }
@@ -43,6 +50,17 @@ class AskTransactionActivity : BaseActivity()
     private var mBill = false
     private var isTablet: Boolean = false
     private val tag = "AskTransaction"
+
+    fun billOrderActivity(transactionId: Int)
+    {
+        Log.i(tag, "billOrderActivity $transactionId")
+
+        // Change to billing with the same transaction.
+        val intent = Intent(this, BillOrderActivity::class.java)
+        intent.putExtra("TRANSACTION_ID", transactionId)
+        startActivity(intent)
+        finish()
+    }
 
     fun createGridLayoutFloorTables()
     {
@@ -108,7 +126,6 @@ class AskTransactionActivity : BaseActivity()
         // mFloorTableModel.clearCache()
     }
 
-
     fun onShortTransactionSelected(selectedTransaction: CShortTransaction)
     {
         Log.i(
@@ -136,43 +153,60 @@ class AskTransactionActivity : BaseActivity()
 
     /**
      * Called when a floor table circle is clicked.
-     * If it's the second click, this will create a NEW transaction.
+     * This function now coordinates the action by calling the ViewModel.
      */
     fun onFloorTableSelected(selectedFloorTable: CFloorTable)
     {
-        Log.i(
-            tag, "onFloorTableSelected: ${selectedFloorTable.name}, current selected: " +
-               "${mFloorTablesAdapter.getSelectedTransactionName()}"
-        )
+        Log.i(tag, "onFloorTableSelected for table: ${selectedFloorTable.name}")
 
-        // First click: Just select the item visually in both lists.
-        if (mFloorTablesAdapter.getSelectedTransactionName() != selectedFloorTable.name)
-        {
-            mFloorTablesAdapter.selectTransactionName(selectedFloorTable.name)
-            // Also highlight the corresponding transaction in the left-hand list if it exists
-            mShortTransactionListAdapter.selectTransactionId(selectedFloorTable.transactionId)
-        }
-        // Second click on the s(ame table: Create a new transaction and navigate.
-        else if (mBill && (selectedFloorTable.transactionId > 0))
-        {
-            // Change to billing activity for this transaction.
-            mTransactionModel.selectTransaction(selectedFloorTable.transactionId)
+        // Launch a coroutine tied to the Activity's lifecycle.
+        // This allows us to call the suspend function in the ViewModel.
+        lifecycleScope.launch {
+            val currentSelectedName = mFloorTablesAdapter.getSelectedTransactionName()
 
-        } else
-        {
-            Log.i(
-                tag, "onFloorTableSelected: Second click: Creating NEW transaction for table: ${
-                    selectedFloorTable
-                        .name
-                }"
-            )
-            // Tell the ViewModel to create a new transaction for this table.
-            // The observer for 'mFloorTableModel.navigateToTransaction' will handle navigation.
-            val minutes = CFG.getValue("maximum_time")
-            mTransactionModel.createTransactionForTable(
-                selectedFloorTable.name, selectedFloorTable.tableId,
-                minutes
-            )
+            // First click on a new table: Just select it visually.
+            if (currentSelectedName != selectedFloorTable.name)
+            {
+                mFloorTablesAdapter.selectTransactionName(selectedFloorTable.name)
+                mShortTransactionListAdapter.selectTransactionId(selectedFloorTable.transactionId)
+            }
+            // Second click on the same table: Delegate all logic to the ViewModel.
+            else
+            {
+                // Call the suspend function from within the coroutine.
+                // The coroutine will 'pause' here until the ViewModel completes its work.
+                val result: FloorTableModel.TableClickResult =
+                    mFloorTableModel.onFloorTableSelected(selectedFloorTable, mBill)
+
+                // --- The code below runs AFTER the ViewModel has finished its work ---
+                // --- and we are back on the Main thread, safe to update the UI. ---
+
+                when (result.action)
+                {
+                    FloorTableModel.FloorTableAction.NAVIGATE_TO_BILL -> {
+                        Log.d(tag, "Action from ViewModel: NAVIGATE_TO_BILL for transaction ${result.transactionId}")
+                        billOrderActivity(result.transactionId)
+                    }
+
+                    FloorTableModel.FloorTableAction.NAVIGATE_TO_ORDER -> {
+                        Log.d(tag, "Action from ViewModel: NAVIGATE_TO_ORDER for transaction ${result.transactionId}")
+                        if (result.transactionId > 0) {
+                            // An open transaction was found, navigate to it.
+                            mTransactionModel.navigateToExistingTransaction(result.transactionId)
+                        } else {
+                            // No open transaction, create a new one.
+                            val minutes = CFG.getValue("maximum_time")
+                            mTransactionModel.createTransactionForTable(
+                                selectedFloorTable.name,
+                                selectedFloorTable.tableId,
+                                minutes
+                            )
+                        }
+                    }
+                    // Handle other potential actions if you add them later
+                    else -> {}
+                }
+            }
         }
     }
 
@@ -182,8 +216,8 @@ class AskTransactionActivity : BaseActivity()
         super.onResume()
         updateViewVisibility()
         mShortTransactionsModel.refreshAllShortTransactions()
-        mFloorTableModel.refreshAllData()
-        //refreshAllData()
+        mFloorTableModel.loadFloorTables()
+        refreshAllData()
     }
 
     private fun setupNavigationPageOrderObserver()
@@ -214,12 +248,13 @@ class AskTransactionActivity : BaseActivity()
         }
 
         mFloorTableModel.floorTables.observe(this) { floorTables ->
-            Log.i(tag, "Floor tables observed, size: ${floorTables?.size}")
+            Log.i(tag, "Floor tables observed, plan: ${global.floorPlanId} size: ${floorTables?.size}")
             if (floorTables != null)
             {
                 mFloorTablesAdapter.submitList(floorTables)
                 // Force layout update
                 mBinding.layoutFloorTables.requestLayout()
+                refreshFloorPlan()
             }
         }
 
@@ -264,17 +299,17 @@ class AskTransactionActivity : BaseActivity()
     private fun refreshFloorPlan()
     {
         Log.i(tag, "refreshFloorPlan")
-        mFloorTablesAdapter.refreshAllData()
-        mFloorTableModel.refreshAllData()
+        mFloorTablesAdapter.redrawViewsAfterChangeLanguage()
+        mFloorTableModel.loadFloorTables()
         val chooseToOrder = when (mBill)
         {
             false -> Translation.get(TextId.TEXT_CHOOSE_TO_ORDER)
             true -> Translation.get(TextId.TEXT_BILL_OPTION)
         }
-        val floorPlanName = mFloorTableModel.floorPlanName()
-        mBinding.headerButton.text = "$chooseToOrder $floorPlanName"
-        mFloorTableModel.refreshAllData()
-        val txt = Translation.get(TextId.TEXT_FLOOR_PLAN) + "\n" + mFloorTableModel.floorPlanName()
+        mBinding.headerButton.text = chooseToOrder
+        mFloorTableModel.loadFloorTables()
+        val txt = Translation.get(TextId.TEXT_FLOOR_PLAN) +
+           "\n" + mFloorTableModel.floorPlanName()
         mBinding.btnFloorplan.text = txt
     }
 
@@ -289,14 +324,14 @@ class AskTransactionActivity : BaseActivity()
     @Suppress("UNUSED_PARAMETER")
     fun onButtonFloorPlanNext(view: View)
     {
-       Log.i(tag, "onButtonFloorPlanNext")
+        Log.i(tag, "onButtonFloorPlanNext")
 
-       global.floorPlanId = mFloorTableModel.getNextFloorPlanId(global.floorPlanId)
-       refreshFloorPlan()
-       if (global.floorPlanId > 0)
-       {
-          Log.i(tag, "onButtonFloorPlanNext  No floorPlans found!!")
-       }
+        global.floorPlanId = mFloorTableModel.getNextFloorPlanId(global.floorPlanId)
+        if (global.floorPlanId > 0)
+        {
+            Log.i(tag, "onButtonFloorPlanNext  No floorPlans found!!")
+        }
+        mFloorTableModel.loadFloorTables()
     }
 
     @Suppress("UNUSED_PARAMETER")

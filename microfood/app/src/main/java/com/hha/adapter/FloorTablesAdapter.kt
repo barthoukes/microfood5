@@ -1,6 +1,5 @@
 package com.hha.floor
 
-import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,6 +12,7 @@ import com.hha.util.TimeArcDrawable
 import tech.hha.microfood.databinding.AdapterFloorTableBinding
 import tech.hha.microfood.R
 import androidx.core.graphics.toColorInt
+import com.hha.framework.CFloorTable
 
 class FloorTablesAdapter(
    private val onFloorTableSelected: (com.hha.framework.CFloorTable) -> Unit,
@@ -78,7 +78,7 @@ class FloorTablesAdapter(
             }
         }
 
-        val floorTable = mFloorTables.getFloorTable(position)
+        val floorTable: CFloorTable? = mFloorTables.getFloorTable(position)
         if (floorTable != null)
         {
             // --- This is the new logic for updating the background ---
@@ -113,28 +113,9 @@ class FloorTablesAdapter(
                 val corner: Float = minutes * 360.0f / maximumTimeTimer
                 timeArcDrawable.progressAngle = corner
             }
-            val colour = when
-            {
-                floorTable.maxPersonCount == 0 -> colTableUnused
-                (floorTable.minutesLeft >= mRedTime &&
-                   floorTable.transactionId > 0) -> colTableFloorPlanBorderTimeout
-                floorTable.tableStatus == ETableStatus.TABLE_OK ||
-                   floorTable.tableStatus == ETableStatus.TABLE_OPEN_NOT_PAID ||
-                   floorTable.tableStatus == ETableStatus.TABLE_OPEN_PAID-> {
-                    if (floorTable.name != mTransactionName) colOpenTableFloorPlan
-                    else colOpenTableFloorPlanSelected
-                }
-                floorTable.tableStatus == ETableStatus.TABLE_BUSY ||
-                   floorTable.tableStatus == ETableStatus.TABLE_EXIST -> {
-                    if (floorTable.name != mTransactionName) colTableFloorPlan
-                    else colTableFloorPlanSelected
-                }
-                floorTable.tableStatus == ETableStatus.TABLE_RESERVED -> colTableReserved
-                else -> "#FF6347".toColorInt() // A reddish color
-            }
-            val col2 = ColourUtils.brighten(colour, 0.15f) or 0xff000000.toInt()
-
             // 6. Set the calculated colors and angle on the drawable
+            val colour = calculateColour(floorTable)
+            val col2 = ColourUtils.brighten(colour, 0.15f) or 0xff000000.toInt()
             timeArcDrawable.setColors(colour, col2)
 
             if (floorTable.drinksMinutes >= mFloorplanDrinksEmpty)
@@ -175,6 +156,31 @@ class FloorTablesAdapter(
         }
     }
 
+    fun calculateColour(floorTable: CFloorTable): Int
+    {
+        val colour = when
+        {
+            floorTable.maxPersonCount == 0 -> colTableUnused
+            (floorTable.minutesLeft >= mRedTime &&
+               floorTable.transactionId > 0) -> colTableFloorPlanBorderTimeout
+            floorTable.tableStatus == ETableStatus.TABLE_OK ||
+               floorTable.tableStatus == ETableStatus.TABLE_OPEN_NOT_PAID ||
+               floorTable.tableStatus == ETableStatus.TABLE_OPEN_PAID-> {
+                if (floorTable.name != mTransactionName) colOpenTableFloorPlan
+                else colOpenTableFloorPlanSelected
+            }
+            floorTable.tableStatus == ETableStatus.TABLE_BUSY ||
+               floorTable.tableStatus == ETableStatus.TABLE_EMPTY ||
+               floorTable.tableStatus == ETableStatus.TABLE_EXIST -> {
+                if (floorTable.name != mTransactionName) colTableFloorPlan
+                else colTableFloorPlanSelected
+            }
+            floorTable.tableStatus == ETableStatus.TABLE_RESERVED -> colTableReserved
+            else -> "#FF6347".toColorInt() // A reddish color
+        }
+        return colour
+    }
+
     override fun getItemCount(): Int = mFloorTables.size
 
     fun submitList(tables: CFloorTables)
@@ -185,7 +191,7 @@ class FloorTablesAdapter(
 
     fun getSelectedTransactionName(): String = mTransactionName
 
-    fun refreshAllData()
+    fun redrawViewsAfterChangeLanguage()
     {
         notifyDataSetChanged()
     }

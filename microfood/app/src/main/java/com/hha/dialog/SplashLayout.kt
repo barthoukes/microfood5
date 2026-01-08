@@ -1,8 +1,6 @@
 package com.hha.dialog
 
-import com.hha.dialog.MainMenuActivity
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -11,14 +9,17 @@ import android.view.WindowManager
 import android.widget.TextView
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
-import com.hha.exceptions.ConfigNotFoundException
-import com.hha.framework.CMenuCards
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import com.hha.resources.Global
+
+import tech.hha.microfood.R
+
+import com.hha.exceptions.ConfigNotFoundException
+import com.hha.framework.CMenuCards
+import com.hha.framework.CTaxProvider
 import com.hha.grpc.GrpcServiceFactory
 import com.hha.network.NetworkScanner
-import tech.hha.microfood.R
+import com.hha.resources.Global
 
 @SuppressLint("CustomSplashScreen")
 class SplashLayout : androidx.activity.ComponentActivity()
@@ -122,6 +123,7 @@ class SplashLayout : androidx.activity.ComponentActivity()
                         // Save IP and load data. This might throw an exception.
                         Global.getInstance().serverIp = foundIp
                         Global.getInstance().getOptions()
+                        CTaxProvider.initialize()
                         CMenuCards.getInstance().loadTakeaway()
 
                         // If we get here, data loading was successful. Navigate and exit.
