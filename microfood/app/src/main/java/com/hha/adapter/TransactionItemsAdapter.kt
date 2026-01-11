@@ -196,4 +196,14 @@ class TransactionItemsAdapter(
         Log.d("TIA", "Listener: Transaction cleared")
         notifyDataSetChanged()
     }
+
+    override fun onBeginLoading()
+    {
+        TODO("Not yet implemented")
+    }
+
+    override fun onEndLoading()
+    {
+        TODO("Not yet implemented")
+    }
 }

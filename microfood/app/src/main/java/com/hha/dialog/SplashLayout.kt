@@ -1,8 +1,6 @@
 package com.hha.dialog
 
-import com.hha.dialog.MainMenuActivity
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -11,22 +9,23 @@ import android.view.WindowManager
 import android.widget.TextView
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
-import com.hha.exceptions.ConfigNotFoundException
-import com.hha.framework.CMenuCards
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import com.hha.resources.Global
-import com.hha.grpc.GrpcServiceFactory
-import com.hha.network.NetworkScanner
+
 import tech.hha.microfood.R
 
-@SuppressLint("CustomSplashScreen")
-class SplashLayout : androidx.activity.ComponentActivity()
-{
+import com.hha.exceptions.ConfigNotFoundException
+import com.hha.framework.CMenuCards
+import com.hha.framework.CTaxProvider
+import com.hha.grpc.GrpcServiceFactory
+import com.hha.network.NetworkScanner
+import com.hha.resources.Global
 
+@SuppressLint("CustomSplashScreen")
+class SplashLayout : BaseActivity()
+{
     val global = Global.getInstance()
     val CFG = global.CFG
-    private lateinit var services: GrpcServiceFactory
 
     override fun onCreate(savedInstanceState: Bundle?)
     {
@@ -99,6 +98,9 @@ class SplashLayout : androidx.activity.ComponentActivity()
 
             while (attempt < maxRetries)
             {
+                Log.d("SplashLayout", "Searching for server, attempt ${attempt + 1}/$maxRetries...")
+                grpcStateViewModel.messageSent()
+
                 var foundIp: String? = null
                 try
                 {
@@ -122,7 +124,11 @@ class SplashLayout : androidx.activity.ComponentActivity()
                         // Save IP and load data. This might throw an exception.
                         Global.getInstance().serverIp = foundIp
                         Global.getInstance().getOptions()
+                        CTaxProvider.initialize()
+                        grpcStateViewModel.messageConfirmed()
+                        grpcStateViewModel.messageSent()
                         CMenuCards.getInstance().loadTakeaway()
+                        grpcStateViewModel.messageConfirmed()
 
                         // If we get here, data loading was successful. Navigate and exit.
                         navigateToMainActivity()

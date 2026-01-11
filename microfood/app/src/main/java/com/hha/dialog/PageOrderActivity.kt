@@ -80,6 +80,7 @@ class PageOrderActivity : BaseActivity(), ModalDialogYesNo.MessageBoxYesNoListen
     private val _orderTotal = MutableLiveData<CMoney>()
     val orderTotal: LiveData<CMoney> = _orderTotal
     var mEnterPressed = false
+    var mFirstTime = false
     val groups = CFG.getValue("display_groups")
     val columns = CFG.getValue("display_groups_horizontal")
     val rows = (groups + columns - 1) / columns
@@ -99,21 +100,23 @@ class PageOrderActivity : BaseActivity(), ModalDialogYesNo.MessageBoxYesNoListen
 //        mTransactionModel = ViewModelProvider(this, TransactionModelFactory)
 //            .get(TransactionModel::class.java)
 
-        setupRecyclerViews()
-
         val transactionId = intent.getIntExtra("TRANSACTION_ID", -1)
+        val mFromBilling = intent.getBooleanExtra("FROM_BILL", false)
+        mFirstTime = true
         // 2. Validate the ID. If it's missing, the activity cannot function.
-        if (transactionId == -1)
+        if (transactionId <= 0)
         {
             Log.e(tag, "FATAL: No TRANSACTION_ID found in Intent. Finishing activity.")
             Toast.makeText(this, "Error: Transaction not found", Toast.LENGTH_LONG).show()
             finish() // Exit immediately
             return   // Stop executing onCreate
         }
+
         // 3. Set up observers to react to data changes from the ViewModel.
         //    This is where you connect the data to your UI.
-        setupObservers()
+        setupRecyclerViews()
         setupClickListeners()
+        setupObservers()
 
         // 2. Tell the ViewModel to start loading the transaction data.
         //    The ViewModel will handle background threads and state updates.
@@ -136,7 +139,7 @@ class PageOrderActivity : BaseActivity(), ModalDialogYesNo.MessageBoxYesNoListen
             // Use the MyEvent wrapper to ensure navigation happens only once
             event.getContentIfNotHandled()?.let { transactionId ->
                 // This block will only execute once per event, even on screen rotation.
-                Log.i("AskTransactionActivity", "Received navigation event for transaction ID: $transactionId")
+                Log.i(tag, "Received navigation event for transaction ID: $transactionId")
 
                 // Create the Intent to start PageOrderActivity
                 val intent = Intent(this, PageOrderActivity::class.java).apply {
@@ -152,14 +155,19 @@ class PageOrderActivity : BaseActivity(), ModalDialogYesNo.MessageBoxYesNoListen
     private fun setupObservers()
     {
         // Observe loading state to show/hide a spinner
-        mTransactionModel.isLoading.observe(this) { isLoading ->
-            mBinding.loadingSpinner.visibility = if (isLoading) View.VISIBLE else View.GONE
-        }
+//        mTransactionModel.isLoading.observe(this) { isLoading ->
+//            mBinding.loadingSpinner.visibility = if (isLoading) View.VISIBLE else View.GONE
+//        }
 
         // Observe the transaction itself
         mTransactionModel.activeTransaction.observe(this) { transaction ->
             if (transaction != null)
             {
+                if (mFirstTime)
+                {
+                    mFirstTime = false
+                    mTransactionModel.initPageOrder()
+                }
                 mBinding.pageOrderTableName.text = mTransactionModel.getTableName()
 
                 // When the transaction is ready, update the adapter.
@@ -242,7 +250,6 @@ class PageOrderActivity : BaseActivity(), ModalDialogYesNo.MessageBoxYesNoListen
     override fun onResume()
     {
         super.onResume()
-        refreshButtons()
 //        // Refresh data when activity resumes
 //        if (global.transaction == null)
 //        {
@@ -419,7 +426,7 @@ class PageOrderActivity : BaseActivity(), ModalDialogYesNo.MessageBoxYesNoListen
         }
     }
 
-    fun addOneToCursorPosition(): Boolean
+    suspend fun addOneToCursorPosition(): Boolean
     {
         val currentTransaction = mTransactionModel.activeTransaction.value
         return currentTransaction?.addOneToCursorPosition() ?: false

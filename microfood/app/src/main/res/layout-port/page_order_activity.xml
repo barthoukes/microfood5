@@ -7,19 +7,6 @@
 	android:background="@drawable/backrepeat"
 	android:fitsSystemWindows="true">
 
-	<ProgressBar
-		android:id="@+id/loading_spinner"
-		style="?android:attr/progressBarStyleLarge"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:indeterminate="true"
-		android:visibility="gone"
-		app:layout_constraintBottom_toTopOf="@id/guideline_price_top"
-		app:layout_constraintEnd_toStartOf="@id/guideline_left"
-		app:layout_constraintStart_toStartOf="parent"
-		app:layout_constraintTop_toBottomOf="@id/guideline_top"
-		tools:visibility="visible" />  <!-- 'tools:visibility' makes it visible in the preview -->
-
 	<androidx.constraintlayout.widget.Guideline
 		android:id="@+id/guideline_top"
 		android:layout_width="wrap_content"
@@ -96,6 +83,17 @@
 		app:layout_constraintStart_toStartOf="parent"
 		app:layout_constraintTop_toBottomOf="@id/guideline_top" />
 
+	<ImageView
+		android:id="@+id/grpc_spinner"
+		android:layout_width="40dp"
+		android:layout_height="0dp"
+		android:visibility="visible"
+		android:background="@color/COLOUR_SPINNER_BACKGROUND"
+		app:layout_constraintBottom_toBottomOf="@id/guideline_top"
+		app:layout_constraintStart_toStartOf="@id/guideline_left"
+		app:layout_constraintTop_toTopOf="parent"
+		app:layout_constraintEnd_toStartOf="@+id/poe_header_text"
+		tools:visibility="visible" />
 
 	<!-- RIGHT COLUMN VIEWS (Menu) -->
 	<TextView
@@ -110,7 +108,7 @@
 		app:layout_constraintTop_toTopOf="parent"
 		app:layout_constraintBottom_toBottomOf="@id/guideline_top"
 		app:layout_constraintEnd_toStartOf="@id/btn_back"
-		app:layout_constraintStart_toStartOf="@id/guideline_left" />
+		app:layout_constraintStart_toEndOf="@id/grpc_spinner" />
 
 	<ImageButton
 		android:id="@+id/btn_back"

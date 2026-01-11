@@ -27,12 +27,23 @@ class CFloorPlans: Iterable<CFloorPlan>
 
    fun getNextFloorPlanId(floorPlanId: Int): Int
    {
-      // Find the index of the current floor plan.
-      val currentIndex = mPlans.indexOfFirst { it.floorPlanId == floorPlanId }
-
-      // Next index
-      var nextIndex = (currentIndex + 1) % mPlans.size
-
+      var nextIndex = 0
+      if (mPlans.isEmpty())
+      {
+         return -1
+      }
+      try
+      {
+         // Find the index of the current floor plan.
+         val currentIndex = mPlans.indexOfFirst { it.floorPlanId == floorPlanId }
+         nextIndex = (currentIndex + 1) % mPlans.size
+      }
+      catch (e: Exception)
+      {
+         nextIndex = 0
+      }
       return mPlans[nextIndex].floorPlanId
+
+
    }
 }

@@ -5,6 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.hha.archive.transactionId
 import com.hha.callback.PaymentsListener
 import com.hha.callback.TransactionItemListener
 import com.hha.callback.TransactionListener
@@ -22,9 +23,11 @@ import com.hha.framework.COpenClientsHandler.createNewTakeawayTransaction
 import com.hha.framework.CPaymentTransaction
 import com.hha.framework.CPersonnel
 import com.hha.grpc.GrpcServiceFactory
+import com.hha.grpc.GrpcStateViewModel
 import com.hha.printer.BillPrinter
 import com.hha.printer.EBillExample
 import com.hha.printer.EPrinterLocation
+import com.hha.printer.OrderNumberPrinter
 import com.hha.printer.PrintFrame
 import com.hha.printer.TakeawayNumber
 import com.hha.resources.CTimestamp
@@ -67,8 +70,10 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
    val navigateToPageOrder: LiveData<MyEvent<Int>> = _navigateToPageOrder
 
    // LiveData to signal when data is being loaded, allowing the UI to show a progress indicator.
-   private val _isLoading = MutableLiveData<Boolean>()
-   val isLoading: LiveData<Boolean> = _isLoading
+   //private val _isLoading = MutableLiveData<Boolean>()
+   //val isLoading: LiveData<Boolean> = _isLoading
+   private var grpcStateViewModel: GrpcStateViewModel? = null
+
    private var mShowDiscount = false // @todo Inspect
 
    // 2. LIVE DATA FOR THE UI
@@ -97,7 +102,7 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
    private val mTakeawayContinueUntilCr = CFG.getBoolean("takeaway_continue_until_cr")
    private var mChangedTime = false
    var mAllowNewItem = false
-   private val mMinutes = 0
+   private var mMinutes = 0 // @todo Check when it is really used?
    private var mAutomaticPayments = false // @todo Inspect
    private val mFloorplanBillFirst = CFG.getBoolean("floorplan_bill_first")
    private var mIsUpdating = false // Add this flag to your class
@@ -176,7 +181,17 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
          Log.e(tag, "addItem: currentTransaction is null!!")
          return false
       }
-      return currentTransaction.addTransactionItem(item, clusterId)
+      viewModelScope.launch {
+         grpcStateViewModel?.messageSent() // Announce call start
+         try
+         {
+            currentTransaction.addTransactionItem(item, clusterId)
+         }
+         finally {
+            grpcStateViewModel?.messageConfirmed() // Announce call end
+         }
+      }
+      return true
    }
 
    fun addToEmployee(rfidKey: Short, paymentStatus: EPaymentStatus)
@@ -267,7 +282,16 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
          )
          {
             val number = TakeawayNumber()
-            number.printTakeawayNumber(currentTransaction)
+            viewModelScope.launch {
+               grpcStateViewModel?.messageSent()
+               try
+               {
+                  number.printTakeawayNumber(currentTransaction)
+               }
+               finally {
+                  grpcStateViewModel?.messageConfirmed()
+               }
+            }
 
             val timeNow = CTimestamp()
             // End transaction and print
@@ -341,31 +365,47 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
    {
       Log.i(tag, "createTransactionForTable $tableName, $tableId")
       viewModelScope.launch {
-         _isLoading.value = true
-         val newTransactionId = withContext(Dispatchers.IO)
+         grpcStateViewModel?.messageSent()
+         try
          {
-            // 1. Call your gRPC/framework function to create a new transaction record
-            //    and link it to the tableId. This should return the new transaction's ID.
-            COpenClientsHandler.createNewRestaurantTransaction(tableName, tableId, minutes)
+            val newTransactionId = withContext(Dispatchers.IO)
+            {
+               // 1. Call your gRPC/framework function to create a new transaction record
+               //    and link it to the tableId. This should return the new transaction's ID.
+               COpenClientsHandler.createNewRestaurantTransaction(tableName, tableId, minutes)
+            }
+            if (newTransactionId > 0)
+            {
+               // 3. --- THIS IS THE FIX ---
+               // Creation was successful. Immediately post the ID as a navigation event.
+               // We no longer create a CTransaction object here.
+               Log.d(tag, "Posting navigation event for transaction ID: $newTransactionId")
+               _navigateToPageOrder.value = MyEvent(newTransactionId)
+            } else
+            {
+               // Handle the error if the transaction could not be created.
+               // For example, post to another LiveData to show a Toast.
+               Log.e(tag, "Failed to create new transaction for table: $tableName (ID: $tableId)")
+               // _showToast.value = MyEvent("Failed to create order")
+            }
+            Log.d(tag, "createTransactionForTable: newTransactionId = $newTransactionId")
          }
-         _isLoading.value = false
-         Log.d(tag, "createTransactionForTable: newTransactionId = $newTransactionId")
+         finally {
+            grpcStateViewModel?.messageConfirmed()
+         }
+      }
+   }
 
-         // 2. If creation was successful, load the full CTransaction object.
-         if (newTransactionId > 0)
-         {
-            // 3. --- THIS IS THE FIX ---
-            // Creation was successful. Immediately post the ID as a navigation event.
-            // We no longer create a CTransaction object here.
-            Log.d(tag, "Posting navigation event for transaction ID: $newTransactionId")
-            _navigateToPageOrder.value = MyEvent(newTransactionId)
-         } else
-         {
-            // Handle the error if the transaction could not be created.
-            // For example, post to another LiveData to show a Toast.
-            Log.e(tag, "Failed to create new transaction for table: $tableName (ID: $tableId)")
-            // _showToast.value = MyEvent("Failed to create order")
-         }
+   fun navigateToExistingTransaction(transactionId: Int)
+   {
+      Log.i(tag, "navigateToExistingTransaction ${transactionId}")
+      if (transactionId > 0)
+      {
+         // 3. --- THIS IS THE FIX ---
+         // Creation was successful. Immediately post the ID as a navigation event.
+         // We no longer create a CTransaction object here.
+         Log.d(tag, "Posting navigation event for transaction ID: $transactionId")
+         _navigateToPageOrder.value = MyEvent(transactionId)
       }
    }
 
@@ -514,6 +554,50 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
       return setTakeawayFinalQuantity(
          0, true, false, ts, false
       )
+   }
+
+   fun initPageOrder(): Boolean
+   {
+      val currentTransaction = _transaction.value
+      if (currentTransaction == null)
+      {
+         return false
+      }
+      if (currentTransaction.isValid() == false)
+      {
+         return false
+      }
+      when (currentTransaction.getStatus())
+      {
+         EClientOrdersType.INIT -> {
+            Log.d(tag, "initPageOrder  open table!")
+            currentTransaction.open()
+            if (userCFG.getBoolean("user_print_ta_number")
+               && userCFG.getBoolean("order_number_first")
+               && currentTransaction.isTakeaway())
+            {
+               val name = currentTransaction.getName()
+               if (name != global.lastPrintedBillNumer)
+               {
+                  global.lastPrintedBillNumer = name
+                  viewModelScope.launch {
+                     val prn = OrderNumberPrinter(name)
+                     prn.print() }
+               }
+            }
+         }
+         EClientOrdersType.OPEN, EClientOrdersType.OPEN_PAID ->
+            Log.d(tag, "open, open_paid -> do nothing")
+         EClientOrdersType.PAYING ->
+         {
+            if (CFG.getValue("bill_paying_add") <= 0)
+               return false
+         }
+         EClientOrdersType.CLOSED -> return false
+         else -> {}
+      }
+      mMinutes = 0
+      return true
    }
 
    /*----------------------------------------------------------------------------*/
@@ -904,11 +988,10 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
       {
          val clusterId: Short = -1
          //Log.d(tag, "MenuItem clicked: ${selectedMenuItem.localName}")
-         if (currentTransaction.addTransactionItem(selectedMenuItem, clusterId))
-         {
-            mIsChanged = true
-            return true
-         }
+         viewModelScope.launch {
+            currentTransaction.addTransactionItem(selectedMenuItem, clusterId) }
+         mIsChanged = true
+         return true
       }
       return false
    }
@@ -1094,65 +1177,66 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
       // Launch a coroutine to handle the potentially long-running transaction loading
       viewModelScope.launch {
          // You can set a loading state here if needed, similar to listOpen()
-         _isLoading.value = true
-
          val global = Global.getInstance()
          var currentTransaction: CTransaction? = _transaction.value
 
          // If the transaction doesn't exist yet, load it in the background.
          if (currentTransaction == null)
          {
+            grpcStateViewModel?.messageSent()
             // Switch to a background thread for I/O operations
-            currentTransaction = withContext(Dispatchers.IO) {
-               if (transactionId < 1E6)
-               {
-                  Log.e(tag, "Invalid global transaction ID, cannot load.")
-                  null // Return null from the background thread
-               } else
-               {
-                  Log.d(tag, "Loading transaction with ID: ${transactionId}")
-                  val newTransaction = CTransaction(transactionId)
-                  // Assuming .load() is the blocking call that loads data.
-                  // This now runs safely in the background.
-                  if (newTransaction.isValid())
+            try
+            {
+               currentTransaction = withContext(Dispatchers.IO) {
+                  if (transactionId < 1E6)
                   {
-                     newTransaction // Return the loaded transaction
+                     Log.e(tag, "Invalid global transaction ID, cannot load.")
+                     null // Return null from the background thread
                   } else
                   {
-                     Log.e(tag, "Failed to load transaction data for ID: ${transactionId}")
-                     null // Return null on failure
+                     Log.d(tag, "Loading transaction with ID: ${transactionId}")
+                     val newTransaction = CTransaction(transactionId)
+                     // Assuming .load() is the blocking call that loads data.
+                     // This now runs safely in the background.
+                     if (newTransaction.isValid())
+                     {
+                        newTransaction // Return the loaded transaction
+                     } else
+                     {
+                        Log.e(tag, "Failed to load transaction data for ID: ${transactionId}")
+                        null // Return null on failure
+                     }
                   }
                }
+               // Back on the main thread now. Check the result from the background work.
+               if (currentTransaction == null)
+               {
+                  Log.e(tag, "Transaction is null after attempting to load. Aborting initialization.")
+                  // _isLoading.value = false
+                  return@launch // Exit the coroutine
+               }
+
+               // Now that we have a valid transaction, update the LiveData
+               _transaction.value = currentTransaction
+
+               // It's now safe to add listeners and perform other main-thread logic
+               mMode = mode
+               currentTransaction.addListener(THIS)
+               currentTransaction.addPaymentListener(THIS)
+               currentTransaction.addItemListener(THIS)
+               // Trigger an initial UI update
+               onTransactionChanged(currentTransaction)
+               if (mode == EInitMode.VIEW_PAGE_ORDER)
+               {
+                  currentTransaction.startNextTimeFrame()
+               }
+               mIsInitialized = true
             }
-         }
-
-         // Back on the main thread now. Check the result from the background work.
-         if (currentTransaction == null)
-         {
-            Log.e(tag, "Transaction is null after attempting to load. Aborting initialization.")
-            // _isLoading.value = false
-            return@launch // Exit the coroutine
-         }
-
-         // Now that we have a valid transaction, update the LiveData
-         _transaction.value = currentTransaction
-
-         // It's now safe to add listeners and perform other main-thread logic
-         mMode = mode
-         if (currentTransaction != null)
-         {
-            currentTransaction.addListener(THIS)
-            currentTransaction.addPaymentListener(THIS)
-            currentTransaction.addItemListener(THIS)
-            // Trigger an initial UI update
-            onTransactionChanged(currentTransaction)
-            if (mode == EInitMode.VIEW_PAGE_ORDER)
+            finally
             {
-               currentTransaction.startNextTimeFrame()
+               grpcStateViewModel?.messageConfirmed()
             }
-            mIsInitialized = true
          }
-         _isLoading.value = false
       }
    }
 
@@ -1334,7 +1418,8 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
       val currentTransaction = _transaction.value
       if (mMode == EInitMode.VIEW_PAGE_ORDER && currentTransaction != null)
       {
-         currentTransaction.addOneToCursorPosition()
+         viewModelScope.launch {
+            currentTransaction.addOneToCursorPosition() }
          onTransactionChanged(currentTransaction)
          mIsChanged = true
       }
@@ -1346,7 +1431,8 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
       val currentTransaction = _transaction.value
       if (mMode == EInitMode.VIEW_PAGE_ORDER && currentTransaction != null)
       {
-         currentTransaction.minus1()
+         viewModelScope.launch {
+            currentTransaction.minus1() }
          onTransactionChanged(currentTransaction)
          mIsChanged = true
       }
@@ -1358,7 +1444,8 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
       val currentTransaction = _transaction.value
       if (mMode == EInitMode.VIEW_PAGE_ORDER && currentTransaction != null)
       {
-         currentTransaction.nextPortion()
+         viewModelScope.launch {
+            currentTransaction.nextPortion() }
          onTransactionChanged(currentTransaction)
          mIsChanged = true
       }
@@ -1370,7 +1457,8 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
       val currentTransaction = _transaction.value
       if (mMode == EInitMode.VIEW_PAGE_ORDER && currentTransaction != null)
       {
-         currentTransaction.remove()
+         viewModelScope.launch {
+            currentTransaction.remove() }
          onTransactionChanged(currentTransaction)
          mIsChanged = true
       }
@@ -1448,6 +1536,16 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
 
    override fun onTransactionCleared()
    {
+   }
+
+   override fun onBeginLoading()
+   {
+      TODO("Not yet implemented")
+   }
+
+   override fun onEndLoading()
+   {
+      TODO("Not yet implemented")
    }
 
    // 4. LISTENER IMPLEMENTATION
@@ -1752,17 +1850,21 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
       }
 
       viewModelScope.launch {
-         _isLoading.value = true
-         // Perform the blocking CTransaction creation on a background thread.
-         val fullTransaction = withContext(Dispatchers.IO) {
-            // This is where you create the full transaction object.
-            // Assuming CTransaction's constructor handles loading from DB/network.
-            CTransaction(transactionId)
+         grpcStateViewModel?.messageSent()
+         try
+         {
+            // Perform the blocking CTransaction creation on a background thread.
+            val fullTransaction = withContext(Dispatchers.IO) {
+               // This is where you create the full transaction object.
+               // Assuming CTransaction's constructor handles loading from DB/network.
+               CTransaction(transactionId)
+            }
+            // Post the loaded transaction to the LiveData. The UI will react to this.
+            _transaction.value = fullTransaction
+         } finally
+         {
+            grpcStateViewModel?.messageConfirmed()
          }
-         _isLoading.value = false
-
-         // Post the loaded transaction to the LiveData. The UI will react to this.
-         _transaction.value = fullTransaction
       }
    }
 
@@ -1783,37 +1885,42 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
    fun createTakeawayTransaction() {
       Log.i(tag, "createTakeawayTransaction")
       viewModelScope.launch {
-         _isLoading.value = true
-         val newTransactionId = withContext(Dispatchers.IO) {
-            // --- All background logic is now here ---
-            val useBag = true
-            // It's better to pass the user ID as a parameter if possible,
-            // but for now, we'll keep the Global call here.
-            val user = Global.getInstance().rfidKeyId
+         grpcStateViewModel?.messageSent()
+         try
+         {
+            val newTransactionId = withContext(Dispatchers.IO) {
+               // --- All background logic is now here ---
+               val useBag = true
+               // It's better to pass the user ID as a parameter if possible,
+               // but for now, we'll keep the Global call here.
+               val user = Global.getInstance().rfidKeyId
 
-            val transactionId = createNewTakeawayTransaction(0, useBag, user, false)
+               val transactionId = createNewTakeawayTransaction(0, useBag, user, false)
 
-            if (transactionId > 0) {
-               // Also perform any other related background work here
-               CMenuCards.getInstance().loadTakeaway()
-               transactionId // Return the valid ID
+               if (transactionId > 0)
+               {
+                  // Also perform any other related background work here
+                  CMenuCards.getInstance().loadTakeaway()
+                  transactionId // Return the valid ID
+               } else
+               {
+                  Log.e(tag, "Failed to create new takeaway transaction.")
+                  -1 // Return an invalid ID on failure
+               }
+            }
+            // --- Post navigation event to the UI ---
+            if (newTransactionId > 0) {
+               Log.d(tag, "Posting navigation event for takeaway transaction ID: $newTransactionId")
+               _navigateToPageOrder.value = MyEvent(newTransactionId)
             } else {
-               Log.e(tag, "Failed to create new takeaway transaction.")
-               -1 // Return an invalid ID on failure
+               // Optionally, you can post to a different LiveData to show an error Toast
+               // _showToast.value = MyEvent("Failed to create order")
             }
          }
-         _isLoading.value = false
-
-         // --- Post navigation event to the UI ---
-         if (newTransactionId > 0) {
-            Log.d(tag, "Posting navigation event for takeaway transaction ID: $newTransactionId")
-            _navigateToPageOrder.value = MyEvent(newTransactionId)
-         } else {
-            // Optionally, you can post to a different LiveData to show an error Toast
-            // _showToast.value = MyEvent("Failed to create order")
+         finally
+         {
+            grpcStateViewModel?.messageConfirmed()
          }
       }
    }
-
-
 }

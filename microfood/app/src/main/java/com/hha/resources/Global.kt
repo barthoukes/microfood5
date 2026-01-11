@@ -39,6 +39,7 @@ class Global private constructor() {
     var clusterNoItems = false
     var showAllprices = false
     var showAllTimes = false
+    var lastPrintedBillNumer = "108"
     var floorPlanId: Int = 1
     var access = EAccess.ACCESS_EMPLOYEE_KEY
     public val CFG: Configuration = Configuration()

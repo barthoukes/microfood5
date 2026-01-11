@@ -1,6 +1,5 @@
 package com.hha.floor
 
-import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -171,6 +170,7 @@ class FloorTablesAdapter(
                 else colOpenTableFloorPlanSelected
             }
             floorTable.tableStatus == ETableStatus.TABLE_BUSY ||
+               floorTable.tableStatus == ETableStatus.TABLE_EMPTY ||
                floorTable.tableStatus == ETableStatus.TABLE_EXIST -> {
                 if (floorTable.name != mTransactionName) colTableFloorPlan
                 else colTableFloorPlanSelected
@@ -191,7 +191,7 @@ class FloorTablesAdapter(
 
     fun getSelectedTransactionName(): String = mTransactionName
 
-    fun refreshAllData()
+    fun redrawViewsAfterChangeLanguage()
     {
         notifyDataSetChanged()
     }

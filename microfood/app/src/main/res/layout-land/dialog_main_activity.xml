@@ -1,169 +1,221 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:id="@+id/main_layout_menu"
-    android:background="@drawable/backrepeat"
-    android:layout_height="match_parent"
-    android:orientation="vertical" >
-    <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-        <TextView
-            android:id="@+id/new_table"
-            android:text="@string/app_name"
-            android:textSize="24sp"
-            android:layout_weight="1"
-            android:layout_width="0dp"
-            android:gravity="center"
-            android:background="@color/COLOUR_HEADER_BACKGROUND"
-            android:textColor="#ffeeeeee"
-            android:layout_marginBottom="4dp"
-            android:layout_height="fill_parent" />
-    </LinearLayout>
-    <LinearLayout
-        android:layout_height="0dp"
-        android:layout_width="fill_parent"
-        android:orientation="horizontal"
-        android:layout_weight="8">
-        <Button
-            android:id="@+id/tafel_overzicht"
-            android:layout_weight="14"
-            android:textSize="24sp"
-            android:background="@color/ANDROID_BUTTON_BACKGROUND"
-            android:textColor="@color/ANDROID_BUTTON_TEXT"
-            android:layout_margin="4dp"
-            android:layout_height="fill_parent"
-            android:layout_width ="fill_parent"
-            android:drawableBottom="@drawable/sitin_yellow"
-            android:tint="#FFFF00"
-            android:onClick="button_tafel_overzicht"
-            android:text ="@string/table_overview"/>
-        <Button
-            android:id="@+id/button_takeaway"
-            android:layout_weight="14"
-            android:textSize="24sp"
-            android:background="@color/ANDROID_BUTTON_BACKGROUND"
-            android:textColor="@color/ANDROID_BUTTON_TEXT"
-            android:layout_margin="4dp"
-            android:layout_height="fill_parent"
-            android:layout_width ="fill_parent"
-            android:onClick="button_takeaway"
-            android:drawableBottom="@drawable/bag_yellow"/>
-        <Button
-            android:id="@+id/button_settings"
-            android:layout_weight="14"
-            android:textSize="24sp"
-            android:background="@color/ANDROID_BUTTON_BACKGROUND"
-            android:textColor="@color/ANDROID_BUTTON_TEXT"
-            android:layout_margin="4dp"
-            android:layout_height="fill_parent"
-            android:layout_width ="fill_parent"
-            android:onClick="button_settings"
-            android:drawableBottom="@drawable/settings_yellow"
-            android:text ="@string/configuration"/>
-        <Button
-            android:id="@+id/button_update"
-            android:layout_height="fill_parent"
-            android:layout_width ="fill_parent"
-            android:layout_weight="14"
-            android:textSize="24sp"
-            android:background="@color/ANDROID_BUTTON_BACKGROUND"
-            android:textColor="@color/ANDROID_BUTTON_TEXT"
-            android:layout_margin="4dp"
-            android:onClick="button_update_tablet"
-            android:drawableBottom="@drawable/menu_yellow"
-            android:text ="@string/update_name_card"/>
-    </LinearLayout>
-    <LinearLayout
-        android:layout_height="0dp"
-        android:layout_width="fill_parent"
-        android:orientation="horizontal"
-        android:layout_weight="8">
-        <Button
-            android:id="@+id/button_calculator"
-            android:layout_height="fill_parent"
-            android:layout_width ="fill_parent"
-            android:drawableBottom="@drawable/icon_calculator_yellow"
-            android:layout_weight="14"
-            android:textSize="24sp"
-            android:background="@color/ANDROID_BUTTON_BACKGROUND"
-            android:textColor="@color/ANDROID_BUTTON_TEXT"
-            android:layout_margin="4dp"
-            android:onClick="button_calculator_yellow"
-            android:text ="Rekenmachine"/>
-        <Button
-            android:id="@+id/button_change_language"
-            android:layout_weight="14"
-            android:textSize="24sp"
-            android:background="@color/ANDROID_BUTTON_BACKGROUND"
-            android:textColor="@color/ANDROID_BUTTON_TEXT"
-            android:layout_margin="4dp"
-            android:layout_height="fill_parent"
-            android:layout_width ="fill_parent"
-            android:onClick="button_change_language"
-            android:drawableBottom="@drawable/languages_yellow"
-            android:text ="language"/>
-        <Button
-            android:id="@+id/button_stop"
-            android:layout_height="fill_parent"
-            android:layout_width ="fill_parent"
-            android:layout_weight="14"
-            android:textSize="24sp"
-            android:background="@color/ANDROID_BUTTON_BACKGROUND"
-            android:textColor="@color/ANDROID_BUTTON_TEXT"
-            android:layout_margin="4dp"
-            android:onClick="button_stop"
-            android:drawableBottom="@drawable/shutdown_yellow"
-            android:text ="@string/stop"/>
-        <Button
-            android:id="@+id/about_us"
-            android:layout_weight="14"
-            android:textSize="24sp"
-            android:background="@color/ANDROID_BUTTON_BACKGROUND"
-            android:textColor="@color/ANDROID_BUTTON_TEXT"
-            android:layout_margin="4dp"
-            android:layout_height="fill_parent"
-            android:layout_width ="fill_parent"
-            android:drawableBottom="@drawable/info_icon_yellow"
-            android:onClick="button_about_us"
-            android:text ="@string/about_us"/>
-    </LinearLayout>
-    <LinearLayout
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:layout_width="fill_parent">
-        <TextView
-            android:id="@+id/text_info"
-            android:text=""
-            android:textSize="12sp"
-            android:layout_weight="15"
-            android:layout_width="0dp"
-            android:gravity="center"
-            android:background="#ff404080"
-            android:textColor="#ff808080"
-            android:layout_margin="4dp"
-            android:layout_height="match_parent" />
-        <TextView
-            android:id="@+id/buffer_colour"
-            android:text=""
-            android:layout_weight="1"
-            android:layout_width="0dp"
-            android:gravity="center"
-            android:background="#ffffffff"
-            android:textColor="#00FFFFFF"
-            android:layout_margin="4dp"
-            android:layout_height="match_parent" />
-        <TextView
-            android:id="@+id/connection_colour"
-            android:text=""
-            android:layout_weight="1"
-            android:layout_width="0dp"
-            android:gravity="center"
-            android:background="#ffffffff"
-            android:textColor="#00FFFFFF"
-            android:layout_margin="4dp"
-            android:layout_height="match_parent" />
-    </LinearLayout>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+   xmlns:app="http://schemas.android.com/apk/res-auto"
+   xmlns:tools="http://schemas.android.com/tools"
+   android:id="@+id/main_layout_menu"
+   android:layout_width="match_parent"
+   android:layout_height="match_parent"
+   android:background="@drawable/backrepeat">
 
-</LinearLayout>
+    <ImageView
+       android:id="@+id/grpc_spinner"
+       android:layout_width="40dp"
+       android:layout_height="0dp"
+       android:background="@color/COLOUR_MESSAGEBOX_BACKGROUND"
+       android:visibility="visible"
+       app:layout_constraintBottom_toBottomOf="@id/guideline_horizontal_top"
+       app:layout_constraintStart_toStartOf="parent"
+       app:layout_constraintTop_toTopOf="parent"
+       tools:visibility="visible" />
+
+    <!-- Header TextView -->
+    <TextView
+       android:id="@+id/new_table"
+       android:layout_width="0dp"
+       android:layout_height="0dp"
+       android:background="@color/COLOUR_HEADER_BACKGROUND"
+       android:gravity="center"
+       android:text="@string/app_name"
+       android:textColor="#ffeeeeee"
+       android:textSize="24sp"
+       app:layout_constraintBottom_toTopOf="@+id/guideline_horizontal_top"
+       app:layout_constraintEnd_toEndOf="parent"
+       app:layout_constraintStart_toEndOf="@id/grpc_spinner"
+       app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageButton
+       android:id="@+id/btn_back"
+       android:layout_width="wrap_content"
+       android:layout_height="0dp"
+       android:background="@color/COLOUR_HEADER_BACKGROUND"
+       android:src="@drawable/back_yellow"
+       android:onClick="button_stop"
+       app:layout_constraintTop_toTopOf="parent"
+       app:layout_constraintEnd_toEndOf="parent"
+       app:layout_constraintBottom_toTopOf="@id/guideline_horizontal_top"/>
+
+    <!--
+        Guidelines to create a 2x4 grid for the buttons.
+        - The horizontal guideline splits the screen in half vertically.
+        - The vertical guidelines create the four columns.
+    -->
+    <androidx.constraintlayout.widget.Guideline
+       android:id="@+id/guideline_horizontal_top"
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:orientation="horizontal"
+       app:layout_constraintGuide_percent="0.083" />
+
+    <androidx.constraintlayout.widget.Guideline
+       android:id="@+id/guideline_horizontal_50"
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:orientation="horizontal"
+       app:layout_constraintGuide_percent="0.54" />
+
+    <androidx.constraintlayout.widget.Guideline
+       android:id="@+id/guideline_vertical_25"
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:orientation="vertical"
+       app:layout_constraintGuide_percent="0.25" />
+
+    <androidx.constraintlayout.widget.Guideline
+       android:id="@+id/guideline_vertical_50"
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:orientation="vertical"
+       app:layout_constraintGuide_percent="0.5" />
+
+    <androidx.constraintlayout.widget.Guideline
+       android:id="@+id/guideline_vertical_75"
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:orientation="vertical"
+       app:layout_constraintGuide_percent="0.75" />
+
+
+    <!-- TOP ROW OF BUTTONS -->
+
+    <Button
+       android:id="@+id/tafel_overzicht"
+       android:layout_width="0dp"
+       android:layout_height="0dp"
+       android:layout_margin="4dp"
+       android:background="@color/ANDROID_BUTTON_BACKGROUND"
+       android:drawableBottom="@drawable/sitin_yellow"
+       android:onClick="button_tafel_overzicht"
+       android:text="@string/table_overview"
+       android:textColor="@color/ANDROID_BUTTON_TEXT"
+       android:textSize="24sp"
+       app:layout_constraintBottom_toTopOf="@id/guideline_horizontal_50"
+       app:layout_constraintEnd_toStartOf="@id/guideline_vertical_25"
+       app:layout_constraintStart_toStartOf="parent"
+       app:layout_constraintTop_toTopOf="@id/guideline_horizontal_top" />
+
+    <Button
+       android:id="@+id/button_takeaway"
+       android:layout_width="0dp"
+       android:layout_height="0dp"
+       android:layout_margin="4dp"
+       android:background="@color/ANDROID_BUTTON_BACKGROUND"
+       android:drawableBottom="@drawable/bag_yellow"
+       android:onClick="button_takeaway"
+       android:textColor="@color/ANDROID_BUTTON_TEXT"
+       android:textSize="24sp"
+       app:layout_constraintBottom_toTopOf="@+id/guideline_horizontal_50"
+       app:layout_constraintEnd_toStartOf="@+id/guideline_vertical_50"
+       app:layout_constraintStart_toStartOf="@+id/guideline_vertical_25"
+       app:layout_constraintTop_toTopOf="@+id/guideline_horizontal_top"
+       tools:text="Take Away" />
+
+    <Button
+       android:id="@+id/button_settings"
+       android:layout_width="0dp"
+       android:layout_height="0dp"
+       android:layout_margin="4dp"
+       android:background="@color/ANDROID_BUTTON_BACKGROUND"
+       android:drawableBottom="@drawable/settings_yellow"
+       android:onClick="button_settings"
+       android:text="@string/configuration"
+       android:textColor="@color/ANDROID_BUTTON_TEXT"
+       android:textSize="24sp"
+       app:layout_constraintBottom_toTopOf="@+id/guideline_horizontal_50"
+       app:layout_constraintEnd_toStartOf="@+id/guideline_vertical_75"
+       app:layout_constraintStart_toStartOf="@+id/guideline_vertical_50"
+       app:layout_constraintTop_toTopOf="@+id/guideline_horizontal_top" />
+
+    <Button
+       android:id="@+id/button_update"
+       android:layout_width="0dp"
+       android:layout_height="0dp"
+       android:layout_margin="4dp"
+       android:background="@color/ANDROID_BUTTON_BACKGROUND"
+       android:drawableBottom="@drawable/menu_yellow"
+       android:onClick="button_update_tablet"
+       android:text="@string/update_name_card"
+       android:textColor="@color/ANDROID_BUTTON_TEXT"
+       android:textSize="24sp"
+       app:layout_constraintBottom_toTopOf="@+id/guideline_horizontal_50"
+       app:layout_constraintEnd_toEndOf="parent"
+       app:layout_constraintStart_toStartOf="@+id/guideline_vertical_75"
+       app:layout_constraintTop_toTopOf="@+id/guideline_horizontal_top" />
+
+
+    <!-- BOTTOM ROW OF BUTTONS -->
+
+    <Button
+       android:id="@+id/button_calculator"
+       android:layout_width="0dp"
+       android:layout_height="0dp"
+       android:layout_margin="4dp"
+       android:background="@color/ANDROID_BUTTON_BACKGROUND"
+       android:drawableBottom="@drawable/icon_calculator_yellow"
+       android:onClick="button_calculator_yellow"
+       android:text="Rekenmachine"
+       android:textColor="@color/ANDROID_BUTTON_TEXT"
+       android:textSize="24sp"
+       app:layout_constraintBottom_toBottomOf="parent"
+       app:layout_constraintEnd_toStartOf="@+id/guideline_vertical_25"
+       app:layout_constraintStart_toStartOf="parent"
+       app:layout_constraintTop_toTopOf="@+id/guideline_horizontal_50" />
+
+    <Button
+       android:id="@+id/button_change_language"
+       android:layout_width="0dp"
+       android:layout_height="0dp"
+       android:layout_margin="4dp"
+       android:background="@color/ANDROID_BUTTON_BACKGROUND"
+       android:drawableBottom="@drawable/languages_yellow"
+       android:onClick="button_change_language"
+       android:text="language"
+       android:textColor="@color/ANDROID_BUTTON_TEXT"
+       android:textSize="24sp"
+       app:layout_constraintBottom_toBottomOf="parent"
+       app:layout_constraintEnd_toStartOf="@+id/guideline_vertical_50"
+       app:layout_constraintStart_toStartOf="@+id/guideline_vertical_25"
+       app:layout_constraintTop_toTopOf="@+id/guideline_horizontal_50" />
+
+    <Button
+       android:id="@+id/button_stop"
+       android:layout_width="0dp"
+       android:layout_height="0dp"
+       android:layout_margin="4dp"
+       android:background="@color/ANDROID_BUTTON_BACKGROUND"
+       android:drawableBottom="@drawable/shutdown_yellow"
+       android:onClick="button_stop"
+       android:text="@string/stop"
+       android:textColor="@color/ANDROID_BUTTON_TEXT"
+       android:textSize="24sp"
+       app:layout_constraintBottom_toBottomOf="parent"
+       app:layout_constraintEnd_toStartOf="@+id/guideline_vertical_75"
+       app:layout_constraintStart_toStartOf="@+id/guideline_vertical_50"
+       app:layout_constraintTop_toTopOf="@+id/guideline_horizontal_50" />
+
+    <Button
+       android:id="@+id/about_us"
+       android:layout_width="0dp"
+       android:layout_height="0dp"
+       android:layout_margin="4dp"
+       android:background="@color/ANDROID_BUTTON_BACKGROUND"
+       android:drawableBottom="@drawable/info_icon_yellow"
+       android:onClick="button_about_us"
+       android:text="@string/about_us"
+       android:textColor="@color/ANDROID_BUTTON_TEXT"
+       android:textSize="24sp"
+       app:layout_constraintBottom_toBottomOf="parent"
+       app:layout_constraintEnd_toEndOf="parent"
+       app:layout_constraintStart_toStartOf="@+id/guideline_vertical_75"
+       app:layout_constraintTop_toTopOf="@+id/guideline_horizontal_50" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

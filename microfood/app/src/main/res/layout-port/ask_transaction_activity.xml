@@ -6,26 +6,24 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <ProgressBar
-        android:id="@+id/main_progress_bar"
-        style="?android:attr/progressBarStyleHorizontal"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
+    <ImageView
+        android:id="@+id/grpc_spinner"
+        android:layout_width="40dp"
+        android:layout_height="0dp"
+        android:background="@color/COLOUR_SPINNER_BACKGROUND"
         android:indeterminate="true"
-        android:visibility="gone"
-        android:elevation="5dp"
-        app:layout_constraintTop_toBottomOf="@id/guideline_horizontal_10"
-        app:layout_constraintBottom_toTopOf="@id/guideline_horizontal_90"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/guideline_vertical_50" />
+        android:visibility="visible"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/guideline_horizontal_10"
+        app:layout_constraintStart_toStartOf="parent"/>
 
     <!-- Guideline at 10% from the top -->
     <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline_horizontal_10"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.1" />
+       android:id="@+id/guideline_horizontal_10"
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:orientation="horizontal"
+       app:layout_constraintGuide_begin="73dp" />
 
     <!-- Guideline at 90% from the top -->
     <androidx.constraintlayout.widget.Guideline
@@ -59,46 +57,34 @@
         android:orientation="vertical"
         app:layout_constraintGuide_percent="0.1" />
 
-    <!-- Toolbar -->
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:background="@color/COLOUR_HEADER_BACKGROUND"
-        android:elevation="4dp"
-        android:textColor="@color/COLOUR_HEADER_TEXT"
-        app:layout_constraintBottom_toTopOf="@id/guideline_horizontal_10"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+    <TextView
+       android:id="@+id/header_button"
+       android:layout_width="0dp"
+       android:layout_height="0dp"
+       android:text="Restaurant POS"
+       android:background="@color/COLOUR_HEADER_BACKGROUND"
+       android:gravity="center"
+       android:textAlignment="center"
+       android:onClick="onHeaderButton"
+       android:textColor="@color/COLOUR_HEADER_TEXT"
+       android:textSize="24sp"
+       app:layout_constraintStart_toEndOf="@id/grpc_spinner"
+       app:layout_constraintEnd_toStartOf="@id/btn_back"
+       app:layout_constraintTop_toTopOf="parent"
+       app:layout_constraintBottom_toTopOf="@id/guideline_horizontal_10"/>
 
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <TextView
-                android:id="@+id/header_button"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:text="Restaurant POS"
-                android:gravity="center"
-                android:onClick="onHeaderButton"
-                android:textColor="@android:color/white"
-                android:textSize="24sp" />
-
-            <ImageButton
-                android:id="@+id/btn_back"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_alignParentEnd="true"
-                android:layout_marginEnd="16dp"
-                android:layout_gravity="right"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="back button"
-                android:onClick="onButtonBack"
-                android:src="@drawable/back_yellow" />
-        </RelativeLayout>
-    </androidx.appcompat.widget.Toolbar>
+    <ImageButton
+       android:id="@+id/btn_back"
+       android:layout_width="wrap_content"
+       android:layout_height="0dp"
+       android:paddingEnd="8dp"
+       android:background="@color/COLOUR_HEADER_BACKGROUND"
+       android:onClick="onButtonBack"
+       android:src="@drawable/back_yellow"
+       app:layout_constraintStart_toEndOf="@id/header_button"
+       app:layout_constraintTop_toTopOf="parent"
+       app:layout_constraintBottom_toBottomOf="@id/guideline_horizontal_10"
+       app:layout_constraintEnd_toEndOf="parent"/>
 
     <!-- Bottom Button Bar -->
     <LinearLayout
@@ -186,7 +172,7 @@
         android:layout_marginEnd="4dp"
         android:background="@color/COLOUR_GROUP_BACKGROUND"
         android:paddingHorizontal="2dp"
-        app:layout_constraintBottom_toTopOf="@id/bottom_button_bar"
+        app:layout_constraintBottom_toTopOf="@id/guideline_horizontal_90"
         app:layout_constraintEnd_toStartOf="@id/guideline_vertical_50"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/guideline_horizontal_10" />
@@ -214,9 +200,7 @@
         android:layout_marginStart="4dp"
         android:layout_marginEnd="0dp"
         android:layout_marginBottom="4dp"
-        android:text="Floorplan"
         android:textSize="16sp"
-        android:onClick="onButtonFloorPlanNext"
         android:backgroundTint="@color/ANDROID_BUTTON_BACKGROUND"
         app:layout_constraintTop_toBottomOf="@id/guideline_horizontal_80"
         app:layout_constraintBottom_toTopOf="@id/guideline_horizontal_90"

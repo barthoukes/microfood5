@@ -17,13 +17,16 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import android.util.Log
+import com.hha.framework.CTransaction
+import com.hha.grpc.GrpcStateViewModel
 
 class FloorTableModel : ViewModel() {
    private val global = Global.getInstance()
    private val tag = "FloorTableModel"
+   private var grpcStateViewModel: GrpcStateViewModel? = null
 
    // Initialize with empty list to ensure observers get called
-   private val _isLoading = MutableLiveData<Boolean>(false)
+   //private val _isLoading = MutableLiveData<Boolean>(false)
    private val _floorTables = MutableLiveData<CFloorTables>(CFloorTables())
    private val _floorPlans = MutableLiveData<CFloorPlans>(CFloorPlans())
 
@@ -32,31 +35,39 @@ class FloorTableModel : ViewModel() {
 
    // Expose LiveData
    val floorTables: LiveData<CFloorTables> = _floorTables
-   val isLoading: LiveData<Boolean> = _isLoading
+  // val isLoading: LiveData<Boolean> = _isLoading
    val errorMessage: LiveData<String?> = _errorMessage
 
    // Cache the last loaded data to restore quickly
    private var cachedFloorTables: CFloorTables? = null
    private var cachedFloorPlans: CFloorPlans? = null
 
+   // An enum to clearly define the possible actions.
+   enum class FloorTableAction{
+      SELECT,      // First click, just select the table visually.
+      NAVIGATE_TO_ORDER,  // Second click, navigate to an existing or new order.
+      NAVIGATE_TO_BILL    // Second click in billing mode.
+   }
+
+   // The data class that will be our return type.
+   data class TableClickResult(
+      val action: FloorTableAction = FloorTableAction.NAVIGATE_TO_ORDER,
+      val transactionId: Int = -1 // Default to -1, only relevant for navigation actions.
+   )
+
    init {
       Log.i(tag, "FloorTableModel initialized")
       // Load initial data
-      refreshAllData()
+      loadFloorPlans()
+      loadFloorTables()
    }
 
-   fun refreshAllData() {
-      // Don't refresh if already loading
-      if (_isLoading.value == true) {
-         Log.i(tag, "Already loading, skipping refresh")
-         return
-      }
-
+   fun loadFloorTables() {
       Log.i(tag, "refreshAllData called, floorPlanId: ${global.floorPlanId}")
 
       viewModelScope.launch {
          try {
-            _isLoading.value = true
+            grpcStateViewModel?.messageSent()
             _errorMessage.value = null
 
             // Try to use cached data first for immediate UI update
@@ -104,7 +115,7 @@ class FloorTableModel : ViewModel() {
                _floorPlans.value = cachedFloorPlans
             }
          } finally {
-            _isLoading.value = false
+            grpcStateViewModel?.messageConfirmed()
          }
       }
    }
@@ -140,32 +151,47 @@ class FloorTableModel : ViewModel() {
       }
    }
 
-   private fun loadFloorPlans(): CFloorPlans {
-      return try {
-         val floorPlanService = GrpcServiceFactory.createFloorPlanService()
-         val output = CFloorPlans()
-         val list: FloorPlanList? = floorPlanService.getFloorPlans(-1, false)
+   private fun loadFloorPlans(): CFloorPlans
+   {
+      var plans = CFloorPlans()
+      viewModelScope.launch {
+         plans = withContext(Dispatchers.IO)
+         {
+            try
+            {
+               val floorPlanService = GrpcServiceFactory.createFloorPlanService()
+               val output = CFloorPlans()
 
-         if (list != null) {
-            for (plan in list.floorPlansList) {
-               val thisFloor = CFloorPlan(
-                  plan.floorPlanId, plan.floorName,
-                  plan.enabled
-               )
-               if (thisFloor.enabled) {
-                  output.add(thisFloor)
+               val list: FloorPlanList? = floorPlanService.getFloorPlans(-1, false)
+
+               if (list != null)
+               {
+                  for (plan in list.floorPlansList)
+                  {
+                     val thisFloor = CFloorPlan(
+                        plan.floorPlanId, plan.floorName,
+                        plan.enabled
+                     )
+                     if (thisFloor.enabled)
+                     {
+                        output.add(thisFloor)
+                     }
+                  }
+                  if (global.floorPlanId < 0)
+                  {
+                     global.floorPlanId = 0
+                  }
+                  Log.i(tag, "Loaded ${output.size} floor plans")
                }
+               output
+            } catch (e: Exception)
+            {
+               Log.e(tag, "Error loading floor plans: ${e.message}")
+               CFloorPlans()
             }
-            if (global.floorPlanId < 0) {
-               global.floorPlanId = 0
-            }
-            Log.i(tag, "Loaded ${output.size} floor plans")
          }
-         output
-      } catch (e: Exception) {
-         Log.e(tag, "Error loading floor plans: ${e.message}")
-         CFloorPlans()
       }
+      return plans
    }
 
    fun nrFloorPlans(): Int {
@@ -229,4 +255,45 @@ class FloorTableModel : ViewModel() {
       _floorTables.value = CFloorTables()
       _floorPlans.value = CFloorPlans()
    }
+
+   /**
+    * Called when a floor table circle is clicked.
+    * If it's the second click, this will create a NEW transaction.
+    */
+   suspend fun onFloorTableSelected(
+      selectedFloorTable: CFloorTable, billMode: Boolean
+      ): TableClickResult
+   {
+      Log.i(tag, "onFloorTableSelected for table: ${selectedFloorTable.name}")
+      // Floortable is already clicked twice, so just do it.
+      if (billMode && (selectedFloorTable.transactionId > 0))
+      {
+         // billing
+         Log.d(tag, "Billing mode for existing transaction: ${selectedFloorTable.transactionId}")
+         return TableClickResult(
+            FloorTableAction.NAVIGATE_TO_BILL,
+            selectedFloorTable.transactionId
+         )
+      } else
+      {
+         // Order mode: Check for an open transaction on a background thread.
+         Log.d(tag, "Order mode. Checking for open transaction...")
+
+         // 2. USE 'withContext' TO RUN ON A BACKGROUND THREAD AND GET THE RESULT
+         val transactionId = withContext(Dispatchers.IO) {
+            // This code block now runs on a background I/O thread.
+            CTransaction.findOpenTable(selectedFloorTable.name)
+         }
+         // The function resumes here on the original thread (likely Main)
+         // with the 'transactionId' value returned from the background task.
+         Log.d(tag, "Found transaction ID: $transactionId")
+
+         // 3. RETURN THE RESULT
+         return TableClickResult(
+            FloorTableAction.NAVIGATE_TO_ORDER,
+            transactionId // This is now correctly an Int
+         )
+      }
+   }
+
 }

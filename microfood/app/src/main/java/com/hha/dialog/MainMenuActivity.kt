@@ -127,24 +127,6 @@ class MainMenuActivity : BaseActivity() {
         }
     }
 
-    private fun updateConnectionStatus(isConnected: Boolean) {
-        binding.connectionColour.setBackgroundColor(
-            if (isConnected) {
-                connectionColorIndex = (connectionColorIndex + 1) % connectionColors.size
-                connectionColors[connectionColorIndex].toInt()
-            } else {
-                Color.RED
-            }
-        )
-    }
-
-    private fun updateBufferStatus(level: Int) {
-        val r = level * 8
-        val g = 192 - level * 6
-        val b = 32
-        binding.bufferColour.setBackgroundColor(Color.rgb(r, g, b))
-    }
-
     // Navigation functions
     private fun navigateToTableOverview() {
         val addressService : AddressService = GrpcServiceFactory.createAddressService()
