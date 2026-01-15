@@ -1,71 +1,102 @@
-# Project Overview
+## **Microfood5: Building a Modern, Tablet-First POS for the Agile Restaurant**
 
-This repository contains the development of a modern, tablet-based Point-of-Sale (POS) client, written in Kotlin for Android. It is designed to function as a remote terminal within a larger POS ecosystem, communicating via gRPC with a central server.
+In the bustling environment of a restaurant—the sizzle of the wok, the clatter of plates, the constant flow of customers—efficiency is everything. Yet, for many establishments, especially in high-volume settings like Chinese restaurants, the point-of-sale (POS) system can be a bottleneck rooted in the past.
 
-![Example Microfood5](https://www.kassaku.nl/wp-content/uploads/2025/10/Frida-app-1024x566.jpg)
+Waiters scribble orders on paper pads, then queue at a central terminal to input them, risking errors and delays. Managers struggle to get a real-time view of table occupancy. Takeaway counters get swamped, leading to long waits.
 
-This Kotlin application represents the next evolution of our proven POS system. While this specific Kotlin client is in active development, the core C++ POS software that powers it is already successfully deployed and operational in numerous restaurants across the Netherlands.
-Architecture & Purpose
+This is the problem **Microfood5** was born to solve. It's an open-source, **modern, tablet-based POS client** written in Kotlin for Android, designed to bring the power of the terminal directly to the point of service: the waiter's hand.
 
-The core philosophy is a language-agnostic architecture where the business logic resides in a central server (our battle-tested C++ application), and the user interface can be implemented in any technology that supports gRPC.
-text
+![Example Microfood5 Tablet Interface](https://www.kassaku.nl/wp-content/uploads/2025/10/Frida-app-1024x566.jpg)
 
+### **The Problem: Paper, Delays, and Inefficiency**
+
+Traditional POS workflows create friction at multiple points:
+
+1.  **The Paper Trail:** Waiters use notepads, leading to illegible handwriting and error-prone transcription.
+2.  **The Bottleneck:** Limited stationary terminals mean waiters waste time walking back and forth during peak hours.
+3.  **The Visibility Gap:** Hosts can't instantly see which tables are free, clean, and ready.
+4.  **The Takeaway Logjam:** A surge of to-go orders can overwhelm a single counter terminal, creating long lines.
+
+### **The Solution: A POS in the Palm of Your Hand**
+
+Microfood5 reimagines this workflow by turning an Android tablet into a powerful, mobile POS terminal. It functions as a remote client within a proven POS ecosystem, communicating seamlessly with a central server via **gRPC** for fast, reliable data exchange.
+
+**Here's how it transforms the restaurant floor:**
+
+*   **Order at the Table:** Waiters take orders directly on the tablet. The order is sent to the kitchen printer **immediately** as the waiter walks away.
+*   **Real-Time Table Management:** A clear floor plan shows occupied and free tables at a glance. Hosts can seat guests faster.
+*   **Mobilize Your Staff:** Any waiter with a tablet can process orders from anywhere. Managers can help input orders during rush hours.
+*   **Accuracy and Transparency:** Customers see their order and running total on the spot, including **dine-in and takeaway pricing**.
+*   **Multi-Language Ready:** The interface supports **Chinese (Traditional and Simplified), Indonesian, German, English, and Turkish**.
+
+### **Proven Foundation, Modern Interface**
+
+This isn't just a prototype. While this Kotlin client is in active development, it connects to a **battle-tested C++ POS server** already deployed in numerous restaurants across the Netherlands. This gives Microfood5 a unique advantage: modern mobile experience backed by years of real-world reliability.
+
+**Architecture Philosophy:**
+```
 [Kotlin Tablet UI] <--gRPC--> [C++ POS Server Core] <---> [Hardware Peripherals]
+```
 
-This project serves as a robust example for:
+The architecture is language-agnostic: business logic resides in the central server, while the user interface can be implemented in any technology that supports gRPC. This makes Microfood5 an excellent example for developers learning to build reactive Android layouts for complex workflows.
 
-    Building modern, reactive Android layouts for a POS workflow
+### **See It in Action**
 
-    Implementing a full Point-of-Sale interface (order entry, modifications, payment)
+| Order Entry | Table Selection | Billing | Chinese Interface |
+|-------------|-----------------|---------|-------------------|
+| ![Tablet with page order entry](https://www.kassaku.nl/wp-content/uploads/2025/12/tablet_poe.png) | ![Tablet ask transaction](https://www.kassaku.nl/wp-content/uploads/2025/12/tablet_ask_table.png) | ![Tablet Billing](https://www.kassaku.nl/wp-content/uploads/2025/12/tablet_billing_80.png) | ![Tablet Chinese ordering](https://www.kassaku.nl/wp-content/uploads/2025/12/portrait-poe.png) |
 
-    Using gRPC as a high-performance communication layer between different programming languages (C++ and Kotlin)
+### **For Developers: Building on Solid Foundations**
 
-# Getting Started for Developers
+Microfood5 serves as a robust reference implementation for:
 
-## Some screenshots
-![Tablet with page order entry](https://www.kassaku.nl/wp-content/uploads/2025/12/tablet_poe.png)
-![Tablet ask transaction](https://www.kassaku.nl/wp-content/uploads/2025/12/tablet_ask_table.png)
-![Tablet Billing](https://www.kassaku.nl/wp-content/uploads/2025/12/tablet_billing_80.png)
-![Tablet Chinese ordering](https://www.kassaku.nl/wp-content/uploads/2025/12/portrait-poe.png)
+*   Building modern, reactive Android layouts for POS workflows
+*   Implementing full Point-of-Sale interfaces (order entry, modifications, payment)
+*   Using gRPC as a high-performance communication layer between different programming languages
 
-## Prerequisites
+**Key Integration Point: The Proto Files**
+The `.proto` files define the contract between client and server. They're the single source of truth for all communication. To build your own client in any language (JavaScript, Python, Go, etc.):
 
-    Kotlin & Android Studio
+1. Use the provided `.proto` files to generate client code for your language
+2. Implement the UI logic that calls the generated gRPC methods
 
-    The .proto files from this repository (or the main project)
+This ensures seamless, type-safe interoperability with the POS server core.
 
-# Key Integration Point: The Proto Files
+### **Current Status & Roadmap**
 
-The protobuf files define the contract between the client and server. They are the single source of truth for all communication.
+*   **Status:** In Active Development (Kotlin client)
+*   **Foundation:** C++ server software is mature and running reliably in real restaurants
+*   **Future Goal:** When the Kotlin tablet app reaches maturity, it will be deployed alongside existing C++ systems, offering partner restaurants a sleek, modern table-side ordering experience
 
-To build your own client in any language (JavaScript, Python, Go, etc.):
+### **About Kassaku – Your POS Partner**
 
-    Use the provided .proto files to generate the client code for your language
+![Example working project in restaurant](https://www.kassaku.nl/wp-content/uploads/2023/07/wok.jpg)
 
-    Implement the UI logic that calls the generated gRPC methods
+Kassaku (Indonesian for *Kassa Aku* = "My Cash Register") is built on **over 15 years of experience** in the hospitality industry, founded by Bart Houkes.
 
-This ensures seamless and type-safe interoperability with our POS server core.
-Current Status & Roadmap
+**Our Story:** In 1994, Bart began his journey in the POS world at a company specializing in solutions for Asian restaurants. After a successful career as a software architect, a chance encounter in 2010 with a restaurateur led to the founding of Houkes Horeca Applications. For over 15 years, we have been the POS specialist for hospitality businesses that value simplicity and quality.
 
-    Status: In Active Development
+Our systems are built on core values: **Love, Quality, Accountability, Trust, and Recognition**. Whether you run a fast-service restaurant, a snack bar, or a cafeteria, our cash registers are designed to save time and reduce errors. No complicated manuals needed – your staff will work with it smoothly on the day of installation.
 
-        This Kotlin client is currently being built and refined on a local development machine
+### **Get Involved**
 
-    Stable Foundation: The C++ server software it connects to is a mature product, running reliably in the real world
+Microfood5 represents a pragmatic open-source model:
 
-    Future Goal: When this Kotlin tablet app reaches maturity, it will be deployed alongside our existing C++ systems in our partner restaurants, offering them a sleek, modern table-side ordering experience
+*   **The Client (Android App)** is fully open-source (Apache 2.0 License). Restaurants or developers can inspect, modify, and build the client themselves.
+*   **The Server** is offered as a licensed service, ensuring reliability, security, and ongoing updates.
 
-# About Kassaku – Your POS Partner
+**Join us in building the future of restaurant technology:**
 
-![Example working project](https://www.kassaku.nl/wp-content/uploads/2023/07/wok.jpg)
+*   **Restaurateurs:** Explore the client and inquire about server licensing for your business
+*   **Android Developers:** Study the codebase, suggest features, or contribute improvements
+*   **Translators:** Help expand its reach with more language support
 
-Kassaku (Indonesian for Kassa Aku = "My Cash Register") is built on over 15 years of experience in the hospitality industry, founded by Bart Houkes.
-Our Story
+**Ready to see the future of mobile POS?**
 
-In 1994, Bart began his journey in the POS world at a company specializing in solutions for Asian restaurants. After a successful career as a software architect, a chance encounter in 2010 with a restaurateur led to the founding of Houkes Horeca Applications. For over 15 years, we have been the POS specialist for hospitality businesses that value simplicity and quality.
+🔗 **Explore the Microfood5 repository on GitHub:** [https://github.com/barthoukes/microfood5](https://github.com/barthoukes/microfood5)
 
-Our systems are built on our core values: Love, Quality, Accountability, Trust, and Recognition. Whether you run a fast-service restaurant, a snack bar, or a cafeteria, our cash registers are designed to save time and reduce errors. No complicated manuals needed – your staff will work with it smoothly on the day of installation.
+---
 
-Interested in what our system can do for your business? Visit our website www.kassaku.nl to request a free, no-obligation demonstration!
+**Why I Built This:** Ultimately, Microfood5 bridges a personal passion for efficient technology with 15+ years of industry experience. It's about replacing clunky processes with sleek, mobile solutions that let restaurant staff focus on what they do best: providing great service.
 
-This project is maintained by the development team at Kassaku / Houkes Horeca Applications.
+*Interested in what our system can do for your business? Visit [www.kassaku.nl](https://www.kassaku.nl) to request a free, no-obligation demonstration!*
