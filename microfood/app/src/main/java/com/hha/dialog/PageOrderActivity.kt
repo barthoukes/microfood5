@@ -7,10 +7,17 @@ import android.view.View
 import android.content.res.Resources
 import android.util.Log
 import android.view.MotionEvent
+import android.view.WindowManager
+import android.widget.Toast
+
 import androidx.fragment.app.DialogFragment
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.activity.viewModels
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import kotlin.getValue
 
 import com.hha.adapter.MenuPagesAdapter
 import com.hha.adapter.TransactionItemsAdapter
@@ -27,10 +34,6 @@ import com.hha.modalDialog.ModalDialogYesNo
 import com.hha.resources.Configuration
 import com.hha.resources.Global
 import MenuItemsAdapter
-import android.widget.Toast
-import androidx.activity.viewModels
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import com.hha.dialog.Translation.str
 import com.hha.modalDialog.ModalDialogDelay
 import com.hha.modalDialog.ModalDialogQuantities
@@ -41,7 +44,6 @@ import com.hha.types.EFinalizerAction
 import com.hha.types.EInitMode
 
 import tech.hha.microfood.databinding.PageOrderActivityBinding
-import kotlin.getValue
 
 class PageOrderActivity : BaseActivity(), ModalDialogYesNo.MessageBoxYesNoListener,
     ModalDialogCancelReason.ModalDialogCancelReasonListener,
@@ -74,6 +76,7 @@ class PageOrderActivity : BaseActivity(), ModalDialogYesNo.MessageBoxYesNoListen
     private val mColourSelectedPage = colourCFG.getBackgroundColour("SELECTED_GROUP_BACKGROUND")
     private val mFloorplanBillFirst = CFG.getBoolean("floorplan_bill_first")
     lateinit private var mTimestamp: CTimestamp
+    private var mOriginalBrightness: Float = -1.0f
 
     var itemWidth = 24
     var mChangedTime = false
@@ -99,6 +102,7 @@ class PageOrderActivity : BaseActivity(), ModalDialogYesNo.MessageBoxYesNoListen
 
 //        mTransactionModel = ViewModelProvider(this, TransactionModelFactory)
 //            .get(TransactionModel::class.java)
+        setMaxScreenBrightness()
 
         val transactionId = intent.getIntExtra("TRANSACTION_ID", -1)
         val mFromBilling = intent.getBooleanExtra("FROM_BILL", false)
@@ -195,6 +199,7 @@ class PageOrderActivity : BaseActivity(), ModalDialogYesNo.MessageBoxYesNoListen
     {
         Log.i(tag, "onDestroy")
         // Get the current transaction object
+        restoreOriginalScreenBrightness()
         mTransactionModel.resetIsChanged()
         super.onDestroy() // Always call the superclass method first
     }

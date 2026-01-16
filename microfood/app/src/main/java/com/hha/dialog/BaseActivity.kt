@@ -3,6 +3,7 @@ package com.hha.dialog
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.viewModels
@@ -25,6 +26,8 @@ open class BaseActivity : AppCompatActivity()
 {
    protected val grpcStateViewModel: GrpcStateViewModel by viewModels()
    private var grpcArcDrawable: GrpcArcDrawable? = null
+   // A variable to store the original brightness for restoration
+   private var originalBrightness: Float = -1.0f
 
    private fun addGrpcSpinner(rootView: ViewGroup) {
       val spinner = ImageView(this).apply {
@@ -72,6 +75,34 @@ open class BaseActivity : AppCompatActivity()
       {
          hideSystemBars()
       }
+   }
+
+   /**
+    * Restores the screen brightness to its original value.
+    * This should typically be called in onDestroy() to ensure the user's
+    * setting is respected when they leave the activity.
+    */
+   fun restoreOriginalScreenBrightness() {
+      // Only restore if a valid original brightness was saved
+      if (originalBrightness != -1.0f) {
+         val layoutParams: WindowManager.LayoutParams = window.attributes
+         layoutParams.screenBrightness = originalBrightness
+         window.attributes = layoutParams
+      }
+   }
+
+   /**
+    * Sets the screen brightness for this activity to maximum.
+    * It saves the original brightness setting so it can be restored later.
+    */
+   fun setMaxScreenBrightness() {
+      // Save the original brightness only if it hasn't been saved already
+      if (originalBrightness == -1.0f) {
+         originalBrightness = window.attributes.screenBrightness
+      }
+      val layoutParams: WindowManager.LayoutParams = window.attributes
+      layoutParams.screenBrightness = WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_FULL
+      window.attributes = layoutParams
    }
 
    override fun setContentView(layoutResID: Int)

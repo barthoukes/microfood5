@@ -7,6 +7,8 @@ import com.hha.callback.TransactionItemListener
 import com.hha.common.DeletedStatus
 import com.hha.common.ItemVisible
 import com.hha.common.Payed
+import com.hha.common.TransactionData
+import com.hha.framework.CTransaction.Companion.tag
 import com.hha.grpc.GrpcServiceFactory
 import com.hha.grpc.LoadingState
 import com.hha.resources.Global
@@ -17,6 +19,7 @@ import com.hha.types.EDeletedStatus
 import com.hha.types.EEnterState
 import com.hha.types.EItemLocation
 import com.hha.types.EItemLocation.Companion.location2Locations
+import com.hha.types.EItemSort
 import com.hha.types.ENameType
 import com.hha.types.EOrderLevel
 import com.hha.types.EPayed
@@ -1362,6 +1365,11 @@ class CTransactionItems : Iterable<CSortedItem>
     {
         mChanged = true;
         mBewChanged = true;
+    }
+
+    fun selectTransactionId(transactionId: Int, sort: EItemSort, timeFrame: ETimeFrameIndex)
+    {
+        mItems.selectTransactionId(transactionId, sort, timeFrame)
     }
 
     fun undoTimeFrame(timeFrameId: ETimeFrameIndex, deviceId: Short)

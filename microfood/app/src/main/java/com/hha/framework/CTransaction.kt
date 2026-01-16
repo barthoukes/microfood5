@@ -819,7 +819,7 @@ class CTransaction : Iterable<CSortedItem>,
         mTimeFrame.startTimeFrame(deviceId, data.transactionId, waiter)
     }
 
-    fun selectTransactionId(transactionId: Int) // , sort: EItemSort, timeFrame: ETimeFrameIndex)
+    fun selectTransactionId(transactionId: Int, sort: EItemSort, timeFrame: ETimeFrameIndex)
     {
         Log.d(tag, "selectTransactionId $transactionId")
         data.transactionId = transactionId
@@ -828,8 +828,13 @@ class CTransaction : Iterable<CSortedItem>,
         val inputData: TransactionData? = service.selectTransactionId(transactionId)
         data.setTransactionData(inputData)
         // @todo load the items from the transaction
-        //mItems.selectTransaction( transactionId, sort, m_allItems ? TIME_FRAME_LATEST:(EtimeFrameIndex)m_timeFrameId);
-
+        val allItems = true
+        val tfi = when (allItems)
+        {
+            true -> ETimeFrameIndex.TIME_FRAME_ALL
+            else -> timeFrame
+        }
+        mItems.selectTransaction( transactionId, sort, tfi)
         mSizeAtStart = mItems.itemLines()
     }
 
