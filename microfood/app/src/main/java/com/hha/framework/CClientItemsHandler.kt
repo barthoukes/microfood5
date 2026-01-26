@@ -37,7 +37,8 @@ class CclientItemsHandler {
         mTimeFrameIndex = timeFrameIndex
         mTransactionId = transactionId
         val itemsDb = mItemsDb.selectTransactionId(
-            transactionId, EItemSort.toItemSort(sort), timeFrameIndex.index.toInt(), -1)
+            transactionId, EItemSort.toItemSort(sort),
+            timeFrameIndex.index, -1)
         mSubItems = if (CFG.getOption("entry_show_deleted"))
             ESubItems.ORDER_ITEMS_AND_DELETED_AND_EXTRA
         else ESubItems.ORDER_ITEMS_AND_EXTRA

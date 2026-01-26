@@ -23,6 +23,7 @@ import com.hha.framework.COpenClientsHandler.createNewTakeawayTransaction
 import com.hha.framework.CPaymentTransaction
 import com.hha.framework.CPersonnel
 import com.hha.grpc.GrpcServiceFactory
+import com.hha.grpc.GrpcStateViewModel
 import com.hha.printer.BillPrinter
 import com.hha.printer.EBillExample
 import com.hha.printer.EPrinterLocation
@@ -46,6 +47,7 @@ import com.hha.types.EPaymentStatus
 import com.hha.types.EPrintBillAction
 import com.hha.types.ETimeFrameIndex
 import com.hha.types.ETransType
+import com.hha.types.PageOrderNavigationEvent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -64,13 +66,15 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
    private val _transaction = MutableLiveData<CTransaction?>()
    val activeTransaction: LiveData<CTransaction?> = _transaction
 
-   // This line will now be correct and have no errors
-   private val _navigateToPageOrder = MutableLiveData<MyEvent<Int>>()
-   val navigateToPageOrder: LiveData<MyEvent<Int>> = _navigateToPageOrder
+   // This navigateToPageOrder is an event to start PageOrder with a transaction.
+   private val _navigateToPageOrder = MutableLiveData<MyEvent<PageOrderNavigationEvent>>()
+   val navigateToPageOrder: LiveData<MyEvent<PageOrderNavigationEvent>> = _navigateToPageOrder
 
    // LiveData to signal when data is being loaded, allowing the UI to show a progress indicator.
-   private val _isLoading = MutableLiveData<Boolean>()
-   val isLoading: LiveData<Boolean> = _isLoading
+   //private val _isLoading = MutableLiveData<Boolean>()
+   //val isLoading: LiveData<Boolean> = _isLoading
+   private var grpcStateViewModel: GrpcStateViewModel? = null
+
    private var mShowDiscount = false // @todo Inspect
 
    // 2. LIVE DATA FOR THE UI
@@ -126,6 +130,9 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
    var mCursor = CCursor(0)
    val tag = "transactionModel"
 
+   val size: Int
+      get() = _transaction.value?.size ?: 0
+
    /**
     * Adds a payment to the current transaction.
     */
@@ -179,7 +186,14 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
          return false
       }
       viewModelScope.launch {
-         currentTransaction.addTransactionItem(item, clusterId)
+         grpcStateViewModel?.messageSent() // Announce call start
+         try
+         {
+            currentTransaction.addTransactionItem(item, clusterId)
+         } finally
+         {
+            grpcStateViewModel?.messageConfirmed() // Announce call end
+         }
       }
       return true
    }
@@ -230,111 +244,134 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
       val currentTransaction = _transaction.value
       if (currentTransaction != null)
       {
-         currentTransaction.closeTimeFrame()
-         if (currentTransaction.transactionEmptyAtStartAndAtEnd())
-         {
-            currentTransaction.emptyTransaction("")
+         viewModelScope.launch {
+            grpcStateViewModel?.messageSent() // Announce the start of the gRPC call
+            try
+            {
+               // This likely involves a gRPC call to update the state on the server
+               currentTransaction.closeTimeFrame()
+
+               // This also involves a gRPC call to either delete or archive the transaction
+               if (currentTransaction.transactionEmptyAtStartAndAtEnd())
+               {
+                  currentTransaction.emptyTransaction("")
+               }
+            }
+            finally
+            {
+               grpcStateViewModel?.messageConfirmed() // Announce the end of the gRPC call
+            }
          }
       }
    }
 
    fun confirmPrintBill(offer: Boolean)
    {
-      val currentTransaction = activeTransaction.value
-      if (currentTransaction == null)
-      {
-         return
-      }
-      if (offer) // 687
-      {
-         currentTransaction.setStatus(EClientOrdersType.OPEN)
-      }
-      val orderType = currentTransaction.getStatus()
-      if (orderType == EClientOrdersType.OPEN
-         || orderType == EClientOrdersType.OPEN_PAID
-         || orderType == EClientOrdersType.PAYING
-      )
-      {
-//            if (!checkBillingKey())
-//            {
-//                CmessageBox cm( "mbx::print_bill_not_valid", BTN9+2, BTN1-2, BTN3+2, BTN1+2, getTranslation(_KEY_BAD), MB_BEEP
-//                | MB_TIME3 | MB_TEXT_CENTER)
-//                cancelNewPayments()
-//                stop( MODE_ASK_TABLE_BILL_DIALOG)
-//                return
-//            }
-         currentTransaction.setEmployeeId(global.rfidKeyId)
-         val transType = currentTransaction.transType
+      val currentTransaction = activeTransaction.value ?: return
 
-         // todo: phone_order_bill_direct
-         if (transType == ETransType.TRANS_TYPE_TAKEAWAY
-            || transType == ETransType.TRANS_TYPE_EAT_INSIDE
-         )
+      viewModelScope.launch {
+         grpcStateViewModel?.messageSent() // Announce that a long operation is starting
+         try
          {
-            val number = TakeawayNumber()
-            viewModelScope.launch {
-               number.printTakeawayNumber(currentTransaction) }
-
-            val timeNow = CTimestamp()
-            // End transaction and print
-            val tfi = currentTransaction.getTimeFrameIndex()
-
-            endTimeFrameAndPrintToBuffer(
-               global.mKitchenPrints, global.mKitchenPrints2bill,
-               timeNow, false,
-               mUserPrintCollect
-            )
-         }
-         var alreadyPayed = currentTransaction.getPartialTotal(-1)
-         val total: CMoney = currentTransaction.getItemTotal() - currentTransaction.getDiscount()
-
-         if ((orderType != EClientOrdersType.OPEN_PAID)
-            && (transType == ETransType.TRANS_TYPE_WOK)
-         )
-         {
-            currentTransaction.addReturnMoney()
-            addToEmployee(global.rfidKeyId, EPaymentStatus.PAY_STATUS_UNPAID)
-            mTransactionTotals = currentTransaction.getTransactionPayments()
-            var newType = EClientOrdersType.CLOSED
-            if (mFloorplanBillFirst)
+            if (offer) // 687
             {
-               if (alreadyPayed < total)
+               currentTransaction.setStatus(EClientOrdersType.OPEN)
+            }
+            val orderType = currentTransaction.getStatus()
+            if (orderType == EClientOrdersType.OPEN
+               || orderType == EClientOrdersType.OPEN_PAID
+               || orderType == EClientOrdersType.PAYING
+            )
+            {
+               //            if (!checkBillingKey())
+               //            {
+               //                CmessageBox cm( "mbx::print_bill_not_valid", BTN9+2, BTN1-2, BTN3+2, BTN1+2, getTranslation(_KEY_BAD), MB_BEEP
+               //                | MB_TIME3 | MB_TEXT_CENTER)
+               //                cancelNewPayments()
+               //                stop( MODE_ASK_TABLE_BILL_DIALOG)
+               //                return
+               //            }
+               currentTransaction.setEmployeeId(global.rfidKeyId)
+               val transType = currentTransaction.transType
+
+               // todo: phone_order_bill_direct
+               if (transType == ETransType.TRANS_TYPE_TAKEAWAY
+                  || transType == ETransType.TRANS_TYPE_EAT_INSIDE
+               )
                {
-                  newType = EClientOrdersType.OPEN
+                  val number = TakeawayNumber()
+                  viewModelScope.launch {
+                     grpcStateViewModel?.messageSent()
+                     try
+                     {
+                        number.printTakeawayNumber(currentTransaction)
+                     } finally
+                     {
+                        grpcStateViewModel?.messageConfirmed()
+                     }
+                  }
+
+                  val timeNow = CTimestamp()
+                  // End transaction and print
+                  val tfi = currentTransaction.getTimeFrameIndex()
+
+                  endTimeFrameAndPrintToBuffer(
+                     global.mKitchenPrints, global.mKitchenPrints2bill,
+                     timeNow, false,
+                     mUserPrintCollect
+                  )
+               }
+               var alreadyPayed = currentTransaction.getPartialTotal(-1)
+               val total: CMoney = currentTransaction.getItemTotal() - currentTransaction.getDiscount()
+
+               if ((orderType != EClientOrdersType.OPEN_PAID)
+                  && (transType == ETransType.TRANS_TYPE_WOK)
+               )
+               {
+                  currentTransaction.addReturnMoney()
+                  addToEmployee(global.rfidKeyId, EPaymentStatus.PAY_STATUS_UNPAID)
+                  mTransactionTotals = currentTransaction.getTransactionPayments()
+                  var newType = EClientOrdersType.CLOSED
+                  if (mFloorplanBillFirst)
+                  {
+                     if (alreadyPayed < total)
+                     {
+                        newType = EClientOrdersType.OPEN
+                     } else
+                     {
+                        newType = when (orderType)
+                        {
+                           EClientOrdersType.OPEN_PAID -> EClientOrdersType.CLOSED
+                           else -> EClientOrdersType.OPEN_PAID
+                        }
+                     }
+                  }
+                  currentTransaction.closeTransaction(newType)
+               } else if (mBillPayingMode == EPayingMode.PAYING_MODE_MANUAL
+                  || currentTransaction.isTakeaway()
+                  || alreadyPayed >= total
+                  || orderType == EClientOrdersType.PAYING
+                  || orderType == EClientOrdersType.OPEN_PAID
+               )
+               {
+                  addReturnMoney()
+                  currentTransaction.addToEmployee(EPaymentStatus.PAY_STATUS_UNPAID)
+                  mTransactionTotals = currentTransaction.getTransactionPayments()
+                  currentTransaction.closeTransaction(EClientOrdersType.CLOSED)
                } else
                {
-                  newType = when (orderType)
-                  {
-                     EClientOrdersType.OPEN_PAID -> EClientOrdersType.CLOSED
-                     else -> EClientOrdersType.OPEN_PAID
-                  }
+                  currentTransaction.setPayingState()
+                  mTransactionTotals = currentTransaction.getTransactionPayments()
                }
             }
-            currentTransaction.closeTransaction(newType)
-         } else if (mBillPayingMode == EPayingMode.PAYING_MODE_MANUAL
-            || currentTransaction.isTakeaway()
-            || alreadyPayed >= total
-            || orderType == EClientOrdersType.PAYING
-            || orderType == EClientOrdersType.OPEN_PAID
-         )
+            val quantity = currentTransaction.getBillPrinterQuantity()
+            printBills(quantity, mTransactionTotals)
+         } // try
+         finally
          {
-            addReturnMoney()
-            currentTransaction.addToEmployee(EPaymentStatus.PAY_STATUS_UNPAID)
-            mTransactionTotals = currentTransaction.getTransactionPayments()
-            currentTransaction.closeTransaction(EClientOrdersType.CLOSED)
-         } else
-         {
-            currentTransaction.setPayingState()
-            mTransactionTotals = currentTransaction.getTransactionPayments()
+            grpcStateViewModel?.messageConfirmed() // Announce that the operation has finished
          }
       }
-      val quantity = currentTransaction.getBillPrinterQuantity()
-      printBills(quantity, mTransactionTotals)
-
-//        if (!CFG("bill_print_kitchen_first"))
-//        {
-//            CprinterSpoolerProxy::Instance()->checkDatabase()
-//        }
    }
 
    /* Creates a NEW transaction associated with a specific tableId, loads the
@@ -347,30 +384,34 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
    {
       Log.i(tag, "createTransactionForTable $tableName, $tableId")
       viewModelScope.launch {
-         _isLoading.value = true
-         val newTransactionId = withContext(Dispatchers.IO)
+         grpcStateViewModel?.messageSent()
+         try
          {
-            // 1. Call your gRPC/framework function to create a new transaction record
-            //    and link it to the tableId. This should return the new transaction's ID.
-            COpenClientsHandler.createNewRestaurantTransaction(tableName, tableId, minutes)
-         }
-         _isLoading.value = false
-         Log.d(tag, "createTransactionForTable: newTransactionId = $newTransactionId")
-
-         // 2. If creation was successful, load the full CTransaction object.
-         if (newTransactionId > 0)
+            val newTransactionId = withContext(Dispatchers.IO)
+            {
+               // 1. Call your gRPC/framework function to create a new transaction record
+               //    and link it to the tableId. This should return the new transaction's ID.
+               COpenClientsHandler.createNewRestaurantTransaction(tableName, tableId, minutes)
+            }
+            if (newTransactionId > 0)
+            {
+               // 3. --- THIS IS THE FIX ---
+               // Creation was successful. Immediately post the ID as a navigation event.
+               // We no longer create a CTransaction object here.
+               Log.d(tag, "Posting navigation event for transaction ID: $newTransactionId")
+               val navEvent = PageOrderNavigationEvent(newTransactionId, false, false)
+               _navigateToPageOrder.value = MyEvent(navEvent)
+            } else
+            {
+               // Handle the error if the transaction could not be created.
+               // For example, post to another LiveData to show a Toast.
+               Log.e(tag, "Failed to create new transaction for table: $tableName (ID: $tableId)")
+               // _showToast.value = MyEvent("Failed to create order")
+            }
+            Log.d(tag, "createTransactionForTable: newTransactionId = $newTransactionId")
+         } finally
          {
-            // 3. --- THIS IS THE FIX ---
-            // Creation was successful. Immediately post the ID as a navigation event.
-            // We no longer create a CTransaction object here.
-            Log.d(tag, "Posting navigation event for transaction ID: $newTransactionId")
-            _navigateToPageOrder.value = MyEvent(newTransactionId)
-         } else
-         {
-            // Handle the error if the transaction could not be created.
-            // For example, post to another LiveData to show a Toast.
-            Log.e(tag, "Failed to create new transaction for table: $tableName (ID: $tableId)")
-            // _showToast.value = MyEvent("Failed to create order")
+            grpcStateViewModel?.messageConfirmed()
          }
       }
    }
@@ -380,15 +421,30 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
       Log.i(tag, "navigateToExistingTransaction ${transactionId}")
       if (transactionId > 0)
       {
-         // 3. --- THIS IS THE FIX ---
-         // Creation was successful. Immediately post the ID as a navigation event.
-         // We no longer create a CTransaction object here.
          Log.d(tag, "Posting navigation event for transaction ID: $transactionId")
-         _navigateToPageOrder.value = MyEvent(transactionId)
+         val navEvent = PageOrderNavigationEvent(
+            transactionId = transactionId,
+            fromBilling =  mFromBilling,
+            newTimeFrame = true
+         )
+         _navigateToPageOrder.value = MyEvent(navEvent)
       }
    }
 
 // In TransactionModel.kt
+
+   fun startNextTimeFrame(transactionId: Int)
+   {
+      Log.i(tag, "endTimeFrameAndPrintToBuffer")
+      val currentTransaction = activeTransaction.value
+      if (currentTransaction == null) {
+         return
+      }
+      // --- SOLUTION: Launch a coroutine on an I/O thread ---
+      viewModelScope.launch(Dispatchers.IO) {
+         currentTransaction.startNewTimeFrame()
+      }
+   }
 
    fun endTimeFrameAndPrintToBuffer(
       prints2kitchen: Int, prints2bill: Int, newTime: CTimestamp,
@@ -484,30 +540,44 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
    fun handleFinishTakeawayQuantity(ts: CTimestamp): EFinalizerAction
    {
       val currentTransaction = _transaction.value
-      if (currentTransaction == null)
-      {
-         return EFinalizerAction.FINALIZE_NOT_IDENTIFIED
-      }
-      if (mAskTakeawayQuantity != 0)
-      {
-         ///////////////////////// ASK QUANTITY ////////////////////////////////
-         val retVal = askTakeawayFinalQuantity(ts, mChangedTime);
-         return retVal;
-      }
+         ?: return EFinalizerAction.FINALIZE_NOT_IDENTIFIED
+      var retVal = EFinalizerAction.FINALIZE_NO_ACTION
 
-      // No printing of kitchen, just go to billing...
-      endTimeFrameAndPrintToBuffer(
-         0, 0, ts,
-         mChangedTime, false
-      )
+      viewModelScope.launch {
+         grpcStateViewModel?.messageSent() // Announce that a long operation is starting
+         try
+         {
+            if (mAskTakeawayQuantity != 0)
+            {
+               ////////////////// ASK QUANTITY /////////////////////////
+               retVal = askTakeawayFinalQuantity(ts, mChangedTime);
+            }
+            else
+            {
+               // No printing of kitchen, just go to billing...
+               endTimeFrameAndPrintToBuffer(
+                  0, 0, ts,
+                  mChangedTime, false
+               )
 
-      if (!currentTransaction.empty)
-      {
-         currentTransaction.addReturnMoney()
-         currentTransaction.closeTransaction(EClientOrdersType.CLOSED)
-         return EFinalizerAction.FINALIZE_MODE_ASK_TABLE
+               if (!currentTransaction.empty)
+               {
+                  currentTransaction.addReturnMoney()
+                  currentTransaction.closeTransaction(EClientOrdersType.CLOSED)
+                  retVal = EFinalizerAction.FINALIZE_MODE_ASK_TABLE
+               }
+               else
+               {
+                  retVal = EFinalizerAction.FINALIZE_MODE_BILLING
+               }
+            }
+         } // try
+         finally
+         {
+            grpcStateViewModel?.messageConfirmed() // Announce that the operation has finished
+         }
       }
-      return EFinalizerAction.FINALIZE_MODE_BILLING
+      return retVal
    }
 
    /*----------------------------------------------------------------------------*/
@@ -537,11 +607,7 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
 
    fun initPageOrder(): Boolean
    {
-      val currentTransaction = _transaction.value
-      if (currentTransaction == null)
-      {
-         return false
-      }
+      val currentTransaction = _transaction.value ?: return false
       if (currentTransaction.isValid() == false)
       {
          return false
@@ -579,6 +645,20 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
       return true
    }
 
+   private fun startNewTimeFrame(currentTransaction: CTransaction)
+   {
+      try {
+         viewModelScope.launch {
+            grpcStateViewModel?.messageSent() // Announce that a long operation is starting
+            currentTransaction.startNewTimeFrame()
+         }
+      }
+      finally
+      {
+         grpcStateViewModel?.messageConfirmed() // Announce that the operation has finished
+      }
+   }
+
    /*----------------------------------------------------------------------------*/
    fun setTakeawayFinalQuantity(
       quantity: Int, billingMode: Boolean, stop: Boolean,
@@ -586,11 +666,7 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
    ): EFinalizerAction
    {
       var retVal = EFinalizerAction.FINALIZE_NO_ACTION
-      val currentTransaction: CTransaction? = _transaction.value
-      if (currentTransaction == null)
-      {
-         return retVal
-      }
+      val currentTransaction = _transaction.value ?: return retVal
       if (quantity != 0 || mAskQuantityZero)
       {
          if (billingMode)
@@ -608,7 +684,7 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
                   quantity, 0, ts,
                   changedTime, false
                );
-               currentTransaction.startTimeFrame()
+               startNewTimeFrame(currentTransaction)
                retVal = EFinalizerAction.FINALIZE_RESET_CHANGES
             } else
             {
@@ -790,10 +866,25 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
       Log.i(tag, "handleFinishQuantiesTimeSitin")
       var action = EFinalizerAction.FINALIZE_NOT_IDENTIFIED
       val EInitMode = EInitMode.VIEW_NONE
-      val currentTransaction = _transaction.value
-      if (currentTransaction == null)
-         return action
+      val currentTransaction = _transaction.value ?: return action
 
+      viewModelScope.launch {
+         grpcStateViewModel?.messageSent() // Announce that a long operation is starting
+         try
+         {
+            action = handleFinishQuantiesTimeSitin(currentTransaction, fromBilling)
+         } finally
+         {
+            grpcStateViewModel?.messageConfirmed() // Announce that the operation has finished
+         }
+      }
+      return action
+   }
+
+   private suspend fun handleFinishQuantiesTimeSitin(
+      currentTransaction: CTransaction,
+      fromBilling: Boolean): EFinalizerAction
+   {
       if (currentTransaction.empty)
       {
          if (hasAnyChanges())
@@ -983,7 +1074,20 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
    fun emptyTransaction(reason: String)
    {
       val currentTransaction = _transaction.value
-      currentTransaction?.emptyTransaction(reason)
+      if (currentTransaction != null)
+      {
+         viewModelScope.launch {
+            grpcStateViewModel?.messageSent() // Announce that a long operation is starting
+            try
+            {
+               // Actual work.
+               currentTransaction.emptyTransaction(reason)
+            } finally
+            {
+               grpcStateViewModel?.messageConfirmed() // Announce that the operation has finished
+            }
+         }
+      }
    }
 
    fun onInit(): EInitAction
@@ -1143,7 +1247,8 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
     *
     * @param mode The initialization mode (FULL_ORDER or BILLING_ONLY).
     */
-   fun initializeTransaction(transactionId: Int, mode: EInitMode)
+   fun initializeTransaction(
+      transactionId: Int, newTimeFrame: Boolean, mode: EInitMode)
    {
       Log.i(tag, "initializeTransaction")
       // Perform initial checks on the main thread. These are fast.
@@ -1156,15 +1261,14 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
       // Launch a coroutine to handle the potentially long-running transaction loading
       viewModelScope.launch {
          // You can set a loading state here if needed, similar to listOpen()
-         _isLoading.value = true
-
          val global = Global.getInstance()
          var currentTransaction: CTransaction? = _transaction.value
 
          // If the transaction doesn't exist yet, load it in the background.
-         if (currentTransaction == null)
+         grpcStateViewModel?.messageSent()
+         // Switch to a background thread for I/O operations
+         try
          {
-            // Switch to a background thread for I/O operations
             currentTransaction = withContext(Dispatchers.IO) {
                if (transactionId < 1E6)
                {
@@ -1173,7 +1277,7 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
                } else
                {
                   Log.d(tag, "Loading transaction with ID: ${transactionId}")
-                  val newTransaction = CTransaction(transactionId)
+                  val newTransaction = CTransaction.createAndLoad(transactionId)
                   // Assuming .load() is the blocking call that loads data.
                   // This now runs safely in the background.
                   if (newTransaction.isValid())
@@ -1186,36 +1290,34 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
                   }
                }
             }
-         }
+            // Back on the main thread now. Check the result from the background work.
+            if (currentTransaction == null)
+            {
+               Log.e(tag, "Transaction is null after attempting to load. Aborting initialization.")
+               // _isLoading.value = false
+               return@launch // Exit the coroutine
+            }
+            if (newTimeFrame)
+            {
+               currentTransaction.startNewTimeFrame()
+            }
+            // Now that we have a valid transaction, update the LiveData
+            _transaction.value = currentTransaction
 
-         // Back on the main thread now. Check the result from the background work.
-         if (currentTransaction == null)
-         {
-            Log.e(tag, "Transaction is null after attempting to load. Aborting initialization.")
-            // _isLoading.value = false
-            return@launch // Exit the coroutine
-         }
-
-         // Now that we have a valid transaction, update the LiveData
-         _transaction.value = currentTransaction
-
-         // It's now safe to add listeners and perform other main-thread logic
-         mMode = mode
-         if (currentTransaction != null)
-         {
+            // It's now safe to add listeners and perform other main-thread logic
+            mMode = mode
             currentTransaction.addListener(THIS)
             currentTransaction.addPaymentListener(THIS)
             currentTransaction.addItemListener(THIS)
             // Trigger an initial UI update
             onTransactionChanged(currentTransaction)
-            if (mode == EInitMode.VIEW_PAGE_ORDER)
-            {
-               currentTransaction.startNextTimeFrame()
-            }
             mIsInitialized = true
          }
-         _isLoading.value = false
-      }
+         finally
+         {
+            grpcStateViewModel?.messageConfirmed()
+         }
+      } // withContext
    }
 
    fun isChanged(): Boolean = mIsChanged
@@ -1785,7 +1887,7 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
       }
 
       // Local language bill print
-      val billPrinter = BillPrinter(currentTransaction.transactionId)
+      val billPrinter = BillPrinter(currentTransaction)
       billPrinter.printBill(
          global.euroLang,
          EPrinterLocation.PRINTER_LOCATION_BILL_PRN,
@@ -1828,17 +1930,21 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
       }
 
       viewModelScope.launch {
-         _isLoading.value = true
-         // Perform the blocking CTransaction creation on a background thread.
-         val fullTransaction = withContext(Dispatchers.IO) {
-            // This is where you create the full transaction object.
-            // Assuming CTransaction's constructor handles loading from DB/network.
-            CTransaction(transactionId)
+         grpcStateViewModel?.messageSent()
+         try
+         {
+            // Perform the blocking CTransaction creation on a background thread.
+            val fullTransaction = withContext(Dispatchers.IO) {
+               // This is where you create the full transaction object.
+               // Assuming CTransaction's constructor handles loading from DB/network.
+               CTransaction.createAndLoad(transactionId)
+            }
+            // Post the loaded transaction to the LiveData. The UI will react to this.
+            _transaction.value = fullTransaction
+         } finally
+         {
+            grpcStateViewModel?.messageConfirmed()
          }
-         _isLoading.value = false
-
-         // Post the loaded transaction to the LiveData. The UI will react to this.
-         _transaction.value = fullTransaction
       }
    }
 
@@ -1859,37 +1965,43 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
    fun createTakeawayTransaction() {
       Log.i(tag, "createTakeawayTransaction")
       viewModelScope.launch {
-         _isLoading.value = true
-         val newTransactionId = withContext(Dispatchers.IO) {
-            // --- All background logic is now here ---
-            val useBag = true
-            // It's better to pass the user ID as a parameter if possible,
-            // but for now, we'll keep the Global call here.
-            val user = Global.getInstance().rfidKeyId
+         grpcStateViewModel?.messageSent()
+         try
+         {
+            val newTransactionId = withContext(Dispatchers.IO) {
+               // --- All background logic is now here ---
+               val useBag = true
+               // It's better to pass the user ID as a parameter if possible,
+               // but for now, we'll keep the Global call here.
+               val user = Global.getInstance().rfidKeyId
 
-            val transactionId = createNewTakeawayTransaction(0, useBag, user, false)
+               val transactionId = createNewTakeawayTransaction(0, useBag, user, false)
 
-            if (transactionId > 0) {
-               // Also perform any other related background work here
-               CMenuCards.getInstance().loadTakeaway()
-               transactionId // Return the valid ID
+               if (transactionId > 0)
+               {
+                  // Also perform any other related background work here
+                  CMenuCards.getInstance().loadTakeaway()
+                  transactionId // Return the valid ID
+               } else
+               {
+                  Log.e(tag, "Failed to create new takeaway transaction.")
+                  -1 // Return an invalid ID on failure
+               }
+            }
+            // --- Post navigation event to the UI ---
+            if (newTransactionId > 0) {
+               Log.d(tag, "Posting navigation event for takeaway transaction ID: $newTransactionId")
+               val navEvent = PageOrderNavigationEvent(newTransactionId, false, false)
+               _navigateToPageOrder.value = MyEvent(navEvent)
             } else {
-               Log.e(tag, "Failed to create new takeaway transaction.")
-               -1 // Return an invalid ID on failure
+               // Optionally, you can post to a different LiveData to show an error Toast
+               // _showToast.value = MyEvent("Failed to create order")
             }
          }
-         _isLoading.value = false
-
-         // --- Post navigation event to the UI ---
-         if (newTransactionId > 0) {
-            Log.d(tag, "Posting navigation event for takeaway transaction ID: $newTransactionId")
-            _navigateToPageOrder.value = MyEvent(newTransactionId)
-         } else {
-            // Optionally, you can post to a different LiveData to show an error Toast
-            // _showToast.value = MyEvent("Failed to create order")
+         finally
+         {
+            grpcStateViewModel?.messageConfirmed()
          }
       }
    }
-
-
 }

@@ -5,9 +5,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import androidx.activity.viewModels
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.viewModelScope
 import androidx.recyclerview.widget.GridLayoutManager
 import com.hha.adapter.ShortTransactionListAdapter
 import com.hha.framework.CFloorTable
@@ -18,12 +16,10 @@ import tech.hha.microfood.databinding.AskTransactionActivityBinding
 import com.hha.dialog.Translation.TextId
 import com.hha.floor.FloorTablesAdapter
 import com.hha.framework.CFloorTables
-import com.hha.framework.CTransaction
+import com.hha.grpc.GrpcArcDrawable
 import com.hha.model.ShortTransactionsModel
 import com.hha.model.TransactionModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import tech.hha.microfood.R
 
 
@@ -32,6 +28,8 @@ class AskTransactionActivity : BaseActivity()
     private val global = Global.getInstance()
     private val CFG = global.CFG
     private lateinit var mBinding: AskTransactionActivityBinding
+    private lateinit var grpcArcDrawable: GrpcArcDrawable
+    private var mNewTimeFrame = false
 
     private val mShortTransactionListAdapter: ShortTransactionListAdapter =
         ShortTransactionListAdapter { selectedShortTransaction ->
@@ -58,6 +56,7 @@ class AskTransactionActivity : BaseActivity()
         // Change to billing with the same transaction.
         val intent = Intent(this, BillOrderActivity::class.java)
         intent.putExtra("TRANSACTION_ID", transactionId)
+        intent.putExtra("FROM_BILL", false)
         startActivity(intent)
         finish()
     }
@@ -110,6 +109,7 @@ class AskTransactionActivity : BaseActivity()
 
         // Setup observers BEFORE refreshing data
         setupObservers()
+        setupOnClickListeners()
 
         // Initialize with empty adapters
         mShortTransactionListAdapter.submitList(emptyList())
@@ -124,6 +124,14 @@ class AskTransactionActivity : BaseActivity()
         super.onDestroy()
         // Optional: Clear cache if needed
         // mFloorTableModel.clearCache()
+    }
+
+    fun setupOnClickListeners()
+    {
+        // Stop button
+        mBinding.btnFloorplan.apply {
+            setOnClickListener { onButtonFloorPlan() }
+        }
     }
 
     fun onShortTransactionSelected(selectedTransaction: CShortTransaction)
@@ -190,7 +198,7 @@ class AskTransactionActivity : BaseActivity()
 
                     FloorTableModel.FloorTableAction.NAVIGATE_TO_ORDER -> {
                         Log.d(tag, "Action from ViewModel: NAVIGATE_TO_ORDER for transaction ${result.transactionId}")
-                        if (result.transactionId > 0) {
+                        if (result.transactionId > 1E6) {
                             // An open transaction was found, navigate to it.
                             mTransactionModel.navigateToExistingTransaction(result.transactionId)
                         } else {
@@ -215,9 +223,12 @@ class AskTransactionActivity : BaseActivity()
         Log.i(tag, "onResume")
         super.onResume()
         updateViewVisibility()
-        mShortTransactionsModel.refreshAllShortTransactions()
-        mFloorTableModel.loadFloorTables()
-        refreshAllData()
+        //mShortTransactionsModel.refreshAllShortTransactions()
+        //mFloorTableModel.loadFloorTables()
+        //refreshAllData()
+        mBinding.root.post {
+            refreshAllData()
+        }
     }
 
     private fun setupNavigationPageOrderObserver()
@@ -225,15 +236,18 @@ class AskTransactionActivity : BaseActivity()
         // 1. OBSERVE THE CORRECT EVENT: navigateToPageOrder
         mTransactionModel.navigateToPageOrder.observe(this) { event ->
             // 2. Use the MyEvent wrapper to handle this as a one-time event
-            event.getContentIfNotHandled()?.let { transactionId ->
+            event.getContentIfNotHandled()?.let { navEvent ->
                 // This block now runs ONLY when a NEW transaction is created
-                Log.i(tag, "Navigating via navigateToPageOrder event with NEW ID: $transactionId")
+                Log.i(tag, "setupNavigationPageOrderObserver Navigating via navigateToPageOrder event with NEW ID: " +
+                   "${navEvent.transactionId}")
 
                 val intent = Intent(this, PageOrderActivity::class.java).apply {
                     // These flags are crucial
                     flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
 
-                    putExtra("TRANSACTION_ID", transactionId)
+                    putExtra("TRANSACTION_ID", navEvent.transactionId)
+                    putExtra("FROM_BILL", navEvent.fromBilling)
+                    putExtra("NEW_TIME_FRAME", navEvent.newTimeFrame)
                 }
                 startActivity(intent)
             }
@@ -243,9 +257,9 @@ class AskTransactionActivity : BaseActivity()
     private fun setupObservers()
     {
         // Observe loading state
-        mFloorTableModel.isLoading.observe(this) { isLoading ->
-            mBinding.mainProgressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
-        }
+//        mFloorTableModel.isLoading.observe(this) { isLoading ->
+//            mBinding.lo.visibility = if (isLoading) View.VISIBLE else View.GONE
+//        }
 
         mFloorTableModel.floorTables.observe(this) { floorTables ->
             Log.i(tag, "Floor tables observed, plan: ${global.floorPlanId} size: ${floorTables?.size}")
@@ -254,7 +268,7 @@ class AskTransactionActivity : BaseActivity()
                 mFloorTablesAdapter.submitList(floorTables)
                 // Force layout update
                 mBinding.layoutFloorTables.requestLayout()
-                refreshFloorPlan()
+                //refreshFloorPlan()
             }
         }
 
@@ -321,8 +335,7 @@ class AskTransactionActivity : BaseActivity()
         refreshAllData()
     }
 
-    @Suppress("UNUSED_PARAMETER")
-    fun onButtonFloorPlanNext(view: View)
+    fun onButtonFloorPlan()
     {
         Log.i(tag, "onButtonFloorPlanNext")
 

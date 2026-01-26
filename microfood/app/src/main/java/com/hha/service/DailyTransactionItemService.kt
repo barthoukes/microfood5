@@ -87,13 +87,14 @@ class DailyTransactionItemService(channel: ManagedChannel) : BaseGrpcService<Dai
     }
 
     fun selectTransactionId(transactionId: Int, sorted: ItemSort,
-                            timeFrameId: Int, deviceId: Int): ItemList? = runBlocking {
+                            timeFrameId: Short, deviceId: Short)
+    : ItemList? = runBlocking {
         try {
             val request = SelectTransactionSort.newBuilder()
                 .setTransactionId(transactionId.toLong())
                 .setSorted(sorted)
-                .setTimeFrameId(timeFrameId)
-                .setDeviceId(deviceId)
+                .setTimeFrameId(timeFrameId.toInt())
+                .setDeviceId(deviceId.toInt())
                 .build()
             stub.selectTransactionId(request)
         } catch (e: Exception) {

@@ -65,12 +65,10 @@ class CSortedItemList : Iterable<CSortedItem>
         m_sortedItems.add(c2i, cItem)
         recalculateInternalSize()
     }
-
     fun clean()
     {
         m_sortedItems.clear()
     }
-
     fun convert(sort: EItemSort, itemsDb: ItemList): CItemList
     {
         val lst = mutableListOf<CItem>()
@@ -1023,12 +1021,27 @@ class CSortedItemList : Iterable<CSortedItem>
         }
     }
 
+    suspend fun selectTransactionId(
+        transactionId: Int, sort: EItemSort, timeFrame: ETimeFrameIndex)
+    {
+        val service = GrpcServiceFactory.createDailyTransactionItemService()
+        val mySort = EItemSort.toItemSort(sort)
+        val itemList = service.selectTransactionId(
+            transactionId,  mySort, timeFrame.index,
+            -1) // global.deviceId)
+        val listItems = CItemList(false, itemList)
+        m_sortedItems = createList(listItems, true)
+        sortAndTry2Merge(0, m_sortedItems.size, false)
+        recalculateInternalSize()
+        return
+    }
+
     fun setTransaction(transactionId: Int): Boolean
     {
-        val dti = GrpcServiceFactory.createDailyTransactionItemService()
-        val itemsDb: ItemList? = dti.selectTransaction(transactionId)
-        val list_items = CItemList(false, itemsDb)
-        m_sortedItems = createList(list_items, true)
+        val service = GrpcServiceFactory.createDailyTransactionItemService()
+        val itemList: ItemList? = service.selectTransaction(transactionId)
+        val listItems = CItemList(false, itemList)
+        m_sortedItems = createList(listItems, true)
         sortAndTry2Merge(0, m_sortedItems.size, false)
         recalculateInternalSize()
         return true

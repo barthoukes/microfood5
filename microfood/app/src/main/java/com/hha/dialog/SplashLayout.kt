@@ -22,12 +22,10 @@ import com.hha.network.NetworkScanner
 import com.hha.resources.Global
 
 @SuppressLint("CustomSplashScreen")
-class SplashLayout : androidx.activity.ComponentActivity()
+class SplashLayout : BaseActivity()
 {
-
     val global = Global.getInstance()
     val CFG = global.CFG
-    private lateinit var services: GrpcServiceFactory
 
     override fun onCreate(savedInstanceState: Bundle?)
     {
@@ -100,6 +98,9 @@ class SplashLayout : androidx.activity.ComponentActivity()
 
             while (attempt < maxRetries)
             {
+                Log.d("SplashLayout", "Searching for server, attempt ${attempt + 1}/$maxRetries...")
+                grpcStateViewModel.messageSent()
+
                 var foundIp: String? = null
                 try
                 {
@@ -124,7 +125,10 @@ class SplashLayout : androidx.activity.ComponentActivity()
                         Global.getInstance().serverIp = foundIp
                         Global.getInstance().getOptions()
                         CTaxProvider.initialize()
+                        grpcStateViewModel.messageConfirmed()
+                        grpcStateViewModel.messageSent()
                         CMenuCards.getInstance().loadTakeaway()
+                        grpcStateViewModel.messageConfirmed()
 
                         // If we get here, data loading was successful. Navigate and exit.
                         navigateToMainActivity()

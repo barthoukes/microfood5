@@ -1,9 +1,9 @@
 //==============================================================================
-//  @file       sql_menu.proto
+//  @file       sql_menu_translation.proto
 //  @ingroup    proto database interface
-//  @brief		Operations on item database
+//  @brief	Operations on translation database
 //
-//  Messages for menu cards
+//  Messages for translations
 //
 //  @author     Bart Houkes
 //
@@ -17,7 +17,7 @@
 
 syntax = "proto3";
 
-option csharp_namespace = "menuItemService";
+option csharp_namespace = "menuTranslationService";
 
 package menu;
 
@@ -27,37 +27,37 @@ import "common_types.proto";
 option java_multiple_files = true;
 option java_package = "com.hha.menu.translation";
 
-service menuTranslationService
+service MenuTranslationService
 {
-    rpc  findOrCreateTranslation(menuTranslation)  returns (menuTranslationList) {}
-    rpc  findTranslation(localNameRequest)  returns (foundReply) {}
-    rpc  findLike(findLikeRequest)  returns (menuTranslationList) {}
-    rpc dump(common.Empty)  returns (common.Empty) {}
+    rpc  FindOrCreateTranslation(MenuTranslation)  returns (MenuTranslationList) {}
+    rpc  FindTranslation(LocalNameRequest)  returns (FoundReply) {}
+    rpc  FindLike(FindLikeRequest)  returns (MenuTranslationList) {}
+    rpc  Dump(common.Empty)  returns (common.Empty) {}
 }
 
-message findLikeRequest
+message FindLikeRequest
 {
     string search_string = 1;
     bool in_chinese = 2;
 }
 
-message menuTranslation
+message MenuTranslation
 {
     string local_name = 1;
     string chinese_name = 2;
 }
 
-message menuTranslationList
+message MenuTranslationList
 {
-    repeated menuTranslation translations = 1;
+    repeated MenuTranslation translations = 1;
 }
 
-message localNameRequest
+message LocalNameRequest
 {
     string local_name = 1;
 }
 
-message foundReply
+message FoundReply
 {
     string name = 1;
 }

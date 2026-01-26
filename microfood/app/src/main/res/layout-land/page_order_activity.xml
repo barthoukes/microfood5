@@ -6,14 +6,12 @@
 	android:background="@drawable/backrepeat"
 	android:layout_height="match_parent">
 
-	<ProgressBar
-		android:id="@+id/loading_spinner"
-		style="?android:attr/progressBarStyle"
-		android:layout_width="wrap_content"
+	<ImageView
+		android:id="@+id/grpc_spinner"
+		android:layout_width="40dp"
 		android:layout_height="0dp"
-		android:indeterminate="true"
-		android:visibility="gone"
-		android:background="@color/COLOUR_HEADER_BACKGROUND"
+		android:visibility="visible"
+		android:background="@color/COLOUR_SPINNER_BACKGROUND"
 		app:layout_constraintBottom_toBottomOf="@id/guideline_top"
 		app:layout_constraintStart_toEndOf="@id/guideline_left"
 		app:layout_constraintTop_toTopOf="parent"
@@ -92,7 +90,22 @@
 		android:id="@+id/layoutTransactionItems"
 		android:layout_width="0dp"
 		android:layout_height="0dp"
+		android:visibility="gone"
 		android:background="@color/COLOUR_ORDER_BACKGROUND_EMPTY"
+		app:layout_constraintBottom_toTopOf="@id/guideline_price_top"
+		app:layout_constraintEnd_toStartOf="@id/guideline_left"
+		app:layout_constraintStart_toStartOf="parent"
+		app:layout_constraintTop_toBottomOf="@id/guideline_top" />
+
+	<TextView
+		android:id="@+id/poe_loading"
+		android:layout_width="0dp"
+		android:layout_height="0dp"
+		android:gravity="center"
+		android:text="LOADING..."
+		android:textColor="@color/COLOUR_HEADER_TEXT"
+		android:background="@color/COLOUR_HEADER_BACKGROUND"
+		android:textSize="20sp"
 		app:layout_constraintBottom_toTopOf="@id/guideline_price_top"
 		app:layout_constraintEnd_toStartOf="@id/guideline_left"
 		app:layout_constraintStart_toStartOf="parent"
@@ -110,7 +123,7 @@
 		app:layout_constraintTop_toTopOf="parent"
 		app:layout_constraintBottom_toBottomOf="@id/guideline_top"
 		app:layout_constraintEnd_toStartOf="@id/btn_back"
-		app:layout_constraintStart_toEndOf="@id/loading_spinner" />
+		app:layout_constraintStart_toEndOf="@id/grpc_spinner" />
 -+
 	<!-- MIDDLE COLUMN VIEWS -->
 	<ImageButton

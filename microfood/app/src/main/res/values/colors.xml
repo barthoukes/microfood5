@@ -16,6 +16,7 @@
     <color name="LIGHTBLUE">#FFADD8E6</color>
     <color name="COLOUR_MESSAGEBOX_TEXT">#FFE0E000</color>
     <color name="COLOUR_MESSAGEBOX_BACKGROUND">#FFFF3030</color>
+    <color name="COLOUR_SPINNER_BACKGROUND">#FFFF3030</color>
     <color name="YELLOW">#FFE0E000</color>
     <color name="WHITE">#FFEEEEEE</color>
     <color name="COLOUR_GROUP_TEXT">#FFF0F080</color>

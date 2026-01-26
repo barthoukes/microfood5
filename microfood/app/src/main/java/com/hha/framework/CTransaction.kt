@@ -25,8 +25,6 @@ import com.hha.types.ETransType
 import com.hha.types.EPaymentStatus
 import com.hha.types.ETaxType
 import com.hha.types.ETimeFrameIndex
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -52,6 +50,21 @@ class CTransaction : Iterable<CSortedItem>,
                 return -1 // Return -1 on error
             }
         }
+
+        suspend fun createAndLoad(
+            transactionId: Int,
+            sort: EItemSort = EItemSort.SORT_ORDER,
+            timeFrame: ETimeFrameIndex = ETimeFrameIndex(ETimeFrameIndex.TIME_FRAME_ALL)
+        ): CTransaction {
+            // Step 1: Call the private, synchronous constructor to create the object
+            val transaction = CTransaction(transactionId, sort, timeFrame)
+
+            // Step 2: Call the suspend function to load the data asynchronously
+            transaction.selectTransactionId(transactionId, sort, timeFrame)
+
+            // Step 3: Return the fully initialized object
+            return transaction
+        }
     }
 
     var global = Global.getInstance()
@@ -62,7 +75,7 @@ class CTransaction : Iterable<CSortedItem>,
     private var mFactorHigh: Double = 1.0
     private var mFactorLow: Double = 1.0
     var hasOrders: Boolean = false
-    private val mItems = CTransactionItems(this)
+    private lateinit var mItems : CTransactionItems
     private val mListeners = mutableListOf<TransactionListener>()
 
     private var mPartial: CMoney = CMoney(0)
@@ -78,6 +91,9 @@ class CTransaction : Iterable<CSortedItem>,
 
     val itemSize: Int
         get() = mItems.itemLines()
+
+    val itemSort: EItemSort
+        get() = mSort
 
     var rfidKeyId: Short = 0
        get() = data.rfidKeyId
@@ -96,6 +112,8 @@ class CTransaction : Iterable<CSortedItem>,
 
     val displayName : String
         get() = data.name
+
+    var mSort = EItemSort.SORT_BILL
 
     constructor(
         transactionId: Int, name: String, time: String,
@@ -135,19 +153,30 @@ class CTransaction : Iterable<CSortedItem>,
         data.message = ""
     }
 
-    constructor(transactionId: Int)
+    private constructor(
+        transactionId: Int, sort: EItemSort, timeFrame: ETimeFrameIndex)
     {
         Log.d(tag, "constructor $transactionId")
-        selectTransactionId(transactionId)
-
-        mItems.addListener(this)
+        mTimeFrame = CTimeFrame(this)
+        mTimeFrame.timeFrameIndex = ETimeFrameIndex(timeFrame.index)
+        mSort = sort
         mPayments.addListener(this)
+        // Afterwards still need to call suspend fun loadItems
     }
 
-    constructor(transactionId: Int, itemSort: EItemSort, timeFrameIndex: ETimeFrameIndex)
+    suspend fun loadItems()
     {
-        selectTransactionId(transactionId)
+        mItems = CTransactionItems.createAndLoad(
+            this, transactionId, mSort,
+            mTimeFrame.timeFrameIndex)
+        mItems.addListener(this)
+    }
 
+    private constructor(transactionId: Int)
+    {
+        Log.d(tag, "constructor(int) $transactionId")
+        mItems.addListener(this)
+        mPayments.addListener(this)
     }
 
     constructor(source: TransactionData?)
@@ -237,7 +266,6 @@ class CTransaction : Iterable<CSortedItem>,
         employee.update(false);
     }
 
-
     suspend fun addTransactionItem(selectedMenuItem: CMenuItem, clusterId: Short): Boolean
     {
         Log.d(
@@ -279,7 +307,7 @@ class CTransaction : Iterable<CSortedItem>,
             transactionId, global.deviceId, timeFrameIndex, timer)
     }
 
-    fun cleanCurrentTransaction()
+    suspend fun cleanCurrentTransaction()
     {
         Log.d(tag, "cleanCurrentTransaction")
         data.rfidKeyId = global.rfidKeyId
@@ -303,7 +331,7 @@ class CTransaction : Iterable<CSortedItem>,
         mTimeFrame.previous()
     }
 
-    fun closeTransaction(why: EClientOrdersType)
+    suspend fun closeTransaction(why: EClientOrdersType)
     {
         Log.d(tag, "closeTransaction")
         val service = GrpcServiceFactory.createDailyTransactionService()
@@ -367,7 +395,8 @@ class CTransaction : Iterable<CSortedItem>,
             tableService.closeTransaction(transactionId);
         }
         // Update memory
-        selectTransactionId(data.transactionId)
+        selectTransactionId(data.transactionId, mSort,
+            ETimeFrameIndex(ETimeFrameIndex.TIME_FRAME_ALL))
         mItems.setNegativeQuantityToRemovedItems();
     }
 
@@ -444,7 +473,7 @@ class CTransaction : Iterable<CSortedItem>,
         mPayments.cancelPayments(index, paymentStatus)
     }
 
-    fun emptyTransaction(reason: String)
+    suspend fun emptyTransaction(reason: String)
     {
         Log.d(tag, "emptyTransaction")
         // No printing of kitchen, just go to billing...
@@ -589,7 +618,7 @@ class CTransaction : Iterable<CSortedItem>,
 
     override fun getTimeFrameIndex(): ETimeFrameIndex
     {
-        return mTimeFrame.getTimeFrameIndex()
+        return mTimeFrame.timeFrameIndex
     }
 
     fun getTotal(taxType: ETaxType): CMoney
@@ -699,7 +728,7 @@ class CTransaction : Iterable<CSortedItem>,
     {
         return mItems.numberKitchenItems(
             data.transactionId,
-            mTimeFrame.getTimeFrameIndex())
+            mTimeFrame.timeFrameIndex)
     }
 
     override fun onPaymentAdded(position: Int, item: CPayment)
@@ -784,7 +813,7 @@ class CTransaction : Iterable<CSortedItem>,
 
     fun removeTimeFrame()
     {
-        mItems.undoTimeFrame( mTimeFrame.time_frame_index,
+        mItems.undoTimeFrame( mTimeFrame.timeFrameIndex,
             global.CFG.getShort("pc_number"))
         closeTimeFrame()
     }
@@ -797,37 +826,51 @@ class CTransaction : Iterable<CSortedItem>,
         service.setMessage(data.transactionId, message)
     }
 
-    fun startNextTimeFrame(): CTimeFrame
-    {
-        Log.d(tag, "startNextTimeFrame")
-        Log.i("Ctransaction", "Start next TimeFrame")
-        mTimeFrame = CTimeFrame(data.transactionId, this)
-        return mTimeFrame
-    }
-
-    fun startTimeFrame()
+    suspend fun startNewTimeFrame()
     {
         Log.d(tag, "startTimeFrame")
         val waiter = global.rfidKeyId
-        if (mTimeFrame.time_frame_index.index == ETimeFrameIndex.TIME_FRAME_ALL &&
-            data.transactionId >0)
+        if (data.transactionId > 1E6)
         {
             mTimeFrame.getLatestTimeFrameIndex(data.transactionId)
         }
-        mTimeFrame.next();
+        mTimeFrame.next()
         val deviceId = global.pcNumber
         mTimeFrame.startTimeFrame(deviceId, data.transactionId, waiter)
     }
 
-    fun selectTransactionId(transactionId: Int)
+    suspend fun selectTransactionId(transactionId: Int, sort: EItemSort, timeFrame: ETimeFrameIndex)
     {
         Log.d(tag, "selectTransactionId $transactionId")
-        data.transactionId = transactionId
-        mPayments.setTransactionId()
-        val service = GrpcServiceFactory.createDailyTransactionService()
-        val inputData: TransactionData? = service.selectTransactionId(transactionId.toInt())
-        data.setTransactionData(inputData)
-        mSizeAtStart = mItems.itemLines()
+        try
+        {
+            val service = GrpcServiceFactory.createDailyTransactionService()
+            val transactionData: TransactionData? = service.selectTransactionId(transactionId)
+            // @todo load the items from the transaction
+            val allItems = true
+
+            if (transactionData != null)
+            {
+                data.setTransactionData(transactionData)
+                mSort = sort
+                val tfi = when (allItems)
+                {
+                    true -> ETimeFrameIndex(ETimeFrameIndex.TIME_FRAME_ALL)
+                    else -> timeFrame
+                }
+                loadItems()
+                mTimeFrame = CTimeFrame(this)
+                mPayments.setTransactionId()
+                mSizeAtStart = mItems.itemLines()
+                mCustomer = CCustomer(data.customerId)
+            } else
+            {
+                Log.e(tag, "Failed to select transaction with ID: $transactionId")
+                // Handle error case
+            }
+        } catch (e: Exception) {
+            Log.e(tag, "Error selecting transaction $transactionId: ${e.message}")
+        }
     }
 
     fun setDiscount(discount: CMoney)
@@ -945,12 +988,18 @@ class CTransaction : Iterable<CSortedItem>,
         return data.name.toIntOrNull() ?:0
     }
 
+    // @tpdp make suspend
     fun updateTotal()
     {
         Log.d(tag, "updateTotal")
         val service = GrpcServiceFactory.createDailyTransactionService()
         service.updateTotal(data.transactionId)
-        selectTransactionId(data.transactionId)
+        // Local update prices
+        data.subTotal = mItems.calculateTotalItems()
+        data.total = data.subTotal - data.discount + data.tips
+        data.taxTotal.calculateTax(data.total,
+            Global.getInstance().taxPercentageLow,
+            Global.getInstance().taxPercentageHigh)
     }
 
     fun useTakeawayPrices(): Boolean

@@ -18,13 +18,15 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import android.util.Log
 import com.hha.framework.CTransaction
+import com.hha.grpc.GrpcStateViewModel
 
 class FloorTableModel : ViewModel() {
    private val global = Global.getInstance()
    private val tag = "FloorTableModel"
+   private var grpcStateViewModel: GrpcStateViewModel? = null
 
    // Initialize with empty list to ensure observers get called
-   private val _isLoading = MutableLiveData<Boolean>(false)
+   //private val _isLoading = MutableLiveData<Boolean>(false)
    private val _floorTables = MutableLiveData<CFloorTables>(CFloorTables())
    private val _floorPlans = MutableLiveData<CFloorPlans>(CFloorPlans())
 
@@ -33,7 +35,7 @@ class FloorTableModel : ViewModel() {
 
    // Expose LiveData
    val floorTables: LiveData<CFloorTables> = _floorTables
-   val isLoading: LiveData<Boolean> = _isLoading
+  // val isLoading: LiveData<Boolean> = _isLoading
    val errorMessage: LiveData<String?> = _errorMessage
 
    // Cache the last loaded data to restore quickly
@@ -51,7 +53,7 @@ class FloorTableModel : ViewModel() {
    data class TableClickResult(
       val action: FloorTableAction = FloorTableAction.NAVIGATE_TO_ORDER,
       val transactionId: Int = -1 // Default to -1, only relevant for navigation actions.
-   )
+      )
 
    init {
       Log.i(tag, "FloorTableModel initialized")
@@ -61,17 +63,11 @@ class FloorTableModel : ViewModel() {
    }
 
    fun loadFloorTables() {
-      // Don't refresh if already loading
-      if (_isLoading.value == true) {
-         Log.i(tag, "Already loading, skipping refresh")
-         return
-      }
-
       Log.i(tag, "refreshAllData called, floorPlanId: ${global.floorPlanId}")
 
       viewModelScope.launch {
          try {
-            _isLoading.value = true
+            grpcStateViewModel?.messageSent()
             _errorMessage.value = null
 
             // Try to use cached data first for immediate UI update
@@ -119,7 +115,7 @@ class FloorTableModel : ViewModel() {
                _floorPlans.value = cachedFloorPlans
             }
          } finally {
-            _isLoading.value = false
+            grpcStateViewModel?.messageConfirmed()
          }
       }
    }
@@ -295,7 +291,7 @@ class FloorTableModel : ViewModel() {
          // 3. RETURN THE RESULT
          return TableClickResult(
             FloorTableAction.NAVIGATE_TO_ORDER,
-            transactionId // This is now correctly an Int
+            transactionId
          )
       }
    }

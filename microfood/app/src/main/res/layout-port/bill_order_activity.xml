@@ -5,7 +5,7 @@
 	android:background="@drawable/backrepeat"
 	android:layout_width="match_parent"
 	android:layout_height="match_parent"
-	android:padding="8dp">
+	android:padding="0dp">
 
 	<!-- NEW: Vertical Guideline to replace the layout_weight -->
 	<androidx.constraintlayout.widget.Guideline
@@ -14,6 +14,20 @@
 		android:layout_height="wrap_content"
 		android:orientation="vertical"
 		app:layout_constraintGuide_percent="0.50" />
+
+	<androidx.constraintlayout.widget.Guideline
+		android:id="@+id/guideline_vertical_33"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:orientation="vertical"
+		app:layout_constraintGuide_percent="0.33" />
+
+	<androidx.constraintlayout.widget.Guideline
+		android:id="@+id/guideline_vertical_66"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:orientation="vertical"
+		app:layout_constraintGuide_percent="0.66" />
 
 	<androidx.constraintlayout.widget.Guideline
 		android:id="@+id/guideline_top"
@@ -31,6 +45,19 @@
 		app:layout_constraintTop_toTopOf="parent"
 		app:layout_constraintBottom_toTopOf="@id/guideline_top"
 		android:layout_height="0dp">
+
+		<ImageView
+			android:id="@+id/grpc_spinner"
+			android:layout_width="40dp"
+			android:layout_height="0dp"
+			android:indeterminate="true"
+			android:visibility="visible"
+			android:background="@color/COLOUR_SPINNER_BACKGROUND"
+			app:layout_constraintTop_toTopOf="parent"
+			app:layout_constraintBottom_toBottomOf="parent"
+			app:layout_constraintStart_toStartOf="parent"
+			tools:visibility="visible" />
+
 		<TextView
 			android:id="@+id/billing_header_text"
 			android:layout_width="0dp"
@@ -42,7 +69,7 @@
 			app:layout_constraintTop_toTopOf="parent"
 			app:layout_constraintBottom_toBottomOf="parent"
 			app:layout_constraintEnd_toStartOf="@id/btn_back"
-			app:layout_constraintStart_toStartOf="parent" />
+			app:layout_constraintStart_toEndOf="@id/grpc_spinner" />
 
 		<ImageButton
 			android:id="@+id/btn_back"
@@ -62,14 +89,14 @@
 	<TextView
 		android:id="@+id/tableName"
 		android:layout_width="0dp"
-		android:layout_marginRight="8dp"
+		android:layout_marginEnd="8dp"
 		android:layout_height="wrap_content"
 		android:background="@color/COLOUR_SELECTED_BACKGROUND"
 		android:gravity="center"
 		android:text="Table 5"
 		android:textColor="@color/COLOUR_SELECTED_TEXT"
 		android:textSize="20sp"
-		app:layout_constraintEnd_toStartOf="@id/guideline_vertical_split"
+		app:layout_constraintEnd_toEndOf="@id/guideline_vertical_split"
 		app:layout_constraintStart_toStartOf="parent"
 		app:layout_constraintTop_toBottomOf="@id/guideline_top" />
 
@@ -111,22 +138,17 @@
 		android:layout_width="0dp"
 		android:layout_height="0dp"
 		android:layout_marginTop="0dp"
-		android:layout_marginBottom="8dp"
+		android:layout_marginBottom="0dp"
 		android:layout_marginEnd="0dp"
 		android:background="@color/COLOUR_ORDER_BACKGROUND_EMPTY"
 		android:choiceMode="singleChoice"
 		android:fadingEdge="none"
 		android:scrollbars="none"
 		android:scrollingCache="true"
-		app:layout_constraintBottom_toTopOf="@+id/btnDiscount"
+		app:layout_constraintBottom_toBottomOf="@+id/total_bill_price"
 		app:layout_constraintEnd_toEndOf="parent"
 		app:layout_constraintStart_toEndOf="@id/guideline_vertical_split"
 		app:layout_constraintTop_toBottomOf="@id/guideline_top" />
-
-
-	<!-- ################################################################## -->
-	<!-- ################ ALL BOTTOM CONTROLS (Unchanged) ################# -->
-	<!-- ################################################################## -->
 
 	<LinearLayout
 		android:id="@+id/icon_buttons_container"
@@ -134,7 +156,7 @@
 		android:layout_height="wrap_content"
 		android:orientation="horizontal"
 		app:layout_constraintBottom_toTopOf="@+id/btn_quick_payments"
-		app:layout_constraintEnd_toStartOf="@id/guideline_vertical_split"
+		app:layout_constraintEnd_toEndOf="parent"
 		app:layout_constraintStart_toStartOf="parent">
 
 		<!-- Language Icon Button -->
@@ -144,6 +166,7 @@
 			android:layout_width="0dp"
 			android:layout_height="wrap_content"
 			android:layout_marginTop="8dp"
+			android:layout_marginBottom="4dp"
 			android:layout_weight="1"
 			android:background="@color/ANDROID_BUTTON_BACKGROUND"
 			android:gravity="center"
@@ -160,6 +183,7 @@
 			android:layout_marginTop="8dp"
 			android:layout_marginLeft="8dp"
 			android:layout_marginRight="8dp"
+			android:layout_marginBottom="4dp"
 			android:layout_weight="1"
 			android:background="@color/ANDROID_BUTTON_BACKGROUND"
 			android:gravity="center"
@@ -168,166 +192,188 @@
 			tools:ignore="SpeakableTextPresentCheck" />
 		<!-- Note: You will need to add an 'ic_message.xml' or similar drawable for this to work -->
 
+		<ImageButton
+			android:id="@+id/btnDiscount"
+			style="?android:attr/buttonStyleSmall"
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="8dp"
+			android:layout_marginBottom="4dp"
+			android:layout_weight="1"
+			android:background="@color/ANDROID_BUTTON_BACKGROUND"
+			android:gravity="center"
+			android:onClick="onButtonDiscount"
+			android:src="@drawable/icon_discount_yellow"
+			tools:ignore="SpeakableTextPresentCheck"
+			app:layout_constraintBottom_toTopOf="parent"
+			app:layout_constraintEnd_toEndOf="parent"/>
+
 	</LinearLayout>
-	<!-- Discount button on the right side, below the payments list -->
-	<ImageButton
-		android:id="@+id/btnDiscount"
-		style="?android:attr/buttonStyleSmall"
-		android:layout_width="0dp"
-		android:layout_height="wrap_content"
-		android:layout_marginTop="0dp"
-		android:layout_weight="1"
-		android:background="@color/ANDROID_BUTTON_BACKGROUND"
-		android:gravity="center"
-		android:onClick="onButtonDiscount"
-		android:src="@drawable/icon_discount_yellow"
-		tools:ignore="SpeakableTextPresentCheck"
-		app:layout_constraintBottom_toTopOf="@+id/btn_quick_payments"
-		app:layout_constraintEnd_toEndOf="parent"
-		app:layout_constraintStart_toStartOf="@id/guideline_vertical_split"/>
 
 	<!-- Payment Methods -->
 	<TextView
 		android:id="@+id/btn_quick_payments"
 		android:layout_width="0dp"
+		android:layout_marginStart="8dp"
 		android:layout_height="wrap_content"
-		android:layout_marginBottom="4dp"
+		android:layout_marginBottom="0dp"
+		android:layout_marginTop="4dp"
 		android:text="Quick Pay:"
 		android:textColor="@android:color/black"
-		app:layout_constraintBottom_toTopOf="@+id/quick_pay_grid"
+		app:layout_constraintTop_toBottomOf="@id/layout_billing_payments"
 		app:layout_constraintEnd_toEndOf="parent"
 		app:layout_constraintStart_toStartOf="parent" />
 
-	<GridLayout
-		android:id="@+id/quick_pay_grid"
-		android:layout_width="0dp"
-		android:layout_height="wrap_content"
-		android:layout_marginBottom="8dp"
-		android:columnCount="3"
-		android:rowCount="2"
-		app:layout_constraintBottom_toTopOf="@+id/print_options_container"
-		app:layout_constraintEnd_toEndOf="parent"
-		app:layout_constraintStart_toStartOf="parent">
-		<!-- GridLayout content remains the same... -->
 		<ImageButton
 			android:id="@+id/btnEuro5"
 			android:layout_width="0dp"
-			android:layout_height="80dp"
-			android:layout_rowWeight="1"
-			android:layout_columnWeight="1"
-			android:layout_margin="4dp"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="4dp"
+			android:layout_marginEnd="4dp"
+			android:paddingTop="4dp"
+			android:paddingBottom="4dp"
 			android:onClick="onButton5Euro"
+			app:layout_constraintStart_toStartOf="parent"
+			app:layout_constraintTop_toBottomOf="@id/btn_quick_payments"
+			app:layout_constraintEnd_toStartOf="@id/guideline_vertical_33"
 			android:background="@color/ANDROID_BUTTON_BACKGROUND"
 			android:src="@drawable/icon_5euro40" />
 
 		<ImageButton
 			android:id="@+id/btnEuro10"
 			android:layout_width="0dp"
-			android:layout_height="80dp"
-			android:layout_rowWeight="1"
-			android:layout_columnWeight="1"
-			android:layout_margin="4dp"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="4dp"
+			android:layout_marginStart="4dp"
+			android:layout_marginEnd="4dp"
+			android:paddingTop="4dp"
+			android:paddingBottom="4dp"
 			android:onClick="onButton10Euro"
 			android:background="@color/ANDROID_BUTTON_BACKGROUND"
+			app:layout_constraintStart_toEndOf="@id/guideline_vertical_33"
+			app:layout_constraintEnd_toStartOf="@id/guideline_vertical_66"
+			app:layout_constraintTop_toBottomOf="@id/btn_quick_payments"
 			android:src="@drawable/icon_10euro40" />
 
 		<ImageButton
 			android:id="@+id/btnEuro20"
 			android:layout_width="0dp"
-			android:layout_height="80dp"
-			android:layout_rowWeight="1"
-			android:layout_columnWeight="1"
-			android:layout_margin="4dp"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="4dp"
+			android:layout_marginStart="4dp"
+			android:paddingTop="4dp"
+			android:paddingBottom="4dp"
 			android:onClick="onButton20Euro"
 			android:background="@color/ANDROID_BUTTON_BACKGROUND"
+			app:layout_constraintStart_toEndOf="@id/guideline_vertical_66"
+			app:layout_constraintEnd_toEndOf="parent"
+			app:layout_constraintTop_toBottomOf="@id/btn_quick_payments"
 			android:src="@drawable/icon_20euro40" />
 
+		<!-- GridLayout content remains the same... -->
 		<ImageButton
 			android:id="@+id/btnEuro50"
 			android:layout_width="0dp"
-			android:layout_height="80dp"
-			android:layout_rowWeight="1"
-			android:layout_columnWeight="1"
-			android:layout_margin="4dp"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="8dp"
+			android:layout_marginEnd="4dp"
+			android:layout_marginBottom="0dp"
 			android:onClick="onButton50Euro"
 			android:background="@color/ANDROID_BUTTON_BACKGROUND"
+			app:layout_constraintTop_toBottomOf="@id/btnEuro5"
+			app:layout_constraintEnd_toStartOf="@id/guideline_vertical_33"
+			app:layout_constraintStart_toStartOf="parent"
 			android:src="@drawable/icon_50euro40" />
 
 		<ImageButton
 			android:id="@+id/btnCash"
 			android:layout_width="0dp"
-			android:layout_height="80dp"
-			android:layout_rowWeight="1"
-			android:layout_columnWeight="1"
-			android:layout_margin="4dp"
+			android:layout_height="wrap_content"
+			android:layout_marginStart="4dp"
+			android:layout_marginEnd="4dp"
+			android:layout_marginTop="8dp"
+			android:layout_marginBottom="0dp"
+			android:paddingTop="4dp"
+			android:paddingBottom="4dp"
 			android:onClick="onButtonCash"
 			android:background="@color/ANDROID_BUTTON_BACKGROUND"
-			android:src="@drawable/pay_cash40" />
+			android:src="@drawable/pay_cash40"
+			app:layout_constraintTop_toBottomOf="@id/btnEuro10"
+			app:layout_constraintStart_toEndOf="@id/guideline_vertical_33"
+			app:layout_constraintEnd_toEndOf="@id/guideline_vertical_66"
+			app:layout_constraintBottom_toBottomOf="@id/btnEuro50"
+			/>
 
 		<ImageButton
 			android:id="@+id/btnPin"
 			android:layout_width="0dp"
-			android:layout_height="80dp"
-			android:layout_rowWeight="1"
-			android:layout_columnWeight="1"
-			android:layout_margin="4dp"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="8dp"
+			android:layout_marginStart="4dp"
 			android:onClick="onButtonPin"
+			android:paddingTop="4dp"
+			android:paddingBottom="4dp"
 			android:background="@color/ANDROID_BUTTON_BACKGROUND"
-			android:src="@drawable/pay_pin40" />
-	</GridLayout>
+			android:src="@drawable/pay_pin40"
+			app:layout_constraintTop_toBottomOf="@id/btnEuro5"
+			app:layout_constraintLeft_toRightOf="@id/guideline_vertical_66"
+			app:layout_constraintRight_toRightOf="parent"/>
 
 	<!-- Print Options -->
-	<LinearLayout
-		android:id="@+id/print_options_container"
-		android:layout_width="0dp"
-		android:layout_height="wrap_content"
-		android:layout_marginBottom="8dp"
-		android:orientation="horizontal"
-		app:layout_constraintBottom_toTopOf="@+id/bottom_action_buttons"
-		app:layout_constraintEnd_toEndOf="parent"
-		app:layout_constraintStart_toStartOf="parent">
-		<!-- Print options content remains the same... -->
-		<LinearLayout
-			android:layout_width="0dp"
-			android:layout_height="wrap_content"
-			android:layout_weight="1"
-			android:orientation="vertical">
 
 			<TextView
 				android:id="@+id/txtKitchenPrints"
-				android:layout_width="match_parent"
+				android:layout_marginEnd="8dp"
+				android:layout_marginTop="8dp"
+				android:layout_width="0dp"
 				android:layout_height="wrap_content"
 				android:text="Kitchen Prints:"
-				android:textColor="@android:color/black" />
+				android:textAlignment="gravity"
+				android:gravity="right"
+				android:textColor="@android:color/black"
+				app:layout_constraintStart_toStartOf="parent"
+				app:layout_constraintTop_toTopOf="@id/btnKitchenPrints"
+				app:layout_constraintBottom_toBottomOf="@id/btnKitchenPrints"
+				app:layout_constraintEnd_toStartOf="@id/btnKitchenPrints"
+				/>
 
 			<Button
 				android:id="@+id/btnKitchenPrints"
-				android:layout_width="match_parent"
+				android:layout_width="0dp"
 				android:layout_height="wrap_content"
-				android:text="1x" />
-		</LinearLayout>
+				android:textAlignment="gravity"
+				android:text="1x"
+				app:layout_constraintStart_toEndOf="@id/guideline_vertical_66"
+				app:layout_constraintEnd_toEndOf="parent"
+				app:layout_constraintTop_toBottomOf="@id/btnPin"
+				/>
 
-		<LinearLayout
+		<TextView
+			android:id="@+id/txtBillPrints"
 			android:layout_width="0dp"
 			android:layout_height="wrap_content"
-			android:layout_marginStart="8dp"
-			android:layout_weight="1"
-			android:orientation="vertical">
+			android:layout_marginEnd="8dp"
+			android:layout_marginTop="8dp"
+			android:gravity="right"
+			android:text="Bill Prints:"
+			android:textColor="@android:color/black"
+			android:textAlignment="gravity"
+			app:layout_constraintEnd_toStartOf="@id/btnBillPrints"
+			app:layout_constraintStart_toStartOf="parent"
+			app:layout_constraintTop_toTopOf="@id/btnBillPrints"
+			app:layout_constraintBottom_toBottomOf="@id/btnBillPrints"
+			/>
 
-			<TextView
-				android:id="@+id/txtBillPrints"
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content"
-				android:text="Bill Prints:"
-				android:textColor="@android:color/black" />
-
-			<Button
-				android:id="@+id/btnBillPrints"
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content"
-				android:text="1x" />
-		</LinearLayout>
-	</LinearLayout>
+	<Button
+		android:id="@+id/btnBillPrints"
+		android:layout_width="0dp"
+		android:layout_height="wrap_content"
+		android:text="1x"
+		app:layout_constraintEnd_toEndOf="parent"
+		app:layout_constraintStart_toStartOf="@id/guideline_vertical_66"
+		app:layout_constraintTop_toBottomOf="@id/btnKitchenPrints"
+		app:layout_constraintBottom_toTopOf="@id/bottom_action_buttons"
+		/>
 
 	<!-- Bottom Action Buttons -->
 	<LinearLayout
