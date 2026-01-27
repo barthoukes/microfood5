@@ -10,15 +10,14 @@ import com.hha.common.CookingState
 import com.hha.resources.CTimestamp
 import com.hha.types.ECookingState
 import com.hha.types.ETimeFrameIndex
-import kotlinx.coroutines.runBlocking
 
 class CTimeFrame
 {
    var id: Int = 0
-   var time_frame_index = ETimeFrameIndex(1)
+   var timeFrameIndex = ETimeFrameIndex(1) // @todo add getter
    var waiter: Int = 0
-   var start_time: String = ""
-   var end_time: String = ""
+   var startTime: String = ""
+   var endTime: String = ""
 
    lateinit var m_operations: TimeFrameOperations
 
@@ -32,10 +31,10 @@ class CTimeFrame
    {
       id = cf.id
       m_operations = cf.m_operations
-      time_frame_index = cf.time_frame_index
+      timeFrameIndex = cf.timeFrameIndex
       waiter = cf.waiter
-      start_time = cf.start_time
-      end_time = cf.end_time
+      startTime = cf.startTime
+      endTime = cf.endTime
    }
 
    constructor(transactionId: Int, operations: TimeFrameOperations)
@@ -46,25 +45,25 @@ class CTimeFrame
 
       val current = LocalDateTime.now()
       val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
-      start_time = current.format(formatter)
+      startTime = current.format(formatter)
       var x = service.insertNewTimeFrame()
       if (x == null) id = 1 else id = x
-      time_frame_index = ETimeFrameIndex(timeFrameId.toShort())
+      timeFrameIndex = ETimeFrameIndex(timeFrameId.toShort())
       waiter = 0
-      end_time = "1980-01-01 00:00:00"
+      endTime = "1980-01-01 00:00:00"
    }
 
    /// @brief create a new time frame.
    constructor(idd: Int, tfi: ETimeFrameIndex, transactionId: Int)
    {
       id = idd
-      time_frame_index = tfi
+      timeFrameIndex = tfi
       waiter = 0
 
       val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
       val output = dateFormat.format(Date())
-      start_time = output
-      end_time = "0"
+      startTime = output
+      endTime = "0"
    }
 
    fun changeDeliverTime(transactionId: Int, pcNumber: Short,
@@ -84,7 +83,7 @@ class CTimeFrame
       val now = CTimestamp()
       service.endTimeFrame(
          m_operations.transactionId,
-         time_frame_index.index,
+         timeFrameIndex.index,
          m_operations.getDeviceId(),
          now.getDateTime(), false,
          CookingState.COOKING_DONE
@@ -97,7 +96,7 @@ class CTimeFrame
       val service = GrpcServiceFactory.createDailyTimeFrameService()
       service.endTimeFrame(
          m_operations.transactionId,
-         time_frame_index.index.toShort(),
+         timeFrameIndex.index.toShort(),
          m_operations.getDeviceId(),
          "", false,
          CookingState.COOKING_DONE
@@ -116,7 +115,7 @@ class CTimeFrame
 
       val state = newState.toCookingState()
       service.endTimeFrame(
-         transactionId, time_frame_index.index,
+         transactionId, timeFrameIndex.index,
          pcNumber, newTime,
          timeChanged, state)
    }
@@ -124,40 +123,40 @@ class CTimeFrame
    fun getLatestTimeFrameIndex(transactionId: Int)
    {
       val service = GrpcServiceFactory.createDailyTimeFrameService()
-      this.time_frame_index = ETimeFrameIndex(
+      this.timeFrameIndex = ETimeFrameIndex(
          service.getLatestTimeFrameIndex(transactionId))
    }
 
-   fun getTimeFrameIndex(): ETimeFrameIndex
-   {
-      return time_frame_index
-   }
+//   fun getTimeFrameIndex(): ETimeFrameIndex
+//   {
+//      return timeFrameIndex
+//   }
 
    fun getValidTimeFrame(): ETimeFrameIndex
    {
-      if (time_frame_index.toInt() <= 1)
+      if (timeFrameIndex.toInt() <= 1)
          return ETimeFrameIndex(ETimeFrameIndex.TIME_FRAME1)
-      return time_frame_index
+      return timeFrameIndex
    }
 
    fun next()
    {
-      time_frame_index = time_frame_index.next()
+      timeFrameIndex = timeFrameIndex.next()
    }
 
    fun previous()
    {
-      time_frame_index = time_frame_index.previous()
+      timeFrameIndex = timeFrameIndex.previous()
    }
 
-   fun startTimeFrame(deviceId: Short, transactionId: Int, personId: Short)
+   suspend fun startTimeFrame(deviceId: Short, transactionId: Int, personId: Short)
    {
       val service = GrpcServiceFactory.createDailyTimeFrameService()
-      service.startTimeFrame(deviceId, transactionId, personId, time_frame_index.index)
+      service.startTimeFrame(deviceId, transactionId, personId, timeFrameIndex.index)
    }
 
    fun toInt(): Int
    {
-      return time_frame_index.toInt()
+      return timeFrameIndex.toInt()
    }
 }

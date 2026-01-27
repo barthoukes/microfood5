@@ -77,7 +77,22 @@
 		android:id="@+id/layoutTransactionItems"
 		android:layout_width="0dp"
 		android:layout_height="0dp"
+		android:visibility="gone"
 		android:background="@color/COLOUR_ORDER_BACKGROUND_EMPTY"
+		app:layout_constraintBottom_toTopOf="@id/guideline_price_top"
+		app:layout_constraintEnd_toStartOf="@id/guideline_left"
+		app:layout_constraintStart_toStartOf="parent"
+		app:layout_constraintTop_toBottomOf="@id/guideline_top" />
+
+	<TextView
+		android:id="@+id/poe_loading"
+		android:layout_width="0dp"
+		android:layout_height="0dp"
+		android:gravity="center"
+		android:text="LOADING..."
+		android:textColor="@color/COLOUR_HEADER_TEXT"
+		android:background="@color/COLOUR_HEADER_BACKGROUND"
+		android:textSize="20sp"
 		app:layout_constraintBottom_toTopOf="@id/guideline_price_top"
 		app:layout_constraintEnd_toStartOf="@id/guideline_left"
 		app:layout_constraintStart_toStartOf="parent"

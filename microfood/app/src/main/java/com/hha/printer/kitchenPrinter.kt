@@ -16,7 +16,6 @@
 
 package com.hha.printer
 
-import com.hha.common.ItemLocation
 import com.hha.dialog.Translation
 import com.hha.dialog.Translation.TextId
 import com.hha.framework.CItem
@@ -28,12 +27,9 @@ import com.hha.resources.Global
 import com.hha.resources.CTimestamp
 import com.hha.types.CMoney
 import com.hha.types.EItemLocation
-import com.hha.printer.BillMessage
 import com.hha.types.EItemSort
 import com.hha.types.ETaal
 import com.hha.types.ETimeFrameIndex
-import com.hha.printer.EPrinterType
-import com.hha.printer.EPrinterLocation
 import com.hha.types.EOrderLevel
 import com.hha.types.ETaxType
 import com.hha.types.ETransType
@@ -46,125 +42,131 @@ class KitchenPrinter(
    collectPrinter: Boolean
 )
 {
-   private var m_printQuantity: Boolean = true
-   private var m_kitchenChinese: Boolean = false
-   private var m_kitchenLocal: Boolean = false
-   private var m_enableCollectPrinter: Boolean = collectPrinter
-   private var m_printKitchenSorted: Boolean = false
+   private var mPrintQuantity: Boolean = true
+   private var mKitchenChinese: Boolean = false
+   private var mKitchenLocal: Boolean = false
+   private var mEnableCollectPrinter: Boolean = collectPrinter
+   private var mPrintKitchenSorted: Boolean = false
    private val global = Global.getInstance()
    private val CFG = global.CFG
    private val userCFG = global.userCFG
-   private var m_euroLang: ETaal = global.euroLang
-   private var m_printLang: ETaal = global.euroLang
-   private var m_timeFrameIndex: ETimeFrameIndex = timeFrameIndex
-   private var m_orderNumberPrinted: Boolean = false
-   private var m_timeDelay: Int = timeDelay
-   private var m_quantity: Int = 1
-   private var m_takeaway: Boolean = false
-   private var m_rechaud: Boolean = false
-   private var m_phone: Boolean = false
-   private var m_deletedBlack: Boolean = false
-   private var m_enableCutPrinter: Boolean = false
-   private var m_chineseFirst: Boolean = false
+   private var mEuroLang: ETaal = global.euroLang
+   private var mPrintLang: ETaal = global.euroLang
+   private var mTimeFrameIndex: ETimeFrameIndex = timeFrameIndex
+   private var mOrderNumberPrinted: Boolean = false
+   private var mTimeDelay: Int = timeDelay
+   private var mQuantity: Int = 1
+   private var mTakeaway: Boolean = false
+   private var mRechaud: Boolean = false
+   private var mPhone: Boolean = false
+   private var mDeletedBlack: Boolean = false
+   private var mEnableCutPrinter: Boolean = false
+   private var mChineseFirst: Boolean = false
 
-   private var m_transaction: CTransaction = CTransaction(transactionId, EItemSort.SORT_NONE, timeFrameIndex)
-   private var m_transactionId: Int = transactionId
-   private var m_onlyText: Boolean = !CFG.getBoolean("kitchen_chinese")
-   private var m_takeawayPrintAll: Boolean = CFG.getBoolean("kitchen_takeaway_print_all")
-   private var m_alias: Boolean = CFG.getValue("kitchen_alias") > 0
-   private var m_firstAlias: Boolean = CFG.getValue("kitchen_first_alias") > 0
-   private var m_lineItemLine: Int = CFG.getValue("kitchen_horizontal_line_line")
-   private var m_linespace: Int = CFG.getValue("kitchen_linespace")
-   private var m_linespaceBetweenArticles: Int = CFG.getValue("kitchen_linespace_between_articles")
-   private var m_linespaceBetweenLanguages: Int = CFG.getValue("kitchen_linespace_between_languages")
-   private var m_linespaceInArticle: Int = CFG.getValue("kitchen_linespace_article")
-   private var m_overrideLocation: EPrinterLocation = EPrinterLocation.PRINTER_LOCATION_AUTOMATIC_PRN
+   private lateinit var mTransaction: CTransaction
+   private var mTransactionId: Int = transactionId
+   private var mOnlyText: Boolean = !CFG.getBoolean("kitchen_chinese")
+   private var mTakeawayPrintAll: Boolean = CFG.getBoolean("kitchen_takeaway_print_all")
+   private var mAlias: Boolean = CFG.getValue("kitchen_alias") > 0
+   private var mFirstAlias: Boolean = CFG.getValue("kitchen_first_alias") > 0
+   private var mLineItemLine: Int = CFG.getValue("kitchen_horizontal_line_line")
+   private var mLinespace: Int = CFG.getValue("kitchen_linespace")
+   private var mLinespaceBetweenArticles: Int = CFG.getValue("kitchen_linespace_between_articles")
+   private var mLinespaceBetweenLanguages: Int = CFG.getValue("kitchen_linespace_between_languages")
+   private var mLinespaceInArticle: Int = CFG.getValue("kitchen_linespace_article")
+   private var mOverrideLocation: EPrinterLocation = EPrinterLocation.PRINTER_LOCATION_AUTOMATIC_PRN
 
-   private val m_kitchenTextFont = CFG.getValue("kitchen_text_font")
-   private val m_kitchenTextHeight = CFG.getValue("kitchen_text_height")
-   private val m_kitchenTextWidth = CFG.getValue("kitchen_text_width")
-   private val m_table = Translation.get(TextId.TEXT_TABLE, m_euroLang)
-   private val m_telephone = Translation.get(TextId.TEXT_TELEPHONE, m_euroLang)
-   private val m_textAsap = Translation.get(TextId.TEXT_ASAP, m_euroLang)
-   private val m_textDeliverTime = Translation.get(TextId.TEXT_DELIVER_TIME, m_euroLang)
-   private val m_textDiscount = Translation.get(TextId.TEXT_DISCOUNT, m_euroLang)
-   private val m_textEatInside = Translation.get(TextId.TEXT_EAT_INSIDE, m_euroLang)
-   private val m_textKey = Translation.get(TextId.TEXT_KEY, m_euroLang)
-   private val m_textList = Translation.get(TextId.TEXT_LIST, m_euroLang)
-   private val m_textTable = Translation.get(TextId.TEXT_TABLE, m_euroLang)
-   private val m_textTelephone = Translation.get(TextId.TEXT_TELEPHONE, m_euroLang)
-   private val m_textTotal = Translation.get(TextId.TEXT_TOTAL, m_euroLang)
-   private val m_textRechaud = Translation.get(TextId.TEXT_RECHAUD, m_euroLang)
-   private val m_textReprint = Translation.get(TextId.TEXT_REPRINT, m_euroLang)
-   private val m_textSubtotal = Translation.get(TextId.TEXT_SUBTOTAL, m_euroLang)
-   private val m_CBM231 = EPrinterType.CBM231.value
-   private val m_SP200 = EPrinterType.SP200.value
-   private val m_TEST_PRINTER = EPrinterType.TEST_PRINTER.value
-   private val m_TM290 = EPrinterType.TM290.value
-   private val m_TM295 = EPrinterType.TM295.value
+   private val mKitchenTextFont = CFG.getValue("kitchen_text_font")
+   private val mKitchenTextHeight = CFG.getValue("kitchen_text_height")
+   private val mKitchenTextWidth = CFG.getValue("kitchen_text_width")
+   private val mTable = Translation.get(TextId.TEXT_TABLE, mEuroLang)
+   private val mTelephone = Translation.get(TextId.TEXT_TELEPHONE, mEuroLang)
+   private val mTextAsap = Translation.get(TextId.TEXT_ASAP, mEuroLang)
+   private val mTextDeliverTime = Translation.get(TextId.TEXT_DELIVER_TIME, mEuroLang)
+   private val mTextDiscount = Translation.get(TextId.TEXT_DISCOUNT, mEuroLang)
+   private val mTextEatInside = Translation.get(TextId.TEXT_EAT_INSIDE, mEuroLang)
+   private val mTextKey = Translation.get(TextId.TEXT_KEY, mEuroLang)
+   private val mTextList = Translation.get(TextId.TEXT_LIST, mEuroLang)
+   private val mTextTable = Translation.get(TextId.TEXT_TABLE, mEuroLang)
+   private val mTextTelephone = Translation.get(TextId.TEXT_TELEPHONE, mEuroLang)
+   private val mTextTotal = Translation.get(TextId.TEXT_TOTAL, mEuroLang)
+   private val mTextRechaud = Translation.get(TextId.TEXT_RECHAUD, mEuroLang)
+   private val mTextReprint = Translation.get(TextId.TEXT_REPRINT, mEuroLang)
+   private val mTextSubtotal = Translation.get(TextId.TEXT_SUBTOTAL, mEuroLang)
+   private val mCBM231 = EPrinterType.CBM231.value
+   private val mSP200 = EPrinterType.SP200.value
+   private val mTestPrinter = EPrinterType.TEST_PRINTER.value
+   private val mTM290 = EPrinterType.TM290.value
+   private val mTM295 = EPrinterType.TM295.value
 
-   private var m_total: CMoney = CMoney(0)
-   private var m_billMessage: String = ""
-   private var m_delay = CTimestamp()
-   private var m_sortedItems = CSortedItemList()
-   private var m_counter = GrpcServiceFactory.createDailyTimeFrameService()
+   private var mTotal: CMoney = CMoney(0)
+   private var mBillMessage: String = ""
+   private var mDelay = CTimestamp()
+   private var mSortedItems = CSortedItemList()
+   private var mCounter = GrpcServiceFactory.createDailyTimeFrameService()
 
    companion object
    {
-      var m_redColour: Boolean = false
+      var mRedColour: Boolean = false
    }
 
    init
    {
-      if (m_linespaceBetweenArticles < 0)
+      if (mLinespaceBetweenArticles < 0)
       {
-         m_linespaceBetweenArticles = m_linespace
+         mLinespaceBetweenArticles = mLinespace
       }
-      if (m_linespaceInArticle < 0)
+      if (mLinespaceInArticle < 0)
       {
-         m_linespaceInArticle = m_linespace
+         mLinespaceInArticle = mLinespace
       }
-      if (m_linespaceBetweenLanguages < 0)
+      if (mLinespaceBetweenLanguages < 0)
       {
-         m_linespaceBetweenLanguages = m_linespace
+         mLinespaceBetweenLanguages = mLinespace
       }
 
-      m_printKitchenSorted = when
+      mPrintKitchenSorted = when
       {
          userCFG.getValue("user_print_kitchen_sorted") > 2 -> !CFG.getBoolean("kitchen_unsorted")
          else -> userCFG.getValue("user_print_kitchen_sorted") > 0
       }
 
-      m_kitchenLocal = when
+      mKitchenLocal = when
       {
          userCFG.getValue("user_print_kitchen_local") > 2 -> CFG.getValue("kitchen_local") > 0
          else -> userCFG.getValue("user_print_kitchen_local") > 0
       }
 
-      if (!m_alias)
+      if (!mAlias)
       {
-         m_firstAlias = false
+         mFirstAlias = false
       }
-      if (!m_onlyText)
+      if (!mOnlyText)
       {
-         m_kitchenChinese = true
+         mKitchenChinese = true
       }
       if (CFG.getValue("kitchen_first_chinese") > 0)
       {
-         m_chineseFirst = true
+         mChineseFirst = true
       }
+   }
+
+   suspend fun createAndLoad(transactionId: Int)
+   {
+      mTransaction = CTransaction.createAndLoad(
+         transactionId, EItemSort.SORT_NONE, mTimeFrameIndex)
    }
 
    fun forceToPrinter(location: EPrinterLocation)
    {
-      m_overrideLocation = location
+      mOverrideLocation = location
    }
 
    fun print(location: EItemLocation, printer: EPrinterLocation, quantity: Int)
    {
       val pr = CFG.getValue("kitchen_print_per_item")
 
-      m_enableCutPrinter = ((pr and 1) != 0 && location == EItemLocation.ITEM_KITCHEN) ||
+      mEnableCutPrinter = ((pr and 1) != 0 && location == EItemLocation.ITEM_KITCHEN) ||
          ((pr and 2) != 0 && location == EItemLocation.ITEM_KITCHEN2) ||
          ((pr and 4) != 0 && location == EItemLocation.ITEM_KITCHEN3) ||
          ((pr and 8) != 0 && location == EItemLocation.ITEM_KITCHEN4) ||
@@ -179,9 +181,9 @@ class KitchenPrinter(
 
    fun print(locationId: EItemLocation, printer: EPrinterLocation)
    {
-      var printLang = if (m_kitchenLocal) m_euroLang else ETaal.LANG_SIMPLIFIED
-      m_printLang = printLang
-      m_euroLang = ETaal.LANG_DUTCH // Assuming EuroLang is available
+      var printLang = if (mKitchenLocal) mEuroLang else ETaal.LANG_SIMPLIFIED
+      mPrintLang = printLang
+      mEuroLang = ETaal.LANG_DUTCH // Assuming EuroLang is available
 
       var actualPrinter = printer
       if (printer == EPrinterLocation.PRINTER_LOCATION_AUTOMATIC_PRN)
@@ -200,38 +202,38 @@ class KitchenPrinter(
       {
          return
       }
-      if (actualPrinter == EPrinterLocation.PRINTER_LOCATION_KITCHEN_COLLECT_PRN && !m_enableCollectPrinter)
+      if (actualPrinter == EPrinterLocation.PRINTER_LOCATION_KITCHEN_COLLECT_PRN && !mEnableCollectPrinter)
       {
          return
       }
 
       val startIndex = getStartIndex()
 
-      if (!m_sortedItems.setTransaction(
-            m_transactionId.toLong(), startIndex,
-            m_timeFrameIndex, locationId, true
+      if (!mSortedItems.setTransaction(
+            mTransactionId.toLong(), startIndex,
+            mTimeFrameIndex, locationId, true
          )
       )
       {
          return
       }
 
-      val splitPoint = m_sortedItems.splitPoint
+      val splitPoint = mSortedItems.splitPoint
       val f1 = PrinterFile()
       f1.clear()
 
-      var size = m_sortedItems.sortAndTryToMerge(m_printKitchenSorted, splitPoint)
+      var size = mSortedItems.sortAndTryToMerge(mPrintKitchenSorted, splitPoint)
       if (size > 0 && splitPoint > 0)
       {
-         size = m_sortedItems.sortAndTryToMerge(m_printKitchenSorted, 0)
+         size = mSortedItems.sortAndTryToMerge(mPrintKitchenSorted, 0)
       }
 
       if (size > 0)
       {
          printItems(f1, locationId)
          val printerLocation =
-            if (m_overrideLocation == EPrinterLocation.PRINTER_LOCATION_AUTOMATIC_PRN) actualPrinter else
-               m_overrideLocation
+            if (mOverrideLocation == EPrinterLocation.PRINTER_LOCATION_AUTOMATIC_PRN) actualPrinter else
+               mOverrideLocation
          val service = GrpcServiceFactory.createTicketPrinterService()
          service.addRawText(
             printerLocation.toPrinterLocation(),
@@ -242,10 +244,10 @@ class KitchenPrinter(
 
    private fun getStartIndex(): ETimeFrameIndex
    {
-      var timeFrameIndex = m_timeFrameIndex
-      val transType = m_transaction.transType
+      var timeFrameIndex = mTimeFrameIndex
+      val transType = mTransaction.transType
 
-      if (m_takeawayPrintAll &&
+      if (mTakeawayPrintAll &&
          (transType == ETransType.TRANS_TYPE_TAKEAWAY || transType == ETransType.TRANS_TYPE_TAKEAWAY_PHONE)
       )
       {
@@ -256,27 +258,27 @@ class KitchenPrinter(
 
    private fun printItems(F: PrinterFile, location: EItemLocation)
    {
-      m_total = CMoney(0)
-      val size = m_sortedItems.size
+      mTotal = CMoney(0)
+      val size = mSortedItems.size
 
       for (p in 0 until size)
       {
-         val item: CSortedItem = m_sortedItems.getSortedItem(p)
+         val item: CSortedItem = mSortedItems.getSortedItem(p)
          if (item == null)
          {
             continue;
          }
          val mainItem = item[0]
 
-         if (mainItem.paperCutPerItem && m_enableCutPrinter)
+         if (mainItem.paperCutPerItem && mEnableCutPrinter)
          {
             var quantity = mainItem.getQuantity()
             val sizeOne = if (quantity > 0) 1 else -1
 
             while (quantity != 0)
             {
-               m_printQuantity = false
-               val idx = m_counter.nextKitchenIndex(m_transactionId, m_timeFrameIndex.index)
+               mPrintQuantity = false
+               val idx = mCounter.nextKitchenIndex(mTransactionId, mTimeFrameIndex.index)
 
                var headerVal = 0
                if (userCFG.getValue("user_print_kitchen_index") > 0)
@@ -288,21 +290,21 @@ class KitchenPrinter(
                printHeader(F, location, if (userCFG.getValue("user_print_kitchen_index") > 0) idx else 0)
                printExtra(F, idx)
 
-               var chinese = m_kitchenChinese
-               if (chinese && m_kitchenLocal && mainItem.chinesePrinterName == mainItem.localPrinterName)
+               var chinese = mKitchenChinese
+               if (chinese && mKitchenLocal && mainItem.chinesePrinterName == mainItem.localPrinterName)
                {
                   chinese = false
                }
 
-               val printLocal = m_kitchenLocal || m_onlyText
-               var printChinese = !m_chineseFirst && chinese
-               var distance = m_linespaceBetweenLanguages
+               val printLocal = mKitchenLocal || mOnlyText
+               var printChinese = !mChineseFirst && chinese
+               var distance = mLinespaceBetweenLanguages
 
-               if (m_chineseFirst && chinese)
+               if (mChineseFirst && chinese)
                {
                   if (!printLocal)
                   {
-                     distance = m_linespaceBetweenArticles
+                     distance = mLinespaceBetweenArticles
                   }
                   printOrder(F, item, true, true, distance)
                }
@@ -310,56 +312,56 @@ class KitchenPrinter(
                {
                   if (!printChinese)
                   {
-                     distance = m_linespaceBetweenArticles
+                     distance = mLinespaceBetweenArticles
                   }
                   printOrder(F, item, false, true, distance)
                }
                if (printChinese)
                {
-                  printOrder(F, item, true, true, m_linespaceBetweenArticles)
+                  printOrder(F, item, true, true, mLinespaceBetweenArticles)
                }
 
-               m_total = m_total + item.getTotal()
+               mTotal = mTotal + item.getTotal()
                printFooter(F)
-               m_printQuantity = true
+               mPrintQuantity = true
                quantity -= sizeOne
             }
          }
       }
 
       var valid = false
-      m_printQuantity = true
+      mPrintQuantity = true
 
       for (p in 0 until size)
       {
-         val item = m_sortedItems.getSortedItem(p)
+         val item = mSortedItems.getSortedItem(p)
          val mainItem = item[0]
 
-         if (!mainItem.paperCutPerItem || !m_enableCutPrinter)
+         if (!mainItem.paperCutPerItem || !mEnableCutPrinter)
          {
             if (!valid)
             {
-               val idx = m_counter.nextKitchenIndex(m_transactionId, m_timeFrameIndex.index)
+               val idx = mCounter.nextKitchenIndex(mTransactionId, mTimeFrameIndex.index)
                printHeader(F, location, if (userCFG.getValue("user_print_kitchen_index") > 0) idx else 0)
                printExtra(F, idx)
                valid = true
             }
 
-            var chinese = m_kitchenChinese
-            if (chinese && m_kitchenLocal && mainItem.chinesePrinterName == mainItem.localPrinterName)
+            var chinese = mKitchenChinese
+            if (chinese && mKitchenLocal && mainItem.chinesePrinterName == mainItem.localPrinterName)
             {
                chinese = false
             }
 
-            val printLocal = m_kitchenLocal || m_onlyText
-            var printChinese = !m_chineseFirst && chinese
-            var distance = m_linespaceBetweenLanguages
+            val printLocal = mKitchenLocal || mOnlyText
+            var printChinese = !mChineseFirst && chinese
+            var distance = mLinespaceBetweenLanguages
 
-            if (m_chineseFirst && chinese)
+            if (mChineseFirst && chinese)
             {
                if (!printLocal)
                {
-                  distance = m_linespaceBetweenArticles
+                  distance = mLinespaceBetweenArticles
                }
                printOrder(F, item, true, false, distance)
             }
@@ -367,16 +369,16 @@ class KitchenPrinter(
             {
                if (!printChinese)
                {
-                  distance = m_linespaceBetweenArticles
+                  distance = mLinespaceBetweenArticles
                }
                printOrder(F, item, false, false, distance)
             }
             if (printChinese)
             {
-               printOrder(F, item, true, false, m_linespaceBetweenArticles)
+               printOrder(F, item, true, false, mLinespaceBetweenArticles)
             }
 
-            m_total = m_total + item.getTotal()
+            mTotal = mTotal + item.getTotal()
          }
       }
 
@@ -384,10 +386,10 @@ class KitchenPrinter(
       {
          if (CFG.getValue("kitchen_transaction_total") > 0)
          {
-            val total = m_transaction.getTotal(ETaxType.BTW_TYPE_LOW) + m_transaction.getTotal(ETaxType.BTW_TYPE_HIGH)
-            m_total = total
+            val total = mTransaction.getTotal(ETaxType.BTW_TYPE_LOW) + mTransaction.getTotal(ETaxType.BTW_TYPE_HIGH)
+            mTotal = total
          }
-         printTotal(F, m_total)
+         printTotal(F, mTotal)
          printFooter(F)
       }
    }
@@ -407,24 +409,24 @@ class KitchenPrinter(
       if (CFG.getValue("kitchen_total") == 0) return
 
       F.write("[Line:16]\n")
-      val discount = m_transaction.getDiscount()
+      val discount = mTransaction.getDiscount()
       val total = subtotal - discount
       var str: String
 
-      if (m_printLang == ETaal.LANG_SIMPLIFIED || m_printLang == ETaal.LANG_TRADITIONAL)
+      if (mPrintLang == ETaal.LANG_SIMPLIFIED || mPrintLang == ETaal.LANG_TRADITIONAL)
       {
          if (!discount.empty())
          {
             str = subtotal.toString(0, CMoney.MONEY_LINE)
-            F.write(m_textSubtotal)
+            F.write(mTextSubtotal)
             val strLen = str.length
             F.write("[subtab:::$strLen]$str\n")
             str = discount.toString(0, CMoney.MONEY_LINE)
-            F.write(m_textDiscount)
+            F.write(mTextDiscount)
             F.write("[subtab:::$str]$str\n")
          }
          str = total.toString(0, CMoney.MONEY_LINE)
-         F.write(m_textTotal)
+         F.write(mTextTotal)
          F.write("[subtab:::$str]$str\n")
       } else
       {
@@ -432,21 +434,21 @@ class KitchenPrinter(
          if (!discount.empty())
          {
             str = subtotal.toString(0, CMoney.MONEY_LINE)
-            F.write(m_textSubtotal)
+            F.write(mTextSubtotal)
             F.write("[subtab:::$str]$str\n")
             str = discount.toString(0, CMoney.MONEY_LINE)
-            F.write(m_textDiscount)
+            F.write(mTextDiscount)
             F.write("[subtab:::$str]$str\n")
          }
          str = total.toString(0, CMoney.MONEY_LINE)
          val strLen = str.length
-         F.write("[Text|Height:2|Width:2]$m_textTotal[subtab::$strLen]$str\n")
+         F.write("[Text|Height:2|Width:2]$mTextTotal[subtab::$strLen]$str\n")
       }
    }
 
    private fun printColours(F: PrinterFile)
    {
-      val isTakeaway = m_transaction.isTakeaway()
+      val isTakeaway = mTransaction.isTakeaway()
 
       when
       {
@@ -460,15 +462,15 @@ class KitchenPrinter(
             F.write(if (CFG.getValue("kitchen_sitin_red") > 1) "[black]" else "[red]")
          }
 
-         CFG.getValue("kitchen_added_food_red") > 0 && isTakeaway && m_timeFrameIndex.index > 1 ->
+         CFG.getValue("kitchen_added_food_red") > 0 && isTakeaway && mTimeFrameIndex.index > 1 ->
          {
-            F.write(if (m_timeFrameIndex.index > 1) "[red]" else "[black]")
+            F.write(if (mTimeFrameIndex.index > 1) "[red]" else "[black]")
          }
 
          CFG.getValue("kitchen_change_colours") > 0 ->
          {
-            m_redColour = !m_redColour
-            F.write(if (m_redColour) "[red]" else "[black]")
+            mRedColour = !mRedColour
+            F.write(if (mRedColour) "[red]" else "[black]")
          }
 
          else ->
@@ -480,7 +482,7 @@ class KitchenPrinter(
 
    private fun printExtra(F: PrinterFile, index: Int)
    {
-      if (!m_takeaway || index <= 1)
+      if (!mTakeaway || index <= 1)
       {
          return
       }
@@ -490,7 +492,7 @@ class KitchenPrinter(
       {
          1 ->
          {
-            val idx = m_timeFrameIndex.index
+            val idx = mTimeFrameIndex.index
             if (idx <= 1) return
          }
 
@@ -527,39 +529,39 @@ class KitchenPrinter(
    private fun printTime(F: PrinterFile)
    {
       var done = false
-      val transType = m_transaction.transType
-      val lang = if (CFG.getValue("kitchen_chinese") > 0) ETaal.LANG_SIMPLIFIED else m_euroLang
+      val transType = mTransaction.transType
+      val lang = if (CFG.getValue("kitchen_chinese") > 0) ETaal.LANG_SIMPLIFIED else mEuroLang
 
       if (transType == ETransType.TRANS_TYPE_TAKEAWAY_PHONE)
       {
-         m_delay = CTimestamp(m_transaction.customerTime)
+         mDelay = CTimestamp(mTransaction.customerTime)
       } else
       {
-         m_delay = CTimestamp(m_transaction.deliverTime)
+         mDelay = CTimestamp(mTransaction.deliverTime)
       }
 
-      if (m_delay.year > 2000)
+      if (mDelay.year > 2000)
       {
-         val time = if (m_delay.isAsap(CFG.getValue("kitchen_print_asap") > 0))
+         val time = if (mDelay.isAsap(CFG.getValue("kitchen_print_asap") > 0))
          {
-            m_textAsap
+            mTextAsap
          } else
          {
-            m_delay.getShortTime()
+            mDelay.getShortTime()
          }
          done = true
 
          if (CFG.getValue("kitchen_chinese") > 0)
          {
-            F.write("[graphics|font:deliver]$m_textDeliverTime $time\n\n")
+            F.write("[graphics|font:deliver]$mTextDeliverTime $time\n\n")
          } else
          {
-            F.write("[height:2]$m_textDeliverTime [width:2]$time[width:1|height:1]\n\n")
+            F.write("[height:2]$mTextDeliverTime [width:2]$time[width:1|height:1]\n\n")
          }
       }
       if (!done && CFG.getValue("kitchen_print_asap") > 0)
       {
-         F.write("[graphics|font:deliver]$m_textAsap\n\n")
+         F.write("[graphics|font:deliver]$mTextAsap\n\n")
       }
    }
 
@@ -579,7 +581,7 @@ class KitchenPrinter(
          return
       }
 
-      F.write("[Linespace:$m_linespace]")
+      F.write("[Linespace:$mLinespace]")
       for (x in 0 until CFG.getValue("kitchen_beeps"))
       {
          F.write("[ring]")
@@ -588,13 +590,13 @@ class KitchenPrinter(
 
       if (CFG.getValue("print_reroute") > 0)
       {
-         F.write("[Reprint|Font:16]$m_textReprint\n[Ifn:$m_TM290|Ifn:$m_TM295|CUT]\n[endif|endif|endif]")
+         F.write("[Reprint|Font:16]$mTextReprint\n[Ifn:$mTM290|Ifn:$mTM295|CUT]\n[endif|endif|endif]")
       }
 
       printColours(F)
 
-      m_billMessage = m_transaction.getBillRemarks()
-      if (m_billMessage.length > 1)
+      mBillMessage = mTransaction.getBillRemarks()
+      if (mBillMessage.length > 1)
       {
          val kitchen_height = CFG.getValue("kitchen_message_size")
          if (kitchen_height > 3)
@@ -612,21 +614,21 @@ class KitchenPrinter(
                F.write("[width:2]")
             }
          }
-         F.write("$m_billMessage\n\n")
+         F.write("$mBillMessage\n\n")
       }
 
       F.write("[text|width:1|height:1|font:1]")
       printTime(F)
-      F.write(String.format(Locale.ROOT, "#%07d", m_transactionId))
+      F.write(String.format(Locale.ROOT, "#%07d", mTransactionId))
 
       if (CFG.getValue("kitchen_print_waiter") > 0)
       {
          if (CFG.getValue("entry_with_key") > 0)
          {
-            val s = m_transaction.getEmployeeName()
+            val s = mTransaction.getEmployeeName()
             if (s.isNotEmpty())
             {
-               F.write("[right:$m_textKey $s]")
+               F.write("[right:$mTextKey $s]")
             }
          }
       }
@@ -657,18 +659,18 @@ class KitchenPrinter(
    {
       if (chinese)
       {
-         F.write("[ifn:$m_SP200|ifn:$m_TEST_PRINTER|linespace:$m_linespaceInArticle]")
+         F.write("[ifn:$mSP200|ifn:$mTestPrinter|linespace:$mLinespaceInArticle]")
          printOrderChineseDetail(F, order, spices_chinese, extras_chinese, linespaceAfter)
          F.write("[endif|endif]")
 
-         F.write("[if:$m_TEST_PRINTER|text]")
+         F.write("[if:$mTestPrinter|text]")
          printLocalOrderTextmode(F, order, order.chinesePrinterName, spices_chinese, extras_chinese, linespaceAfter)
          F.write("[endif]")
       } else
       {
          if (CFG.getValue("kitchen_chinese") > 0)
          {
-            F.write("[If:$m_SP200]")
+            F.write("[If:$mSP200]")
          }
          printLocalOrderTextmode(F, order, order.localPrinterName, spices_local, extras_local, linespaceAfter)
          if (CFG.getValue("kitchen_chinese") > 0)
@@ -677,11 +679,11 @@ class KitchenPrinter(
          }
          if (CFG.getValue("kitchen_chinese") > 0)
          {
-            F.write("[ifn:$m_SP200|ifn:$m_TEST_PRINTER]")
+            F.write("[ifn:$mSP200|ifn:$mTestPrinter]")
             printLocalOrderGraphmode(F, order, spices_local, extras_local, linespaceAfter)
             F.write("[endif|endif]")
 
-            F.write("[if:$m_TEST_PRINTER|text]")
+            F.write("[if:$mTestPrinter|text]")
             printLocalOrderTextmode(F, order, order.localPrinterName, spices_local, extras_local, linespaceAfter)
             F.write("[endif]")
          }
@@ -690,7 +692,7 @@ class KitchenPrinter(
 
    private fun printTafel(F: PrinterFile, location: EItemLocation, billNumber: Int)
    {
-      val name = m_transaction.displayName
+      val name = mTransaction.displayName
       var s: String
       val printTime = true
       val sub_nr: String
@@ -709,11 +711,11 @@ class KitchenPrinter(
          "\n"
       }
 
-      m_rechaud = m_transaction.isRechaud()
-      m_takeaway = m_transaction.isTakeaway()
-      m_phone = m_transaction.isTelephone()
+      mRechaud = mTransaction.isRechaud()
+      mTakeaway = mTransaction.isTakeaway()
+      mPhone = mTransaction.isTelephone()
 
-      m_deletedBlack = CFG.getValue("kitchen_takeaway_red") > 0 && (m_takeaway || m_phone) &&
+      mDeletedBlack = CFG.getValue("kitchen_takeaway_red") > 0 && (mTakeaway || mPhone) &&
          CFG.getValue("kitchen_change_colours") == 0
 
       if (CFG.getValue("kitchen_line") > 0)
@@ -725,10 +727,10 @@ class KitchenPrinter(
 
       when
       {
-         m_rechaud ->
+         mRechaud ->
          {
-            val nr = m_transaction.TAcount()
-            F.write("[Ifchars:29]\t[endif]$m_textRechaud")
+            val nr = mTransaction.TAcount()
+            F.write("[Ifchars:29]\t[endif]$mTextRechaud")
             if (nr > 0)
             {
                F.append(String.format(Locale.ROOT, ": %02d%s", nr, sub_nr))
@@ -738,18 +740,18 @@ class KitchenPrinter(
             }
          }
 
-         m_takeaway ->
+         mTakeaway ->
          {
             val tstr = when
             {
-               CFG.getValue("takeaway_mode") > 0 -> m_textList
-               m_transaction.transType == ETransType.TRANS_TYPE_TAKEAWAY ||
-                  m_transaction.transType == ETransType.TRANS_TYPE_TAKEAWAY_PHONE ->
-                  Translation.get(TextId.TEXT_TAKEAWAY, m_euroLang)
+               CFG.getValue("takeaway_mode") > 0 -> mTextList
+               mTransaction.transType == ETransType.TRANS_TYPE_TAKEAWAY ||
+                  mTransaction.transType == ETransType.TRANS_TYPE_TAKEAWAY_PHONE ->
+                  Translation.get(TextId.TEXT_TAKEAWAY, mEuroLang)
 
-               else -> m_textEatInside
+               else -> mTextEatInside
             }
-            val takeaway_counter = m_transaction.TAcount()
+            val takeaway_counter = mTransaction.TAcount()
             F.write("[Ifchars:29]\t[endif]$tstr")
 
             if (takeaway_counter > 0)
@@ -761,32 +763,32 @@ class KitchenPrinter(
             }
          }
 
-         m_phone ->
+         mPhone ->
          {
-            F.write("$m_textTelephone $name\n")
-            s = m_transaction.getClient()
+            F.write("$mTextTelephone $name\n")
+            s = mTransaction.getClient()
             if (s.length > 2)
             {
                F.write("[height:1|width:1]\n$s\n")
             }
          }
 
-         m_transaction.isShop() ->
+         mTransaction.isShop() ->
          {
-            val ptr = m_transaction.getClient()
+            val ptr = mTransaction.getClient()
             F.write(ptr)
          }
 
          else ->
          {
-            s = m_transaction.getClient()
+            s = mTransaction.getClient()
             if (s.length > 2)
             {
-               F.write("$m_textTelephone $name\n")
+               F.write("$mTextTelephone $name\n")
                F.write("[height:1|width:1]\n$s$sub_nr")
             } else
             {
-               F.write("[Ifchars:29]\t[endif]$m_textTable: $name$sub_nr")
+               F.write("[Ifchars:29]\t[endif]$mTextTable: $name$sub_nr")
             }
          }
       } // when
@@ -799,7 +801,7 @@ class KitchenPrinter(
       {
          F.write("[font:waiter|Ifchars:29]\t[endif|time] [date]\n")
       }
-      F.write("[Line:16|ifn:$m_SP200|ifn:$m_CBM231]\n[endif|endif]")
+      F.write("[Line:16|ifn:$mSP200|ifn:$mCBM231]\n[endif|endif]")
       F.write("[Width:1|Graphics]")
    }
 
@@ -811,11 +813,11 @@ class KitchenPrinter(
       linespaceAfter: Int
    )
    {
-      F.write("[Linespace:$m_linespaceInArticle]")
-      if (order.level == EOrderLevel.LEVEL_ITEMGROUP && m_lineItemLine > 0)
+      F.write("[Linespace:$mLinespaceInArticle]")
+      if (order.level == EOrderLevel.LEVEL_ITEMGROUP && mLineItemLine > 0)
       {
          F.write("[width:1|height:1|font:kitchen_h1]")
-         F.write("[line:$m_lineItemLine]\n")
+         F.write("[line:$mLineItemLine]\n")
          if (order.localPrinterName.isEmpty() && order.chinesePrinterName.isEmpty())
          {
             return
@@ -825,16 +827,16 @@ class KitchenPrinter(
          F.write("[width:1|height:1|font:kitchen_chinese]")
       }
 
-      if (order.level != EOrderLevel.LEVEL_ITEMGROUP && m_printQuantity)
+      if (order.level != EOrderLevel.LEVEL_ITEMGROUP && mPrintQuantity)
       {
          val q = order.getQuantity()
          F.write("${q}x")
       }
       F.write("[tab::99x ]")
 
-      if (m_firstAlias)
+      if (mFirstAlias)
       {
-         if (m_alias)
+         if (mAlias)
          {
             F.write(order.alias)
             F.write(" [tab::99x ABC]")
@@ -856,7 +858,7 @@ class KitchenPrinter(
             F.wordsDotOut(extras, "99x ", true)
             F.write("[font:kitchen_chinese]")
          }
-         if (m_alias)
+         if (mAlias)
          {
             F.write("[right:${order.alias}]")
          }
@@ -873,26 +875,26 @@ class KitchenPrinter(
       linespaceAfter: Int
    )
    {
-      F.write("[Linespace:$m_linespaceInArticle]")
-      F.write("[font:$m_kitchenTextFont|height:$m_kitchenTextHeight|width:$m_kitchenTextWidth]")
+      F.write("[Linespace:$mLinespaceInArticle]")
+      F.write("[font:$mKitchenTextFont|height:$mKitchenTextHeight|width:$mKitchenTextWidth]")
 
-      if (order.level != EOrderLevel.LEVEL_ITEMGROUP && m_printQuantity)
+      if (order.level != EOrderLevel.LEVEL_ITEMGROUP && mPrintQuantity)
       {
          val q = order.getQuantity()
          F.write("${q}x")
       }
 
       F.write("[tab:3|ifchars:26|tab:5|Endif]")
-      if (m_firstAlias && m_alias)
+      if (mFirstAlias && mAlias)
       {
          F.write("${order.alias}[tab:8|ifchars:21|tab:10|endif]")
       }
 
-      F.wordsCharOut(localPrinterName, 5, 0, m_kitchenTextWidth, false)
-      F.wordsCharOut(spices, 5, 0, m_kitchenTextWidth, true)
-      F.wordsCharOut(extras, 5, 0, m_kitchenTextWidth, true)
+      F.wordsCharOut(localPrinterName, 5, 0, mKitchenTextWidth, false)
+      F.wordsCharOut(spices, 5, 0, mKitchenTextWidth, true)
+      F.wordsCharOut(extras, 5, 0, mKitchenTextWidth, true)
 
-      if (!m_firstAlias && m_alias)
+      if (!mFirstAlias && mAlias)
       {
          var len = order.alias.length
          if (CFG.getValue("kitchen_text_width") > 0)
@@ -913,19 +915,19 @@ class KitchenPrinter(
       linespaceAfter: Int
    )
    {
-      F.write("[Linespace:$m_linespaceInArticle]")
+      F.write("[Linespace:$mLinespaceInArticle]")
       F.write("[font:kitchen_local|Height:1|width:1]")
 
-      if (order.level != EOrderLevel.LEVEL_ITEMGROUP && m_printQuantity)
+      if (order.level != EOrderLevel.LEVEL_ITEMGROUP && mPrintQuantity)
       {
          val q = order.getQuantity()
          F.write("${q}x")
       }
       F.write("[tab::99x ]")
 
-      if (m_firstAlias)
+      if (mFirstAlias)
       {
-         if (m_alias)
+         if (mAlias)
          {
             F.write("${order.alias} [tab::99x ABCD]")
          }
@@ -946,7 +948,7 @@ class KitchenPrinter(
             F.write(" ")
             F.wordsDotOut(extras, "99x ", true)
          }
-         if (m_alias)
+         if (mAlias)
          {
             F.write("[right:${order.alias}]")
          }
@@ -957,9 +959,9 @@ class KitchenPrinter(
    private fun printFooter(F: PrinterFile)
    {
       F.write("[font:default]")
-      F.write("[transaction:${m_transaction.transactionId}]")
+      F.write("[transaction:${mTransaction.transactionId}]")
       val s = CFG.getString("kitchen_footer")
       F.write(s)
-      F.write("[If:$m_SP200]\n\n\n\n[Endif]\n\n\n[cut|black]\n")
+      F.write("[If:$mSP200]\n\n\n\n[Endif]\n\n\n[cut|black]\n")
    }
 }

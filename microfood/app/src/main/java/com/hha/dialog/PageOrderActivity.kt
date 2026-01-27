@@ -105,10 +105,12 @@ class PageOrderActivity : BaseActivity(), ModalDialogYesNo.MessageBoxYesNoListen
         setMaxScreenBrightness()
 
         val transactionId = intent.getIntExtra("TRANSACTION_ID", -1)
-        val mFromBilling = intent.getBooleanExtra("FROM_BILL", false)
+        mFromBilling = intent.getBooleanExtra("FROM_BILL", false)
+        val mNewTimeFrame = intent.getBooleanExtra("NEW_TIME_FRAME", false)
+        Log.i(tag, "onCreate $transactionId $mFromBilling $mNewTimeFrame")
         mFirstTime = true
         // 2. Validate the ID. If it's missing, the activity cannot function.
-        if (transactionId <= 0)
+        if (transactionId <= 1E6)
         {
             Log.e(tag, "FATAL: No TRANSACTION_ID found in Intent. Finishing activity.")
             Toast.makeText(this, "Error: Transaction not found", Toast.LENGTH_LONG).show()
@@ -121,10 +123,13 @@ class PageOrderActivity : BaseActivity(), ModalDialogYesNo.MessageBoxYesNoListen
         setupRecyclerViews()
         setupClickListeners()
         setupObservers()
+        setupNavigationObserver()
 
         // 2. Tell the ViewModel to start loading the transaction data.
         //    The ViewModel will handle background threads and state updates.
-        mTransactionModel.initializeTransaction(transactionId, EInitMode.VIEW_PAGE_ORDER)
+        mTransactionModel.initializeTransaction(
+            transactionId, mNewTimeFrame, EInitMode.VIEW_PAGE_ORDER
+        )
     }
 
     private fun setupClickListeners()
@@ -141,15 +146,17 @@ class PageOrderActivity : BaseActivity(), ModalDialogYesNo.MessageBoxYesNoListen
     {
         mTransactionModel.navigateToPageOrder.observe(this) { event ->
             // Use the MyEvent wrapper to ensure navigation happens only once
-            event.getContentIfNotHandled()?.let { transactionId ->
+            event.getContentIfNotHandled()?.let { navEvent ->
                 // This block will only execute once per event, even on screen rotation.
-                Log.i(tag, "Received navigation event for transaction ID: $transactionId")
+                Log.i(tag, "Received navigation event for transaction ID: ${navEvent.transactionId}")
 
                 // Create the Intent to start PageOrderActivity
                 val intent = Intent(this, PageOrderActivity::class.java).apply {
                     // Pass the transaction ID to the next activity
                     // Make sure to convert Int to Long if the receiving end expects a Long
-                    putExtra("TRANSACTION_ID", transactionId)
+                    putExtra("TRANSACTION_ID", navEvent.transactionId)
+                    putExtra("NEW_TIME_FRAME", navEvent.newTimeFrame)
+                    putExtra("FROM_BILL", navEvent.fromBilling)
                 }
                 startActivity(intent)
             }
@@ -170,7 +177,11 @@ class PageOrderActivity : BaseActivity(), ModalDialogYesNo.MessageBoxYesNoListen
                 if (mFirstTime)
                 {
                     mFirstTime = false
+                    val newCursor = mTransactionModel.size
+                    global.cursor.set(newCursor)
+                    mTransactionItemsAdapter.setCursor(global.cursor)
                     mTransactionModel.initPageOrder()
+                    showTransactionLoading(false)
                 }
                 mBinding.pageOrderTableName.text = mTransactionModel.getTableName()
 
@@ -233,13 +244,6 @@ class PageOrderActivity : BaseActivity(), ModalDialogYesNo.MessageBoxYesNoListen
             {
                 val position = layoutManager.getPosition(child)
                 Log.d(tag, "Clicked item at position: $position")
-
-                // Manually trigger the click
-//                val item = global.transaction?.get(position)
-//                if (item != null)
-//                {
-//                    onClickTransactionItem(item)
-//                }
                 break
             }
         }
@@ -332,20 +336,25 @@ class PageOrderActivity : BaseActivity(), ModalDialogYesNo.MessageBoxYesNoListen
         dialog.show(supportFragmentManager, "MessageBoxCancelReason")
     }
 
-    private fun askQuantityDialog() {
+    private fun askQuantityDialog()
+    {
         Log.i(tag, "askQuantityDialog")
-        try {
+        try
+        {
             val txt = Translation.TextId.TEXT_QUANTITY.str()
             val dialog = ModalDialogQuantity.newInstance(txt)
 
             // Check fragment manager state
-            if (!isFinishing && !isDestroyed) {
+            if (!isFinishing && !isDestroyed)
+            {
                 dialog.show(supportFragmentManager, "ModalDialogQuantity")
                 Log.i(tag, "Dialog shown")
-            } else {
+            } else
+            {
                 Log.e(tag, "Activity is finishing or destroyed, cannot show dialog")
             }
-        } catch (e: Exception) {
+        } catch (e: Exception)
+        {
             Log.e(tag, "Error showing dialog: ${e.message}", e)
             Toast.makeText(this, "Error showing dialog: ${e.message}", Toast.LENGTH_SHORT).show()
         }
@@ -487,6 +496,19 @@ class PageOrderActivity : BaseActivity(), ModalDialogYesNo.MessageBoxYesNoListen
                 }
             }
         )
+    }
+
+    private fun showTransactionLoading(isLoading: Boolean)
+    {
+        if (isLoading)
+        {
+            mBinding.poeLoading.visibility = View.VISIBLE
+            mBinding.layoutTransactionItems.visibility = View.INVISIBLE
+        } else
+        {
+            mBinding.poeLoading.visibility = View.GONE
+            mBinding.layoutTransactionItems.visibility = View.VISIBLE
+        }
     }
 
     private fun createMenuPagesAdapter()
@@ -773,7 +795,8 @@ class PageOrderActivity : BaseActivity(), ModalDialogYesNo.MessageBoxYesNoListen
     {
         // Modal dialog pressed a button.
         val action = mTransactionModel.handleFinishQuantity(
-            quantity, billingMode, stop)
+            quantity, billingMode, stop
+        )
         handleAction(action)
     }
 

@@ -1021,13 +1021,14 @@ class CSortedItemList : Iterable<CSortedItem>
         }
     }
 
-    fun selectTransactionId(
+    suspend fun selectTransactionId(
         transactionId: Int, sort: EItemSort, timeFrame: ETimeFrameIndex)
     {
         val service = GrpcServiceFactory.createDailyTransactionItemService()
         val mySort = EItemSort.toItemSort(sort)
         val itemList = service.selectTransactionId(
-            transactionId,  mySort, timeFrame.index, global.deviceId)
+            transactionId,  mySort, timeFrame.index,
+            -1) // global.deviceId)
         val listItems = CItemList(false, itemList)
         m_sortedItems = createList(listItems, true)
         sortAndTry2Merge(0, m_sortedItems.size, false)

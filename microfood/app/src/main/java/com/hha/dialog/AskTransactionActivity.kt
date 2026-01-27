@@ -5,9 +5,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import androidx.activity.viewModels
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.viewModelScope
 import androidx.recyclerview.widget.GridLayoutManager
 import com.hha.adapter.ShortTransactionListAdapter
 import com.hha.framework.CFloorTable
@@ -18,13 +16,10 @@ import tech.hha.microfood.databinding.AskTransactionActivityBinding
 import com.hha.dialog.Translation.TextId
 import com.hha.floor.FloorTablesAdapter
 import com.hha.framework.CFloorTables
-import com.hha.framework.CTransaction
 import com.hha.grpc.GrpcArcDrawable
 import com.hha.model.ShortTransactionsModel
 import com.hha.model.TransactionModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import tech.hha.microfood.R
 
 
@@ -34,6 +29,7 @@ class AskTransactionActivity : BaseActivity()
     private val CFG = global.CFG
     private lateinit var mBinding: AskTransactionActivityBinding
     private lateinit var grpcArcDrawable: GrpcArcDrawable
+    private var mNewTimeFrame = false
 
     private val mShortTransactionListAdapter: ShortTransactionListAdapter =
         ShortTransactionListAdapter { selectedShortTransaction ->
@@ -202,7 +198,7 @@ class AskTransactionActivity : BaseActivity()
 
                     FloorTableModel.FloorTableAction.NAVIGATE_TO_ORDER -> {
                         Log.d(tag, "Action from ViewModel: NAVIGATE_TO_ORDER for transaction ${result.transactionId}")
-                        if (result.transactionId > 0) {
+                        if (result.transactionId > 1E6) {
                             // An open transaction was found, navigate to it.
                             mTransactionModel.navigateToExistingTransaction(result.transactionId)
                         } else {
@@ -240,17 +236,18 @@ class AskTransactionActivity : BaseActivity()
         // 1. OBSERVE THE CORRECT EVENT: navigateToPageOrder
         mTransactionModel.navigateToPageOrder.observe(this) { event ->
             // 2. Use the MyEvent wrapper to handle this as a one-time event
-            event.getContentIfNotHandled()?.let { transactionId ->
+            event.getContentIfNotHandled()?.let { navEvent ->
                 // This block now runs ONLY when a NEW transaction is created
                 Log.i(tag, "setupNavigationPageOrderObserver Navigating via navigateToPageOrder event with NEW ID: " +
-                   "$transactionId")
+                   "${navEvent.transactionId}")
 
                 val intent = Intent(this, PageOrderActivity::class.java).apply {
                     // These flags are crucial
                     flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
 
-                    putExtra("TRANSACTION_ID", transactionId)
-                    putExtra("FROM_BILL", false)
+                    putExtra("TRANSACTION_ID", navEvent.transactionId)
+                    putExtra("FROM_BILL", navEvent.fromBilling)
+                    putExtra("NEW_TIME_FRAME", navEvent.newTimeFrame)
                 }
                 startActivity(intent)
             }

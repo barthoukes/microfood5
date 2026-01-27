@@ -53,7 +53,7 @@ class FloorTableModel : ViewModel() {
    data class TableClickResult(
       val action: FloorTableAction = FloorTableAction.NAVIGATE_TO_ORDER,
       val transactionId: Int = -1 // Default to -1, only relevant for navigation actions.
-   )
+      )
 
    init {
       Log.i(tag, "FloorTableModel initialized")
@@ -291,7 +291,7 @@ class FloorTableModel : ViewModel() {
          // 3. RETURN THE RESULT
          return TableClickResult(
             FloorTableAction.NAVIGATE_TO_ORDER,
-            transactionId // This is now correctly an Int
+            transactionId
          )
       }
    }

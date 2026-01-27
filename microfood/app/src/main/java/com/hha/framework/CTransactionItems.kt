@@ -7,8 +7,6 @@ import com.hha.callback.TransactionItemListener
 import com.hha.common.DeletedStatus
 import com.hha.common.ItemVisible
 import com.hha.common.Payed
-import com.hha.common.TransactionData
-import com.hha.framework.CTransaction.Companion.tag
 import com.hha.grpc.GrpcServiceFactory
 import com.hha.grpc.LoadingState
 import com.hha.resources.Global
@@ -58,7 +56,28 @@ class CTransactionItems : Iterable<CSortedItem>
     private val scope = CoroutineScope(Dispatchers.Main)
     private var currentTask: Job? = null
 
-    constructor(itemOperations : ItemOperations)
+    companion object
+    {
+        var tag = "CTransactionItems"
+
+        suspend fun createAndLoad(
+            itemOperations : ItemOperations,
+            transactionId: Int,
+            sort: EItemSort = EItemSort.SORT_ORDER,
+            timeFrame: ETimeFrameIndex = ETimeFrameIndex(ETimeFrameIndex.TIME_FRAME_ALL)
+        ): CTransactionItems {
+            // Step 1: Call the private, synchronous constructor to create the object
+            val transactionItems = CTransactionItems(itemOperations)
+            // Step 2: Call the suspend function to load the data asynchronously
+            transactionItems.selectTransactionId(transactionId, sort, timeFrame)
+
+            // Step 3: Return the fully initialized object
+            return transactionItems
+        }
+    }
+
+
+    private constructor(itemOperations : ItemOperations)
     {
         mItemOperations = itemOperations
         m_state = EEnterState.ENTER_ITEM_STATE
@@ -627,7 +646,7 @@ class CTransactionItems : Iterable<CSortedItem>
     suspend fun nextPortion(cursor: CCursor): Boolean
     {
         val timeFrame = mItemOperations.getTimeFrame()
-        val tfi = timeFrame.time_frame_index
+        val tfi = timeFrame.timeFrameIndex
         return nextPortion(cursor, tfi)
     }
 
@@ -1367,7 +1386,8 @@ class CTransactionItems : Iterable<CSortedItem>
         mBewChanged = true;
     }
 
-    fun selectTransactionId(transactionId: Int, sort: EItemSort, timeFrame: ETimeFrameIndex)
+    suspend fun selectTransactionId(
+        transactionId: Int, sort: EItemSort, timeFrame: ETimeFrameIndex)
     {
         mItems.selectTransactionId(transactionId, sort, timeFrame)
     }

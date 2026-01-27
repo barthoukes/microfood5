@@ -32,38 +32,38 @@ service DailyTransactionItemService
     // Transaction Item
     //rpc GetRows (common.Empty)  returns (RowsReply) {}
     //rpc GetItem (IndexRequest)  returns (Item) {}
+    rpc CreateItem (CreateItemRequest)  returns (NumberReply) {}
+    rpc CreateItemWithTimestamp (CreateItemWithTimestampRequest)  returns (NumberReply) {}
+    rpc DeleteAll (TransactionTimeFrameDeviceWhy)  returns (common.Empty) {}
+    rpc DeleteTransactionItems (TransactionId)  returns (common.Empty) {}
+    rpc DeleteTwinItem (DeleteTwinItemRequest)  returns (common.Empty) {}
+    rpc DuplicateTransaction (TransactionToTransaction)  returns (common.Empty) {}
+    rpc ExchangeSequences (ExchangeSequencesRequest)  returns (common.Empty) {}
+    rpc FindItems(FindItemsRequest)  returns (ItemGroupQuantityList) {}
+    rpc FindSequenceItems(FindSequenceItemsRequest)  returns (common.ItemList) {}
+    rpc FindSequences(FindSequencesRequest)  returns (FindSequencesReply) {}
+    rpc FinishPayments (TransactionId)  returns (common.Empty) {}
+    rpc GetAllDrinksTotal (GetAllDrinksTotalRequest)  returns (Money) {}
+    rpc GetAllKitchenTotal (GetAllKitchenTotalRequest)  returns (Money) {}
+    rpc GetExtraHalfHourTotal(TransactionId)  returns (Money) {}
+    rpc GetTimeFrameLocationTotal (TransactionLocationIndex)  returns (Money) {}
+    rpc IsEmpty(common.MenuCardId)  returns (IsEmptyResponse) {}
+    rpc IsEmptyTransaction(EmptyTransactionRequest)  returns (IsEmptyResponse) {}
+    rpc ItemCount (TransactionTimeFrame)  returns (NumberReply) {}
+    rpc ItemSum (TransactionTimeFrame)  returns (Money) {}
+    rpc InsertSequence (InsertSequenceRequest)  returns (common.Empty) {}
+    rpc MergeTransactionItems(TransactionIds)  returns (common.Empty) {}
     rpc NumberKitchenItems (TransactionTimeFrame)  returns (NumberReply) {}
+    rpc ReplaceListItem (ReplaceListItemRequest)  returns (common.Empty) {}
+    rpc Select (TransactionSubItems)  returns (common.ItemList) {}
     rpc SelectTimeFrame (TransactionTimeFrame)  returns (common.ItemList) {}
     rpc SelectTransaction(TransactionId)  returns (common.ItemList) {}
     rpc SelectTransactionId(SelectTransactionSort)  returns (common.ItemList) {}
-    rpc CreateItem (CreateItemRequest)  returns (NumberReply) {}
-    rpc CreateItemWithTimestamp (CreateItemWithTimestampRequest)  returns (NumberReply) {}
-    rpc FinishPayments (TransactionId)  returns (common.Empty) {}
-    rpc DuplicateTransaction (TransactionToTransaction)  returns (common.Empty) {}
-    rpc DeleteAll (TransactionTimeFrameDeviceWhy)  returns (common.Empty) {}
-    rpc ItemCount (TransactionTimeFrame)  returns (NumberReply) {}
-    rpc ItemSum (TransactionTimeFrame)  returns (Money) {}
-    rpc UpdateItemToDatabase (common.Item)  returns (common.Empty) {}
-    rpc GetAllDrinksTotal (GetAllDrinksTotalRequest)  returns (Money) {}
-    rpc GetAllKitchenTotal (GetAllKitchenTotalRequest)  returns (Money) {}
-    rpc GetTimeFrameLocationTotal (TransactionLocationIndex)  returns (Money) {}
-    rpc SetTimeFrameLocation (TransactionLocationIndex)  returns (common.ItemList) {}
-    rpc DeleteTransactionItems (TransactionId)  returns (common.Empty) {}
     rpc SetNegativeQuantityToRemovedItems (TransactionId)  returns (common.Empty) {}
-    rpc UndoTimeFrame (UndoTimeFrameRequest)  returns (common.Empty) {}
-    rpc InsertSequence (InsertSequenceRequest)  returns (common.Empty) {}
-    rpc Select (TransactionSubItems)  returns (common.ItemList) {}
-    rpc ReplaceListItem (ReplaceListItemRequest)  returns (common.Empty) {}
+    rpc SetTimeFrameLocation (TransactionLocationIndex)  returns (common.ItemList) {}
     rpc SetTwinQuantity (SetTwinQuantityRequest)  returns (common.Empty) {}
-    rpc DeleteTwinItem (DeleteTwinItemRequest)  returns (common.Empty) {}
-    rpc ExchangeSequences (ExchangeSequencesRequest)  returns (common.Empty) {}
-    rpc FindSequences(FindSequencesRequest)  returns (FindSequencesReply) {}
-    rpc GetExtraHalfHourTotal(TransactionId)  returns (Money) {}
-    rpc FindItems(FindItemsRequest)  returns (ItemGroupQuantityList) {}
-    rpc IsEmpty(common.MenuCardId)  returns (IsEmptyResponse) {}
-    rpc IsEmptyTransaction(EmptyTransactionRequest)  returns (IsEmptyResponse) {}
-    rpc MergeTransactionItems(TransactionIds)  returns (common.Empty) {}
-    rpc FindSequenceItems(FindSequenceItemsRequest)  returns (common.ItemList) {}
+    rpc UndoTimeFrame (UndoTimeFrameRequest)  returns (common.Empty) {}
+    rpc UpdateItemToDatabase (common.Item)  returns (common.Empty) {}
 }
 
 message FindSequenceItemsRequest
