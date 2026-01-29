@@ -3,39 +3,53 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/backrepeat"
-    android:orientation="vertical" >
+    android:orientation="vertical">
 
     <ImageView
         android:id="@+id/imageView1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:src="@drawable/cancel" />
-        
+        android:scaleType="centerCrop"
+        android:src="@drawable/tablets_land2" />
+
     <TextView
-        android:id="@+id/stopBig"
+        android:id="@+id/textBig"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center"
-        android:text="@string/tot_ziens"
-        android:textColor="#FFFFFF88"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+       android:textSize="40sp"
+        android:text="@string/program_title"
+        android:textColor="#FFFF0088"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
 
-    <TextView
+    <ImageView
+       android:id="@+id/grpc_spinner"
+       android:layout_width="40dp"
+       android:layout_height="40dp"
+       android:visibility="visible"
+       android:layout_gravity="center|top"
+       android:background="@color/COLOUR_SPINNER_BACKGROUND"/>
+
+    <!-- TextView
         android:id="@+id/textView2"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center_horizontal"
         android:text="@string/copyright"
-        android:textColor="#FF000040"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
-    
+        android:textSize="30sp"
+        android:textColor="#FF000080"
+        android:textAppearance="?android:attr/textAppearanceMedium" / -->
+
+
     <TextView
         android:id="@+id/textView3"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="bottom|center_horizontal"
+        android:textSize="30sp"
         android:text="@string/home"
-        android:textColor="#FF000040"
+        android:textColor="#FF000080"
         android:textAppearance="?android:attr/textAppearanceMedium" />
+
 </FrameLayout>

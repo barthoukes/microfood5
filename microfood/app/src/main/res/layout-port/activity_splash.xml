@@ -11,7 +11,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:scaleType="centerCrop"
-        android:src="@drawable/tablets_port" />
+        android:src="@drawable/tablets_port2" />
 
     <TextView
         android:id="@+id/textBig"

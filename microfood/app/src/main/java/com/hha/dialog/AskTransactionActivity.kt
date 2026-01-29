@@ -28,8 +28,6 @@ class AskTransactionActivity : BaseActivity()
     private val global = Global.getInstance()
     private val CFG = global.CFG
     private lateinit var mBinding: AskTransactionActivityBinding
-    private lateinit var grpcArcDrawable: GrpcArcDrawable
-    private var mNewTimeFrame = false
 
     private val mShortTransactionListAdapter: ShortTransactionListAdapter =
         ShortTransactionListAdapter { selectedShortTransaction ->
@@ -96,6 +94,69 @@ class AskTransactionActivity : BaseActivity()
         mBinding.layoutShortTransactionList.layoutManager = gridLayoutShortTransactions
     }
 
+    fun mainMenuActivity()
+    {
+        Log.i(tag, "Navigating to Main.")
+
+        // Create an Intent to start the AskTransactionActivity
+        val intent = Intent(this, MainMenuActivity::class.java)
+
+        // Add flags to clear the task stack and start a new one.
+        // This ensures the user cannot press "Back" to return to BillOrderActivity.
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+
+        // Start the new activity
+        startActivity(intent)
+
+        // Close the current BillOrderActivity so it's removed from the back stack
+        finish()
+    }
+
+    @Suppress("UNUSED_PARAMETER")
+    fun onButtonBack(view: View)
+    {
+        Log.i(tag, "onButtonBack")
+        mainMenuActivity()
+    }
+
+    @Suppress("UNUSED_PARAMETER")
+    fun onButtonLanguage(view: View)
+    {
+        Log.i(tag, "onButtonLanguage")
+        Translation.nextLanguage()
+        refreshAllData()
+    }
+
+    fun onButtonFloorPlan()
+    {
+        Log.i(tag, "onButtonFloorPlanNext")
+
+        global.floorPlanId = mFloorTableModel.getNextFloorPlanId(global.floorPlanId)
+        if (global.floorPlanId > 0)
+        {
+            Log.i(tag, "onButtonFloorPlanNext  No floorPlans found!!")
+        }
+        mFloorTableModel.loadFloorTables()
+    }
+
+    @Suppress("UNUSED_PARAMETER")
+    fun onButtonFloorPlanOnOff(view: View)
+    {
+        Log.i(tag, "onButtonFloorPlanOnOff")
+        if (!isTablet)
+        {
+            isShowingFloorPlanOnPhone = !isShowingFloorPlanOnPhone
+            updateViewVisibility()
+        }
+    }
+
+    @Suppress("UNUSED_PARAMETER")
+    fun onButtonTakeaway(view: View)
+    {
+        Log.i(tag, "onButtonTakeaway")
+        mTransactionModel.createTakeawayTransaction()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?)
     {
         Log.i(tag, "onCreate")
@@ -124,39 +185,6 @@ class AskTransactionActivity : BaseActivity()
         super.onDestroy()
         // Optional: Clear cache if needed
         // mFloorTableModel.clearCache()
-    }
-
-    fun setupOnClickListeners()
-    {
-        // Stop button
-        mBinding.btnFloorplan.apply {
-            setOnClickListener { onButtonFloorPlan() }
-        }
-    }
-
-    fun onShortTransactionSelected(selectedTransaction: CShortTransaction)
-    {
-        Log.i(
-            tag, "onShortTransactionSelected ${selectedTransaction.name} ${
-                selectedTransaction
-                    .transactionId
-            }"
-        )
-
-        if (mFloorTablesAdapter.getSelectedTransactionName() != selectedTransaction.name)
-        {
-            mFloorTablesAdapter.selectTransactionName(selectedTransaction.name)
-            mShortTransactionListAdapter.selectTransactionId(selectedTransaction.transactionId)
-        } else if (mBill)
-        {
-            // Change to billing activity for this transaction.
-            mTransactionModel.selectTransaction(selectedTransaction.transactionId)
-
-        } else
-        {
-            // Same name chosen,
-            mShortTransactionListAdapter.selectTransactionId(selectedTransaction.transactionId)
-        }
     }
 
     /**
@@ -218,6 +246,14 @@ class AskTransactionActivity : BaseActivity()
         }
     }
 
+    @Suppress("UNUSED_PARAMETER")
+    fun onHeaderButton(view: View)
+    {
+        Log.i(tag, "onHeaderButton")
+        mBill = !mBill
+        refreshAllData()
+    }
+
     override fun onResume()
     {
         Log.i(tag, "onResume")
@@ -231,14 +267,70 @@ class AskTransactionActivity : BaseActivity()
         }
     }
 
+    fun onShortTransactionSelected(selectedTransaction: CShortTransaction)
+    {
+        Log.i(
+            tag, "onShortTransactionSelected ${selectedTransaction.name} ${
+                selectedTransaction
+                    .transactionId
+            }"
+        )
+
+        if (mFloorTablesAdapter.getSelectedTransactionName() != selectedTransaction.name)
+        {
+            mFloorTablesAdapter.selectTransactionName(selectedTransaction.name)
+            mShortTransactionListAdapter.selectTransactionId(selectedTransaction.transactionId)
+        } else if (mBill)
+        {
+            // Change to billing activity for this transaction.
+            mTransactionModel.selectTransaction(selectedTransaction.transactionId)
+
+        } else
+        {
+            // Same name chosen,
+            mShortTransactionListAdapter.selectTransactionId(selectedTransaction.transactionId)
+        }
+    }
+
+    private fun refreshAllData()
+    {
+        Log.i(tag, "refreshAllData")
+        refreshShortTransaction()
+        refreshFloorPlan()
+    }
+
+    private fun refreshShortTransaction()
+    {
+        Log.i(tag, "refreshShortTransaction")
+        mShortTransactionListAdapter.notifyDataSetChanged()
+        mShortTransactionsModel.refreshAllShortTransactions()
+    }
+
+    private fun refreshFloorPlan()
+    {
+        Log.i(tag, "refreshFloorPlan")
+        mFloorTablesAdapter.redrawViewsAfterChangeLanguage()
+        mFloorTableModel.loadFloorTables()
+        val chooseToOrder = when (mBill)
+        {
+            false -> Translation.get(TextId.TEXT_CHOOSE_TO_ORDER)
+            true -> Translation.get(TextId.TEXT_BILL_OPTION)
+        }
+        mBinding.headerButton.text = chooseToOrder
+        mFloorTableModel.loadFloorTables()
+        val txt = Translation.get(TextId.TEXT_FLOOR_PLAN) +
+           "\n" + mFloorTableModel.floorPlanName()
+        mBinding.btnFloorplan.text = txt
+    }
+
     private fun setupNavigationPageOrderObserver()
     {
-        // 1. OBSERVE THE CORRECT EVENT: navigateToPageOrder
         mTransactionModel.navigateToPageOrder.observe(this) { event ->
             // 2. Use the MyEvent wrapper to handle this as a one-time event
             event.getContentIfNotHandled()?.let { navEvent ->
                 // This block now runs ONLY when a NEW transaction is created
-                Log.i(tag, "setupNavigationPageOrderObserver Navigating via navigateToPageOrder event with NEW ID: " +
+                Log.i(tag,
+                   "setupNavigationPageOrderObserver Navigating via navigateToPageOrder event with NEW ID: " +
                    "${navEvent.transactionId}")
 
                 val intent = Intent(this, PageOrderActivity::class.java).apply {
@@ -281,6 +373,14 @@ class AskTransactionActivity : BaseActivity()
         }
     }
 
+    fun setupOnClickListeners()
+    {
+        // Stop button
+        mBinding.btnFloorplan.apply {
+            setOnClickListener { onButtonFloorPlan() }
+        }
+    }
+
     private fun setupRecyclerView()
     {
         // Set the adapters that were already created
@@ -292,139 +392,6 @@ class AskTransactionActivity : BaseActivity()
 
         mBinding.layoutFloorTables.setItemViewCacheSize(64)
         mBinding.layoutShortTransactionList.setItemViewCacheSize(64)
-    }
-
-// ... inside AskTransactionActivity class
-
-    private fun refreshAllData()
-    {
-        Log.i(tag, "refreshAllData")
-        refreshShortTransaction()
-        refreshFloorPlan()
-    }
-
-    private fun refreshShortTransaction()
-    {
-        Log.i(tag, "refreshShortTransaction")
-        mShortTransactionListAdapter.notifyDataSetChanged()
-        mShortTransactionsModel.refreshAllShortTransactions()
-    }
-
-    private fun refreshFloorPlan()
-    {
-        Log.i(tag, "refreshFloorPlan")
-        mFloorTablesAdapter.redrawViewsAfterChangeLanguage()
-        mFloorTableModel.loadFloorTables()
-        val chooseToOrder = when (mBill)
-        {
-            false -> Translation.get(TextId.TEXT_CHOOSE_TO_ORDER)
-            true -> Translation.get(TextId.TEXT_BILL_OPTION)
-        }
-        mBinding.headerButton.text = chooseToOrder
-        mFloorTableModel.loadFloorTables()
-        val txt = Translation.get(TextId.TEXT_FLOOR_PLAN) +
-           "\n" + mFloorTableModel.floorPlanName()
-        mBinding.btnFloorplan.text = txt
-    }
-
-    @Suppress("UNUSED_PARAMETER")
-    fun onButtonLanguage(view: View)
-    {
-        Log.i(tag, "onButtonLanguage")
-        Translation.nextLanguage()
-        refreshAllData()
-    }
-
-    fun onButtonFloorPlan()
-    {
-        Log.i(tag, "onButtonFloorPlanNext")
-
-        global.floorPlanId = mFloorTableModel.getNextFloorPlanId(global.floorPlanId)
-        if (global.floorPlanId > 0)
-        {
-            Log.i(tag, "onButtonFloorPlanNext  No floorPlans found!!")
-        }
-        mFloorTableModel.loadFloorTables()
-    }
-
-    @Suppress("UNUSED_PARAMETER")
-    fun onButtonFloorPlanOnOff(view: View)
-    {
-        Log.i(tag, "onButtonFloorPlanOnOff")
-        if (!isTablet)
-        {
-            isShowingFloorPlanOnPhone = !isShowingFloorPlanOnPhone
-            updateViewVisibility()
-        }
-    }
-
-    @Suppress("UNUSED_PARAMETER")
-    fun onButtonTakeaway(view: View)
-    {
-        Log.i(tag, "onButtonTakeaway")
-        mTransactionModel.createTakeawayTransaction()
-    }
-
-    fun MainMenuActivity()
-    {
-        Log.i(tag, "Navigating to Main.")
-
-        // Create an Intent to start the AskTransactionActivity
-        val intent = Intent(this, MainMenuActivity::class.java)
-
-        // Add flags to clear the task stack and start a new one.
-        // This ensures the user cannot press "Back" to return to BillOrderActivity.
-        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-
-        // Start the new activity
-        startActivity(intent)
-
-        // Close the current BillOrderActivity so it's removed from the back stack
-        finish()
-    }
-
-    private fun onExistingTransactionClicked()
-    {
-        Log.i(tag, "onExistingTransactionClicked")
-        // Implement existing transaction logic
-        finish()
-    }
-
-    @Suppress("UNUSED_PARAMETER")
-    fun onHeaderButton(view: View)
-    {
-        Log.i(tag, "onHeaderButton")
-        mBill = !mBill
-        refreshAllData()
-    }
-
-    private fun onAddDiscountClicked()
-    {
-        // @todo Implement split bill logic
-    }
-
-    @Suppress("UNUSED_PARAMETER")
-    fun onButtonBack(view: View)
-    {
-        Log.i(tag, "onButtonBack")
-        MainMenuActivity()
-    }
-
-    private fun onChangeTableClicked()
-    {
-        Log.i(tag, "onChangeTableClicked")
-        // @todo Implement split bill logic
-    }
-
-    private fun onPrintReceiptClicked()
-    {
-        Log.i(tag, "onPrintReceiptClicked")
-        // @todo Implement split bill logic
-    }
-
-    private fun onSplitBillClicked()
-    {
-        // @todo Implement split bill logic
     }
 
     private fun updateViewVisibility()
