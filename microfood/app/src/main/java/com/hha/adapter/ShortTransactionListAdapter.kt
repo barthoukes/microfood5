@@ -217,6 +217,17 @@ class ShortTransactionListAdapter(
 
     fun getSelectedTransaction(): Int = mTransactionId
 
+    fun clearSelection()
+    {
+        // Find the adapter position of the previously selected item
+        val index = clientList.indexOfFirst { it.transactionId == mTransactionId }
+        mTransactionId = -1
+        if (index != -1)
+        {
+            notifyItemChanged(index)
+        }
+    }
+
     fun selectTransactionId(transactionId: Int)
     {
         // Store the ID of the previously selected item

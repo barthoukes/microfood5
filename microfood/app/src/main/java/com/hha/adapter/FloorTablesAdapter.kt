@@ -198,6 +198,16 @@ class FloorTablesAdapter(
 
 // ... inside FloorTablesAdapter ...
 
+    fun clearSelection()
+    {
+        val previousIndex = mFloorTables.indexOfFirst { it.name == mTransactionName }
+        mTransactionName = ""
+        if (previousIndex != -1)
+        {
+            notifyItemChanged(previousIndex)
+        }
+    }
+
     fun selectTransactionName(transactionName: String)
     {
         // Store the ID of the previously selected item
