@@ -259,12 +259,22 @@ class AskTransactionActivity : BaseActivity()
         Log.i(tag, "onResume")
         super.onResume()
         updateViewVisibility()
+        mFloorTablesAdapter.clearSelection()
+        mShortTransactionListAdapter.clearSelection()
         //mShortTransactionsModel.refreshAllShortTransactions()
         //mFloorTableModel.loadFloorTables()
         //refreshAllData()
         mBinding.root.post {
             refreshAllData()
         }
+    }
+
+    override fun onPause()
+    {
+        Log.i(tag, "onPause")
+        super.onPause()
+        mFloorTablesAdapter.clearSelection()
+        mShortTransactionListAdapter.clearSelection()
     }
 
     fun onShortTransactionSelected(selectedTransaction: CShortTransaction)

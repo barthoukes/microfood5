@@ -5,7 +5,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.hha.archive.transactionId
 import com.hha.callback.PaymentsListener
 import com.hha.callback.TransactionItemListener
 import com.hha.callback.TransactionListener
@@ -63,8 +62,8 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
    // --- NEW: LiveData to hold the fully-loaded CTransaction ---
    // This will be observed by the Activity to know when to navigate.
    // 1. SINGLE SOURCE OF TRUTH
-   private val _transaction = MutableLiveData<CTransaction?>()
-   val activeTransaction: LiveData<CTransaction?> = _transaction
+   private val _activeTransaction = MutableLiveData<CTransaction?>()
+   val activeTransaction: LiveData<CTransaction?> = _activeTransaction
 
    // This navigateToPageOrder is an event to start PageOrder with a transaction.
    private val _navigateToPageOrder = MutableLiveData<MyEvent<PageOrderNavigationEvent>>()
@@ -131,14 +130,14 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
    val tag = "transactionModel"
 
    val size: Int
-      get() = _transaction.value?.size ?: 0
+      get() = _activeTransaction.value?.size ?: 0
 
    /**
     * Adds a payment to the current transaction.
     */
    fun addPayment(method: EPaymentMethod, amount: CMoney)
    {
-      val currentTransaction = _transaction.value
+      val currentTransaction = _activeTransaction.value
       currentTransaction?.addPayment(method, amount)
    }
 
@@ -178,7 +177,7 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
    fun addItem(item: CMenuItem, clusterId: Short): Boolean
    {
       Log.i(tag, "addItem")
-      val currentTransaction = _transaction.value
+      val currentTransaction = _activeTransaction.value
       // The ViewModel tells the model to change. The listener will handle the UI update automatically.
       if (currentTransaction == null)
       {
@@ -241,7 +240,7 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
 
    fun closeTimeFrame()
    {
-      val currentTransaction = _transaction.value
+      val currentTransaction = _activeTransaction.value
       if (currentTransaction != null)
       {
          viewModelScope.launch {
@@ -497,7 +496,7 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
       Log.i(tag, "finishTransaction")
       mFromBilling = fromBilling
       mPrintKitchen2PosQuantity = userCFG.getValue("user_print_kitchen2pos_quantity")
-      val currentTransaction = _transaction.value
+      val currentTransaction = _activeTransaction.value
       if (currentTransaction == null)
       {
          return EFinalizerAction.FINALIZE_NO_ACTION
@@ -539,7 +538,7 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
 
    fun handleFinishTakeawayQuantity(ts: CTimestamp): EFinalizerAction
    {
-      val currentTransaction = _transaction.value
+      val currentTransaction = _activeTransaction.value
          ?: return EFinalizerAction.FINALIZE_NOT_IDENTIFIED
       var retVal = EFinalizerAction.FINALIZE_NO_ACTION
 
@@ -587,7 +586,7 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
    fun askTakeawayFinalQuantity(ts: CTimestamp, changedTime: Boolean): EFinalizerAction
    {
       Log.i(tag, "askTakeawayFinalQuantity")
-      val currentTransaction = _transaction.value
+      val currentTransaction = _activeTransaction.value
       if (currentTransaction == null)
       {
          return EFinalizerAction.FINALIZE_NOT_IDENTIFIED
@@ -607,7 +606,7 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
 
    fun initPageOrder(): Boolean
    {
-      val currentTransaction = _transaction.value ?: return false
+      val currentTransaction = _activeTransaction.value ?: return false
       if (currentTransaction.isValid() == false)
       {
          return false
@@ -666,7 +665,7 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
    ): EFinalizerAction
    {
       var retVal = EFinalizerAction.FINALIZE_NO_ACTION
-      val currentTransaction = _transaction.value ?: return retVal
+      val currentTransaction = _activeTransaction.value ?: return retVal
       if (quantity != 0 || mAskQuantityZero)
       {
          if (billingMode)
@@ -713,7 +712,7 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
    {
       Log.i(tag, "handleFinishSitin")
 
-      val currentTransaction = _transaction.value
+      val currentTransaction = _activeTransaction.value
       if (currentTransaction == null)
       {
          return EFinalizerAction.FINALIZE_NOT_IDENTIFIED
@@ -788,7 +787,7 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
    fun handleFinishQuantity(
       quantity: Int, billingMode: Boolean, stop: Boolean): EFinalizerAction
    {
-      val currentTransaction = _transaction.value
+      val currentTransaction = _activeTransaction.value
       if (currentTransaction == null)
       {
          return EFinalizerAction.FINALIZE_NOT_IDENTIFIED
@@ -849,7 +848,7 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
 
    fun handleFinishQuantiesTimeWok(fromBilling: Boolean): EFinalizerAction
    {
-      val currentTransaction = _transaction.value
+      val currentTransaction = _activeTransaction.value
       if (currentTransaction == null)
       {
          return EFinalizerAction.FINALIZE_NOT_IDENTIFIED
@@ -866,7 +865,7 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
       Log.i(tag, "handleFinishQuantiesTimeSitin")
       var action = EFinalizerAction.FINALIZE_NOT_IDENTIFIED
       val EInitMode = EInitMode.VIEW_NONE
-      val currentTransaction = _transaction.value ?: return action
+      val currentTransaction = _activeTransaction.value ?: return action
 
       viewModelScope.launch {
          grpcStateViewModel?.messageSent() // Announce that a long operation is starting
@@ -925,7 +924,7 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
    ): EFinalizerAction
    {
       var retVal = EFinalizerAction.FINALIZE_NOT_IDENTIFIED
-      val currentTransaction = _transaction.value
+      val currentTransaction = _activeTransaction.value
       if (currentTransaction == null)
          return retVal
       mPrintKitchenQuantity = quantityKitchen
@@ -967,7 +966,7 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
     */
    fun handleFinishTakeaway(): EFinalizerAction
    {
-      val currentTransaction: CTransaction? = _transaction.value
+      val currentTransaction: CTransaction? = _activeTransaction.value
       if (currentTransaction == null)
       {
          return EFinalizerAction.FINALIZE_NO_ACTION
@@ -1053,7 +1052,7 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
 
    fun handleMenuItem(selectedMenuItem: CMenuItem): Boolean
    {
-      val currentTransaction = _transaction.value
+      val currentTransaction = _activeTransaction.value
       if (mMode == EInitMode.VIEW_PAGE_ORDER && currentTransaction != null)
       {
          val clusterId: Short = -1
@@ -1073,7 +1072,7 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
 
    fun emptyTransaction(reason: String)
    {
-      val currentTransaction = _transaction.value
+      val currentTransaction = _activeTransaction.value
       if (currentTransaction != null)
       {
          viewModelScope.launch {
@@ -1093,7 +1092,7 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
    fun onInit(): EInitAction
    {
       mEmptyTimeFrame = false
-      val currentTransaction = activeTransaction.value
+      val currentTransaction = _activeTransaction.value
       if (currentTransaction == null)
       {
          return EInitAction.INIT_ACTION_NOTHING
@@ -1163,7 +1162,7 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
    fun discountVisible(): Boolean
    {
       Log.i(tag, "discountVisible")
-      val currentTransaction = activeTransaction.value
+      val currentTransaction = _activeTransaction.value
       if (currentTransaction == null)
       {
          return false
@@ -1183,7 +1182,7 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
    fun getCursor(item: CItem): Int
    {
       Log.i(tag, "getCursor")
-      val currentTransaction = _transaction.value
+      val currentTransaction = _activeTransaction.value
       return currentTransaction?.getCursor(item) ?: 0
    }
 
@@ -1191,7 +1190,7 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
    fun getRequiredAdditionalPayment(): CMoney
    {
       Log.i(tag, "getRequiredAdditionalPayment")
-      val currentTransaction = _transaction.value
+      val currentTransaction = _activeTransaction.value
       if (currentTransaction == null)
       {
          return CMoney(0)
@@ -1211,7 +1210,7 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
    fun getTableName(): String
    {
       Log.i(tag, "getTableName")
-      val currentTransaction = _transaction.value
+      val currentTransaction = _activeTransaction.value
       if (currentTransaction == null)
       {
          return "--"
@@ -1237,7 +1236,7 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
    fun hasAnyChanges(): Boolean
    {
       Log.i(tag, "hasAnyChanges")
-      val currentTransaction = _transaction.value
+      val currentTransaction = _activeTransaction.value
       return currentTransaction?.hasAnyChanges() ?: false
    }
 
@@ -1252,7 +1251,7 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
    {
       Log.i(tag, "initializeTransaction")
       // Perform initial checks on the main thread. These are fast.
-      if (mIsInitialized || (mode == EInitMode.VIEW_BILLING && _transaction.value == null))
+      if (mIsInitialized || (mode == EInitMode.VIEW_BILLING && _activeTransaction.value == null))
       {
          return
       }
@@ -1262,7 +1261,7 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
       viewModelScope.launch {
          // You can set a loading state here if needed, similar to listOpen()
          val global = Global.getInstance()
-         var currentTransaction: CTransaction? = _transaction.value
+         var currentTransaction: CTransaction? = _activeTransaction.value
 
          // If the transaction doesn't exist yet, load it in the background.
          grpcStateViewModel?.messageSent()
@@ -1302,7 +1301,7 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
                currentTransaction.startNewTimeFrame()
             }
             // Now that we have a valid transaction, update the LiveData
-            _transaction.value = currentTransaction
+            _activeTransaction.value = currentTransaction
 
             // It's now safe to add listeners and perform other main-thread logic
             mMode = mode
@@ -1390,7 +1389,7 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
    fun needToAskCancelReason(): Boolean
    {
       Log.i(tag, "needToAskCancelReason")
-      val currentTransaction = _transaction.value
+      val currentTransaction = _activeTransaction.value
       if (currentTransaction != null)
       {
          return currentTransaction.isTakeaway()
@@ -1409,7 +1408,7 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
    {
       Log.i(tag, "onCleared")
       super.onCleared()
-      val currentTransaction = _transaction.value
+      val currentTransaction = _activeTransaction.value
       currentTransaction?.removeListener(this)
    }
 
@@ -1436,7 +1435,7 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
    override fun onItemAdded(position: Int, item: CItem)
    {
       // Get the current transaction object which now contains the newly added item.
-      val currentTransaction = _transaction.value
+      val currentTransaction = _activeTransaction.value
       if (currentTransaction != null)
       {
          // Call the main update function to notify all observers.
@@ -1446,7 +1445,7 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
 
    override fun onItemRemoved(position: Int, newSize: Int)
    {
-      val currentTransaction = _transaction.value
+      val currentTransaction = _activeTransaction.value
       if (currentTransaction != null)
       {
          // Call the main update function to notify all observers.
@@ -1456,7 +1455,7 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
 
    override fun onItemUpdated(position: Int, item: CItem)
    {
-      val currentTransaction = _transaction.value
+      val currentTransaction = _activeTransaction.value
       if (currentTransaction != null)
       {
          // Call the main update function to notify all observers.
@@ -1470,7 +1469,7 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
     */
    fun onNavigationComplete()
    {
-      _transaction.value = null
+      _activeTransaction.value = null
    }
 
    fun onQuantitySelected(quantity: Int): EFinalizerAction
@@ -1495,7 +1494,7 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
    fun onButtonPlus1()
    {
       Log.i(tag, "onButtonPlus1")
-      val currentTransaction = _transaction.value
+      val currentTransaction = _activeTransaction.value
       if (mMode == EInitMode.VIEW_PAGE_ORDER && currentTransaction != null)
       {
          viewModelScope.launch {
@@ -1508,7 +1507,7 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
    fun onButtonMin1()
    {
       Log.i(tag, "onButtonMin1")
-      val currentTransaction = _transaction.value
+      val currentTransaction = _activeTransaction.value
       if (mMode == EInitMode.VIEW_PAGE_ORDER && currentTransaction != null)
       {
          viewModelScope.launch {
@@ -1521,7 +1520,7 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
    fun onButtonPortion()
    {
       Log.i(tag, "onButtonPortion")
-      val currentTransaction = _transaction.value
+      val currentTransaction = _activeTransaction.value
       if (mMode == EInitMode.VIEW_PAGE_ORDER && currentTransaction != null)
       {
          viewModelScope.launch {
@@ -1534,7 +1533,7 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
    fun onButtonRemove()
    {
       Log.i(tag, "onButtonRemove")
-      val currentTransaction = _transaction.value
+      val currentTransaction = _activeTransaction.value
       if (mMode == EInitMode.VIEW_PAGE_ORDER && currentTransaction != null)
       {
          viewModelScope.launch {
@@ -1551,7 +1550,7 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
    fun onInitAmounts(payingMode: EPayingMode, cleanTipsDiscount: Boolean)
    {
       Log.i(tag, "onInitAmounts")
-      val currentTransaction = activeTransaction.value
+      val currentTransaction = _activeTransaction.value
       if (currentTransaction == null)
       {
          return
@@ -1591,7 +1590,7 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
    ): EFinalizerAction
    {
       Log.i(tag, "onQuantitySelected")
-      val currentTransaction: CTransaction? = _transaction.value
+      val currentTransaction: CTransaction? = _activeTransaction.value
       if (currentTransaction == null)
       {
          return EFinalizerAction.FINALIZE_NO_ACTION
@@ -1642,7 +1641,7 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
       try
       {
          mIsUpdating = true
-         _transaction.postValue(transaction)
+         _activeTransaction.postValue(transaction)
          // When any part of the transaction changes, update all relevant LiveData.
          transaction.calculateTotalTransaction()
          _orderTotal.postValue(transaction.getTotalTransaction())
@@ -1656,7 +1655,7 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
    fun payAllUsing(paymentMethod: EPaymentMethod)
    {
       Log.i(tag, "payAllUsing ${paymentMethod.toString()}")
-      val currentTransaction = _transaction.value
+      val currentTransaction = _activeTransaction.value
       if (currentTransaction == null)
       {
          return
@@ -1692,7 +1691,7 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
    fun payEuros(amount: CMoney)
    {
       Log.i(tag, "payEuros")
-      val currentTransaction = _transaction.value
+      val currentTransaction = _activeTransaction.value
       currentTransaction?.addPayment(EPaymentMethod.PAYMENT_CASH, amount)
    }
 
@@ -1704,7 +1703,7 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
    fun prepareBillDisplayLines()
    {
       Log.i(tag, "prepareBillDisplayLines")
-      val currentTransaction = _transaction.value
+      val currentTransaction = _activeTransaction.value
       if (currentTransaction == null)
          return
       val lines = mutableListOf<BillDisplayLine>()
@@ -1880,7 +1879,7 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
     */
    fun printBills(quantity: Int, transactionTotals: CPaymentTransaction)
    {
-      val currentTransaction = activeTransaction.value
+      val currentTransaction = _activeTransaction.value
       if (currentTransaction == null)
       {
          return
@@ -1920,7 +1919,7 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
     * Fetches the full CTransaction object for a given transactionId.
     * Once fetched, it posts the object to the transaction LiveData.
     */
-   fun selectTransaction(transactionId: Int)
+   fun selectTransactionForPageOrder(transactionId: Int)
    {
       Log.i(tag, "selectTransaction $transactionId")
       // Don't do anything if an invalid ID is passed.
@@ -1939,8 +1938,16 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
                // Assuming CTransaction's constructor handles loading from DB/network.
                CTransaction.createAndLoad(transactionId)
             }
-            // Post the loaded transaction to the LiveData. The UI will react to this.
-            _transaction.value = fullTransaction
+            when (fullTransaction.getStatus())
+            {
+               // Start Page Order by creating the event.
+               EClientOrdersType.OPEN, EClientOrdersType.OPEN_PAID,
+                   EClientOrdersType.INIT, EClientOrdersType.PAYING
+                      -> _navigateToPageOrder.value =
+                  MyEvent(PageOrderNavigationEvent(
+                     transactionId, mFromBilling, true))
+               else -> {}
+            }
          } finally
          {
             grpcStateViewModel?.messageConfirmed()
@@ -1951,7 +1958,7 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
    fun setMessage(text: String)
    {
       Log.i(tag, "setMessage $text")
-      val currentTransaction = _transaction.value
+      val currentTransaction = _activeTransaction.value
       currentTransaction?.setMessage(text)
    }
 
