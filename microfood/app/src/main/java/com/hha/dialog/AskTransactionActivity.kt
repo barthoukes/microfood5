@@ -16,7 +16,6 @@ import tech.hha.microfood.databinding.AskTransactionActivityBinding
 import com.hha.dialog.Translation.TextId
 import com.hha.floor.FloorTablesAdapter
 import com.hha.framework.CFloorTables
-import com.hha.grpc.GrpcArcDrawable
 import com.hha.model.ShortTransactionsModel
 import com.hha.model.TransactionModel
 import kotlinx.coroutines.launch
@@ -195,20 +194,21 @@ class AskTransactionActivity : BaseActivity()
     {
         Log.i(tag, "onFloorTableSelected for table: ${selectedFloorTable.name}")
 
-        // Launch a coroutine tied to the Activity's lifecycle.
-        // This allows us to call the suspend function in the ViewModel.
-        lifecycleScope.launch {
-            val currentSelectedName = mFloorTablesAdapter.getSelectedTransactionName()
+        val currentSelectedName = mFloorTablesAdapter.getSelectedTransactionName()
 
+        if (currentSelectedName != selectedFloorTable.name)
+        {
             // First click on a new table: Just select it visually.
-            if (currentSelectedName != selectedFloorTable.name)
-            {
-                mFloorTablesAdapter.selectTransactionName(selectedFloorTable.name)
-                mShortTransactionListAdapter.selectTransactionId(selectedFloorTable.transactionId)
-            }
+            mFloorTablesAdapter.selectTransactionName(selectedFloorTable.name)
+            mShortTransactionListAdapter.selectTransactionId(selectedFloorTable.transactionId)
+        }
+        else
+        {
             // Second click on the same table: Delegate all logic to the ViewModel.
-            else
-            {
+
+            // Launch a coroutine tied to the Activity's lifecycle.
+            // This allows us to call the suspend function in the ViewModel.
+            lifecycleScope.launch {
                 // Call the suspend function from within the coroutine.
                 // The coroutine will 'pause' here until the ViewModel completes its work.
                 val result: FloorTableModel.TableClickResult =
@@ -278,18 +278,14 @@ class AskTransactionActivity : BaseActivity()
 
         if (mFloorTablesAdapter.getSelectedTransactionName() != selectedTransaction.name)
         {
+            // Highlight the last pressed transaction
             mFloorTablesAdapter.selectTransactionName(selectedTransaction.name)
             mShortTransactionListAdapter.selectTransactionId(selectedTransaction.transactionId)
-        } else if (mBill)
-        {
-            // Change to billing activity for this transaction.
-            mTransactionModel.selectTransaction(selectedTransaction.transactionId)
-
-        } else
-        {
-            // Same name chosen,
-            mShortTransactionListAdapter.selectTransactionId(selectedTransaction.transactionId)
         }
+
+        // Change to billing/page-order activity for this transaction.
+        mTransactionModel.selectTransactionForPageOrder(
+            selectedTransaction.transactionId)
     }
 
     private fun refreshAllData()

@@ -1246,7 +1246,6 @@ class CTransactionItems : Iterable<CSortedItem>
         return CCursor(y)
     }
 
-    // bool CclientItemsHandler::insertItem( long itemId,...)
     suspend fun insertItem(
         menuItem: CMenuItem, cursr: CCursor,
         quantity: Int, level: EOrderLevel, group: Int, page: Int, parts: Int,
