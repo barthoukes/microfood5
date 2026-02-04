@@ -96,6 +96,7 @@ class PageOrderActivity : BaseActivity(), ModalDialogYesNo.MessageBoxYesNoListen
 
     override fun onCreate(savedInstanceState: Bundle?)
     {
+        Log.i(tag, "onCreate")
         super.onCreate(savedInstanceState)
         mBinding = PageOrderActivityBinding.inflate(layoutInflater)
         setContentView(mBinding.root)
@@ -134,6 +135,7 @@ class PageOrderActivity : BaseActivity(), ModalDialogYesNo.MessageBoxYesNoListen
 
     private fun setupClickListeners()
     {
+        Log.i(tag, "setupClickListeners")
         // Table overview button
         mBinding.OK.apply {
             setOnClickListener {
@@ -144,6 +146,8 @@ class PageOrderActivity : BaseActivity(), ModalDialogYesNo.MessageBoxYesNoListen
 
     private fun setupNavigationObserver()
     {
+        Log.i(tag, "setupNavigationObserver")
+
         mTransactionModel.navigateToPageOrder.observe(this) { event ->
             // Use the MyEvent wrapper to ensure navigation happens only once
             event.getContentIfNotHandled()?.let { navEvent ->
@@ -165,6 +169,7 @@ class PageOrderActivity : BaseActivity(), ModalDialogYesNo.MessageBoxYesNoListen
 
     private fun setupObservers()
     {
+        Log.i(tag, "setupObservers")
         // Observe loading state to show/hide a spinner
 //        mTransactionModel.isLoading.observe(this) { isLoading ->
 //            mBinding.loadingSpinner.visibility = if (isLoading) View.VISIBLE else View.GONE
@@ -475,6 +480,7 @@ class PageOrderActivity : BaseActivity(), ModalDialogYesNo.MessageBoxYesNoListen
 
     private fun setupRecyclerViews()
     {
+        Log.i(tag, "setupRecyclerViews")
         // 1. GridLayoutManager for pages with 3 rows (vertical span) and horizontal scrolling
         createLinearLayoutTransactionItems()
         createTransactionItemsAdapter()
@@ -726,8 +732,13 @@ class PageOrderActivity : BaseActivity(), ModalDialogYesNo.MessageBoxYesNoListen
     fun billOrderActivity(transactionId: Int)
     {
         // Change to billing with the same transaction.
-        //mTransactionModel.initializeTransaction(TransactionModel.InitMode.VIEW_BILLING)
-        val intent = Intent(this, BillOrderActivity::class.java)
+       try
+       {//mTransactionModel.initializeTransaction(TransactionModel.InitMode.VIEW_BILLING)
+       } catch (e: Exception)
+       {
+          TODO("Not yet implemented")
+       }
+       val intent = Intent(this, BillOrderActivity::class.java)
         intent.putExtra("TRANSACTION_ID", transactionId)
         startActivity(intent)
         finish()

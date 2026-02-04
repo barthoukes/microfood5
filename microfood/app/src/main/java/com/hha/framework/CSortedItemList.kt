@@ -16,8 +16,11 @@ import kotlin.collections.mutableListOf
 const val FIRST_SEQUENCE_ID = 1
 private val log = Logger.getLogger("CsortedItemList")
 
+class IntRef(var value: Int)
+
 class CSortedItemList : Iterable<CSortedItem>
 {
+    val tag = "CSortedItemList"
     val global = Global.getInstance()
     val CFG = global.CFG
     var freeItems = CFG.getOption("bill_print_free_items")
@@ -325,7 +328,6 @@ class CSortedItemList : Iterable<CSortedItem>
         var list_items = CItemList()
 
         var p = 0
-        var q: Int
         while (p < items.size)
         {
             if (items[p].done)
@@ -333,7 +335,7 @@ class CSortedItemList : Iterable<CSortedItem>
                 p++
                 continue
             }
-            q = p + 1
+            var q = p + 1
             while (q < items.size)
             {
                 if (items[q].done)
@@ -364,7 +366,7 @@ class CSortedItemList : Iterable<CSortedItem>
             } else
             {
                 // Erase extra with quantity 0
-                q = 1
+                var q = 1
                 while (q < items[p].items.size)
                 {
                     if (items[p].items[q].getQuantity() == 0)
@@ -591,29 +593,26 @@ class CSortedItemList : Iterable<CSortedItem>
                 // Delete item + subitems
                 m_sortedItems.removeAt(sortedIndex)
                 recalculateInternalSize()
-                return
             } else
             {
                 // Delete subitem
                 m_sortedItems[sortedIndex].items.removeAt(cursor.position - index)
                 recalculateInternalSize()
-                return
             }
         }
     }
 
-    fun eraseEmpty(first: Int, last: Int): Boolean
+    fun eraseEmpty(first: Int, last: IntRef): Boolean
     {
         var change = false
         var x = first
-        var last = last
-        while (x < last)
+        while (x < last.value)
         {
             val p = m_sortedItems[x]
             if (p.getQuantity() == 0)
             {
                 m_sortedItems.removeAt(x)
-                last--
+                last.value--
                 change = true
                 continue
             } else
@@ -744,15 +743,14 @@ class CSortedItemList : Iterable<CSortedItem>
         return null
     }
 
-    fun mergeItems(first: Int, last: Int, sortEnabled: Boolean): Boolean
+    fun mergeItems(first: Int, last: IntRef, sortEnabled: Boolean): Boolean
     {
         var change = false
         var index = first
-        var last = last
-        while (index <= last - 2)
+        while (index <= last.value - 2)
         {
             var y = index + 1
-            while (y < last)
+            while (y < last.value)
             {
                 val sortOnlySameSequence = (y - index > 1) && (!sortEnabled)
                 val p: CSortedItem = m_sortedItems[index]
@@ -773,7 +771,7 @@ class CSortedItemList : Iterable<CSortedItem>
                     {
                         change = true
                         m_sortedItems.removeAt(y)
-                        last--
+                        last.value--
                         continue
                     }
                 }
@@ -784,16 +782,15 @@ class CSortedItemList : Iterable<CSortedItem>
         return change
     }
 
-    fun mergeItemsSameTimeFrame(first: Int, last: Int): Boolean
+    fun mergeItemsSameTimeFrame(first: Int, last: IntRef): Boolean
     {
         var change = false
         val mergeOnlySameSequence = false
         var x = first
-        var last = last
-        while (x <= last - 2)
+        while (x <= last.value - 2)
         {
             var y = x + 1
-            while (y < last)
+            while (y < last.value)
             {
                 val p = m_sortedItems[x]
                 val q = m_sortedItems[y]
@@ -814,7 +811,7 @@ class CSortedItemList : Iterable<CSortedItem>
                         {
                             change = true
                             m_sortedItems.removeAt(y)
-                            last--
+                            last.value--
                             continue
                         }
                     }
@@ -826,16 +823,15 @@ class CSortedItemList : Iterable<CSortedItem>
         return change
     }
 
-    fun mergeNegativeAndPositive(first: Int, last: Int): Boolean
+    fun mergeNegativeAndPositive(first: Int, last: IntRef): Boolean
     {
         var change = false
         var x = first
-        var last = last
         val mergeOnlySameSequence = false
-        while (x <= last - 2)
+        while (x <= last.value - 2)
         {
             var y = x + 1
-            while (y < last)
+            while (y < last.value)
             {
                 val p = m_sortedItems[x]
                 val q = m_sortedItems[y]
@@ -858,7 +854,7 @@ class CSortedItemList : Iterable<CSortedItem>
                         {
                             change = true
                             m_sortedItems.removeAt(y)
-                            last--
+                            last.value--
                             continue
                         }
                     }
@@ -870,15 +866,14 @@ class CSortedItemList : Iterable<CSortedItem>
         return change
     }
 
-    fun mergePortionChanges(first: Int, last: Int): Boolean
+    fun mergePortionChanges(first: Int, last: IntRef): Boolean
     {
         var change = false
         var x = first
-        var last = last
-        while (x <= last - 2)
+        while (x <= last.value - 2)
         {
             var y = x + 1
-            while (y < last)
+            while (y < last.value)
             {
                 val p = m_sortedItems[x]
                 val q = m_sortedItems[y]
@@ -888,7 +883,7 @@ class CSortedItemList : Iterable<CSortedItem>
                     {
                         change = true
                         m_sortedItems.removeAt(y)
-                        last--
+                        last.value--
                         continue
                     }
                 }
@@ -899,16 +894,15 @@ class CSortedItemList : Iterable<CSortedItem>
         return change
     }
 
-    fun mergeSameSequence(first: Int, last: Int): Boolean
+    fun mergeSameSequence(first: Int, last: IntRef): Boolean
     {
         var change = false
         val mergeOnlySameSequence = false
         var x = first
-        var last = last
-        while (x <= last - 2)
+        while (x <= last.value - 2)
         {
             var y = x + 1
-            while (y < last)
+            while (y < last.value)
             {
                 val p = m_sortedItems[x]
                 val q = m_sortedItems[y]
@@ -931,7 +925,7 @@ class CSortedItemList : Iterable<CSortedItem>
                         {
                             change = true
                             m_sortedItems.removeAt(y)
-                            last--
+                            last.value--
                             continue
                         }
                     }
@@ -1031,7 +1025,7 @@ class CSortedItemList : Iterable<CSortedItem>
             -1) // global.deviceId)
         val listItems = CItemList(false, itemList)
         m_sortedItems = createList(listItems, true)
-        sortAndTry2Merge(0, m_sortedItems.size, false)
+        sortAndTry2Merge(0, IntRef(m_sortedItems.size), false)
         recalculateInternalSize()
         return
     }
@@ -1042,7 +1036,7 @@ class CSortedItemList : Iterable<CSortedItem>
         val itemList: ItemList? = service.selectTransaction(transactionId)
         val listItems = CItemList(false, itemList)
         m_sortedItems = createList(listItems, true)
-        sortAndTry2Merge(0, m_sortedItems.size, false)
+        sortAndTry2Merge(0, IntRef(m_sortedItems.size), false)
         recalculateInternalSize()
         return true
     }
@@ -1119,35 +1113,41 @@ class CSortedItemList : Iterable<CSortedItem>
         return m_sortedItems.size
     }
 
-    fun sortAndTry2Merge(first: Int, last: Int, sortEnabled: Boolean): Int
+    fun sortAndTry2Merge(first: Int, last: IntRef, sortEnabled: Boolean): Int
     {
-        var change = true
-        var retry = 200
-        var first = first
-        var last = last
-
-        while (change)
+        Log.i(tag, "sortAndTry2Merge first: $first, last: $last")
+        try
         {
-            while (change && last - first > 1)
+            var change = true
+            var retry = 200
+            var size = m_sortedItems.size
+
+            while (change)
             {
-                change = mergeItems(first, last, sortEnabled)
-                if (sortEnabled)
+                while (change && last.value - first > 1)
                 {
-                    change = change or sortByItemPage(first, last)
-                } else
-                {
-                    change = change or sortByItemSequence(first, last)
+                    change = mergeItems(first, last, sortEnabled)
+                    if (sortEnabled)
+                    {
+                        change = change or sortByItemPage(first, last)
+                    } else
+                    {
+                        change = change or sortByItemSequence(first, last)
+                    }
+                    change = change or mergeNegativeAndPositive(first, last)
+                    change = change or mergeSameSequence(first, last)
+                    if (--retry == 0)
+                    {
+                        Log.e("CsortedItemList", "sortAndTry2Merge retries too many times")
+                    }
                 }
-                change = change or mergeNegativeAndPositive(first, last)
-                change = change or mergeSameSequence(first, last)
-                if (--retry == 0)
-                {
-                    Log.e("CsortedItemList", "sortAndTry2Merge retries too many times")
-                }
+                change = eraseEmpty(first, last)
             }
-            change = eraseEmpty(first, last)
+        } catch (e: Exception)
+        {
+            return 0
         }
-        return last
+        return last.value
     }
 
     fun sortAndTryToMerge(sortEnabled: Boolean, splitPoint: Int): Int
@@ -1160,18 +1160,18 @@ class CSortedItemList : Iterable<CSortedItem>
             val c = m_sortedItems[index][0]
             if (c.level == EOrderLevel.LEVEL_SEPARATOR && splitPoint <= 0)
             {
-                lowest = sortAndTry2Merge(lowest, index, sortEnabled)
+                lowest = sortAndTry2Merge(lowest, IntRef(index), sortEnabled)
                 index = lowest
                 lowest++
             } else if (splitPoint == index && splitPoint > 0)
             {
-                lowest = sortAndTry2Merge(lowest, index, sortEnabled)
+                lowest = sortAndTry2Merge(lowest, IntRef(index), sortEnabled)
                 index = lowest
                 splitPoint = -1
             }
             index++
         }
-        sortAndTry2Merge(lowest, index, sortEnabled)
+        sortAndTry2Merge(lowest, IntRef(index), sortEnabled)
         return m_sortedItems.size
     }
 
@@ -1199,28 +1199,37 @@ class CSortedItemList : Iterable<CSortedItem>
         return list_items
     }
 
-    fun sortByItemSequence(first: Int, last: Int): Boolean
+    fun sortByItemSequence(first: Int, last: IntRef): Boolean
     {
+        Log.i(tag, "sortByItemSequence first=$first, last=$last")
         var change = false
         var x = first
-        while (x <= last - 2)
+        try
         {
-            val p = m_sortedItems[x]
-            val q = m_sortedItems[x + 1]
-
-            val sign_p = p.getSign()
-            val sign_q = q.getSign()
-
-            if (sign_q < sign_p || (sign_q == sign_p && p.getSequence() > q.getSequence()))
+            while (x <= last.value - 2)
             {
-                // Exchange these
-                val i = q
-                m_sortedItems[x + 1] = p
-                m_sortedItems[x] = i
-                change = true
-                continue
+                val p = m_sortedItems[x]
+                val q = m_sortedItems[x + 1]
+
+                val sign_p = p.getSign()
+                val sign_q = q.getSign()
+
+                if (sign_q < sign_p || (sign_q == sign_p && p.getSequence() > q.getSequence()))
+                {
+                    // Exchange these
+                    val i = q
+                    m_sortedItems[x + 1] = p
+                    m_sortedItems[x] = i
+                    change = true
+                    continue
+                }
+                x++
             }
-            x++
+        }
+        catch (e: Exception)
+        {
+            Log.e(tag, "sortByItemSequence exception: $e")
+            change = false
         }
         return change
     }
@@ -1234,11 +1243,11 @@ class CSortedItemList : Iterable<CSortedItem>
         eraseDoneAndFreeItems(m_sortedItems)
     }
 
-    fun sortByItemPage(first: Int, last: Int): Boolean
+    fun sortByItemPage(first: Int, last: IntRef): Boolean
     {
         var change = false
         var x = first
-        while (x <= last - 2)
+        while (x <= last.value - 2)
         {
             val p = m_sortedItems[x]
             val q = m_sortedItems[x + 1]

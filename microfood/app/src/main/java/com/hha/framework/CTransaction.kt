@@ -56,6 +56,7 @@ class CTransaction : Iterable<CSortedItem>,
             sort: EItemSort = EItemSort.SORT_ORDER,
             timeFrame: ETimeFrameIndex = ETimeFrameIndex(ETimeFrameIndex.TIME_FRAME_ALL)
         ): CTransaction {
+            Log.i(tag, "createAndLoad")
             // Step 1: Call the private, synchronous constructor to create the object
             val transaction = CTransaction(transactionId, sort, timeFrame)
 
@@ -166,6 +167,7 @@ class CTransaction : Iterable<CSortedItem>,
 
     suspend fun loadItems()
     {
+        Log.i(tag, "loadItems")
         mItems = CTransactionItems.createAndLoad(
             this, transactionId, mSort,
             mTimeFrame.timeFrameIndex)
@@ -702,6 +704,7 @@ class CTransaction : Iterable<CSortedItem>,
         var item = get(y) ?: get(--y) ?: return
         if (item.deletedStatus != EDeletedStatus.DELETE_NOT) return
         mItems.addQuantity(CCursor(y), -1)
+        mItems.checkCursor(global.cursor)
     }
 
     suspend fun nextPortion()
@@ -794,6 +797,7 @@ class CTransaction : Iterable<CSortedItem>,
         var item = get(y) ?: get(--y) ?: return
         if (item.deletedStatus != EDeletedStatus.DELETE_NOT) return
         mItems.addQuantity(CCursor(y), -item.getQuantity())
+        mItems.checkCursor(global.cursor)
     }
 
     fun removeItemListener(listener: TransactionItemListener)
@@ -841,7 +845,7 @@ class CTransaction : Iterable<CSortedItem>,
 
     suspend fun selectTransactionId(transactionId: Int, sort: EItemSort, timeFrame: ETimeFrameIndex)
     {
-        Log.d(tag, "selectTransactionId $transactionId")
+        Log.i(tag, "selectTransactionId $transactionId")
         try
         {
             val service = GrpcServiceFactory.createDailyTransactionService()

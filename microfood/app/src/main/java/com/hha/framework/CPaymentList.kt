@@ -1,11 +1,13 @@
 package com.hha.framework
 
+import android.util.Log
 import com.hha.callback.PaymentsListener
 import com.hha.callback.TransactionOperations
 import com.hha.common.PaymentMethod
 import com.hha.daily.payment.PaymentDetails
 import com.hha.daily.payment.PaymentDetailsList
 import com.hha.daily.payment.PaymentList
+import com.hha.framework.CTransaction.Companion.tag
 import com.hha.grpc.GrpcServiceFactory
 import com.hha.resources.Global
 import com.hha.service.DailyTransactionPaymentService
@@ -350,7 +352,8 @@ class CPaymentList(transactionOperations: TransactionOperations)
 
     public fun setTransactionId()
     {
-        val transactionId = mTransaction.transactionId
+        Log.i(tag, "setTransactionId")
+            val transactionId = mTransaction.transactionId
         if (transactionId < 0)
         {
             mPayments.clear()

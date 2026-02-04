@@ -345,6 +345,14 @@ class CTransactionItems : Iterable<CSortedItem>
         currentTask = null
     }
 
+    fun checkCursor(cursor : CCursor)
+    {
+        if (cursor.position > mItems.size)
+        {
+            cursor.set(mItems.size)
+        }
+    }
+
     fun getAllKitchenTotal(
         payStatus: EPaymentStatus, isWithStatiegeld: Boolean): CMoney
     {
@@ -1259,6 +1267,10 @@ class CTransactionItems : Iterable<CSortedItem>
         var sequence = FIRST_SEQUENCE_ID
         val subSequence = 0 // NORMAL_ITEM_SUB_SEQUENCE
         val subSubSequence = 0 // NORMAL_ITEM_SUB_SEQUENCE;
+        if (cursor.position >= mItems.size && mItems.size >0)
+        {
+            cursor.position = mItems.size-1
+        }
 
         val itemsDb = GrpcServiceFactory.createDailyTransactionItemService()
         if (cursor.position >= 0 && cursor.position < mItems.size)
