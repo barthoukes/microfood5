@@ -704,7 +704,12 @@ class CSortedItemList : Iterable<CSortedItem>
 
     fun getItem(index: CCursor): CItem?
     {
-        var mutableIndex = index.position
+        return getItem(index.position)
+    }
+
+    fun getItem(index: Int): CItem?
+    {
+        var mutableIndex = index
         for (item in m_sortedItems)
         {
             if (mutableIndex < item.size)
