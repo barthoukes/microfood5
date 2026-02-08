@@ -100,7 +100,8 @@ class PageOrderActivity : BaseActivity(), ModalDialogYesNo.MessageBoxYesNoListen
         super.onCreate(savedInstanceState)
         mBinding = PageOrderActivityBinding.inflate(layoutInflater)
         setContentView(mBinding.root)
-
+        mBinding.poeLoading.text = Translation.get(
+            Translation.TextId.TEXT_LOADING)
 //        mTransactionModel = ViewModelProvider(this, TransactionModelFactory)
 //            .get(TransactionModel::class.java)
         setMaxScreenBrightness()
