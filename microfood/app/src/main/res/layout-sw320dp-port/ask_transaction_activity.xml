@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@drawable/backrepeat"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/grpc_spinner"
+        android:layout_width="40dp"
+        android:layout_height="0dp"
+        android:background="@color/COLOUR_SPINNER_BACKGROUND"
+        android:indeterminate="true"
+        android:visibility="visible"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/guideline_horizontal_10"
+        app:layout_constraintStart_toStartOf="parent"/>
+
+    <!-- Guideline at 10% from the top -->
+    <androidx.constraintlayout.widget.Guideline
+       android:id="@+id/guideline_horizontal_10"
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:orientation="horizontal"
+       app:layout_constraintGuide_begin="73dp" />
+
+    <!-- Guideline at 90% from the top -->
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline_horizontal_90"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.9" />
+
+    <!-- Guideline at 80% from the top -->
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline_horizontal_80"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.8" />
+
+    <!-- This guideline is no longer needed to split the screen -->
+    <!--
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline_vertical_50"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.5" />
+    -->
+
+    <TextView
+       android:id="@+id/header_button"
+       android:layout_width="0dp"
+       android:layout_height="0dp"
+       android:text="Restaurant POS"
+       android:background="@color/COLOUR_HEADER_BACKGROUND"
+       android:gravity="center"
+       android:textAlignment="center"
+       android:onClick="onHeaderButton"
+       android:textColor="@color/COLOUR_HEADER_TEXT"
+       android:textSize="24sp"
+       app:layout_constraintStart_toEndOf="@id/grpc_spinner"
+       app:layout_constraintEnd_toStartOf="@id/btn_back"
+       app:layout_constraintTop_toTopOf="parent"
+       app:layout_constraintBottom_toTopOf="@id/guideline_horizontal_10"/>
+
+    <ImageButton
+       android:id="@+id/btn_back"
+       android:layout_width="wrap_content"
+       android:layout_height="0dp"
+       android:paddingEnd="8dp"
+       android:background="@color/COLOUR_HEADER_BACKGROUND"
+       android:onClick="onButtonBack"
+       android:src="@drawable/back_yellow"
+       app:layout_constraintStart_toEndOf="@id/header_button"
+       app:layout_constraintTop_toTopOf="parent"
+       app:layout_constraintBottom_toBottomOf="@id/guideline_horizontal_10"
+       app:layout_constraintEnd_toEndOf="parent"/>
+
+    <!-- Bottom Button Bar -->
+    <LinearLayout
+        android:id="@+id/bottom_button_bar"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@color/ANDROID_BUTTON_BACKGROUND"
+        android:orientation="horizontal"
+        android:padding="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/guideline_horizontal_90">
+
+        <!-- Buttons remain the same -->
+        <ImageButton
+            android:id="@+id/btn_language"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Change Language"
+            android:onClick="onButtonLanguage"
+            android:src="@drawable/languages_yellow" />
+        <ImageButton
+            android:id="@+id/btn_floor_plan"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:onClick="onButtonFloorPlanOnOff"
+            android:contentDescription="Floor Plan"
+            android:src="@drawable/floorplan_yellow" />
+        <ImageButton
+            android:id="@+id/btn_calculator"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Calculator"
+            android:src="@drawable/icon_calculator_yellow" />
+        <ImageButton
+            android:id="@+id/btn_takeaway"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:onClick="onButtonTakeaway"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Takeaway"
+            android:src="@drawable/bag_yellow" />
+        <ImageButton
+            android:id="@+id/btn_phone_order"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Phone Order"
+            android:src="@drawable/icon_takephone_yellow" />
+        <ImageButton
+            android:id="@+id/btn_open_drawer"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Open Drawer"
+            android:src="@drawable/drawer_yellow" />
+    </LinearLayout>
+
+    <!-- MODIFIED: Left Transactions RecyclerView is now hidden -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/layoutShortTransactionList"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/guideline_horizontal_90"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/guideline_horizontal_10" />
+
+    <!-- MODIFIED: Right Tables RecyclerView now takes full width -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/layout_floor_tables"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:padding="1dp"
+        android:layout_marginBottom="4dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginEnd="4dp"
+        android:background="@drawable/vloer11"
+        app:layout_constraintBottom_toTopOf="@id/guideline_horizontal_80"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/guideline_horizontal_10" />
+
+    <!-- MODIFIED: Floorplan button now takes full width -->
+    <Button
+        android:id="@+id/btn_floorplan"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="0dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginEnd="4dp"
+        android:layout_marginBottom="4dp"
+        android:textSize="16sp"
+        android:backgroundTint="@color/ANDROID_BUTTON_BACKGROUND"
+        app:layout_constraintTop_toBottomOf="@id/guideline_horizontal_80"
+        app:layout_constraintBottom_toTopOf="@id/guideline_horizontal_90"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+

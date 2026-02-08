@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="@drawable/backrepeat"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- Vertical Button Bar (Right Side) -->
+    <LinearLayout
+        android:id="@+id/button_bar"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@color/ANDROID_BUTTON_BACKGROUND"
+        android:orientation="vertical"
+        android:padding="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@id/guideline_vertical_90"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <!-- ... Your buttons inside the bar ... -->
+        <ImageButton
+            android:id="@+id/btn_language"
+            android:layout_width="64dp"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:layout_gravity="center"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Change Language"
+            android:onClick="onButtonLanguage"
+            android:src="@drawable/languages_yellow" />
+
+        <!-- Floor Plan -->
+        <ImageButton
+            android:id="@+id/btn_floor_plan"
+            android:layout_width="64dp"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:layout_gravity="center"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:onClick="onButtonFloorPlanOnOff"
+            android:contentDescription="Floor Plan"
+            android:src="@drawable/floorplan_yellow" />
+
+        <ImageButton
+            android:id="@+id/btn_takeaway"
+            android:layout_width="64dp"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:layout_gravity="center"
+            android:onClick="onButtonTakeaway"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Takeaway"
+            android:src="@drawable/bag_yellow" />
+        <ImageButton
+            android:id="@+id/btn_phone_order"
+            android:layout_width="64dp"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:layout_gravity="center"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Phone Order"
+            android:src="@drawable/icon_takephone_yellow" />
+        <ImageButton
+            android:id="@+id/btn_open_drawer"
+            android:layout_width="64dp"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:layout_gravity="center"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Open Drawer"
+            android:src="@drawable/drawer_yellow" />
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/grpc_spinner"
+        android:layout_width="40dp"
+        android:layout_height="0dp"
+        android:background="@color/COLOUR_SPINNER_BACKGROUND"
+        android:visibility="visible"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/guideline_horizontal_10"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:visibility="visible" />
+
+    <TextView
+        android:id="@+id/header_button"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:gravity="center"
+        android:text="Restaurant POS"
+        android:background="@color/COLOUR_HEADER_BACKGROUND"
+        android:onClick="onHeaderButton"
+        android:textColor="@android:color/white"
+        android:textSize="24sp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toEndOf="@id/grpc_spinner"
+        app:layout_constraintBottom_toTopOf="@id/guideline_horizontal_10"
+        app:layout_constraintEnd_toStartOf="@id/btn_back"/>
+
+    <ImageButton
+        android:id="@+id/btn_back"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:contentDescription="back button"
+        android:onClick="onButtonBack"
+        android:elevation="4dp"
+        android:layout_marginRight="8dp"
+        android:background="@color/COLOUR_HEADER_BACKGROUND"
+        android:src="@drawable/back_yellow"
+        app:layout_constraintBottom_toTopOf="@+id/guideline_horizontal_10"
+        app:layout_constraintEnd_toStartOf="@+id/guideline_vertical_90"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- A Guideline to split the two RecyclerViews 50/50 -->
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline_vertical_10"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.1" />
+
+    <!-- REMOVED: The middle guideline is no longer needed -->
+
+    <!-- Horizontal Guideline at 10% from the top -->
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline_horizontal_10"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.125" />
+
+    <!-- Horizontal Guideline at 10% from the top -->
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline_horizontal_90"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.9" />
+
+    <!-- Vertical Guideline at 90% -->
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline_vertical_90"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.875" />
+
+
+    <!-- MODIFIED: The transaction list is now gone -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/layoutShortTransactionList"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        tools:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/guideline_horizontal_10" />
+
+    <!-- MODIFIED: The floor tables now take up the full width -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/layout_floor_tables"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="4dp"
+        android:background="@drawable/vloer11"
+        android:orientation="horizontal"
+        app:layout_constraintTop_toBottomOf="@id/guideline_horizontal_10"
+        app:layout_constraintBottom_toTopOf="@id/guideline_horizontal_90"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/guideline_vertical_90"/>
+
+    <!-- MODIFIED: The floorplan button now takes up the full width -->
+    <Button
+        android:id="@+id/btn_floorplan"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:padding="0dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="0dp"
+        android:layout_marginBottom="-4dp"
+        android:textSize="16sp"
+        android:backgroundTint="@color/ANDROID_BUTTON_BACKGROUND"
+        app:layout_constraintTop_toBottomOf="@+id/guideline_horizontal_90"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/guideline_vertical_90" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+
