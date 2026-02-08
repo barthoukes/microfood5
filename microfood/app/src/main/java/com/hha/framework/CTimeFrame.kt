@@ -76,7 +76,7 @@ class CTimeFrame
          timer.getDateTime())
    }
 
-   fun closeTimeFrame()
+   fun endTimeFrame()
    {
       // With timestamp added
       val service = GrpcServiceFactory.createDailyTimeFrameService()

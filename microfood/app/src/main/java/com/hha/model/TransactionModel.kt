@@ -238,28 +238,36 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
 //        currentTransaction.allowNewItems(allowNewItems)
    }
 
-   fun closeTimeFrame()
+   fun removeAndUndoTimeFrame()
    {
       val currentTransaction = _activeTransaction.value
-      if (currentTransaction != null)
+      if (currentTransaction == null)
       {
-         viewModelScope.launch {
-            grpcStateViewModel?.messageSent() // Announce the start of the gRPC call
-            try
-            {
-               // This likely involves a gRPC call to update the state on the server
-               currentTransaction.closeTimeFrame()
+         return
+      }
 
-               // This also involves a gRPC call to either delete or archive the transaction
-               if (currentTransaction.transactionEmptyAtStartAndAtEnd())
-               {
-                  currentTransaction.emptyTransaction("")
-               }
-            }
-            finally
+      viewModelScope.launch {
+         grpcStateViewModel?.messageSent() // Announce the start of the gRPC call
+         try
+         {
+            // This likely involves a gRPC call to update the state on the server
+
+            // This also involves a gRPC call to either delete or archive the transaction
+            if (currentTransaction.transactionEmptyAtStartAndAtEnd())
             {
-               grpcStateViewModel?.messageConfirmed() // Announce the end of the gRPC call
+               currentTransaction.closeTimeFrame()
+               currentTransaction.emptyTransaction("")
             }
+            else
+            {
+               val now = CTimestamp()
+               currentTransaction.removeAndUndoTimeFrame()
+            }
+            currentTransaction.updateTotal()
+         }
+         finally
+         {
+            grpcStateViewModel?.messageConfirmed() // Announce the end of the gRPC call
          }
       }
    }
@@ -474,7 +482,6 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
 
          // This is now safely called on a background thread
          currentTransaction.endTimeFrame(
-            transactionId, CFG.getValue("pc_number"),
             newTime, timeChanged, newState
          )
 
@@ -1081,6 +1088,7 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
             {
                // Actual work.
                currentTransaction.emptyTransaction(reason)
+               mIsChanged = true
             } finally
             {
                grpcStateViewModel?.messageConfirmed() // Announce that the operation has finished
@@ -1249,7 +1257,7 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
    fun initializeTransaction(
       transactionId: Int, newTimeFrame: Boolean, mode: EInitMode)
    {
-      Log.i(tag, "initializeTransaction")
+      Log.i(tag, "initializeTransaction $transactionId")
       // Perform initial checks on the main thread. These are fast.
       if (mIsInitialized || (mode == EInitMode.VIEW_BILLING && _activeTransaction.value == null))
       {
@@ -1299,6 +1307,10 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
             if (newTimeFrame)
             {
                currentTransaction.startNewTimeFrame()
+            }
+            else
+            {
+               currentTransaction.getLatestTimeFrame()
             }
             // Now that we have a valid transaction, update the LiveData
             _activeTransaction.value = currentTransaction
@@ -1392,10 +1404,24 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
       val currentTransaction = _activeTransaction.value
       if (currentTransaction != null)
       {
-         return currentTransaction.isTakeaway()
-            || currentTransaction.transactionEmptyAtStartAndAtEnd()
-            || currentTransaction.getTimeFrameIndex().index ==
-            ETimeFrameIndex.TIME_FRAME1
+         if (!currentTransaction.isTakeaway()
+            && currentTransaction.empty)
+         {
+            return true
+         }
+         if (currentTransaction.getTimeFrameIndex().index ==
+            ETimeFrameIndex.TIME_FRAME1)
+         {
+            return true
+         }
+         if (currentTransaction.isTakeaway())
+         {
+            return true
+         }
+         if (currentTransaction.transactionEmptyAtStartAndAtEnd())
+         {
+            return true
+         }
       }
       return false
    }
@@ -1498,9 +1524,11 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
       if (mMode == EInitMode.VIEW_PAGE_ORDER && currentTransaction != null)
       {
          viewModelScope.launch {
-            currentTransaction.addOneToCursorPosition() }
-         onTransactionChanged(currentTransaction)
-         mIsChanged = true
+            currentTransaction.addOneToCursorPosition()
+            Log.d(tag, "onButtonPlus1 ${currentTransaction.transactionId} done")
+            onTransactionChanged(currentTransaction)
+            mIsChanged = true
+         }
       }
    }
 
@@ -1511,9 +1539,10 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
       if (mMode == EInitMode.VIEW_PAGE_ORDER && currentTransaction != null)
       {
          viewModelScope.launch {
-            currentTransaction.minus1() }
-         onTransactionChanged(currentTransaction)
-         mIsChanged = true
+            currentTransaction.minus1()
+            onTransactionChanged(currentTransaction)
+            Log.d(tag, "onButtonMin1 ${currentTransaction.transactionId} done")
+         }
       }
    }
 
@@ -1526,7 +1555,7 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
          viewModelScope.launch {
             currentTransaction.nextPortion() }
          onTransactionChanged(currentTransaction)
-         mIsChanged = true
+         Log.d(tag, "onButtonPortion ${currentTransaction.transactionId} done")
       }
    }
 
@@ -1537,9 +1566,10 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
       if (mMode == EInitMode.VIEW_PAGE_ORDER && currentTransaction != null)
       {
          viewModelScope.launch {
-            currentTransaction.remove() }
-         onTransactionChanged(currentTransaction)
-         mIsChanged = true
+            currentTransaction.remove()
+            Log.d(tag, "onButtonRemove ${currentTransaction.transactionId} done")
+            onTransactionChanged(currentTransaction)
+         }
       }
    }
 
@@ -1634,6 +1664,7 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
     */
    override fun onTransactionChanged(transaction: CTransaction)
    {
+      mIsChanged = true
       if (mIsUpdating)
       {
          return
