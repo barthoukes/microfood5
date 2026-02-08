@@ -13,6 +13,7 @@ import tech.hha.microfood.databinding.AdapterFloorTableBinding
 import tech.hha.microfood.R
 import androidx.core.graphics.toColorInt
 import com.hha.framework.CFloorTable
+import com.hha.types.EDrinksStatus
 
 class FloorTablesAdapter(
    private val onFloorTableSelected: (com.hha.framework.CFloorTable) -> Unit,
@@ -35,11 +36,6 @@ class FloorTablesAdapter(
     private val colTableFloorPlanBorder = colourCFG.getTextColour("COLOUR_TABLE_FLOORPLAN_BORDER")
     val mMaximumTimeTimer = CFG.getValue("maximum_time")
     val mFloorPlanPersonsEnable = CFG.getBoolean("floorplan_persons_enable")
-    val mFloorplanDrinksEmpty = CFG.getValue("floorplan_minutes_empty")
-    val mFloorplanDrinksHalf = CFG.getValue("floorplan_minutes_half")
-    val mFloorplanDrinksFull = CFG.getValue("floorplan_minutes_full")
-    val mFloorplanDrinksQuart = (mFloorplanDrinksEmpty + mFloorplanDrinksHalf) / 2
-    val mFloorplanDrinks3Quart = (mFloorplanDrinksFull + mFloorplanDrinksHalf) / 2
 
     // 2. A map to hold drawables for each view holder.
     // This avoids creating new drawables on every scroll, which is more efficient.
@@ -118,31 +114,31 @@ class FloorTablesAdapter(
             val col2 = ColourUtils.brighten(colour, 0.15f) or 0xff000000.toInt()
             timeArcDrawable.setColors(colour, col2)
 
-            if (floorTable.drinksMinutes >= mFloorplanDrinksEmpty)
+            var icon = when
             {
-                holder.binding.milk.setImageResource(R.drawable.milk0)
-            } else if (floorTable.drinksMinutes >= mFloorplanDrinksQuart)
-            {
-                holder.binding.milk.setImageResource(R.drawable.milk25)
-            } else if (floorTable.drinksMinutes >= mFloorplanDrinksHalf)
-            {
-                holder.binding.milk.setImageResource(R.drawable.milk50)
-            } else if (floorTable.drinksMinutes >= mFloorplanDrinks3Quart)
-            {
-                holder.binding.milk.setImageResource(R.drawable.milk75)
-            } else if (floorTable.drinksMinutes >= mFloorplanDrinksFull)
-            {
-                holder.binding.milk.setImageResource(R.drawable.milk100)
-            } else
+                floorTable.transactionId >= 1E6 &&
+                   floorTable.tableStatus == ETableStatus.TABLE_OK ->
+                {
+                    when (floorTable.drinksStatus)
+                    {
+                        EDrinksStatus.DRINK_STATUS_FULL -> R.drawable.milk100
+                        EDrinksStatus.DRINK_STATUS_EMPTY -> R.drawable.milk0
+                        EDrinksStatus.DRINK_STATUS_HALF_FULL -> R.drawable.milk50
+                        EDrinksStatus.DRINK_STATUS_QUART_FULL -> R.drawable.milk25
+                        EDrinksStatus.DRINK_STATUS_3QUART_FULL -> R.drawable.milk75
+                        else -> null
+                    }
+                }
+                else -> null
+            }
+            if (icon == null)
             {
                 holder.binding.milk.visibility = View.GONE
             }
-            if (floorTable.tableStatus == ETableStatus.TABLE_OK)
+            else
             {
                 holder.binding.milk.visibility = View.VISIBLE
-            } else
-            {
-                holder.binding.milk.visibility = View.GONE
+                holder.binding.milk.setImageResource(icon)
             }
 
             // --- Your existing logic to set text and click listeners ---

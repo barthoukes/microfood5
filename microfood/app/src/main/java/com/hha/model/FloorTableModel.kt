@@ -96,8 +96,8 @@ class FloorTableModel : ViewModel() {
 
                // Only update if data has actually changed
                val currentTables = _floorTables.value
-               if (currentTables == null || currentTables.size != tables.size ||
-                  !areTablesEqual(currentTables, tables)) {
+               if (!areTablesEqual(currentTables, tables))
+               {
                   _floorTables.value = tables
                   _floorPlans.value = floors
                } else {
@@ -120,16 +120,28 @@ class FloorTableModel : ViewModel() {
       }
    }
 
-   private fun areTablesEqual(tables1: CFloorTables, tables2: CFloorTables): Boolean {
+   private fun areTablesEqual(tables1: CFloorTables?, tables2: CFloorTables?): Boolean
+   {
+      if (tables1 == null || tables2 == null)
+      {
+         return false;
+      }
       if (tables1.size != tables2.size) return false
 
       for (i in 0 until tables1.size) {
          val table1 = tables1.getFloorTable(i)
          val table2 = tables2.getFloorTable(i)
 
-         if (table1?.tableId != table2?.tableId ||
-            table1?.name != table2?.name ||
-            table1?.transactionId != table2?.transactionId) {
+         if (table1 == null || table2 == null)
+         {
+            return false
+         }
+         if (table1.tableId != table2.tableId ||
+            table1.name != table2.name ||
+            table1.transactionId != table2.transactionId ||
+            table1.tableStatus != table2.tableStatus ||
+            table1.drinksStatus != table2.drinksStatus)
+         {
             return false
          }
       }

@@ -5,6 +5,7 @@ import com.hha.types.CMoney
 import com.hha.types.EClientOrdersType
 import com.hha.types.ETableStatus
 import com.hha.types.ETableType
+import com.hha.types.EDrinksStatus
 
 /**
  * Represents the detailed state and properties of a single table on the floor plan.
@@ -33,7 +34,8 @@ data class CFloorTable(
     var actualPersonCount: Int,         // Actual number of persons
     var maxPersonCount: Int,            // Persons for table
     var drinksMinutes: Int,             // Time from last drink
-    var floorPlanId: Int                // Room for this table
+    var floorPlanId: Int,               // Room for this table
+    var drinksStatus: EDrinksStatus     // Status for drinks
 ) {
     /**
      * Secondary constructor to create a CFloorTable from a gRPC 'Table' object.
@@ -63,6 +65,8 @@ data class CFloorTable(
         actualPersonCount = table.actualPersonCount,
         maxPersonCount = 4, //table.maxPersonCount,
         drinksMinutes = table.drinksMinutes,
-        floorPlanId = table.floorPlanId
+        floorPlanId = table.floorPlanId,
+        drinksStatus = EDrinksStatus.fromMinutes(
+            table.drinksMinutes)
         )
 }
