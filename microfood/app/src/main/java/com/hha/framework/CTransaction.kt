@@ -329,7 +329,7 @@ class CTransaction : Iterable<CSortedItem>,
     fun closeTimeFrame()
     {
         Log.d(tag, "closeTimeFrame")
-        mTimeFrame.closeTimeFrame()
+        mTimeFrame.endTimeFrame()
         mTimeFrame.previous()
     }
 
@@ -415,8 +415,6 @@ class CTransaction : Iterable<CSortedItem>,
     }
 
     fun endTimeFrame(
-        transactionId: Int,
-        pcNumber: Int,
         newTime: CTimestamp,
         timeChanged: Boolean,
         newState: ECookingState
@@ -482,7 +480,7 @@ class CTransaction : Iterable<CSortedItem>,
         val itemSum = itemSum()
         if (itemSum != 0)
         {
-            removeTimeFrame()
+            removeAndUndoTimeFrame()
         } else
         {
             closeTimeFrame()
@@ -815,8 +813,10 @@ class CTransaction : Iterable<CSortedItem>,
         mPayments.removeListener(listener)
     }
 
-    fun removeTimeFrame()
+    fun removeAndUndoTimeFrame()
     {
+        Log.d(tag, "removeAndUndoTimeFrame")
+        mTimeFrame.endTimeFrame()
         mItems.undoTimeFrame( mTimeFrame.timeFrameIndex,
             global.CFG.getShort("pc_number"))
         closeTimeFrame()
@@ -830,9 +830,18 @@ class CTransaction : Iterable<CSortedItem>,
         service.setMessage(data.transactionId, message)
     }
 
+    suspend fun getLatestTimeFrame()
+    {
+        Log.i(tag, "getLatestTimeFrame")
+        if (data.transactionId > 1E6)
+        {
+            mTimeFrame.getLatestTimeFrameIndex(data.transactionId)
+        }
+    }
+
     suspend fun startNewTimeFrame()
     {
-        Log.d(tag, "startTimeFrame")
+        Log.i(tag, "startTimeFrame")
         val waiter = global.rfidKeyId
         if (data.transactionId > 1E6)
         {

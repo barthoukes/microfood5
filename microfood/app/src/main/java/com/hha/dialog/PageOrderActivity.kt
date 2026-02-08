@@ -7,7 +7,6 @@ import android.view.View
 import android.content.res.Resources
 import android.util.Log
 import android.view.MotionEvent
-import android.view.WindowManager
 import android.widget.Toast
 
 import androidx.fragment.app.DialogFragment
@@ -52,6 +51,7 @@ class PageOrderActivity : BaseActivity(), ModalDialogYesNo.MessageBoxYesNoListen
     ModalDialogDelay.ModalDialogDelayListener,
     ModalDialogQuantities.ModalDialogQuantitiesListener
 {
+    val REQUEST_CODE_UNDO_CHANGES = 1
     private final var tag = "POE"
     private lateinit var mBinding: PageOrderActivityBinding
     val global = Global.getInstance()
@@ -100,7 +100,8 @@ class PageOrderActivity : BaseActivity(), ModalDialogYesNo.MessageBoxYesNoListen
         super.onCreate(savedInstanceState)
         mBinding = PageOrderActivityBinding.inflate(layoutInflater)
         setContentView(mBinding.root)
-
+        mBinding.poeLoading.text = Translation.get(
+            Translation.TextId.TEXT_LOADING)
 //        mTransactionModel = ViewModelProvider(this, TransactionModelFactory)
 //            .get(TransactionModel::class.java)
         setMaxScreenBrightness()
@@ -380,6 +381,7 @@ class PageOrderActivity : BaseActivity(), ModalDialogYesNo.MessageBoxYesNoListen
 
     private fun stopInCorrectMode()
     {
+        // Todo: Implement rechaud, wok, sitin
         val intent = when (mFromBilling)
         {
             true -> Intent(this, BillOrderActivity::class.java)
@@ -426,22 +428,28 @@ class PageOrderActivity : BaseActivity(), ModalDialogYesNo.MessageBoxYesNoListen
 
     private fun escapeTransaction()
     {
-        if (!mTransactionModel.isChanged())
-        {
-            // No changes to table, simple to remove the time frame.
-            mTransactionModel.closeTimeFrame()
+        Log.d(tag, "handleEscapeTransaction called.")
+        val transaction = mTransactionModel.activeTransaction.value
 
+        if (transaction == null) {
+            // No transaction, just finish the activity.
+            finish()
+            mFromBilling = false
             stopInCorrectMode()
-        } else if (mTransactionModel.needToAskCancelReason())
+        }
+        if (mTransactionModel.needToAskCancelReason())
         {
             showAskCancelReasonDialog()
 
-        } else if (mTransactionModel.hasAnyChanges())
+        } else if (!mTransactionModel.isChanged())
+        {
+            // No changes to table, simple to remove the time frame.
+            mTransactionModel.removeAndUndoTimeFrame()
+            stopInCorrectMode()
+        }
+        else
         {
             showUndoChanges()
-        } else
-        {
-            stopInCorrectMode()
         }
     }
 
@@ -466,9 +474,18 @@ class PageOrderActivity : BaseActivity(), ModalDialogYesNo.MessageBoxYesNoListen
 
     override fun onDialogPositiveClick(dialog: DialogFragment, requestCode: Int)
     {
+        Log.d(tag, "MessageBox User clicked Yes, requestCode=$requestCode.")
         // User clicked "Yes".
         // Put your logic here, for example: clear the transaction.
-        Log.d(tag, "MessageBox User clicked Yes.")
+        when (requestCode)
+        {
+            REQUEST_CODE_UNDO_CHANGES ->
+            {
+                mTransactionModel.removeAndUndoTimeFrame()
+                stopInCorrectMode()
+            }
+            else -> {}
+        }
     }
 
     override fun onDialogNegativeClick(dialog: DialogFragment, requestCode: Int)
@@ -476,6 +493,11 @@ class PageOrderActivity : BaseActivity(), ModalDialogYesNo.MessageBoxYesNoListen
         // User clicked "No".
         // The dialog is automatically dismissed. You can log or do nothing.
         Log.d(tag, "MessageBox User clicked No.")
+        when (requestCode)
+        {
+            REQUEST_CODE_UNDO_CHANGES -> {}
+            else -> {}
+        }
     }
 
     private fun setupRecyclerViews()
@@ -795,9 +817,11 @@ class PageOrderActivity : BaseActivity(), ModalDialogYesNo.MessageBoxYesNoListen
         val dialog = ModalDialogYesNo.newInstance(
             "Undo Changes",
             "Undo the changes made to the order?",
-            1
+            REQUEST_CODE_UNDO_CHANGES
         )
         dialog.show(supportFragmentManager, "MessageBoxYesNo")
+        // If yes -> onDialogPositiveClick()
+        // If no -? onDialogNegativeClick()
     }
 
     override fun onQuantitySelected(

@@ -42,7 +42,6 @@ class CTransactionItems : Iterable<CSortedItem>
     var m_twinItemId = -1
     var mAllowChanges = true
     var mChanged = false
-    var mBewChanged = false
     val mClusterIsRunning = false
     val mViewMode: EViewMode = EViewMode.VIEW_MODE_TRANSACTION ///< Are we in split or preview mode?
     private val mListeners = mutableListOf<TransactionItemListener>()
@@ -211,7 +210,7 @@ class CTransactionItems : Iterable<CSortedItem>
                 return deleteItem(cursor, timeFrameId, why);
             }
         }
-
+        mChanged = true
         item.addQuantity(quantity)
         if (item.getQuantity() > quantity)
             mListeners.forEach { it.onItemUpdated(cursor.position, item) }
@@ -676,6 +675,7 @@ class CTransactionItems : Iterable<CSortedItem>
         val statiegeld = item.getStatiegeldPerPiece()
         var quantity = item.getQuantity()
         val level = EOrderLevel.toOrderLevel(item.level)
+        mChanged = true
         val why = when
         {
             item.timeFrameId != timeFrameId -> DeletedStatus.DELETE_PORTION_AFTER_PRINTING
@@ -836,23 +836,29 @@ class CTransactionItems : Iterable<CSortedItem>
             Log.i("CTransactionItems", "First item added");
             return retVal
         }
-//        CitemPtr previousOrder =(*m_clientOrdersHandler)[cursor - 1];
-//        int unitPrice = previousOrder->getUnitPrice().Long();
-//
-//        if ( previousOrder->menuItemId == item_id
-//        && previousOrder->twinItemId == twin_item_id
-//        && unitPrice == prices.full_price.Long()
-//            && previousOrder->deletedStatus == DELETE_NOT
-//        && previousOrder->parts == 2
-//        && CFG("entry_merge_similar_items"))
-//        {
-//            // Same as previous item.
-//                m_clientOrdersHandler->addQuantity(cursor - 1, 1);
-//            m_transactionItemControl.invalidateDisplayAndSetOrderChanged();
-//            LOG_FUNC_EXIT << " Same item added" << Endl;
-//            return true;
-//        }
-//        // Just add the item at the end.
+        val cursor = CCursor(global.cursor.position-1)
+        val previousOrder = mItems.getItem(cursor)
+        if (previousOrder == null)
+        {
+            Log.e(tag, "Prevous order not found!!")
+            return false
+        }
+        //val cursor = mItems.*m_clientOrdersHandler)[cursor - 1]
+        val unitPrice = previousOrder.getUnitPrice()
+
+        if ( previousOrder.menuItemId == menuItem.menuItemId
+        && (twinItem == null || previousOrder.twinItemId == twinItem.menuItemId)
+        && unitPrice == prices.fullPrice
+            && previousOrder.deletedStatus == EDeletedStatus.DELETE_NOT
+        && previousOrder.parts == 2
+        && CFG.getBoolean("entry_merge_similar_items"))
+        {
+            // Same as previous item.
+            addQuantity(cursor, 1)
+            Log.d(tag, " Same item added")
+            return true
+        }
+        // Just add the item at the end.
         retVal = addItem(global.cursor, menuItem, prices, clusterId, twinItem)
         Log.i("CTransactionItems", "Item added")
         //assert(false)
@@ -1019,6 +1025,7 @@ class CTransactionItems : Iterable<CSortedItem>
         deleteTwinItem(item, why)
         val itemsDb = GrpcServiceFactory.createDailyTransactionItemService()
         val whys = EDeletedStatus.toDeletedStatus(why)
+        mChanged = true
         when (item.level)
         {
             // Remove item with sub-items and sub-sub-items
@@ -1187,6 +1194,7 @@ class CTransactionItems : Iterable<CSortedItem>
                     item.subSubSequence, whys
                 )
             }
+            mChanged = true
         }
     }
 
@@ -1230,8 +1238,12 @@ class CTransactionItems : Iterable<CSortedItem>
         return m
     }
 
-    private fun getNewSequence(): Int =
-        (mItems.maxOfOrNull { it.getSequence() } ?: 0) + 1
+    private fun getNewSequence(): Int
+    {
+        val seq = (mItems.maxOfOrNull { it.getSequence() } ?: 0) + 1
+        Log.i(tag, "getNewSequence =$seq")
+        return seq
+    }
 
     fun getNrItemsAndSubItems(): Int
     {
@@ -1265,21 +1277,17 @@ class CTransactionItems : Iterable<CSortedItem>
     {
         var cursor = cursr
         var sequence = FIRST_SEQUENCE_ID
-        val subSequence = 0 // NORMAL_ITEM_SUB_SEQUENCE
+        val subSequence = 1 // NORMAL_ITEM_SUB_SEQUENCE
         val subSubSequence = 0 // NORMAL_ITEM_SUB_SEQUENCE;
-        if (cursor.position >= mItems.size && mItems.size >0)
-        {
-            cursor.position = mItems.size-1
-        }
+        mChanged = true
 
         val itemsDb = GrpcServiceFactory.createDailyTransactionItemService()
-        if (cursor.position >= 0 && cursor.position < mItems.size)
+        if (cursor.position >= 0 && cursor.position < mItems.itemLines)
         {
-            // Same as below cursor?
-            val mi = mItems.mainItem(cursor)
-            if (mi != null)
+            val sortedItem: CSortedItem? = mItems.mainItem(cursor)
+            if (sortedItem != null)
             {
-                val i: CItem = mi.mainItem()
+                val i: CItem = sortedItem.mainItem()
                 if (i.menuItemId == menuItem.menuItemId
                     && i.level == level
                     && i.group == group
@@ -1296,16 +1304,13 @@ class CTransactionItems : Iterable<CSortedItem>
                 {
                     return addQuantity(cursor, timeFrameId, 1)
                 }
-            }
-            // Not same as below cursor.
-            val mainItem = mItems.mainItem(cursor)
-            if (mainItem != null)
-            {
-                sequence = mainItem.getSequence()
+                val curItem : CItem? = mItems.getItem(cursor)
+                sequence = curItem?.sequence ?: 1
                 withContext(Dispatchers.IO)
                 {
+                    // Not same as below cursor.
                     itemsDb.insertSequence(mItemOperations.transactionId, sequence)
-                    Log.i("CTransactionItems", "insertItem should not happen anymore!!")
+                    Log.i(tag, "insertItem should not happen anymore!!")
                 }
             } else
             {
@@ -1370,11 +1375,11 @@ class CTransactionItems : Iterable<CSortedItem>
             statiegeld
         )
         i.setQuantityPrice(quantity, unitPrice, statiegeld);
-        if (cursor.position >= mItems.size)
+        if (cursor.position >= mItems.itemLines)
         {
             val cs = CSortedItem(i)
             mItems.add(cs)
-            mListeners.forEach { it.onItemAdded(cursor.position, i) }
+            mListeners.forEach { it.onItemAdded(cursor.position+1, i) }
         } else
         {
             // Increase sequence ID's.
@@ -1386,7 +1391,7 @@ class CTransactionItems : Iterable<CSortedItem>
                 }
             }
             mItems.add(cursor, i)
-            mListeners.forEach { it.onItemAdded(cursor.position, i) }
+            mListeners.forEach { it.onItemAdded(cursor.position+1, i) }
         }
         return true
     }
@@ -1394,7 +1399,6 @@ class CTransactionItems : Iterable<CSortedItem>
     private fun invalidateDisplayAndSetOrderChanged()
     {
         mChanged = true;
-        mBewChanged = true;
     }
 
     suspend fun selectTransactionId(

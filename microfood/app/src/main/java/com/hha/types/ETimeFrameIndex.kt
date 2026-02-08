@@ -54,7 +54,7 @@ data class ETimeFrameIndex constructor(var index: Short) {
         {
             TIME_FRAME_LATEST, TIME_FRAME_ALL,
             TIME_FRAME_NONE, TIME_FRAME_UNDEFINED
-                -> return ETimeFrameIndex(index)
+                -> return ETimeFrameIndex(TIME_FRAME1)
 
             else -> return ETimeFrameIndex((index + 1).toShort())
         }

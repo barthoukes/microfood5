@@ -14,7 +14,8 @@ import com.hha.types.ETimeFrameIndex
 import kotlin.collections.getValue
 import kotlin.text.toShort
 
-class Global private constructor() {
+class Global private constructor()
+{
     // Properties
     var firstTablet: Short = 15
     lateinit var myDir: File
