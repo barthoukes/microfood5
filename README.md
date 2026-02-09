@@ -42,9 +42,15 @@ The architecture is language-agnostic: business logic resides in the central ser
 
 ### **See It in Action**
 
+February 2026
+| Main Menu | Table Selection |Page Order|
+|-----------|-----------------|----------|
+|<img width="800" height="1340" alt="image" src="https://github.com/user-attachments/assets/6041a764-7c6b-47a4-8ffc-1abae703a7c0" />|<img width="800" height="1340" alt="image" src="https://github.com/user-attachments/assets/1bf48300-9dfb-4dd6-b4e6-6ce297e05fd5" />|<img width="800" height="1340" alt="image" src="https://github.com/user-attachments/assets/35e4768f-5572-48cf-8f3e-0f3f7498a5a5" />|
+
+December 2025
 | Order Entry | Table Selection | Billing | Chinese Interface |
 |-------------|-----------------|---------|-------------------|
-| ![Tablet with page order entry](https://www.kassaku.nl/wp-content/uploads/2025/12/tablet_poe.png) | ![Tablet ask transaction](https://www.kassaku.nl/wp-content/uploads/2025/12/tablet_ask_table.png) | ![Tablet Billing](https://www.kassaku.nl/wp-content/uploads/2025/12/tablet_billing_80.png) | ![Tablet Chinese ordering](https://www.kassaku.nl/wp-content/uploads/2025/12/portrait-poe.png) |
+| ![Tablet with page order entry](https://www.kassaku.nl/wp-content/uploads/2025/12/tablet_poe.png) | ![Tablet Billing](https://www.kassaku.nl/wp-content/uploads/2025/12/tablet_billing_80.png) | ![Tablet Chinese ordering](https://www.kassaku.nl/wp-content/uploads/2025/12/portrait-poe.png) |
 
 ### **For Developers: Building on Solid Foundations**
 
