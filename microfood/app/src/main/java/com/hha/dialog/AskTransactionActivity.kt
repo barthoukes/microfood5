@@ -6,6 +6,7 @@ import android.util.Log
 import android.view.View
 import androidx.activity.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.viewModelScope
 import androidx.recyclerview.widget.GridLayoutManager
 import com.hha.adapter.ShortTransactionListAdapter
 import com.hha.framework.CFloorTable
@@ -130,12 +131,12 @@ class AskTransactionActivity : BaseActivity()
    {
       Log.i(tag, "onButtonFloorPlanNext")
 
-      global.floorPlanId = mFloorTableModel.getNextFloorPlanId(global.floorPlanId)
-      if (global.floorPlanId > 0)
+      val floorPlanId = mFloorTableModel.getNextFloorPlanId(global.floorPlanId)
+      if (global.floorPlanId <= 0)
       {
          Log.i(tag, "onButtonFloorPlanNext  No floorPlans found!!")
       }
-      mFloorTableModel.loadFloorTables()
+      mFloorTableModel.setFloorPlanId(floorPlanId)
    }
 
    @Suppress("UNUSED_PARAMETER")
@@ -317,14 +318,17 @@ class AskTransactionActivity : BaseActivity()
    {
       Log.i(tag, "refreshFloorPlan")
       mFloorTablesAdapter.redrawViewsAfterChangeLanguage()
-      mFloorTableModel.loadFloorTables()
+      mFloorTableModel.loadTables()
       val chooseToOrder = when (mBill)
       {
          false -> Translation.get(TextId.TEXT_CHOOSE_TO_ORDER)
          true -> Translation.get(TextId.TEXT_BILL_OPTION)
       }
       mBinding.headerButton.text = chooseToOrder
-      mFloorTableModel.loadFloorTables()
+   }
+
+   fun refreshFloorPlanButton()
+   {
       val txt = Translation.get(TextId.TEXT_FLOOR_PLAN) +
          "\n" + mFloorTableModel.floorPlanName()
       mBinding.btnFloorplan.text = txt
@@ -357,19 +361,14 @@ class AskTransactionActivity : BaseActivity()
 
    private fun setupObservers()
    {
-      // Observe loading state
-//        mFloorTableModel.isLoading.observe(this) { isLoading ->
-//            mBinding.lo.visibility = if (isLoading) View.VISIBLE else View.GONE
-//        }
-
       mFloorTableModel.floorTables.observe(this) { floorTables ->
          Log.i(tag, "Floor tables observed, plan: ${global.floorPlanId} size: ${floorTables?.size}")
          if (floorTables != null)
          {
+            refreshFloorPlanButton()
             mFloorTablesAdapter.submitList(floorTables)
             // Force layout update
             mBinding.layoutFloorTables.requestLayout()
-            //refreshFloorPlan()
          }
       }
 

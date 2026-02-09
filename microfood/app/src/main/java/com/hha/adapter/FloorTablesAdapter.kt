@@ -181,7 +181,14 @@ class FloorTablesAdapter(
 
     fun submitList(tables: CFloorTables)
     {
-        mFloorTables = tables
+        val filteredTables = CFloorTables()
+        tables.forEach { table ->
+            if (table.floorPlanId == global.floorPlanId)
+            {
+                filteredTables.add(table)
+            }
+        }
+        mFloorTables = filteredTables
         notifyDataSetChanged()
     }
 
