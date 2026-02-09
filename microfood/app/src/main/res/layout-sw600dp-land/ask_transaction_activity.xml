@@ -32,18 +32,6 @@
            android:onClick="onButtonLanguage"
            android:src="@drawable/languages_yellow" />
 
-        <!-- Floor Plan -->
-        <ImageButton
-           android:id="@+id/btn_floor_plan"
-           android:layout_width="64dp"
-           android:layout_height="0dp"
-           android:layout_weight="1"
-           android:layout_gravity="center"
-           android:background="?attr/selectableItemBackgroundBorderless"
-           android:onClick="onButtonFloorPlanOnOff"
-           android:contentDescription="Floor Plan"
-           android:src="@drawable/floorplan_yellow" />
-
         <ImageButton
            android:id="@+id/btn_takeaway"
            android:layout_width="64dp"
@@ -122,7 +110,13 @@
        android:orientation="vertical"
        app:layout_constraintGuide_percent="0.1" />
 
-    <!-- REMOVED: The middle guideline is no longer needed -->
+    <!-- A Guideline to split the two RecyclerViews 50/50 -->
+    <androidx.constraintlayout.widget.Guideline
+       android:id="@+id/guideline_vertical_middle"
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:orientation="vertical"
+       app:layout_constraintGuide_percent="0.5" />
 
     <!-- Horizontal Guideline at 10% from the top -->
     <androidx.constraintlayout.widget.Guideline
@@ -149,34 +143,37 @@
        app:layout_constraintGuide_percent="0.875" />
 
 
-    <!-- MODIFIED: The transaction list is now gone -->
+    <!-- Left RecyclerView for Transactions -->
     <androidx.recyclerview.widget.RecyclerView
        android:id="@+id/layoutShortTransactionList"
        android:layout_width="0dp"
        android:layout_height="0dp"
-       android:visibility="gone"
-       tools:visibility="gone"
+       android:layout_marginStart="0dp"
+       android:layout_marginEnd="4dp"
+       android:background="@color/COLOUR_BUTTON_BACKGROUND"
+       android:orientation="horizontal"
+       android:visibility="visible"
        app:layout_constraintBottom_toBottomOf="parent"
-       app:layout_constraintEnd_toEndOf="parent"
+       app:layout_constraintEnd_toStartOf="@+id/guideline_vertical_middle"
        app:layout_constraintStart_toStartOf="parent"
        app:layout_constraintTop_toBottomOf="@id/guideline_horizontal_10" />
 
-    <!-- MODIFIED: The floor tables now take up the full width -->
+    <!-- Right RecyclerView for Tables -->
     <androidx.recyclerview.widget.RecyclerView
        android:id="@+id/layout_floor_tables"
        android:layout_width="0dp"
        android:layout_height="0dp"
-       android:layout_marginStart="4dp"
        android:layout_marginEnd="8dp"
+       android:layout_marginStart="4dp"
        android:layout_marginBottom="4dp"
        android:background="@drawable/vloer11"
        android:orientation="horizontal"
        app:layout_constraintTop_toBottomOf="@id/guideline_horizontal_10"
        app:layout_constraintBottom_toTopOf="@id/guideline_horizontal_90"
-       app:layout_constraintStart_toStartOf="parent"
+       app:layout_constraintStart_toEndOf="@+id/guideline_vertical_middle"
        app:layout_constraintEnd_toStartOf="@id/guideline_vertical_90"/>
 
-    <!-- MODIFIED: The floorplan button now takes up the full width -->
+    <!-- Button to show the Floorplan -->
     <Button
        android:id="@+id/btn_floorplan"
        android:layout_width="0dp"
@@ -190,7 +187,7 @@
        android:backgroundTint="@color/ANDROID_BUTTON_BACKGROUND"
        app:layout_constraintTop_toBottomOf="@+id/guideline_horizontal_90"
        app:layout_constraintBottom_toBottomOf="parent"
-       app:layout_constraintStart_toStartOf="parent"
+       app:layout_constraintStart_toEndOf="@+id/guideline_vertical_middle"
        app:layout_constraintEnd_toStartOf="@id/guideline_vertical_90" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

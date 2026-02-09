@@ -33,7 +33,7 @@
        android:orientation="horizontal"
        app:layout_constraintGuide_percent="0.9" />
 
-    <!-- Guideline at 80% from the top -->
+    <!-- Guideline at 90% from the top -->
     <androidx.constraintlayout.widget.Guideline
        android:id="@+id/guideline_horizontal_80"
        android:layout_width="wrap_content"
@@ -41,15 +41,21 @@
        android:orientation="horizontal"
        app:layout_constraintGuide_percent="0.8" />
 
-    <!-- This guideline is no longer needed to split the screen -->
-    <!--
+    <!-- Guideline at 50% vertically to split the RecyclerViews -->
     <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline_vertical_50"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintGuide_percent="0.5" />
-    -->
+       android:id="@+id/guideline_vertical_50"
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:orientation="vertical"
+       app:layout_constraintGuide_percent="0.5" />
+
+    <!-- Guideline at 50% vertically to split the RecyclerViews -->
+    <androidx.constraintlayout.widget.Guideline
+       android:id="@+id/guideline_vertical_10"
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:orientation="vertical"
+       app:layout_constraintGuide_percent="0.1" />
 
     <TextView
        android:id="@+id/header_button"
@@ -93,7 +99,7 @@
        app:layout_constraintStart_toStartOf="parent"
        app:layout_constraintTop_toBottomOf="@id/guideline_horizontal_90">
 
-        <!-- Buttons remain the same -->
+        <!-- Change Language -->
         <ImageButton
            android:id="@+id/btn_language"
            android:layout_width="0dp"
@@ -103,15 +109,8 @@
            android:contentDescription="Change Language"
            android:onClick="onButtonLanguage"
            android:src="@drawable/languages_yellow" />
-        <ImageButton
-           android:id="@+id/btn_floor_plan"
-           android:layout_width="0dp"
-           android:layout_height="match_parent"
-           android:layout_weight="1"
-           android:background="?attr/selectableItemBackgroundBorderless"
-           android:onClick="onButtonFloorPlanOnOff"
-           android:contentDescription="Floor Plan"
-           android:src="@drawable/floorplan_yellow" />
+
+        <!-- Calculator -->
         <ImageButton
            android:id="@+id/btn_calculator"
            android:layout_width="0dp"
@@ -120,6 +119,8 @@
            android:background="?attr/selectableItemBackgroundBorderless"
            android:contentDescription="Calculator"
            android:src="@drawable/icon_calculator_yellow" />
+
+        <!-- Takeaway Bag -->
         <ImageButton
            android:id="@+id/btn_takeaway"
            android:layout_width="0dp"
@@ -129,6 +130,8 @@
            android:background="?attr/selectableItemBackgroundBorderless"
            android:contentDescription="Takeaway"
            android:src="@drawable/bag_yellow" />
+
+        <!-- Phone Takeaway -->
         <ImageButton
            android:id="@+id/btn_phone_order"
            android:layout_width="0dp"
@@ -137,6 +140,8 @@
            android:background="?attr/selectableItemBackgroundBorderless"
            android:contentDescription="Phone Order"
            android:src="@drawable/icon_takephone_yellow" />
+
+        <!-- Open Drawer -->
         <ImageButton
            android:id="@+id/btn_open_drawer"
            android:layout_width="0dp"
@@ -147,18 +152,21 @@
            android:src="@drawable/drawer_yellow" />
     </LinearLayout>
 
-    <!-- MODIFIED: Left Transactions RecyclerView is now hidden -->
+    <!-- Left Transactions RecyclerView -->
     <androidx.recyclerview.widget.RecyclerView
        android:id="@+id/layoutShortTransactionList"
        android:layout_width="0dp"
        android:layout_height="0dp"
-       android:visibility="gone"
+       android:layout_marginStart="0dp"
+       android:layout_marginEnd="4dp"
+       android:background="@color/COLOUR_GROUP_BACKGROUND"
+       android:paddingHorizontal="2dp"
        app:layout_constraintBottom_toTopOf="@id/guideline_horizontal_90"
-       app:layout_constraintEnd_toEndOf="parent"
+       app:layout_constraintEnd_toStartOf="@id/guideline_vertical_50"
        app:layout_constraintStart_toStartOf="parent"
        app:layout_constraintTop_toBottomOf="@id/guideline_horizontal_10" />
 
-    <!-- MODIFIED: Right Tables RecyclerView now takes full width -->
+    <!-- Right Tables RecyclerView -->
     <androidx.recyclerview.widget.RecyclerView
        android:id="@+id/layout_floor_tables"
        android:layout_width="0dp"
@@ -166,26 +174,25 @@
        android:padding="1dp"
        android:layout_marginBottom="4dp"
        android:layout_marginStart="4dp"
-       android:layout_marginEnd="4dp"
+       android:layout_marginEnd="0dp"
        android:background="@drawable/vloer11"
        app:layout_constraintBottom_toTopOf="@id/guideline_horizontal_80"
        app:layout_constraintEnd_toEndOf="parent"
-       app:layout_constraintStart_toStartOf="parent"
+       app:layout_constraintStart_toEndOf="@id/guideline_vertical_50"
        app:layout_constraintTop_toBottomOf="@id/guideline_horizontal_10" />
 
-    <!-- MODIFIED: Floorplan button now takes full width -->
     <Button
        android:id="@+id/btn_floorplan"
        android:layout_width="0dp"
        android:layout_height="0dp"
        android:layout_marginTop="0dp"
        android:layout_marginStart="4dp"
-       android:layout_marginEnd="4dp"
+       android:layout_marginEnd="0dp"
        android:layout_marginBottom="4dp"
        android:textSize="16sp"
        android:backgroundTint="@color/ANDROID_BUTTON_BACKGROUND"
        app:layout_constraintTop_toBottomOf="@id/guideline_horizontal_80"
        app:layout_constraintBottom_toTopOf="@id/guideline_horizontal_90"
-       app:layout_constraintStart_toStartOf="parent"
+       app:layout_constraintStart_toEndOf="@+id/guideline_vertical_50"
        app:layout_constraintEnd_toEndOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

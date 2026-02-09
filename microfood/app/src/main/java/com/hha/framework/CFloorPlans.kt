@@ -1,5 +1,7 @@
 package com.hha.framework
 
+import android.util.Log
+
 class CFloorPlans: Iterable<CFloorPlan>
 {
    var mPlans: MutableList<CFloorPlan> = mutableListOf()
@@ -9,6 +11,7 @@ class CFloorPlans: Iterable<CFloorPlan>
    override fun iterator(): Iterator<CFloorPlan> = mPlans.iterator()
 
    fun getFloorPlan(index: Int): CFloorPlan? = mPlans.getOrNull(index)
+   val tag = "CFloorPlans"
 
    fun getFloorName(floorPlanId: Int): String
    {
@@ -27,6 +30,7 @@ class CFloorPlans: Iterable<CFloorPlan>
 
    fun getNextFloorPlanId(floorPlanId: Int): Int
    {
+      Log.i(tag, "getNextFloorPlanId floorPlanId: $floorPlanId")
       var nextIndex = 0
       if (mPlans.isEmpty())
       {
@@ -43,7 +47,5 @@ class CFloorPlans: Iterable<CFloorPlan>
          nextIndex = 0
       }
       return mPlans[nextIndex].floorPlanId
-
-
    }
 }

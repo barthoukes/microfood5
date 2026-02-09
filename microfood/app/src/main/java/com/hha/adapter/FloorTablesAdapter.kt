@@ -157,8 +157,8 @@ class FloorTablesAdapter(
         val colour = when
         {
             floorTable.maxPersonCount == 0 -> colTableUnused
-            (floorTable.minutesLeft >= mRedTime &&
-               floorTable.transactionId > 0) -> colTableFloorPlanBorderTimeout
+            (floorTable.minutesLeft <= mMaximumTimeTimer-mRedTime &&
+               floorTable.transactionId > 1E6) -> colTableFloorPlanBorderTimeout
             floorTable.tableStatus == ETableStatus.TABLE_OK ||
                floorTable.tableStatus == ETableStatus.TABLE_OPEN_NOT_PAID ||
                floorTable.tableStatus == ETableStatus.TABLE_OPEN_PAID-> {
@@ -181,7 +181,14 @@ class FloorTablesAdapter(
 
     fun submitList(tables: CFloorTables)
     {
-        mFloorTables = tables
+        val filteredTables = CFloorTables()
+        tables.forEach { table ->
+            if (table.floorPlanId == global.floorPlanId)
+            {
+                filteredTables.add(table)
+            }
+        }
+        mFloorTables = filteredTables
         notifyDataSetChanged()
     }
 
