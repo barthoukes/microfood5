@@ -22,4 +22,5 @@
     <string name="tot_ziens">再见</string>
     <string name="update_name_card">Update menu kaart</string>
     <string name="menu_update_started">Update started</string>
+   <string name="enter_website">ENTER Website</string>
 </resources>

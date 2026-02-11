@@ -33,13 +33,6 @@ class BillItemsAdapter(
         return BillItemViewHolder(binding)
     }
 
-    // --- NEW: Add a function to update the data and refresh the list ---
-    fun updateData(newTransaction: CTransaction)
-    {
-        this.mTransaction = newTransaction
-        notifyDataSetChanged() // Tell the RecyclerView to redraw itself
-    }
-
     override fun getItemCount(): Int
     {
         return mTransaction?.size?.plus(1) ?: 1
@@ -88,4 +81,10 @@ class BillItemsAdapter(
         }
     }
 
+    // update the data and refresh the list
+    fun submitList(newTransaction: CTransaction)
+    {
+        this.mTransaction = newTransaction
+        notifyDataSetChanged() // Tell the RecyclerView to redraw itself
+    }
 }

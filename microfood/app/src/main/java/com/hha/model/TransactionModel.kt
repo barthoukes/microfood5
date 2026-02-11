@@ -152,7 +152,7 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
    fun addReturnMoney()
    {
       Log.i(tag, "addReturnMoney")
-      val currentTransaction = activeTransaction.value
+      val currentTransaction = _activeTransaction.value
       if (currentTransaction == null)
       {
          return
@@ -200,7 +200,7 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
    fun addToEmployee(rfidKey: Short, paymentStatus: EPaymentStatus)
    {
       Log.i(tag, "addToEmployee")
-      val currentTransaction = activeTransaction.value
+      val currentTransaction = _activeTransaction.value
       if (currentTransaction == null)
       {
          return
@@ -257,24 +257,68 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
             {
                currentTransaction.closeTimeFrame()
                currentTransaction.emptyTransaction("")
-            }
-            else
+            } else
             {
                val now = CTimestamp()
                currentTransaction.removeAndUndoTimeFrame()
             }
             currentTransaction.updateTotal()
-         }
-         finally
+            _activeTransaction.value = currentTransaction
+         } finally
          {
             grpcStateViewModel?.messageConfirmed() // Announce the end of the gRPC call
          }
       }
    }
 
+   fun createTakeawayTransaction()
+   {
+      Log.i(tag, "createTakeawayTransaction")
+      viewModelScope.launch {
+         grpcStateViewModel?.messageSent()
+         try
+         {
+            val newTransactionId = withContext(Dispatchers.IO) {
+               // --- All background logic is now here ---
+               val useBag = true
+               // It's better to pass the user ID as a parameter if possible,
+               // but for now, we'll keep the Global call here.
+               val user = Global.getInstance().rfidKeyId
+
+               val transactionId = createNewTakeawayTransaction(0, useBag, user, false)
+
+               if (transactionId > 0)
+               {
+                  // Also perform any other related background work here
+                  CMenuCards.getInstance().loadTakeaway()
+                  transactionId // Return the valid ID
+               } else
+               {
+                  Log.e(tag, "Failed to create new takeaway transaction.")
+                  -1 // Return an invalid ID on failure
+               }
+            }
+            // --- Post navigation event to the UI ---
+            if (newTransactionId > 0)
+            {
+               Log.d(tag, "Posting navigation event for takeaway transaction ID: $newTransactionId")
+               val navEvent = PageOrderNavigationEvent(newTransactionId, false, false)
+               _navigateToPageOrder.value = MyEvent(navEvent)
+            } else
+            {
+               // Optionally, you can post to a different LiveData to show an error Toast
+               // _showToast.value = MyEvent("Failed to create order")
+            }
+         } finally
+         {
+            grpcStateViewModel?.messageConfirmed()
+         }
+      }
+   }
+
    fun confirmPrintBill(offer: Boolean)
    {
-      val currentTransaction = activeTransaction.value ?: return
+      val currentTransaction = _activeTransaction.value ?: return
 
       viewModelScope.launch {
          grpcStateViewModel?.messageSent() // Announce that a long operation is starting
@@ -431,7 +475,7 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
          Log.d(tag, "Posting navigation event for transaction ID: $transactionId")
          val navEvent = PageOrderNavigationEvent(
             transactionId = transactionId,
-            fromBilling =  mFromBilling,
+            fromBilling = mFromBilling,
             newTimeFrame = true
          )
          _navigateToPageOrder.value = MyEvent(navEvent)
@@ -443,8 +487,9 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
    fun startNextTimeFrame(transactionId: Int)
    {
       Log.i(tag, "endTimeFrameAndPrintToBuffer")
-      val currentTransaction = activeTransaction.value
-      if (currentTransaction == null) {
+      val currentTransaction = _activeTransaction.value
+      if (currentTransaction == null)
+      {
          return
       }
       // --- SOLUTION: Launch a coroutine on an I/O thread ---
@@ -455,11 +500,13 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
 
    fun endTimeFrameAndPrintToBuffer(
       prints2kitchen: Int, prints2bill: Int, newTime: CTimestamp,
-      timeChanged: Boolean, collectPrinter: Boolean
-   ) {
+      timeChanged: Boolean, collectPrinter: Boolean,
+   )
+   {
       Log.i(tag, "endTimeFrameAndPrintToBuffer")
-      val currentTransaction = activeTransaction.value
-      if (currentTransaction == null) {
+      val currentTransaction = _activeTransaction.value
+      if (currentTransaction == null)
+      {
          return
       }
 
@@ -473,9 +520,11 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
          val transactionId = currentTransaction.transactionId
 
          var newState = ECookingState.COOKING_DONE
-         if (CFG.getBoolean("prepare_display_enable")) {
+         if (CFG.getBoolean("prepare_display_enable"))
+         {
             val kitchen: Int = currentTransaction.numberKitchenItems()
-            if (kitchen > 0) {
+            if (kitchen > 0)
+            {
                newState = ECookingState.COOKING_IN_KITCHEN
             }
          }
@@ -484,6 +533,7 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
          currentTransaction.endTimeFrame(
             newTime, timeChanged, newState
          )
+         _activeTransaction.value = currentTransaction
 
          // These print buffer calls are also executed on the background thread
          val pf = PrintFrame()
@@ -557,8 +607,7 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
             {
                ////////////////// ASK QUANTITY /////////////////////////
                retVal = askTakeawayFinalQuantity(ts, mChangedTime);
-            }
-            else
+            } else
             {
                // No printing of kitchen, just go to billing...
                endTimeFrameAndPrintToBuffer(
@@ -571,8 +620,7 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
                   currentTransaction.addReturnMoney()
                   currentTransaction.closeTransaction(EClientOrdersType.CLOSED)
                   retVal = EFinalizerAction.FINALIZE_MODE_ASK_TABLE
-               }
-               else
+               } else
                {
                   retVal = EFinalizerAction.FINALIZE_MODE_BILLING
                }
@@ -611,6 +659,11 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
       )
    }
 
+   fun getTransactionId(): Int
+   {
+      return activeTransaction?.value?.transactionId ?: -1
+   }
+
    fun initPageOrder(): Boolean
    {
       val currentTransaction = _activeTransaction.value ?: return false
@@ -620,89 +673,50 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
       }
       when (currentTransaction.getStatus())
       {
-         EClientOrdersType.INIT -> {
+         EClientOrdersType.INIT ->
+         {
             Log.d(tag, "initPageOrder  open table!")
             currentTransaction.open()
             if (userCFG.getBoolean("user_print_ta_number")
                && userCFG.getBoolean("order_number_first")
-               && currentTransaction.isTakeaway())
+               && currentTransaction.isTakeaway()
+            )
             {
                val name = currentTransaction.getName()
                if (name != global.lastPrintedBillNumer)
                {
                   global.lastPrintedBillNumer = name
                   viewModelScope.launch {
-                     val prn = OrderNumberPrinter(name)
-                     prn.print() }
+                     try
+                     {
+                        grpcStateViewModel?.messageSent() // Announce that a long operation is starting
+                        val prn = OrderNumberPrinter(name)
+                        prn.print()
+                     } finally
+                     {
+                        grpcStateViewModel?.messageConfirmed() // Announce that the operation has finished
+                     }
+                  }
                }
             }
          }
+
          EClientOrdersType.OPEN, EClientOrdersType.OPEN_PAID ->
             Log.d(tag, "open, open_paid -> do nothing")
+
          EClientOrdersType.PAYING ->
          {
             if (CFG.getValue("bill_paying_add") <= 0)
                return false
          }
+
          EClientOrdersType.CLOSED -> return false
-         else -> {}
+         else ->
+         {
+         }
       }
       mMinutes = 0
       return true
-   }
-
-   private fun startNewTimeFrame(currentTransaction: CTransaction)
-   {
-      try {
-         viewModelScope.launch {
-            grpcStateViewModel?.messageSent() // Announce that a long operation is starting
-            currentTransaction.startNewTimeFrame()
-         }
-      }
-      finally
-      {
-         grpcStateViewModel?.messageConfirmed() // Announce that the operation has finished
-      }
-   }
-
-   /*----------------------------------------------------------------------------*/
-   fun setTakeawayFinalQuantity(
-      quantity: Int, billingMode: Boolean, stop: Boolean,
-      ts: CTimestamp, changedTime: Boolean
-   ): EFinalizerAction
-   {
-      var retVal = EFinalizerAction.FINALIZE_NO_ACTION
-      val currentTransaction = _activeTransaction.value ?: return retVal
-      if (quantity != 0 || mAskQuantityZero)
-      {
-         if (billingMode)
-         {
-            retVal = EFinalizerAction.FINALIZE_MODE_BILLING
-         } else if (stop)
-         {
-            retVal = EFinalizerAction.FINALIZE_NO_ACTION
-         } else
-         {
-            if (mTakeawayContinueUntilCr)
-            {
-               // For takeaway, just continue and don't stop!!
-               endTimeFrameAndPrintToBuffer(
-                  quantity, 0, ts,
-                  changedTime, false
-               );
-               startNewTimeFrame(currentTransaction)
-               retVal = EFinalizerAction.FINALIZE_RESET_CHANGES
-            } else
-            {
-               endTimeFrameAndPrintToBuffer(
-                  0, 0, ts,
-                  changedTime, false
-               );
-               retVal = EFinalizerAction.FINALIZE_MODE_BILLING
-            }
-         }
-      }
-      return retVal
    }
 
    fun handleFinishShop(fromBilling: Boolean): EFinalizerAction
@@ -749,7 +763,8 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
       ts.addMinutes(mMinutes)
       endTimeFrameAndPrintToBuffer(
          1, 0, ts,
-         mMinutes != 0, false)
+         mMinutes != 0, false
+      )
       return EFinalizerAction.FINALIZE_MODE_ASK_TABLE
    }
 
@@ -792,7 +807,8 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
    }
 
    fun handleFinishQuantity(
-      quantity: Int, billingMode: Boolean, stop: Boolean): EFinalizerAction
+      quantity: Int, billingMode: Boolean, stop: Boolean,
+   ): EFinalizerAction
    {
       val currentTransaction = _activeTransaction.value
       if (currentTransaction == null)
@@ -805,7 +821,8 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
          ETransType.TRANS_TYPE_TAKEAWAY -> return EFinalizerAction.FINALIZE_NO_ACTION
          ETransType.TRANS_TYPE_SITIN -> return handleFinishSitinQuantity(quantity, billingMode, stop)
 
-         else -> {
+         else ->
+         {
             Log.w(tag, "handleFinishQuantity: unknown transaction type ${currentTransaction.transType}")
             return EFinalizerAction.FINALIZE_NOT_IDENTIFIED
          }
@@ -813,7 +830,7 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
    }
 
    fun handleFinishSitinQuantity(
-      quantity: Int, toBilling: Boolean, stop: Boolean
+      quantity: Int, toBilling: Boolean, stop: Boolean,
    ): EFinalizerAction
    {
       Log.i(tag, "handleFinishSitinQuantity")
@@ -824,15 +841,16 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
       {
          return EFinalizerAction.FINALIZE_NO_ACTION
       }
-      if (quantity==0 && !mAskQuantityZero)
+      if (quantity == 0 && !mAskQuantityZero)
       {
          return EFinalizerAction.FINALIZE_NO_ACTION
       }
       val ts = CTimestamp()
       ts.addMinutes(mMinutes)
       endTimeFrameAndPrintToBuffer(
-         quantity,0, ts,
-         mMinutes!=0, false)
+         quantity, 0, ts,
+         mMinutes != 0, false
+      )
       return when (toBilling)
       {
          true -> EFinalizerAction.FINALIZE_MODE_BILLING
@@ -841,7 +859,7 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
    }
 
    fun handleFinishWokQuantity(
-      quantity: Int, billingMode: Boolean, stop: Boolean
+      quantity: Int, billingMode: Boolean, stop: Boolean,
    ): EFinalizerAction
    {
       val action: EFinalizerAction = when
@@ -889,7 +907,8 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
 
    private suspend fun handleFinishQuantiesTimeSitin(
       currentTransaction: CTransaction,
-      fromBilling: Boolean): EFinalizerAction
+      fromBilling: Boolean,
+   ): EFinalizerAction
    {
       if (currentTransaction.empty)
       {
@@ -927,7 +946,7 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
       fromBilling: Boolean, quantityKitchen: Int,
       quantityKitchen2Pos: Int,
       changedTime: Boolean, ts: CTimestamp,
-      isBillingButton: Boolean
+      isBillingButton: Boolean,
    ): EFinalizerAction
    {
       var retVal = EFinalizerAction.FINALIZE_NOT_IDENTIFIED
@@ -1065,16 +1084,12 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
          val clusterId: Short = -1
          //Log.d(tag, "MenuItem clicked: ${selectedMenuItem.localName}")
          viewModelScope.launch {
-            currentTransaction.addTransactionItem(selectedMenuItem, clusterId) }
+            currentTransaction.addTransactionItem(selectedMenuItem, clusterId)
+         }
          mIsChanged = true
          return true
       }
       return false
-   }
-
-   fun initializeTransaction(initMode: EInitMode)
-   {
-      mMode = initMode
    }
 
    fun emptyTransaction(reason: String)
@@ -1227,12 +1242,12 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
       {
          ETransType.TRANS_TYPE_EAT_INSIDE,
          ETransType.TRANS_TYPE_WOK, ETransType.TRANS_TYPE_RECHAUD,
-         ETransType.TRANS_TYPE_SITIN
+         ETransType.TRANS_TYPE_SITIN,
             -> Translation.get(TextId.TEXT_TABLE)
 
          ETransType.TRANS_TYPE_DELIVERY -> Translation.get(TextId.TEXT_TELEPHONE)
          ETransType.TRANS_TYPE_TAKEAWAY,
-         ETransType.TRANS_TYPE_TAKEAWAY_PHONE
+         ETransType.TRANS_TYPE_TAKEAWAY_PHONE,
             -> Translation.get(TextId.TEXT_TAKEAWAY)
 
          else -> "--"
@@ -1255,14 +1270,12 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
     * @param mode The initialization mode (FULL_ORDER or BILLING_ONLY).
     */
    fun initializeTransaction(
-      transactionId: Int, newTimeFrame: Boolean, mode: EInitMode)
+      transactionId: Int, newTimeFrame: Boolean, mode: EInitMode,
+   )
    {
       Log.i(tag, "initializeTransaction $transactionId")
+      mMode = mode
       // Perform initial checks on the main thread. These are fast.
-      if (mIsInitialized || (mode == EInitMode.VIEW_BILLING && _activeTransaction.value == null))
-      {
-         return
-      }
       val THIS = this
 
       // Launch a coroutine to handle the potentially long-running transaction loading
@@ -1307,13 +1320,11 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
             if (newTimeFrame)
             {
                currentTransaction.startNewTimeFrame()
-            }
-            else
+            } else
             {
                currentTransaction.getLatestTimeFrame()
             }
             // Now that we have a valid transaction, update the LiveData
-            _activeTransaction.value = currentTransaction
 
             // It's now safe to add listeners and perform other main-thread logic
             mMode = mode
@@ -1322,9 +1333,9 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
             currentTransaction.addItemListener(THIS)
             // Trigger an initial UI update
             onTransactionChanged(currentTransaction)
+            _activeTransaction.value = currentTransaction
             mIsInitialized = true
-         }
-         finally
+         } finally
          {
             grpcStateViewModel?.messageConfirmed()
          }
@@ -1339,7 +1350,7 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
     */
    fun isPrintBillAllowedAndConfirmed(
       currentTransaction: CTransaction, offer: Boolean,
-      customerTotal: CMoney
+      customerTotal: CMoney,
    ): EPrintBillAction
    {
       Log.i(tag, "isPrintBillAllowedAndConfirmed")
@@ -1405,12 +1416,14 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
       if (currentTransaction != null)
       {
          if (!currentTransaction.isTakeaway()
-            && currentTransaction.empty)
+            && currentTransaction.empty
+         )
          {
             return true
          }
          if (currentTransaction.getTimeFrameIndex().index ==
-            ETimeFrameIndex.TIME_FRAME1)
+            ETimeFrameIndex.TIME_FRAME1
+         )
          {
             return true
          }
@@ -1508,7 +1521,7 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
 
    /*----------------------------------------------------------------------------*/
    fun onQuantitySelected(
-      fromBilling: Boolean, quantity: Int, minutes: Int
+      fromBilling: Boolean, quantity: Int, minutes: Int,
    ): EFinalizerAction
    {
       Log.i(tag, "onQuantitySelected")
@@ -1553,7 +1566,8 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
       if (mMode == EInitMode.VIEW_PAGE_ORDER && currentTransaction != null)
       {
          viewModelScope.launch {
-            currentTransaction.nextPortion() }
+            currentTransaction.nextPortion()
+         }
          onTransactionChanged(currentTransaction)
          Log.d(tag, "onButtonPortion ${currentTransaction.transactionId} done")
       }
@@ -1616,7 +1630,7 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
    /*----------------------------------------------------------------------------*/
    fun onQuantitySelected(
       fromBilling: Boolean, quantity: Int, ts: CTimestamp,
-      timeChanged: Boolean
+      timeChanged: Boolean,
    ): EFinalizerAction
    {
       Log.i(tag, "onQuantitySelected")
@@ -1677,7 +1691,8 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
          transaction.calculateTotalTransaction()
          _orderTotal.postValue(transaction.getTotalTransaction())
          prepareBillDisplayLines()
-      } finally {
+      } finally
+      {
          mIsUpdating = false
       }
    }
@@ -1946,6 +1961,60 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
       mMode = newMode
    }
 
+   private fun startNewTimeFrame(currentTransaction: CTransaction)
+   {
+      try
+      {
+         viewModelScope.launch {
+            grpcStateViewModel?.messageSent() // Announce that a long operation is starting
+            currentTransaction.startNewTimeFrame()
+         }
+      } finally
+      {
+         grpcStateViewModel?.messageConfirmed() // Announce that the operation has finished
+      }
+   }
+
+   /*----------------------------------------------------------------------------*/
+   fun setTakeawayFinalQuantity(
+      quantity: Int, billingMode: Boolean, stop: Boolean,
+      ts: CTimestamp, changedTime: Boolean,
+   ): EFinalizerAction
+   {
+      var retVal = EFinalizerAction.FINALIZE_NO_ACTION
+      val currentTransaction = _activeTransaction.value ?: return retVal
+      if (quantity != 0 || mAskQuantityZero)
+      {
+         if (billingMode)
+         {
+            retVal = EFinalizerAction.FINALIZE_MODE_BILLING
+         } else if (stop)
+         {
+            retVal = EFinalizerAction.FINALIZE_NO_ACTION
+         } else
+         {
+            if (mTakeawayContinueUntilCr)
+            {
+               // For takeaway, just continue and don't stop!!
+               endTimeFrameAndPrintToBuffer(
+                  quantity, 0, ts,
+                  changedTime, false
+               );
+               startNewTimeFrame(currentTransaction)
+               retVal = EFinalizerAction.FINALIZE_RESET_CHANGES
+            } else
+            {
+               endTimeFrameAndPrintToBuffer(
+                  0, 0, ts,
+                  changedTime, false
+               );
+               retVal = EFinalizerAction.FINALIZE_MODE_BILLING
+            }
+         }
+      }
+      return retVal
+   }
+
    /**
     * Fetches the full CTransaction object for a given transactionId.
     * Once fetched, it posts the object to the transaction LiveData.
@@ -1973,11 +2042,17 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
             {
                // Start Page Order by creating the event.
                EClientOrdersType.OPEN, EClientOrdersType.OPEN_PAID,
-                   EClientOrdersType.INIT, EClientOrdersType.PAYING
-                      -> _navigateToPageOrder.value =
-                  MyEvent(PageOrderNavigationEvent(
-                     transactionId, mFromBilling, true))
-               else -> {}
+               EClientOrdersType.INIT, EClientOrdersType.PAYING,
+                  -> _navigateToPageOrder.value =
+                  MyEvent(
+                     PageOrderNavigationEvent(
+                        transactionId, mFromBilling, true
+                     )
+                  )
+
+               else ->
+               {
+               }
             }
          } finally
          {
@@ -1993,53 +2068,4 @@ class TransactionModel : ViewModel(), PaymentsListener, TransactionListener,
       currentTransaction?.setMessage(text)
    }
 
-   // In TransactionModel.kt
-
-   fun getTransactionId(): Int
-   {
-      return activeTransaction?.value?.transactionId ?: -1
-   }
-
-   fun createTakeawayTransaction() {
-      Log.i(tag, "createTakeawayTransaction")
-      viewModelScope.launch {
-         grpcStateViewModel?.messageSent()
-         try
-         {
-            val newTransactionId = withContext(Dispatchers.IO) {
-               // --- All background logic is now here ---
-               val useBag = true
-               // It's better to pass the user ID as a parameter if possible,
-               // but for now, we'll keep the Global call here.
-               val user = Global.getInstance().rfidKeyId
-
-               val transactionId = createNewTakeawayTransaction(0, useBag, user, false)
-
-               if (transactionId > 0)
-               {
-                  // Also perform any other related background work here
-                  CMenuCards.getInstance().loadTakeaway()
-                  transactionId // Return the valid ID
-               } else
-               {
-                  Log.e(tag, "Failed to create new takeaway transaction.")
-                  -1 // Return an invalid ID on failure
-               }
-            }
-            // --- Post navigation event to the UI ---
-            if (newTransactionId > 0) {
-               Log.d(tag, "Posting navigation event for takeaway transaction ID: $newTransactionId")
-               val navEvent = PageOrderNavigationEvent(newTransactionId, false, false)
-               _navigateToPageOrder.value = MyEvent(navEvent)
-            } else {
-               // Optionally, you can post to a different LiveData to show an error Toast
-               // _showToast.value = MyEvent("Failed to create order")
-            }
-         }
-         finally
-         {
-            grpcStateViewModel?.messageConfirmed()
-         }
-      }
-   }
 }

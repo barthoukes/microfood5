@@ -171,10 +171,6 @@ class PageOrderActivity : BaseActivity(), ModalDialogYesNo.MessageBoxYesNoListen
     private fun setupObservers()
     {
         Log.i(tag, "setupObservers")
-        // Observe loading state to show/hide a spinner
-//        mTransactionModel.isLoading.observe(this) { isLoading ->
-//            mBinding.loadingSpinner.visibility = if (isLoading) View.VISIBLE else View.GONE
-//        }
 
         // Observe the transaction itself
         mTransactionModel.activeTransaction.observe(this) { transaction ->
@@ -189,7 +185,7 @@ class PageOrderActivity : BaseActivity(), ModalDialogYesNo.MessageBoxYesNoListen
                     mTransactionModel.initPageOrder()
                     showTransactionLoading(false)
                 }
-                mBinding.pageOrderTableName.text = mTransactionModel.getTableName()
+                updateTransactionName()
 
                 // When the transaction is ready, update the adapter.
                 mTransactionItemsAdapter.submitList(transaction)
@@ -206,7 +202,7 @@ class PageOrderActivity : BaseActivity(), ModalDialogYesNo.MessageBoxYesNoListen
         mTransactionModel.orderTotal.observe(this) { newTotal ->
             // The 'newTotal' is the CMoney object from the LiveData.
             // We format it and set it on the TextView.
-            mBinding.totalPrice.text = newTotal.toString()
+            mBinding.pageOrderPrice.text = newTotal.toString()
         }
         // Observe other LiveData like total price, display lines, etc.
         // mTransactionModel.orderTotal.observe(this) { total -> ... }
@@ -470,6 +466,7 @@ class PageOrderActivity : BaseActivity(), ModalDialogYesNo.MessageBoxYesNoListen
     private fun refreshButtons()
     {
         mBinding.poeHeaderText.text = Translation.get(Translation.TextId.TEXT_PAGE_ORDER)
+        updateTransactionName()
     }
 
     override fun onDialogPositiveClick(dialog: DialogFragment, requestCode: Int)
@@ -627,20 +624,6 @@ class PageOrderActivity : BaseActivity(), ModalDialogYesNo.MessageBoxYesNoListen
         mBinding.layoutTransactionItems.adapter = mTransactionItemsAdapter
     }
 
-    // Add this new function to PageOrderActivity
-//    private fun setupTransaction()
-//    {
-//        // 1. Remove the listener from any old transaction to prevent leaks
-//        m_viewModel.transaction.removeItemListener(m_transactionItemsAdapter)
-//
-//        // 3. Assign the transaction to the local variable and add the listener
-//        m_viewModel.transaction.addItemListener(m_transactionItemsAdapter)
-//
-//        // 4. Update the adapter with the fresh transaction data
-//        m_transactionItemsAdapter.updateData(m_viewModel.transaction)
-//        m_viewModel.transaction.startNextTimeFrame()
-//    }
-
     // DP-to-pixel conversion extension
     fun Int.dpToPx(): Int = (this * Resources.getSystem()
         .displayMetrics.density).toInt()
@@ -700,19 +683,7 @@ class PageOrderActivity : BaseActivity(), ModalDialogYesNo.MessageBoxYesNoListen
         if (mTransactionModel.addItem(selectedMenuItem, mClusterId))
         {
             mTransactionItemsAdapter.setCursor(global.cursor)
-            // m_menuItemsAdapter.notifyDataSetChanged()
-            //m_transactionItemsAdapter.notifyDataSetChanged()
-            /// binding.totalPrice.text = m_transaction.getTotalAmount().str()
-            //m_transactionItemsAdapter.setCursor(global.cursor)
         }
-        // Update selection state
-//        menuItems.menuItems.values.forEach { item ->
-//            item.isSelected = (item.menuItemId == selectedMenuItem.menuItemId)
-//        }
-        //     menuItemsAdapter.notifyDataSetChanged()
-
-        // Load items for the selected page
-        //    loadPageItems(selectedMenuItem.menuItemId)
     }
 
     private fun loadPageItems(pageId: Int)
@@ -812,18 +783,6 @@ class PageOrderActivity : BaseActivity(), ModalDialogYesNo.MessageBoxYesNoListen
         dialog.show(supportFragmentManager, "MessageBoxCancelReason")
     }
 
-    private fun showUndoChanges()
-    {
-        val dialog = ModalDialogYesNo.newInstance(
-            "Undo Changes",
-            "Undo the changes made to the order?",
-            REQUEST_CODE_UNDO_CHANGES
-        )
-        dialog.show(supportFragmentManager, "MessageBoxYesNo")
-        // If yes -> onDialogPositiveClick()
-        // If no -? onDialogNegativeClick()
-    }
-
     override fun onQuantitySelected(
         quantity: Int, billingMode: Boolean, stop: Boolean,
     )
@@ -846,5 +805,22 @@ class PageOrderActivity : BaseActivity(), ModalDialogYesNo.MessageBoxYesNoListen
         ts.addMinutes(finalDelay)
         val action = mTransactionModel.handleFinishTakeawayQuantity(ts)
         handleAction(action)
+    }
+
+    private fun showUndoChanges()
+    {
+        val dialog = ModalDialogYesNo.newInstance(
+            "Undo Changes",
+            "Undo the changes made to the order?",
+            REQUEST_CODE_UNDO_CHANGES
+        )
+        dialog.show(supportFragmentManager, "MessageBoxYesNo")
+        // If yes -> onDialogPositiveClick()
+        // If no -? onDialogNegativeClick()
+    }
+
+    fun updateTransactionName()
+    {
+        mBinding.pageOrderName.text = mTransactionModel.getTableName()
     }
 }

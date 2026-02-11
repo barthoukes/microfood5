@@ -7,7 +7,6 @@ import android.view.View
 import android.widget.Toast
 import androidx.activity.viewModels
 
-import androidx.lifecycle.ViewModelProvider
 import androidx.fragment.app.DialogFragment
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -45,7 +44,7 @@ class BillOrderActivity : BaseActivity(),
 
     // Views
     private lateinit var mBinding: BillOrderActivityBinding
-    private lateinit var mBillItemsAdapter: BillItemsAdapter
+    private lateinit var mBillingItemsAdapter: BillItemsAdapter
     private lateinit var mPaymentsAdapter: PaymentsAdapter
     private val mTransactionModel: TransactionModel by viewModels()
 
@@ -64,6 +63,7 @@ class BillOrderActivity : BaseActivity(),
     private val mAskBillConfirmation = CFG.getBoolean("bill_ask_confirmation")
     private val mContinueWhenAmountEnough = CFG.getBoolean("bill_continue_when_enough")
     private var mPaidTotal = CMoney(0)
+    private var mFirstTime = true
 
     private var mCustomerTotal = CMoney(0)
     private val mUserPrintCollect = userCFG.getBoolean("user_print_collect")
@@ -72,67 +72,17 @@ class BillOrderActivity : BaseActivity(),
     private val CONFIRM_BILL = 456
     private val tag = "BillOrderActivity"
 
-    fun onInit()
+    fun askConfirmationBill(offer: Boolean)
     {
-        val action = mTransactionModel.onInit()
-        when (action)
+        mOffer = offer
+        val title = when (offer)
         {
-            EInitAction.INIT_ACTION_BILL_PAYMENTS -> finish() // @todo
-            EInitAction.INIT_ACTION_FINISH -> finish()
-            EInitAction.INIT_ACTION_ASK_MONEY -> { askMoneyType()
-                finish() }
-            else -> {}
+            false -> Translation.get(Translation.TextId.TEXT_FINISH_BILL)
+            true -> Translation.get(Translation.TextId.TEXT_PRINT_OFFER)
         }
-
-        if (mTransactionModel.discountVisible())
-        {
-            mBinding.btnDiscount.visibility = View.VISIBLE
-        } else
-        {
-            mBinding.btnDiscount.visibility = View.GONE
-        }
-    }
-
-    fun askTransactionActivity()
-    {
-        Log.i(tag, "Bill processed. Navigating to AskTransactionActivity.")
-
-        // Create an Intent to start the AskTransactionActivity
-        val intent = Intent(this, AskTransactionActivity::class.java)
-
-        // Add flags to clear the task stack and start a new one.
-        // This ensures the user cannot press "Back" to return to BillOrderActivity.
-        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-
-        // Start the new activity
-        startActivity(intent)
-
-        // Close the current BillOrderActivity so it's removed from the back stack
-        finish()
-    }
-
-    private fun createGridLayoutBillingItems()
-    {
-        // 1. GridLayoutManager for pages with 3 rows (vertical span) and horizontal scrolling
-        val gridLayoutManagerTransactionItems = GridLayoutManager(
-            this@BillOrderActivity,
-            1, // Span count = number of columns (horizontal)
-            GridLayoutManager.VERTICAL, // Vertical scrolling
-            false
-        )
-        mBinding.layoutBillingItems.layoutManager =
-            gridLayoutManagerTransactionItems
-    }
-
-    // Optional but clean: Create a helper function for initialization
-    private fun initializeViews()
-    {
-    }
-
-    override fun onResume()
-    {
-        super.onResume()
-        onInit()
+        val dlg = ModalDialogYesNo.newInstance(title, "", CONFIRM_BILL)
+        dlg.show(supportFragmentManager, "ConfirmationDialog")
+        // Continue in onDialogPositiveClick and onDialogNegativeClick
     }
 
     /*----------------------------------------------------------------------------*/
@@ -191,24 +141,100 @@ class BillOrderActivity : BaseActivity(),
 //        }
     }
 
-    override fun onPause()
+    fun askTransactionActivity()
     {
-        super.onPause()
-        // --- UNREGISTER LISTENER ---
-        // Unregister the adapter to prevent memory leaks and stop receiving updates
-        // when the activity is not in the foreground. The transaction object will outlive
-        // this activity, so it's crucial to remove the reference to the adapter.
+        Log.i(tag, "Bill processed. Navigating to AskTransactionActivity.")
+
+        // Create an Intent to start the AskTransactionActivity
+        val intent = Intent(this, AskTransactionActivity::class.java)
+
+        // Add flags to clear the task stack and start a new one.
+        // This ensures the user cannot press "Back" to return to BillOrderActivity.
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+
+        // Start the new activity
+        startActivity(intent)
+
+        // Close the current BillOrderActivity so it's removed from the back stack
+        finish()
     }
 
-    private fun setupRecyclerView()
+    /*----------------------------------------------------------------------------*/
+    /** Check for valid billing key, delete payments and notify when wrong.
+     *  Also when the wrong key is used, notify to use the proper key
+     *  @return true if ok to continue billing
+     */
+    fun checkBillingKey(): Boolean
     {
-        // 1. GridLayoutManager for pages with 3 rows (vertical span) and horizontal scrolling
-        createGridLayoutBillingItems()
-        createBillingItemsAdapter()
-        createGridLayoutPayments()
-        createPaymentsAdapter()
+        val currentTransaction = mTransactionModel.activeTransaction.value // 678
+        if (currentTransaction == null)
+        {
+            return false
+        }
+        var retVal = true
+        val employeeId = currentTransaction.getEmployeeId()
+        if (!currentTransaction.isTakeaway()
+            && CFG.getValue("waiter_per_table") != 0
+            && employeeId != global.rfidKeyId
+        )
+        {
+            // Table has different waiter !
+            val txt = Translation.get(Translation.TextId.TEXT_EMPLOYEE)
+            Toast.makeText(this@BillOrderActivity, txt, Toast.LENGTH_LONG).show()
+            retVal = false
+        }
+//            else if (CFG("restaurant_map"))
+//        {
+//            long transactionId = m_transactionItemModel->getTransactionId()
+//            CsqlFloorTableIterator(-1).setTransactionTableAvailable(transactionId)
+//        }
+
+        if (!retVal)
+        {
+            currentTransaction.cancelNewPayments()
+            askTransactionActivity()
+        }
+        return retVal;
     }
 
+    fun cancelPaymentsAskOtherTable()
+    {
+        val currentTransaction = mTransactionModel.activeTransaction.value // 678
+        if (currentTransaction == null)
+        {
+            return
+        }
+
+        val transactionId = currentTransaction.transactionId
+        Log.i(
+            tag, "CbillingDialog::onPrintBill not valid = $transactionId!!"
+        )
+        currentTransaction.cancelPayments(EPaymentStatus.PAY_STATUS_UNPAID)
+        askTransactionActivity()
+    }
+
+    fun confirmPrintBill()
+    {
+        mTransactionModel.confirmPrintBill(mOffer)
+
+//        if (!CFG("bill_print_kitchen_first"))
+//        {
+//            CprinterSpoolerProxy::Instance()->checkDatabase();
+//        }
+        askTransactionActivity()
+    }
+
+    fun createBillingItemsAdapter()
+    {
+        // --- FIX 3a: Assign to the class property 'm_billItemsAdapter' ---
+        mBillingItemsAdapter = BillItemsAdapter(
+            mTransactionModel.mCursor) { selectedBillItem ->
+            handleBillItemSelection(selectedBillItem)
+        }.apply {
+            mBinding.layoutBillingItems.setItemViewCacheSize(18)
+        }
+        mBinding.layoutBillingItems.adapter = mBillingItemsAdapter
+    }
 
     fun createGridLayoutPayments()
     {
@@ -220,6 +246,19 @@ class BillOrderActivity : BaseActivity(),
             false
         )
         mBinding.layoutBillingPayments.layoutManager =
+            gridLayoutManagerTransactionItems
+    }
+
+    private fun createGridLayoutBillingItems()
+    {
+        // 1. GridLayoutManager for pages with 3 rows (vertical span) and horizontal scrolling
+        val gridLayoutManagerTransactionItems = GridLayoutManager(
+            this@BillOrderActivity,
+            1, // Span count = number of columns (horizontal)
+            GridLayoutManager.VERTICAL, // Vertical scrolling
+            false
+        )
+        mBinding.layoutBillingItems.layoutManager =
             gridLayoutManagerTransactionItems
     }
 
@@ -245,16 +284,38 @@ class BillOrderActivity : BaseActivity(),
         //TODO("Not yet implemented")
     }
 
-    fun createBillingItemsAdapter()
+    // Optional but clean: Create a helper function for initialization
+    private fun initializeViews()
     {
-        // --- FIX 3a: Assign to the class property 'm_billItemsAdapter' ---
-        mBillItemsAdapter = BillItemsAdapter(
-            mTransactionModel.mCursor) { selectedBillItem ->
-            handleBillItemSelection(selectedBillItem)
-        }.apply {
-            mBinding.layoutBillingItems.setItemViewCacheSize(18)
-        }
-        mBinding.layoutBillingItems.adapter = mBillItemsAdapter
+    }
+
+    /*----------------------------------------------------------------------------*/
+    /** Check if we can print a bill, also ask whether it is allowed
+     *  @return true when
+     */
+    fun isPrintBillAllowedAndConfirmed(
+        currentTransaction: CTransaction, offer: Boolean
+    )
+    {
+        val action = mTransactionModel.isPrintBillAllowedAndConfirmed(
+            currentTransaction, offer, mCustomerTotal
+        )
+        runAction(currentTransaction, offer, action)
+    }
+
+    override fun onPause()
+    {
+        super.onPause()
+        // --- UNREGISTER LISTENER ---
+        // Unregister the adapter to prevent memory leaks and stop receiving updates
+        // when the activity is not in the foreground. The transaction object will outlive
+        // this activity, so it's crucial to remove the reference to the adapter.
+    }
+
+    override fun onResume()
+    {
+        super.onResume()
+        onInit()
     }
 
     private fun handleBillItemSelection(selectedBillItem: CItem)
@@ -286,8 +347,8 @@ class BillOrderActivity : BaseActivity(),
         mBinding.txtBillPrints.text = Translation.get(Translation.TextId.TEXT_PRINT_SLIP)
         refreshPrints()
         mTransactionModel.refreshAllPayments()
-        mBillItemsAdapter.notifyDataSetChanged()
-        mBinding.tableName.text = mTransactionModel.getTableName()
+        mBillingItemsAdapter.notifyDataSetChanged()
+        updateTransactionName()
     }
 
     @Suppress("UNUSED_PARAMETER")
@@ -386,6 +447,7 @@ class BillOrderActivity : BaseActivity(),
 
         setupRecyclerView()
         initializeViews()
+        setupObservers()
 
         val transactionId = intent.getIntExtra("TRANSACTION_ID", -1) // Use a constant for the key
         // 2. Check if the ID is valid
@@ -395,26 +457,9 @@ class BillOrderActivity : BaseActivity(),
             finish() // Exit the activity if no ID is provided
             return
         }
-        mTransactionModel.activeTransaction.observe(this) { transaction ->
-            // This block will run automatically when the activity starts
-            // and any time the transaction data changes.
-
-            if (transaction != null)
-            {
-                // --- THIS IS WHERE YOU CALL updateData ---
-                mBillItemsAdapter.updateData(transaction)
-
-                transaction.calculateTotalTransaction()
-                mBinding.totalBillPrice.text = transaction.getTotalTransaction().toString()
-            }
-        }
-        // OBSERVER 2: For the payments list (bottom RecyclerView)
-        mTransactionModel.billDisplayLines.observe(this) { paymentLines ->
-            // This block runs when the list of payment lines is ready.
-            mPaymentsAdapter.submitList(paymentLines)
-        }
-
-        mTransactionModel.initializeTransaction(EInitMode.VIEW_BILLING)
+        mBinding.poeLoading.text = Translation.get(
+            Translation.TextId.TEXT_LOADING)
+        mTransactionModel.initializeTransaction(transactionId, false, EInitMode.VIEW_BILLING)
     }
 
     // This is the new method you must implement
@@ -424,6 +469,37 @@ class BillOrderActivity : BaseActivity(),
     )
     {
         mTransactionModel.addPayment(paymentMethod, amount)
+    }
+
+    // YesNo dialog, press NO/CANCEL
+    override fun onDialogNegativeClick(dialog: DialogFragment, requestCode: Int)
+    {
+        when (requestCode)
+        {
+            CLEAN_TABLE,
+            CONFIRM_BILL -> cancelPaymentsAskOtherTable()
+            else -> {}
+        }
+    }
+
+    // YesNo dialog, press OK/CONFIRM
+    override fun onDialogPositiveClick(dialog: DialogFragment, requestCode: Int)
+    {
+        when (requestCode)
+        {
+            CLEAN_TABLE, CONFIRM_BILL -> confirmPrintBill()
+            else -> {}
+        }
+    }
+
+    override fun onTextEntered(text: String)
+    {
+        mTransactionModel.setMessage(text)
+    }
+
+    override fun onTransactionChanged(transaction: CTransaction)
+    {
+        // binding.totalBillPrice.text = transaction.getTotalTransaction().toString()
     }
 
     public fun payAllUsingPin()
@@ -444,20 +520,9 @@ class BillOrderActivity : BaseActivity(),
         }
     }
 
-    // Public methods to update data
-    fun setTableName(name: String)
-    {
-        mBinding.tableName.text = when (global.language)
-        {
-            ETaal.LANG_ENGLISH -> "Table $name"
-            ETaal.LANG_SIMPLIFIED, ETaal.LANG_TRADITIONAL -> "桌子 $name"
-            else -> "Tafel $name"
-        }
-    }
-
     fun setTotalPrice(price: String)
     {
-        mBinding.totalBillPrice.text = when (global.language)
+        mBinding.billingPrice.text = when (global.language)
         {
             ETaal.LANG_ENGLISH -> "Total: €$price"
             ETaal.LANG_TRADITIONAL, ETaal.LANG_SIMPLIFIED -> "总计: €$price"
@@ -499,35 +564,13 @@ class BillOrderActivity : BaseActivity(),
         }
     }
 
-    // YesNo dialog, press NO/CANCEL
-    override fun onDialogNegativeClick(dialog: DialogFragment, requestCode: Int)
+    private fun setupRecyclerView()
     {
-        when (requestCode)
-        {
-            CLEAN_TABLE,
-            CONFIRM_BILL -> cancelPaymentsAskOtherTable()
-            else -> {}
-        }
-    }
-
-    // YesNo dialog, press OK/CONFIRM
-    override fun onDialogPositiveClick(dialog: DialogFragment, requestCode: Int)
-    {
-        when (requestCode)
-        {
-            CLEAN_TABLE, CONFIRM_BILL -> confirmPrintBill()
-            else -> {}
-        }
-    }
-
-    override fun onTextEntered(text: String)
-    {
-        mTransactionModel.setMessage(text)
-    }
-
-    override fun onTransactionChanged(transaction: CTransaction)
-    {
-        // binding.totalBillPrice.text = transaction.getTotalTransaction().toString()
+        // 1. GridLayoutManager for pages with 3 rows (vertical span) and horizontal scrolling
+        createGridLayoutBillingItems()
+        createBillingItemsAdapter()
+        createGridLayoutPayments()
+        createPaymentsAdapter()
     }
 
     /**
@@ -543,20 +586,6 @@ class BillOrderActivity : BaseActivity(),
         // Show the dialog using the FragmentManager.
         // The "tag" is a unique string name for the dialog instance.
         dialog.show(supportFragmentManager, "ConfirmationDialog")
-    }
-
-    /*----------------------------------------------------------------------------*/
-    /** Check if we can print a bill, also ask whether it is allowed
-     *  @return true when
-     */
-    fun isPrintBillAllowedAndConfirmed(
-        currentTransaction: CTransaction, offer: Boolean
-    )
-    {
-        val action = mTransactionModel.isPrintBillAllowedAndConfirmed(
-            currentTransaction, offer, mCustomerTotal
-        )
-        runAction(currentTransaction, offer, action)
     }
 
     fun runAction(
@@ -589,81 +618,86 @@ class BillOrderActivity : BaseActivity(),
         isPrintBillAllowedAndConfirmed(currentTransaction, offer) // 675
     }
 
-    fun askConfirmationBill(offer: Boolean)
+    fun onInit()
     {
-        mOffer = offer
-        val title = when (offer)
+        val action = mTransactionModel.onInit()
+        when (action)
         {
-            false -> Translation.get(Translation.TextId.TEXT_FINISH_BILL)
-            true -> Translation.get(Translation.TextId.TEXT_PRINT_OFFER)
+            EInitAction.INIT_ACTION_BILL_PAYMENTS -> finish() // @todo
+            EInitAction.INIT_ACTION_FINISH -> finish()
+            EInitAction.INIT_ACTION_ASK_MONEY -> { askMoneyType()
+                finish() }
+            else -> {}
         }
-        val dlg = ModalDialogYesNo.newInstance(title, "", CONFIRM_BILL)
-        dlg.show(supportFragmentManager, "ConfirmationDialog")
-        // Continue in onDialogPositiveClick and onDialogNegativeClick
+
+        if (mTransactionModel.discountVisible())
+        {
+            mBinding.btnDiscount.visibility = View.VISIBLE
+        } else
+        {
+            mBinding.btnDiscount.visibility = View.GONE
+        }
     }
 
-    fun cancelPaymentsAskOtherTable()
+    private fun setupObservers()
     {
-        val currentTransaction = mTransactionModel.activeTransaction.value // 678
-        if (currentTransaction == null)
-        {
-            return
+        Log.i(tag, "setupObservers")
+
+        // Observe the transaction itself
+        mTransactionModel.activeTransaction.observe(this) { transaction ->
+            if (transaction != null)
+            {
+                if (mFirstTime)
+                {
+                    mFirstTime = false
+                }
+                showTransactionLoading(false)
+                updateTransactionName()
+
+                // When the transaction is ready, update the adapter.
+                mBillingItemsAdapter.submitList(transaction)
+                transaction.calculateTotalTransaction()
+                mBinding.billingPrice.text = transaction.getTotalTransaction().toString()
+            } else
+            {
+                // Handle the case where the transaction failed to load.
+                // Maybe show an error message and close the activity.
+                Log.e(tag, "Failed to load transaction. Finishing activity.")
+                finish()
+            }
         }
 
-        val transactionId = currentTransaction.transactionId
-        Log.i(
-            tag, "CbillingDialog::onPrintBill not valid = $transactionId!!"
-        )
-        currentTransaction.cancelPayments(EPaymentStatus.PAY_STATUS_UNPAID)
-        askTransactionActivity()
+        // OBSERVER 2: For the payments list (bottom RecyclerView)
+        mTransactionModel.billDisplayLines.observe(this) { paymentLines ->
+            // This block runs when the list of payment lines is ready.
+            mPaymentsAdapter.submitList(paymentLines)
+        }
+
+        // This block will run every time _orderTotal is updated in the ViewModel.
+        mTransactionModel.orderTotal.observe(this) { newTotal ->
+            // The 'newTotal' is the CMoney object from the LiveData.
+            // We format it and set it on the TextView.
+            mBinding.billingPrice.text = newTotal.toString()
+        }
+        // Observe other LiveData like total price, display lines, etc.
+        // mTransactionModel.orderTotal.observe(this) { total -> ... }
     }
 
-    fun confirmPrintBill()
+    private fun showTransactionLoading(isLoading: Boolean)
     {
-        mTransactionModel.confirmPrintBill(mOffer)
-
-//        if (!CFG("bill_print_kitchen_first"))
-//        {
-//            CprinterSpoolerProxy::Instance()->checkDatabase();
-//        }
-        askTransactionActivity()
+        if (isLoading)
+        {
+            mBinding.poeLoading.visibility = View.VISIBLE
+            mBinding.layoutBillingItems.visibility = View.INVISIBLE
+        } else
+        {
+            mBinding.poeLoading.visibility = View.GONE
+            mBinding.layoutBillingItems.visibility = View.VISIBLE
+        }
     }
 
-    /*----------------------------------------------------------------------------*/
-    /** Check for valid billing key, delete payments and notify when wrong.
-     *  Also when the wrong key is used, notify to use the proper key
-     *  @return true if ok to continue billing
-     */
-    fun checkBillingKey(): Boolean
+    fun updateTransactionName()
     {
-        val currentTransaction = mTransactionModel.activeTransaction.value // 678
-        if (currentTransaction == null)
-        {
-            return false
-        }
-        var retVal = true
-        val employeeId = currentTransaction.getEmployeeId()
-        if (!currentTransaction.isTakeaway()
-            && CFG.getValue("waiter_per_table") != 0
-            && employeeId != global.rfidKeyId
-        )
-        {
-            // Table has different waiter !
-            val txt = Translation.get(Translation.TextId.TEXT_EMPLOYEE)
-            Toast.makeText(this@BillOrderActivity, txt, Toast.LENGTH_LONG).show()
-            retVal = false
-        }
-//            else if (CFG("restaurant_map"))
-//        {
-//            long transactionId = m_transactionItemModel->getTransactionId()
-//            CsqlFloorTableIterator(-1).setTransactionTableAvailable(transactionId)
-//        }
-
-        if (!retVal)
-        {
-            currentTransaction.cancelNewPayments()
-            askTransactionActivity()
-        }
-        return retVal;
+        mBinding.billingName.text = mTransactionModel.getTableName()
     }
 }

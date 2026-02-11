@@ -79,7 +79,8 @@
 			android:contentDescription="back button"
 			android:src="@drawable/back_yellow"
 			android:onClick="onButtonCancel"
-			app:layout_constraintStart_toEndOf="@id/billing_header_text"
+			app:layout_constraintTop_toTopOf="parent"
+			app:layout_constraintBottom_toBottomOf="parent"
 			app:layout_constraintEnd_toEndOf="parent" />
 	</androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -87,7 +88,7 @@
 	<!-- ===========  LEFT SIDE (BILL)  ============== -->
 	<!-- ============================================= -->
 	<TextView
-		android:id="@+id/tableName"
+		android:id="@+id/billing_name"
 		android:layout_width="0dp"
 		android:layout_marginEnd="8dp"
 		android:layout_height="wrap_content"
@@ -101,7 +102,7 @@
 		app:layout_constraintTop_toBottomOf="@id/guideline_top" />
 
 	<TextView
-		android:id="@+id/total_bill_price"
+		android:id="@+id/billing_price"
 		android:layout_width="0dp"
 		android:layout_height="wrap_content"
 		android:layout_marginTop="0dp"
@@ -117,7 +118,7 @@
 		app:layout_constraintStart_toStartOf="parent" />
 
 	<androidx.recyclerview.widget.RecyclerView
-		android:id="@+id/layoutBillingItems"
+		android:id="@+id/layout_billing_items"
 		android:layout_width="0dp"
 		android:layout_height="0dp"
 		android:layout_marginTop="0dp"
@@ -127,11 +128,26 @@
 		android:choiceMode="singleChoice"
 		android:fadingEdge="none"
 		android:scrollbars="none"
+		android:visibility="gone"
 		android:scrollingCache="true"
-		app:layout_constraintBottom_toTopOf="@id/total_bill_price"
+		app:layout_constraintBottom_toTopOf="@id/billing_price"
 		app:layout_constraintEnd_toStartOf="@id/guideline_vertical_split"
 		app:layout_constraintStart_toStartOf="parent"
-		app:layout_constraintTop_toBottomOf="@id/tableName" />
+		app:layout_constraintTop_toBottomOf="@id/billing_name" />
+
+	<TextView
+		android:id="@+id/poe_loading"
+		android:layout_width="0dp"
+		android:layout_height="0dp"
+		android:gravity="center"
+		android:text="LOADING..."
+		android:textColor="@color/COLOUR_HEADER_TEXT"
+		android:background="@color/COLOUR_HEADER_BACKGROUND"
+		android:textSize="20sp"
+		app:layout_constraintBottom_toTopOf="@id/billing_price"
+		app:layout_constraintEnd_toStartOf="@id/guideline_vertical_split"
+		app:layout_constraintStart_toStartOf="parent"
+		app:layout_constraintTop_toBottomOf="@id/billing_name" />
 
 	<androidx.recyclerview.widget.RecyclerView
 		android:id="@+id/layout_billing_payments"
@@ -145,7 +161,7 @@
 		android:fadingEdge="none"
 		android:scrollbars="none"
 		android:scrollingCache="true"
-		app:layout_constraintBottom_toBottomOf="@+id/total_bill_price"
+		app:layout_constraintBottom_toBottomOf="@+id/billing_price"
 		app:layout_constraintEnd_toEndOf="parent"
 		app:layout_constraintStart_toEndOf="@id/guideline_vertical_split"
 		app:layout_constraintTop_toBottomOf="@id/guideline_top" />

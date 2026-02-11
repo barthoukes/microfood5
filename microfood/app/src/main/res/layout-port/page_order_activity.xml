@@ -45,7 +45,7 @@
 		app:layout_constraintGuide_percent="0.917" />
 
 	<TextView
-		android:id="@+id/page_order_table_name"
+		android:id="@+id/page_order_name"
 		android:layout_width="0dp"
 		android:layout_height="0dp"
 		android:background="@color/COLOUR_SELECTED_BACKGROUND"
@@ -59,7 +59,7 @@
 		app:layout_constraintTop_toTopOf="parent" />
 
 	<TextView
-		android:id="@+id/total_price"
+		android:id="@+id/page_order_price"
 		android:layout_width="0dp"
 		android:layout_height="0dp"
 		android:layout_margin="1dp"
