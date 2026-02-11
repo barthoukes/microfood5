@@ -53,16 +53,10 @@ February 2026
 | <img width="1340" height="800" alt="image" src="https://github.com/user-attachments/assets/b06588a4-247d-43ae-aa02-fada65e335f0" /> |
 
 February 2026
-|Mobile phone   | Start | Page Order | Ask Transaction | Ask Table | Billing |
-|---------------|-------|------------|-----------------|-----------|
-| Samsug SM-A405FN | <img width="1080" height="2340" alt="image" src="https://github.com/user-attachments/assets/095d212f-676f-4251-b874-5ca7fa008315" /> | <img width="1080" height="2340" alt="image" src="https://github.com/user-attachments/assets/9de3dae7-692a-4beb-95dd-feb661be05a8" /> | <img width="1080" height="2340" alt="image" src="https://github.com/user-attachments/assets/b61e7525-bba1-4d34-93e7-17ad19a926c1" /> | <img width="1080" height="2340" alt="image" src="https://github.com/user-attachments/assets/e7fb8812-4c8b-4431-bb97-1c14371289c4" /> | <img width="1080" height="2400" alt="image" src="https://github.com/user-attachments/assets/9a234c3e-fcc5-4356-9860-8352261e3a55" /> |
-
-
-
-
-
-
-
+|Mobile phone   | | |  |  
+|---------------|-----|-------|------------|
+| Samsug SM-A405FN | <img width="1080" height="2340" alt="image" src="https://github.com/user-attachments/assets/095d212f-676f-4251-b874-5ca7fa008315" /> | <img width="1080" height="2340" alt="image" src="https://github.com/user-attachments/assets/9de3dae7-692a-4beb-95dd-feb661be05a8" /> |
+| OPPO          | <img width="1080" height="2340" alt="image" src="https://github.com/user-attachments/assets/b61e7525-bba1-4d34-93e7-17ad19a926c1" /> | <img width="1080" height="2340" alt="image" src="https://github.com/user-attachments/assets/e7fb8812-4c8b-4431-bb97-1c14371289c4" /> | <img width="1080" height="2400" alt="image" src="https://github.com/user-attachments/assets/9a234c3e-fcc5-4356-9860-8352261e3a55" /> |
 
 ### **For Developers: Building on Solid Foundations**
 
