@@ -47,20 +47,16 @@ February 2026
 |-----------|-----------------|----------|
 |<img width="800" height="1340" alt="image" src="https://github.com/user-attachments/assets/6041a764-7c6b-47a4-8ffc-1abae703a7c0" />|<img width="800" height="1340" alt="image" src="https://github.com/user-attachments/assets/1bf48300-9dfb-4dd6-b4e6-6ce297e05fd5" />|<img width="800" height="1340" alt="image" src="https://github.com/user-attachments/assets/35e4768f-5572-48cf-8f3e-0f3f7498a5a5" />|
 
-December 2025
-| Order Entry | Table Selection | Billing | Chinese Interface |
-|-------------|-----------------|---------|-------------------|
-| ![Tablet with page order entry](https://www.kassaku.nl/wp-content/uploads/2025/12/tablet_poe.png) | ![Tablet Billing](https://www.kassaku.nl/wp-content/uploads/2025/12/tablet_billing_80.png) | ![Tablet Chinese ordering](https://www.kassaku.nl/wp-content/uploads/2025/12/portrait-poe.png) |
-
 February 2026
 | Landscape |
 |-----------|
 | <img width="1340" height="800" alt="image" src="https://github.com/user-attachments/assets/b06588a4-247d-43ae-aa02-fada65e335f0" /> |
 
 February 2026
-|Mobile phone   | Start | Page Order | Ask Transaction | Ask Table |
+|Mobile phone   | Start | Page Order | Ask Transaction | Ask Table | Billing |
 |---------------|-------|------------|-----------------|-----------|
-| Samsug SM-A405FN | <img width="1080" height="2340" alt="image" src="https://github.com/user-attachments/assets/095d212f-676f-4251-b874-5ca7fa008315" /> | <img width="1080" height="2340" alt="image" src="https://github.com/user-attachments/assets/9de3dae7-692a-4beb-95dd-feb661be05a8" /> | <img width="1080" height="2340" alt="image" src="https://github.com/user-attachments/assets/b61e7525-bba1-4d34-93e7-17ad19a926c1" /> | <img width="1080" height="2340" alt="image" src="https://github.com/user-attachments/assets/e7fb8812-4c8b-4431-bb97-1c14371289c4" /> | 
+| Samsug SM-A405FN | <img width="1080" height="2340" alt="image" src="https://github.com/user-attachments/assets/095d212f-676f-4251-b874-5ca7fa008315" /> | <img width="1080" height="2340" alt="image" src="https://github.com/user-attachments/assets/9de3dae7-692a-4beb-95dd-feb661be05a8" /> | <img width="1080" height="2340" alt="image" src="https://github.com/user-attachments/assets/b61e7525-bba1-4d34-93e7-17ad19a926c1" /> | <img width="1080" height="2340" alt="image" src="https://github.com/user-attachments/assets/e7fb8812-4c8b-4431-bb97-1c14371289c4" /> | <img width="1080" height="2400" alt="image" src="https://github.com/user-attachments/assets/9a234c3e-fcc5-4356-9860-8352261e3a55" /> |
+
 
 
 
